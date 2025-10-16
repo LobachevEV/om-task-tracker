@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option csharp_namespace = "OneMoreTaskTracker.GitLab.Proxy.MergeRequests";
+
+package mr_helper.git_lab.proxy.merge_requests;
+
+service MrCreator{
+  rpc Create(stream CreateMrRequest) returns (stream CreateMrResponse);
+}
+
+message CreateMrRequest{
+  int32 project_id = 1;
+  string project_name = 2;
+  string title = 3;
+  string source_branch = 4;
+  string target_branch = 5;
+}
+
+message CreateMrResponse{
+  CreateMrStatus status = 1;
+}
+
+enum CreateMrStatus{
+  SUCCESS = 0;
+  FAIL = 1;
+}

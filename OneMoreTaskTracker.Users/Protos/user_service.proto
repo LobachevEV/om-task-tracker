@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+option csharp_namespace = "OneMoreTaskTracker.Proto.Users";
+package mr_helper.users;
+
+service UserService {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
+  rpc GetTeamMemberIds(GetTeamMemberIdsRequest) returns (GetTeamMemberIdsResponse);
+}
+
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+  int32 manager_id = 3;
+}
+
+message RegisterResponse {
+  int32 user_id = 1;
+  string email = 2;
+  string role = 3;
+}
+
+message AuthenticateRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message AuthenticateResponse {
+  bool success = 1;
+  int32 user_id = 2;
+  string email = 3;
+  string role = 4;
+}
+
+message GetTeamMemberIdsRequest {
+  int32 manager_id = 1;
+}
+
+message GetTeamMemberIdsResponse {
+  repeated int32 user_ids = 1;
+}

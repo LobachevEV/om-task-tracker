@@ -1,0 +1,40 @@
+syntax = "proto3";
+import "task_state.proto";
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "OneMoreTaskTracker.Proto.Tasks.CreateTaskCommand";
+package mr_helper.tasks;
+
+service TaskCreator{
+  rpc Create(CreateTaskRequest) returns (stream CreateTaskResponse);
+}
+
+message CreateTaskRequest{
+  string jira_task_id = 1;
+  int32 userId = 2;
+  google.protobuf.Timestamp start_date = 3;
+}
+
+message CreateTaskResponse{
+  TaskDto task = 1;
+  repeated ProjectDto projects = 2;
+  repeated MergeRequestDto merge_requests = 3;
+}
+
+message TaskDto{
+  int32 id = 1;
+  string jira_task_id = 2;
+  TaskState state = 3;
+}
+
+message ProjectDto{
+  int32 id = 1;
+  string name = 2;
+}
+
+message MergeRequestDto{
+  string id = 1;
+  string title = 2;
+  string source_branch = 3;
+  string target_branch = 4;
+}

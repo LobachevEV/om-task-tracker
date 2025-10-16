@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option csharp_namespace = "OneMoreTaskTracker.Proto.Clients.MergeRequests";
+
+package mr_helper.git_lab.proxy.merge_requests;
+
+service MrFinder{
+  rpc Find(FindMrRequest) returns (stream FindMrResponse);
+}
+
+message FindMrRequest{
+  string mr_state = 1;
+  string search = 2;
+}
+
+message FindMrResponse{
+  MrDto Mr = 1;
+}
+
+message MrDto{
+  int32 iid = 1;
+  int32 project_id = 2;
+  string project_name = 3;
+  string title = 4;
+  string source_branch = 5;
+  string target_branch = 6;
+  repeated string labels = 7; 
+}

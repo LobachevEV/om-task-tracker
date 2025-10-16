@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option csharp_namespace = "OneMoreTaskTracker.GitLab.Proxy.Branches";
+
+package mr_helper.git_lab.proxy.branches;
+
+service BranchesCreator{
+  rpc Create(stream CreateBranchRequest) returns (stream CreateBranchResponse);
+}
+
+message CreateBranchRequest{
+  int32 project_id = 1;
+  string branch_name = 2;
+  string base_branch = 3;
+}
+
+message CreateBranchResponse{
+  CreateBranchStatus status = 1;
+}
+
+enum CreateBranchStatus{
+  SUCCESS = 0;
+  FAIL = 1;
+}

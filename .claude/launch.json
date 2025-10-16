@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "OneMoreTaskTracker.Tasks",
+      "runtimeExecutable": "/usr/local/share/dotnet/dotnet",
+      "runtimeArgs": ["run", "--project", "OneMoreTaskTracker.Tasks"],
+      "port": 5102
+    },
+    {
+      "name": "OneMoreTaskTracker.GitLab.Proxy",
+      "runtimeExecutable": "/usr/local/share/dotnet/dotnet",
+      "runtimeArgs": ["run", "--project", "OneMoreTaskTracker.GitLab.Proxy"],
+      "port": 5176
+    },
+    {
+      "name": "OneMoreTaskTracker.Api",
+      "runtimeExecutable": "/usr/local/share/dotnet/dotnet",
+      "runtimeArgs": ["run", "--project", "OneMoreTaskTracker.Api"],
+      "port": 5000
+    },
+    {
+      "name": "OneMoreTaskTracker.WebClient",
+      "runtimeExecutable": "/bin/sh",
+      "runtimeArgs": ["-c", "cd /Users/e.lobacev/Repos/OneMoreTaskTracker/OneMoreTaskTracker.WebClient && PATH=/opt/homebrew/bin:$PATH npm run dev"],
+      "port": 5173
+    }
+  ]
+}

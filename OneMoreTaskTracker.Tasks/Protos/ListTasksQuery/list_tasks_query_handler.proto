@@ -1,0 +1,26 @@
+syntax = "proto3";
+import "task_state.proto";
+
+option csharp_namespace = "OneMoreTaskTracker.Proto.Tasks.ListTasksQuery";
+package mr_helper.tasks;
+
+service TaskLister {
+  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse);
+}
+
+message ListTasksRequest {
+  int32 user_id = 1;
+  string role = 2;
+  repeated int32 team_member_ids = 3;
+}
+
+message ListTasksResponse {
+  repeated TaskDto tasks = 1;
+}
+
+message TaskDto {
+  int32 id = 1;
+  string jira_task_id = 2;
+  TaskState state = 3;
+  int32 user_id = 4;
+}

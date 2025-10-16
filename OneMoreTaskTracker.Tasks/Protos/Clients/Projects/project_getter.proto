@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option csharp_namespace = "OneMoreTaskTracker.Proto.Clients.Projects";
+
+package mr_helper.projects;
+
+service ProjectGetter{
+  rpc Get(GetProjectQuery) returns (GetProjectResponse);
+}
+
+message GetProjectQuery{
+  int32 id = 1;
+}
+
+message GetProjectResponse{
+  ProjectDto project = 1;
+}
+
+message ProjectDto{
+  int32 id = 1;
+  string name = 2;
+}

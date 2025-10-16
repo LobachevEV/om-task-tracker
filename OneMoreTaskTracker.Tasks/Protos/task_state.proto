@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option csharp_namespace = "OneMoreTaskTracker.Proto.Tasks";
+package mr_helper.tasks;
+
+enum TaskState {
+  NOT_STARTED = 0;
+  IN_DEV = 1;
+  MR_TO_RELEASE = 2;
+  IN_TEST = 3;
+  MR_TO_MASTER = 4;
+  COMPLETED = 5;
+}

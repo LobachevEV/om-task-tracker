@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "task_state.proto";
+
+option csharp_namespace = "OneMoreTaskTracker.Proto.Tasks";
+package mr_helper.tasks;
+
+service TaskMover{
+  rpc Handle(MoveTaskCommand) returns (stream MoveTaskResponse);
+}
+
+message MoveTaskCommand{
+  int32 user_id = 1;
+  string task_id = 2;
+  google.protobuf.Timestamp first_push_date = 3;
+}
+
+message MoveTaskResponse {
+  TaskState state = 1;
+  repeated TaskProjectDto projects = 2;
+}
+
+message TaskProjectDto {
+  string id = 1;
+  string name = 2;
+}

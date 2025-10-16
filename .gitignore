@@ -1,0 +1,25 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+.idea/
+publish/
+
+# Environment — never commit real env files
+.env
+.env.local
+.env.*.local
+
+# Generated reports and build artifacts
+.reports/
+
+# IDE / agent internal state
+.junie/memory/
+
+.claude/
+!.claude/skills/
+!.claude/skills/**
+!.claude/instincts/
+!.claude/instincts/**
+.playwright-mcp/

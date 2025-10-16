@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="compose.yaml" />
+  </Folder>
+  <Project Path="OneMoreTaskTracker.GitLab.Proxy/OneMoreTaskTracker.GitLab.Proxy.csproj" Type="C#" />
+  <Project Path="OneMoreTaskTracker.Tasks/OneMoreTaskTracker.Tasks.csproj" Type="C#" />
+  <Project Path="OneMoreTaskTracker.Api/OneMoreTaskTracker.Api.csproj" Type="C#" />
+  <Project Path="OneMoreTaskTracker.Users/OneMoreTaskTracker.Users.csproj" Type="C#" />
+</Solution>

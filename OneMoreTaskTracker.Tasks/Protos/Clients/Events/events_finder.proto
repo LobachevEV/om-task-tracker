@@ -1,0 +1,27 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "OneMoreTaskTracker.Proto.Clients.Events";
+
+package mr_helper.git_lab.proxy.events;
+
+service EventsFinder{
+  rpc Find (FindEventsRequest) returns (stream FindEventsResponse);
+}
+
+message FindEventsRequest{
+  int32 user_id = 1;
+  string task_id = 2;
+  string action = 3;
+  google.protobuf.Timestamp search_after = 4;
+}
+
+message FindEventsResponse{
+  EventDto event = 1;
+}
+
+message EventDto{
+  int32 project_id = 1;
+  string branch = 2;
+  string task_name = 3;
+}
