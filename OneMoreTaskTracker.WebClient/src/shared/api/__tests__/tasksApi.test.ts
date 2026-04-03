@@ -2,16 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fetchTasks, fetchTaskDetail, moveTask, createTask } from '../tasksApi';
 import { setAuth, clearAuth } from '../../auth/auth';
 import type { CreateTaskPayload } from '../../types/task';
+import { makeResponse } from '../../../test/testUtils';
 
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
-
-function makeResponse(status: number, body: unknown): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
-}
 
 beforeEach(() => {
   localStorage.clear();

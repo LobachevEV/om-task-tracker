@@ -18,7 +18,6 @@ public sealed class GetTaskHandlerTests
     [Fact]
     public async System.Threading.Tasks.Task Get_WhenMergedMrsFound_ReturnsInTestStateWithMrsAndProjects()
     {
-        // Arrange
         var mrsProvider = Substitute.For<IMrsProvider>();
         var mrs = new[]
         {
@@ -31,18 +30,12 @@ public sealed class GetTaskHandlerTests
         var projectsProvider = Substitute.For<IProjectsProvider>();
 
         var handler = new GetTaskHandler(projectsProvider, mrsProvider);
-        var request = new GetTaskRequest
-        {
-            TaskId = "TASK-123",
-            UserId = 1
-        };
+        var request = new GetTaskRequest { TaskId = "TASK-123", UserId = 1 };
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
 
-        // Act
         var response = await handler.Get(request, ctx);
 
-        // Assert
         response.State.Should().Be(TaskState.InTest);
         response.MergeRequests.Should().HaveCount(2);
         response.Projects.Should().HaveCount(2);
@@ -52,7 +45,6 @@ public sealed class GetTaskHandlerTests
     [Fact]
     public async System.Threading.Tasks.Task Get_WhenNoMergedMrs_AndProjectsFound_ReturnsInDevState()
     {
-        // Arrange
         var mrsProvider = Substitute.For<IMrsProvider>();
         mrsProvider.Find(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(ToAsyncEnumerable(Array.Empty<FakeMrInfo>()));
@@ -67,18 +59,12 @@ public sealed class GetTaskHandlerTests
             .Returns(ToAsyncEnumerable(projects));
 
         var handler = new GetTaskHandler(projectsProvider, mrsProvider);
-        var request = new GetTaskRequest
-        {
-            TaskId = "TASK-456",
-            UserId = 1
-        };
+        var request = new GetTaskRequest { TaskId = "TASK-456", UserId = 1 };
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
 
-        // Act
         var response = await handler.Get(request, ctx);
 
-        // Assert
         response.State.Should().Be(TaskState.InDev);
         response.Projects.Should().HaveCount(2);
         response.MergeRequests.Should().HaveCount(0);
@@ -87,7 +73,6 @@ public sealed class GetTaskHandlerTests
     [Fact]
     public async System.Threading.Tasks.Task Get_WhenNoMergedMrsAndNoProjects_ReturnsNotStarted()
     {
-        // Arrange
         var mrsProvider = Substitute.For<IMrsProvider>();
         mrsProvider.Find(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(ToAsyncEnumerable(Array.Empty<FakeMrInfo>()));
@@ -97,18 +82,12 @@ public sealed class GetTaskHandlerTests
             .Returns(ToAsyncEnumerable(Array.Empty<ProjectDto>()));
 
         var handler = new GetTaskHandler(projectsProvider, mrsProvider);
-        var request = new GetTaskRequest
-        {
-            TaskId = "TASK-789",
-            UserId = 1
-        };
+        var request = new GetTaskRequest { TaskId = "TASK-789", UserId = 1 };
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
 
-        // Act
         var response = await handler.Get(request, ctx);
 
-        // Assert
         response.State.Should().Be(TaskState.NotStarted);
         response.Projects.Should().HaveCount(0);
         response.MergeRequests.Should().HaveCount(0);

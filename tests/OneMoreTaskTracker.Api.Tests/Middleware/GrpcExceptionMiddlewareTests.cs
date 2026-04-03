@@ -38,162 +38,45 @@ public sealed class GrpcExceptionMiddlewareTests
     [Fact]
     public async Task InvokeAsync_WhenNoException_PassesThrough()
     {
-        // Arrange
-        // Act
         var context = await InvokeWithException(null);
-
-        // Assert
         context.Response.StatusCode.Should().Be(200);
     }
 
-    [Fact]
-    public async Task InvokeAsync_WhenInvalidArgument_Returns400()
+    public static TheoryData<StatusCode, int, string> StatusCodeMappings => new()
     {
-        // Arrange
-        var ex = new RpcException(new Status(StatusCode.InvalidArgument, "Invalid data"));
+        { StatusCode.InvalidArgument,   400, "Invalid request data" },
+        { StatusCode.NotFound,          404, "Resource not found" },
+        { StatusCode.AlreadyExists,     409, "Resource already exists" },
+        { StatusCode.Unauthenticated,   401, "Authentication required" },
+        { StatusCode.PermissionDenied,  403, "Permission denied" },
+        { StatusCode.DeadlineExceeded,  504, "Request timed out" },
+        { StatusCode.ResourceExhausted, 429, "Too many requests" },
+        { StatusCode.Unavailable,       502, "Service temporarily unavailable" },
+        { StatusCode.Unknown,           502, "Service error" },
+    };
 
-        // Act
+    [Theory]
+    [MemberData(nameof(StatusCodeMappings))]
+    public async Task InvokeAsync_MapsGrpcStatusToHttpStatus(StatusCode grpcStatus, int expectedHttp, string expectedMessage)
+    {
+        var ex = new RpcException(new Status(grpcStatus, "detail"));
+
         var context = await InvokeWithException(ex);
+        var body = await GetResponseBody(context);
 
-        // Assert
-        context.Response.StatusCode.Should().Be(400);
+        context.Response.StatusCode.Should().Be(expectedHttp);
         context.Response.ContentType.Should().Be("application/json");
-
-        var body = await GetResponseBody(context);
-        body.Should().Contain("Invalid request data");
-    }
-
-    [Fact]
-    public async Task InvokeAsync_WhenNotFound_Returns404()
-    {
-        // Arrange
-        var ex = new RpcException(new Status(StatusCode.NotFound, "Not found"));
-
-        // Act
-        var context = await InvokeWithException(ex);
-
-        // Assert
-        context.Response.StatusCode.Should().Be(404);
-        var body = await GetResponseBody(context);
-        body.Should().Contain("Resource not found");
-    }
-
-    [Fact]
-    public async Task InvokeAsync_WhenAlreadyExists_Returns409()
-    {
-        // Arrange
-        var ex = new RpcException(new Status(StatusCode.AlreadyExists, "Already exists"));
-
-        // Act
-        var context = await InvokeWithException(ex);
-
-        // Assert
-        context.Response.StatusCode.Should().Be(409);
-        var body = await GetResponseBody(context);
-        body.Should().Contain("Resource already exists");
-    }
-
-    [Fact]
-    public async Task InvokeAsync_WhenUnauthenticated_Returns401()
-    {
-        // Arrange
-        var ex = new RpcException(new Status(StatusCode.Unauthenticated, "Unauthenticated"));
-
-        // Act
-        var context = await InvokeWithException(ex);
-
-        // Assert
-        context.Response.StatusCode.Should().Be(401);
-        var body = await GetResponseBody(context);
-        body.Should().Contain("Authentication required");
-    }
-
-    [Fact]
-    public async Task InvokeAsync_WhenPermissionDenied_Returns403()
-    {
-        // Arrange
-        var ex = new RpcException(new Status(StatusCode.PermissionDenied, "Permission denied"));
-
-        // Act
-        var context = await InvokeWithException(ex);
-
-        // Assert
-        context.Response.StatusCode.Should().Be(403);
-        var body = await GetResponseBody(context);
-        body.Should().Contain("Permission denied");
-    }
-
-    [Fact]
-    public async Task InvokeAsync_WhenDeadlineExceeded_Returns504()
-    {
-        // Arrange
-        var ex = new RpcException(new Status(StatusCode.DeadlineExceeded, "Deadline exceeded"));
-
-        // Act
-        var context = await InvokeWithException(ex);
-
-        // Assert
-        context.Response.StatusCode.Should().Be(504);
-        var body = await GetResponseBody(context);
-        body.Should().Contain("Request timed out");
-    }
-
-    [Fact]
-    public async Task InvokeAsync_WhenResourceExhausted_Returns429()
-    {
-        // Arrange
-        var ex = new RpcException(new Status(StatusCode.ResourceExhausted, "Resource exhausted"));
-
-        // Act
-        var context = await InvokeWithException(ex);
-
-        // Assert
-        context.Response.StatusCode.Should().Be(429);
-        var body = await GetResponseBody(context);
-        body.Should().Contain("Too many requests");
-    }
-
-    [Fact]
-    public async Task InvokeAsync_WhenUnavailable_Returns502()
-    {
-        // Arrange
-        var ex = new RpcException(new Status(StatusCode.Unavailable, "Unavailable"));
-
-        // Act
-        var context = await InvokeWithException(ex);
-
-        // Assert
-        context.Response.StatusCode.Should().Be(502);
-        var body = await GetResponseBody(context);
-        body.Should().Contain("Service temporarily unavailable");
-    }
-
-    [Fact]
-    public async Task InvokeAsync_WhenUnknownStatus_Returns502()
-    {
-        // Arrange
-        var ex = new RpcException(new Status(StatusCode.Unknown, "Unknown error"));
-
-        // Act
-        var context = await InvokeWithException(ex);
-
-        // Assert
-        context.Response.StatusCode.Should().Be(502);
-        var body = await GetResponseBody(context);
-        body.Should().Contain("Service error");
+        body.Should().Contain(expectedMessage);
     }
 
     [Fact]
     public async Task InvokeAsync_ResponseIsValidJson()
     {
-        // Arrange
         var ex = new RpcException(new Status(StatusCode.InvalidArgument, "Invalid"));
 
-        // Act
         var context = await InvokeWithException(ex);
         var body = await GetResponseBody(context);
 
-        // Assert
         var act = () => JsonDocument.Parse(body);
         act.Should().NotThrow();
 
@@ -202,26 +85,8 @@ public sealed class GrpcExceptionMiddlewareTests
     }
 
     [Fact]
-    public async Task InvokeAsync_ResponseHasErrorProperty()
-    {
-        // Arrange
-        var ex = new RpcException(new Status(StatusCode.NotFound, "Not found"));
-
-        // Act
-        var context = await InvokeWithException(ex);
-        var body = await GetResponseBody(context);
-
-        // Assert
-        using var doc = JsonDocument.Parse(body);
-        var root = doc.RootElement;
-        root.TryGetProperty("error", out var errorElement).Should().BeTrue();
-        errorElement.GetString().Should().Be("Resource not found");
-    }
-
-    [Fact]
     public async Task InvokeAsync_LogsTheException()
     {
-        // Arrange
         var loggingCalls = new List<string>();
         var logger = Substitute.For<ILogger<GrpcExceptionMiddleware>>();
 
@@ -233,7 +98,7 @@ public sealed class GrpcExceptionMiddlewareTests
                 Arg.Any<object>(),
                 Arg.Any<Exception>(),
                 Arg.Any<Func<object, Exception?, string>>()))
-            .Do(x => loggingCalls.Add("logged"));
+            .Do(_ => loggingCalls.Add("logged"));
 
         var context = new DefaultHttpContext();
         context.Response.Body = new MemoryStream();
@@ -242,11 +107,8 @@ public sealed class GrpcExceptionMiddlewareTests
         RequestDelegate next = _ => throw ex;
 
         var middleware = new GrpcExceptionMiddleware(next, logger);
-
-        // Act
         await middleware.InvokeAsync(context);
 
-        // Assert
         loggingCalls.Should().Contain("logged");
     }
 }

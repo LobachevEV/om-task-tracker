@@ -1,16 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { login, register } from '../authApi';
 import type { LoginPayload, RegisterPayload } from '../../types/auth';
+import { makeResponse } from '../../../test/testUtils';
 
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
-
-function makeResponse(status: number, body: unknown): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
-}
 
 describe('login', () => {
   beforeEach(() => {

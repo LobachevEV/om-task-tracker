@@ -56,7 +56,6 @@ public sealed class AuthControllerIntegrationTests : IClassFixture<ApiWebApplica
     [Fact]
     public async Task Register_WithValidPayload_Returns200WithToken()
     {
-        // Arrange
         var payload = new { email = "test@example.com", password = "password123" };
 
         _factory.MockUserService
@@ -72,10 +71,8 @@ public sealed class AuthControllerIntegrationTests : IClassFixture<ApiWebApplica
                 Role = "Developer"
             }));
 
-        // Act
         var response = await PostAsJsonAsync(_client, "/api/auth/register", payload);
 
-        // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
 
         var json = await response.Content.ReadAsStringAsync();
@@ -90,7 +87,6 @@ public sealed class AuthControllerIntegrationTests : IClassFixture<ApiWebApplica
     [Fact]
     public async Task Register_TokenCanBeDecoded()
     {
-        // Arrange
         var payload = new { email = "user@example.com", password = "password123" };
 
         _factory.MockUserService
@@ -106,13 +102,11 @@ public sealed class AuthControllerIntegrationTests : IClassFixture<ApiWebApplica
                 Role = "Manager"
             }));
 
-        // Act
         var response = await PostAsJsonAsync(_client, "/api/auth/register", payload);
         var json = await response.Content.ReadAsStringAsync();
         using var doc = JsonDocument.Parse(json);
         var token = doc.RootElement.GetProperty("token").GetString();
 
-        // Assert
         var handler = new JwtSecurityTokenHandler();
         var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
         jwtToken.Should().NotBeNull();
@@ -124,64 +118,26 @@ public sealed class AuthControllerIntegrationTests : IClassFixture<ApiWebApplica
             c.Type == System.Security.Claims.ClaimTypes.Role && c.Value == "Manager");
     }
 
-    [Fact]
-    public async Task Register_WithInvalidEmail_Returns400()
+    public static TheoryData<string> InvalidRegisterBodies => new()
     {
-        // Arrange
-        var payload = new { email = "notanemail", password = "password123" };
+        { """{"email":"notanemail","password":"password123"}""" },
+        { """{"email":"test@example.com","password":"short12"}""" },
+        { """{"password":"password123"}""" },
+        { """{"email":"test@example.com"}""" },
+    };
 
-        // Act
-        var response = await PostAsJsonAsync(_client, "/api/auth/register", payload);
-
-        // Assert
-        response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadAsStringAsync();
-        content.Should().NotBeEmpty();
-    }
-
-    [Fact]
-    public async Task Register_WithPasswordTooShort_Returns400()
+    [Theory]
+    [MemberData(nameof(InvalidRegisterBodies))]
+    public async Task Register_WithInvalidBody_Returns400(string json)
     {
-        // Arrange
-        var payload = new { email = "test@example.com", password = "short12" };
-
-        // Act
-        var response = await PostAsJsonAsync(_client, "/api/auth/register", payload);
-
-        // Assert
-        response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    public async Task Register_WithMissingEmail_Returns400()
-    {
-        // Arrange
-        var payload = new { password = "password123" };
-
-        // Act
-        var response = await PostAsJsonAsync(_client, "/api/auth/register", payload);
-
-        // Assert
-        response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    public async Task Register_WithMissingPassword_Returns400()
-    {
-        // Arrange
-        var payload = new { email = "test@example.com" };
-
-        // Act
-        var response = await PostAsJsonAsync(_client, "/api/auth/register", payload);
-
-        // Assert
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync("/api/auth/register", content);
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);
     }
 
     [Fact]
     public async Task Register_WithManagerId_PassesItToGrpcService()
     {
-        // Arrange
         var payload = new { email = "dev@example.com", password = "password123", managerId = 5 };
 
         _factory.MockUserService
@@ -202,17 +158,14 @@ public sealed class AuthControllerIntegrationTests : IClassFixture<ApiWebApplica
                 });
             });
 
-        // Act
         var response = await PostAsJsonAsync(_client, "/api/auth/register", payload);
 
-        // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
     }
 
     [Fact]
     public async Task Login_WithValidCredentials_Returns200WithToken()
     {
-        // Arrange
         var payload = new { email = "test@example.com", password = "password123" };
 
         _factory.MockUserService
@@ -229,10 +182,8 @@ public sealed class AuthControllerIntegrationTests : IClassFixture<ApiWebApplica
                 Role = "Developer"
             }));
 
-        // Act
         var response = await PostAsJsonAsync(_client, "/api/auth/login", payload);
 
-        // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
 
         var json = await response.Content.ReadAsStringAsync();
@@ -247,7 +198,6 @@ public sealed class AuthControllerIntegrationTests : IClassFixture<ApiWebApplica
     [Fact]
     public async Task Login_WithInvalidCredentials_Returns401()
     {
-        // Arrange
         var payload = new { email = "test@example.com", password = "wrongpassword" };
 
         _factory.MockUserService
@@ -256,15 +206,10 @@ public sealed class AuthControllerIntegrationTests : IClassFixture<ApiWebApplica
                 Arg.Any<Metadata>(),
                 Arg.Any<DateTime?>(),
                 Arg.Any<CancellationToken>())
-            .Returns(GrpcCall(new AuthenticateResponse
-            {
-                Success = false
-            }));
+            .Returns(GrpcCall(new AuthenticateResponse { Success = false }));
 
-        // Act
         var response = await PostAsJsonAsync(_client, "/api/auth/login", payload);
 
-        // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);
 
         var json = await response.Content.ReadAsStringAsync();
@@ -272,49 +217,25 @@ public sealed class AuthControllerIntegrationTests : IClassFixture<ApiWebApplica
         doc.RootElement.GetProperty("error").GetString().Should().Be("Invalid email or password");
     }
 
-    [Fact]
-    public async Task Login_WithInvalidEmail_Returns400()
+    public static TheoryData<string> InvalidLoginBodies => new()
     {
-        // Arrange
-        var payload = new { email = "notanemail", password = "password123" };
+        { """{"email":"notanemail","password":"password123"}""" },
+        { """{"password":"password123"}""" },
+        { """{"email":"test@example.com"}""" },
+    };
 
-        // Act
-        var response = await PostAsJsonAsync(_client, "/api/auth/login", payload);
-
-        // Assert
-        response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    public async Task Login_WithMissingEmail_Returns400()
+    [Theory]
+    [MemberData(nameof(InvalidLoginBodies))]
+    public async Task Login_WithInvalidBody_Returns400(string json)
     {
-        // Arrange
-        var payload = new { password = "password123" };
-
-        // Act
-        var response = await PostAsJsonAsync(_client, "/api/auth/login", payload);
-
-        // Assert
-        response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    public async Task Login_WithMissingPassword_Returns400()
-    {
-        // Arrange
-        var payload = new { email = "test@example.com" };
-
-        // Act
-        var response = await PostAsJsonAsync(_client, "/api/auth/login", payload);
-
-        // Assert
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync("/api/auth/login", content);
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);
     }
 
     [Fact]
     public async Task Login_TokenCanBeDecoded()
     {
-        // Arrange
         var payload = new { email = "manager@example.com", password = "password123" };
 
         _factory.MockUserService
@@ -331,13 +252,11 @@ public sealed class AuthControllerIntegrationTests : IClassFixture<ApiWebApplica
                 Role = "Manager"
             }));
 
-        // Act
         var response = await PostAsJsonAsync(_client, "/api/auth/login", payload);
         var json = await response.Content.ReadAsStringAsync();
         using var doc = JsonDocument.Parse(json);
         var token = doc.RootElement.GetProperty("token").GetString();
 
-        // Assert
         var handler = new JwtSecurityTokenHandler();
         var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
         jwtToken.Should().NotBeNull();
@@ -352,7 +271,6 @@ public sealed class AuthControllerIntegrationTests : IClassFixture<ApiWebApplica
     [Fact]
     public async Task Login_PassesCorrectEmailAndPasswordToGrpcService()
     {
-        // Arrange
         var payload = new { email = "user@example.com", password = "mypassword" };
 
         _factory.MockUserService.ClearReceivedCalls();
@@ -370,10 +288,8 @@ public sealed class AuthControllerIntegrationTests : IClassFixture<ApiWebApplica
                 return GrpcCall(new AuthenticateResponse { Success = true, UserId = 1, Email = "user@example.com", Role = "Developer" });
             });
 
-        // Act
         await PostAsJsonAsync(_client, "/api/auth/login", payload);
 
-        // Assert
         _factory.MockUserService.Received(1).AuthenticateAsync(
             Arg.Any<AuthenticateRequest>(),
             Arg.Any<Metadata>(),
@@ -405,7 +321,6 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
 
         builder.ConfigureTestServices(services =>
         {
-            // Remove the real gRPC client registrations
             var descriptors = services.Where(d =>
                 d.ServiceType == typeof(UserService.UserServiceClient) ||
                 d.ServiceType == typeof(TaskCreator.TaskCreatorClient) ||
@@ -417,7 +332,6 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
             foreach (var descriptor in descriptors)
                 services.Remove(descriptor);
 
-            // Add mock clients
             services.AddSingleton(MockUserService);
             services.AddSingleton(Substitute.For<TaskCreator.TaskCreatorClient>());
             services.AddSingleton(Substitute.For<TaskLister.TaskListerClient>());

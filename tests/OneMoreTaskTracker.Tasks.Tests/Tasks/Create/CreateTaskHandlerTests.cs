@@ -20,7 +20,6 @@ public sealed class CreateTaskHandlerTests
     [Fact]
     public async System.Threading.Tasks.Task Create_SavesTaskToDatabase()
     {
-        // Arrange
         var db = CreateDb();
         var mrsProvider = Substitute.For<IMrsProvider>();
         mrsProvider.Find(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
@@ -31,19 +30,13 @@ public sealed class CreateTaskHandlerTests
             .Returns(ToAsyncEnumerable(Array.Empty<ProjectDto>()));
 
         var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
-        var request = new CreateTaskRequest
-        {
-            JiraTaskId = "TASK-123",
-            UserId = 42
-        };
+        var request = new CreateTaskRequest { JiraTaskId = "TASK-123", UserId = 42 };
         var writer = new FakeServerStreamWriter<CreateTaskResponse>();
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
 
-        // Act
         await handler.Create(request, writer, ctx);
 
-        // Assert
         var savedTask = await db.Tasks.FirstOrDefaultAsync();
         savedTask.Should().NotBeNull();
         savedTask!.JiraId.Should().Be("TASK-123");
@@ -53,7 +46,6 @@ public sealed class CreateTaskHandlerTests
     [Fact]
     public async System.Threading.Tasks.Task Create_StreamsInitialTaskResponse()
     {
-        // Arrange
         var db = CreateDb();
         var mrsProvider = Substitute.For<IMrsProvider>();
         mrsProvider.Find(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
@@ -64,19 +56,13 @@ public sealed class CreateTaskHandlerTests
             .Returns(ToAsyncEnumerable(Array.Empty<ProjectDto>()));
 
         var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
-        var request = new CreateTaskRequest
-        {
-            JiraTaskId = "TASK-456",
-            UserId = 1
-        };
+        var request = new CreateTaskRequest { JiraTaskId = "TASK-456", UserId = 1 };
         var writer = new FakeServerStreamWriter<CreateTaskResponse>();
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
 
-        // Act
         await handler.Create(request, writer, ctx);
 
-        // Assert
         writer.Written.Should().HaveCount(1);
         writer.Written[0].Task.Should().NotBeNull();
     }
@@ -84,7 +70,6 @@ public sealed class CreateTaskHandlerTests
     [Fact]
     public async System.Threading.Tasks.Task Create_WhenMrsFound_StreamsSecondResponseWithMrsAndProjects()
     {
-        // Arrange
         var db = CreateDb();
         var mrsProvider = Substitute.For<IMrsProvider>();
         var mrs = new[]
@@ -100,19 +85,13 @@ public sealed class CreateTaskHandlerTests
             .Returns(ToAsyncEnumerable(Array.Empty<ProjectDto>()));
 
         var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
-        var request = new CreateTaskRequest
-        {
-            JiraTaskId = "TASK-789",
-            UserId = 1
-        };
+        var request = new CreateTaskRequest { JiraTaskId = "TASK-789", UserId = 1 };
         var writer = new FakeServerStreamWriter<CreateTaskResponse>();
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
 
-        // Act
         await handler.Create(request, writer, ctx);
 
-        // Assert
         writer.Written.Should().HaveCount(2);
         writer.Written[0].Task.Should().NotBeNull();
         writer.Written[1].MergeRequests.Should().HaveCount(2);
@@ -122,7 +101,6 @@ public sealed class CreateTaskHandlerTests
     [Fact]
     public async System.Threading.Tasks.Task Create_WhenMrsFound_DoesNotQueryProjects()
     {
-        // Arrange
         var db = CreateDb();
         var mrsProvider = Substitute.For<IMrsProvider>();
         var mrs = new[] { new FakeMrInfo(Iid: 1) };
@@ -134,26 +112,19 @@ public sealed class CreateTaskHandlerTests
             .Returns(ToAsyncEnumerable(Array.Empty<ProjectDto>()));
 
         var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
-        var request = new CreateTaskRequest
-        {
-            JiraTaskId = "TASK-999",
-            UserId = 1
-        };
+        var request = new CreateTaskRequest { JiraTaskId = "TASK-999", UserId = 1 };
         var writer = new FakeServerStreamWriter<CreateTaskResponse>();
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
 
-        // Act
         await handler.Create(request, writer, ctx);
 
-        // Assert
         projectsProvider.Received(0).Get(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<Google.Protobuf.WellKnownTypes.Timestamp>());
     }
 
     [Fact]
     public async System.Threading.Tasks.Task Create_WhenNoMrsButProjectsFound_StreamsProjectsResponse()
     {
-        // Arrange
         var db = CreateDb();
         var mrsProvider = Substitute.For<IMrsProvider>();
         mrsProvider.Find(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
@@ -169,19 +140,13 @@ public sealed class CreateTaskHandlerTests
             .Returns(ToAsyncEnumerable(projects));
 
         var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
-        var request = new CreateTaskRequest
-        {
-            JiraTaskId = "TASK-111",
-            UserId = 1
-        };
+        var request = new CreateTaskRequest { JiraTaskId = "TASK-111", UserId = 1 };
         var writer = new FakeServerStreamWriter<CreateTaskResponse>();
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
 
-        // Act
         await handler.Create(request, writer, ctx);
 
-        // Assert
         writer.Written.Should().HaveCount(2);
         writer.Written[1].Projects.Should().HaveCount(2);
     }
@@ -189,7 +154,6 @@ public sealed class CreateTaskHandlerTests
     [Fact]
     public async System.Threading.Tasks.Task Create_WhenNoMrsAndNoProjects_StreamsOnlyInitialResponse()
     {
-        // Arrange
         var db = CreateDb();
         var mrsProvider = Substitute.For<IMrsProvider>();
         mrsProvider.Find(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
@@ -200,19 +164,13 @@ public sealed class CreateTaskHandlerTests
             .Returns(ToAsyncEnumerable(Array.Empty<ProjectDto>()));
 
         var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
-        var request = new CreateTaskRequest
-        {
-            JiraTaskId = "TASK-222",
-            UserId = 1
-        };
+        var request = new CreateTaskRequest { JiraTaskId = "TASK-222", UserId = 1 };
         var writer = new FakeServerStreamWriter<CreateTaskResponse>();
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
 
-        // Act
         await handler.Create(request, writer, ctx);
 
-        // Assert
         writer.Written.Should().HaveCount(1);
         writer.Written[0].Task.Should().NotBeNull();
     }

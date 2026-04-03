@@ -44,16 +44,13 @@ public sealed class JwtTokenServiceTests
     [Fact]
     public void GenerateToken_ContainsCorrectClaims()
     {
-        // Arrange
         var service = CreateService();
         const int userId = 42;
         const string email = "test@example.com";
         const string role = "Developer";
 
-        // Act
         var token = service.GenerateToken(userId, email, role);
 
-        // Assert
         token.Should().NotBeNullOrEmpty();
 
         var decodedToken = DecodeToken(token);
@@ -68,13 +65,10 @@ public sealed class JwtTokenServiceTests
     [Fact]
     public void GenerateToken_TokenIsValid()
     {
-        // Arrange
         var service = CreateService();
 
-        // Act
         var token = service.GenerateToken(1, "test@example.com", "Developer");
 
-        // Assert
         var decodedToken = DecodeToken(token);
         decodedToken.Should().NotBeNull();
         decodedToken.Issuer.Should().Be("TestIssuer");
@@ -84,15 +78,11 @@ public sealed class JwtTokenServiceTests
     [Fact]
     public void GenerateToken_SetsExpiration()
     {
-        // Arrange
         var service = CreateService();
         var beforeGeneration = DateTime.UtcNow;
 
-        // Act
         var token = service.GenerateToken(1, "test@example.com", "Developer");
-        var afterGeneration = DateTime.UtcNow;
 
-        // Assert
         var decodedToken = DecodeToken(token);
         var expiryTime = decodedToken.ValidTo;
 
@@ -107,28 +97,22 @@ public sealed class JwtTokenServiceTests
     [Fact]
     public void GenerateToken_WithDifferentUsers_ProducesDifferentTokens()
     {
-        // Arrange
         var service = CreateService();
 
-        // Act
         var token1 = service.GenerateToken(1, "user1@example.com", "Developer");
         var token2 = service.GenerateToken(2, "user2@example.com", "Manager");
 
-        // Assert
         token1.Should().NotBe(token2);
     }
 
     [Fact]
     public void GenerateToken_WithDifferentRoles_IncludesDifferentRoleClaims()
     {
-        // Arrange
         var service = CreateService();
 
-        // Act
         var developerToken = service.GenerateToken(1, "test@example.com", "Developer");
         var managerToken = service.GenerateToken(1, "test@example.com", "Manager");
 
-        // Assert
         var decodedDeveloper = DecodeToken(developerToken);
         var decodedManager = DecodeToken(managerToken);
 

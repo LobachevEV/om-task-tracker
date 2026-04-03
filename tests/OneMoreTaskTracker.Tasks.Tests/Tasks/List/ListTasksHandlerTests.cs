@@ -16,7 +16,6 @@ public sealed class ListTasksHandlerTests
     [Fact]
     public async System.Threading.Tasks.Task ListTasks_AsDeveloper_ReturnsOnlyOwnTasks()
     {
-        // Arrange
         var db = CreateDb();
         db.Tasks.AddRange(
             new Task { JiraId = "TASK-1", UserId = 1 },
@@ -26,18 +25,12 @@ public sealed class ListTasksHandlerTests
         await db.SaveChangesAsync();
 
         var handler = new ListTasksHandler(db);
-        var request = new ListTasksRequest
-        {
-            UserId = 1,
-            Role = "Developer"
-        };
+        var request = new ListTasksRequest { UserId = 1, Role = "Developer" };
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
 
-        // Act
         var response = await handler.ListTasks(request, ctx);
 
-        // Assert
         response.Tasks.Should().HaveCount(2);
         response.Tasks.Should().AllSatisfy(t => t.UserId.Should().Be(1));
     }
@@ -45,7 +38,6 @@ public sealed class ListTasksHandlerTests
     [Fact]
     public async System.Threading.Tasks.Task ListTasks_AsManager_ReturnsTeamMemberTasks()
     {
-        // Arrange
         var db = CreateDb();
         db.Tasks.AddRange(
             new Task { JiraId = "TASK-1", UserId = 1 },
@@ -65,10 +57,8 @@ public sealed class ListTasksHandlerTests
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
 
-        // Act
         var response = await handler.ListTasks(request, ctx);
 
-        // Assert
         response.Tasks.Should().HaveCount(3);
         response.Tasks.Should().AllSatisfy(t => new[] { 1, 2, 3 }.Should().Contain(t.UserId));
     }
@@ -76,7 +66,6 @@ public sealed class ListTasksHandlerTests
     [Fact]
     public async System.Threading.Tasks.Task ListTasks_WithUnknownRole_ReturnsEmpty()
     {
-        // Arrange
         var db = CreateDb();
         db.Tasks.AddRange(
             new Task { JiraId = "TASK-1", UserId = 1 },
@@ -85,25 +74,18 @@ public sealed class ListTasksHandlerTests
         await db.SaveChangesAsync();
 
         var handler = new ListTasksHandler(db);
-        var request = new ListTasksRequest
-        {
-            UserId = 1,
-            Role = "UnknownRole"
-        };
+        var request = new ListTasksRequest { UserId = 1, Role = "UnknownRole" };
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
 
-        // Act
         var response = await handler.ListTasks(request, ctx);
 
-        // Assert
         response.Tasks.Should().HaveCount(0);
     }
 
     [Fact]
     public async System.Threading.Tasks.Task ListTasks_ResultsOrderedByIdDescending()
     {
-        // Arrange
         var db = CreateDb();
         db.Tasks.AddRange(
             new Task { JiraId = "TASK-1", UserId = 1 },
@@ -113,18 +95,12 @@ public sealed class ListTasksHandlerTests
         await db.SaveChangesAsync();
 
         var handler = new ListTasksHandler(db);
-        var request = new ListTasksRequest
-        {
-            UserId = 1,
-            Role = "Developer"
-        };
+        var request = new ListTasksRequest { UserId = 1, Role = "Developer" };
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
 
-        // Act
         var response = await handler.ListTasks(request, ctx);
 
-        // Assert
         var ids = response.Tasks.Select(t => t.Id).ToList();
         ids.Should().BeInDescendingOrder();
     }
@@ -132,7 +108,6 @@ public sealed class ListTasksHandlerTests
     [Fact]
     public async System.Threading.Tasks.Task ListTasks_LimitedTo500Tasks()
     {
-        // Arrange
         var db = CreateDb();
         var tasks = Enumerable.Range(1, 501)
             .Select(i => new Task { JiraId = $"TASK-{i}", UserId = 1 })
@@ -141,18 +116,12 @@ public sealed class ListTasksHandlerTests
         await db.SaveChangesAsync();
 
         var handler = new ListTasksHandler(db);
-        var request = new ListTasksRequest
-        {
-            UserId = 1,
-            Role = "Developer"
-        };
+        var request = new ListTasksRequest { UserId = 1, Role = "Developer" };
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
 
-        // Act
         var response = await handler.ListTasks(request, ctx);
 
-        // Assert
         response.Tasks.Should().HaveCount(500);
     }
 
