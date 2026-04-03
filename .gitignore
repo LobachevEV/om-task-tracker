@@ -22,4 +22,4 @@ publish/
 !.claude/skills/**
 !.claude/instincts/
 !.claude/instincts/**
-.playwright-mcp/
+.playwright-mcp/.worktrees/
