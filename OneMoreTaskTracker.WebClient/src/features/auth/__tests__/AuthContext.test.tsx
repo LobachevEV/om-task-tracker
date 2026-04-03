@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { AuthProvider, useAuth } from '../AuthContext';
-import { getAuth } from '../../../shared/auth/auth';
+import { getAuth, AUTH_KEY } from '../../../shared/auth/auth';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => <AuthProvider>{children}</AuthProvider>;
 
@@ -23,7 +23,7 @@ describe('AuthContext', () => {
       email: authState.email,
       role: authState.role,
     };
-    localStorage.setItem('mrhelper_auth', JSON.stringify(storedAuth));
+    localStorage.setItem(AUTH_KEY, JSON.stringify(storedAuth));
 
     const { result } = renderHook(() => useAuth(), { wrapper });
 
@@ -62,7 +62,7 @@ describe('AuthContext', () => {
       email: authState.email,
       role: authState.role,
     };
-    localStorage.setItem('mrhelper_auth', JSON.stringify(storedAuth));
+    localStorage.setItem(AUTH_KEY, JSON.stringify(storedAuth));
 
     const { result } = renderHook(() => useAuth(), { wrapper });
     expect(result.current.user).not.toBeNull();

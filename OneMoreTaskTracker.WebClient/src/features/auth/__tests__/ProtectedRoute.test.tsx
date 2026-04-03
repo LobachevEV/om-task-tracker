@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AuthProvider } from '../AuthContext';
 import { ProtectedRoute } from '../ProtectedRoute';
-import { setAuth, clearAuth } from '../../../shared/auth/auth';
+import { setAuth, clearAuth, AUTH_KEY } from '../../../shared/auth/auth';
 
 function renderWithRouter(element: React.ReactElement, initialEntries?: string[]) {
   return render(
@@ -26,7 +26,7 @@ describe('ProtectedRoute', () => {
       email: authState.email,
       role: authState.role,
     };
-    localStorage.setItem('mrhelper_auth', JSON.stringify(storedAuth));
+    localStorage.setItem(AUTH_KEY, JSON.stringify(storedAuth));
 
     renderWithRouter(
       <ProtectedRoute>
