@@ -1,0 +1,243 @@
+using FluentAssertions;
+using Google.Protobuf.WellKnownTypes;
+using Grpc.Core;
+using Microsoft.EntityFrameworkCore;
+using NSubstitute;
+using OneMoreTaskTracker.Proto.Tasks.CreateTaskCommand;
+using OneMoreTaskTracker.Tasks.MergeRequests;
+using OneMoreTaskTracker.Tasks.Projects;
+using OneMoreTaskTracker.Tasks.Tasks.Create;
+using OneMoreTaskTracker.Tasks.Tasks.Data;
+using OneMoreTaskTracker.Tasks.Tests.TestHelpers;
+using ProjectDto = OneMoreTaskTracker.Proto.Clients.Projects.ProjectDto;
+using Xunit;
+using Task = OneMoreTaskTracker.Tasks.Tasks.Data.Task;
+
+namespace OneMoreTaskTracker.Tasks.Tests.Tasks.Create;
+
+public sealed class CreateTaskHandlerTests
+{
+    [Fact]
+    public async System.Threading.Tasks.Task Create_SavesTaskToDatabase()
+    {
+        // Arrange
+        var db = CreateDb();
+        var mrsProvider = Substitute.For<IMrsProvider>();
+        mrsProvider.Find(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(ToAsyncEnumerable(Array.Empty<FakeMrInfo>()));
+
+        var projectsProvider = Substitute.For<IProjectsProvider>();
+        projectsProvider.Get(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<Timestamp>())
+            .Returns(ToAsyncEnumerable(Array.Empty<ProjectDto>()));
+
+        var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
+        var request = new CreateTaskRequest
+        {
+            JiraTaskId = "TASK-123",
+            UserId = 42
+        };
+        var writer = new FakeServerStreamWriter<CreateTaskResponse>();
+        var ctx = Substitute.For<ServerCallContext>();
+        ctx.CancellationToken.Returns(CancellationToken.None);
+
+        // Act
+        await handler.Create(request, writer, ctx);
+
+        // Assert
+        var savedTask = await db.Tasks.FirstOrDefaultAsync();
+        savedTask.Should().NotBeNull();
+        savedTask!.JiraId.Should().Be("TASK-123");
+        savedTask.UserId.Should().Be(42);
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task Create_StreamsInitialTaskResponse()
+    {
+        // Arrange
+        var db = CreateDb();
+        var mrsProvider = Substitute.For<IMrsProvider>();
+        mrsProvider.Find(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(ToAsyncEnumerable(Array.Empty<FakeMrInfo>()));
+
+        var projectsProvider = Substitute.For<IProjectsProvider>();
+        projectsProvider.Get(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<Timestamp>())
+            .Returns(ToAsyncEnumerable(Array.Empty<ProjectDto>()));
+
+        var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
+        var request = new CreateTaskRequest
+        {
+            JiraTaskId = "TASK-456",
+            UserId = 1
+        };
+        var writer = new FakeServerStreamWriter<CreateTaskResponse>();
+        var ctx = Substitute.For<ServerCallContext>();
+        ctx.CancellationToken.Returns(CancellationToken.None);
+
+        // Act
+        await handler.Create(request, writer, ctx);
+
+        // Assert
+        writer.Written.Should().HaveCount(1);
+        writer.Written[0].Task.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task Create_WhenMrsFound_StreamsSecondResponseWithMrsAndProjects()
+    {
+        // Arrange
+        var db = CreateDb();
+        var mrsProvider = Substitute.For<IMrsProvider>();
+        var mrs = new[]
+        {
+            new FakeMrInfo(Iid: 1, ProjectId: 10, ProjectName: "repo-1"),
+            new FakeMrInfo(Iid: 2, ProjectId: 20, ProjectName: "repo-2")
+        };
+        mrsProvider.Find(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(ToAsyncEnumerable(mrs));
+
+        var projectsProvider = Substitute.For<IProjectsProvider>();
+        projectsProvider.Get(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<Timestamp>())
+            .Returns(ToAsyncEnumerable(Array.Empty<ProjectDto>()));
+
+        var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
+        var request = new CreateTaskRequest
+        {
+            JiraTaskId = "TASK-789",
+            UserId = 1
+        };
+        var writer = new FakeServerStreamWriter<CreateTaskResponse>();
+        var ctx = Substitute.For<ServerCallContext>();
+        ctx.CancellationToken.Returns(CancellationToken.None);
+
+        // Act
+        await handler.Create(request, writer, ctx);
+
+        // Assert
+        writer.Written.Should().HaveCount(2);
+        writer.Written[0].Task.Should().NotBeNull();
+        writer.Written[1].MergeRequests.Should().HaveCount(2);
+        writer.Written[1].Projects.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task Create_WhenMrsFound_DoesNotQueryProjects()
+    {
+        // Arrange
+        var db = CreateDb();
+        var mrsProvider = Substitute.For<IMrsProvider>();
+        var mrs = new[] { new FakeMrInfo(Iid: 1) };
+        mrsProvider.Find(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(ToAsyncEnumerable(mrs));
+
+        var projectsProvider = Substitute.For<IProjectsProvider>();
+        projectsProvider.Get(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<Timestamp>())
+            .Returns(ToAsyncEnumerable(Array.Empty<ProjectDto>()));
+
+        var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
+        var request = new CreateTaskRequest
+        {
+            JiraTaskId = "TASK-999",
+            UserId = 1
+        };
+        var writer = new FakeServerStreamWriter<CreateTaskResponse>();
+        var ctx = Substitute.For<ServerCallContext>();
+        ctx.CancellationToken.Returns(CancellationToken.None);
+
+        // Act
+        await handler.Create(request, writer, ctx);
+
+        // Assert
+        projectsProvider.Received(0).Get(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<Google.Protobuf.WellKnownTypes.Timestamp>());
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task Create_WhenNoMrsButProjectsFound_StreamsProjectsResponse()
+    {
+        // Arrange
+        var db = CreateDb();
+        var mrsProvider = Substitute.For<IMrsProvider>();
+        mrsProvider.Find(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(ToAsyncEnumerable(Array.Empty<FakeMrInfo>()));
+
+        var projectsProvider = Substitute.For<IProjectsProvider>();
+        var projects = new[]
+        {
+            new ProjectDto { Id = 100, Name = "project-1" },
+            new ProjectDto { Id = 101, Name = "project-2" }
+        };
+        projectsProvider.Get(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<Google.Protobuf.WellKnownTypes.Timestamp>())
+            .Returns(ToAsyncEnumerable(projects));
+
+        var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
+        var request = new CreateTaskRequest
+        {
+            JiraTaskId = "TASK-111",
+            UserId = 1
+        };
+        var writer = new FakeServerStreamWriter<CreateTaskResponse>();
+        var ctx = Substitute.For<ServerCallContext>();
+        ctx.CancellationToken.Returns(CancellationToken.None);
+
+        // Act
+        await handler.Create(request, writer, ctx);
+
+        // Assert
+        writer.Written.Should().HaveCount(2);
+        writer.Written[1].Projects.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task Create_WhenNoMrsAndNoProjects_StreamsOnlyInitialResponse()
+    {
+        // Arrange
+        var db = CreateDb();
+        var mrsProvider = Substitute.For<IMrsProvider>();
+        mrsProvider.Find(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(ToAsyncEnumerable(Array.Empty<FakeMrInfo>()));
+
+        var projectsProvider = Substitute.For<IProjectsProvider>();
+        projectsProvider.Get(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<Timestamp>())
+            .Returns(ToAsyncEnumerable(Array.Empty<ProjectDto>()));
+
+        var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
+        var request = new CreateTaskRequest
+        {
+            JiraTaskId = "TASK-222",
+            UserId = 1
+        };
+        var writer = new FakeServerStreamWriter<CreateTaskResponse>();
+        var ctx = Substitute.For<ServerCallContext>();
+        ctx.CancellationToken.Returns(CancellationToken.None);
+
+        // Act
+        await handler.Create(request, writer, ctx);
+
+        // Assert
+        writer.Written.Should().HaveCount(1);
+        writer.Written[0].Task.Should().NotBeNull();
+    }
+
+    private static TasksDbContext CreateDb() =>
+        new(new DbContextOptionsBuilder<TasksDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options);
+
+    private sealed class FakeServerStreamWriter<T> : IServerStreamWriter<T>
+    {
+        public List<T> Written { get; } = [];
+        public WriteOptions? WriteOptions { get; set; }
+
+        public System.Threading.Tasks.Task WriteAsync(T message)
+        {
+            Written.Add(message);
+            return System.Threading.Tasks.Task.CompletedTask;
+        }
+    }
+
+    private static async IAsyncEnumerable<T> ToAsyncEnumerable<T>(IEnumerable<T> items)
+    {
+        foreach (var item in items)
+            yield return item;
+        await System.Threading.Tasks.Task.CompletedTask;
+    }
+}
