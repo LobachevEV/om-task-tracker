@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { clearAuth, getAuth, getToken, setAuth } from '../auth';
+import { clearAuth, getAuth, getToken, setAuth, AUTH_KEY } from '../auth';
 import type { AuthState } from '../auth';
 
 const mockState: AuthState = {
@@ -24,9 +24,9 @@ describe('setAuth / getAuth', () => {
   });
 
   it('removes corrupted data and returns null', () => {
-    localStorage.setItem('mrhelper_auth', 'not-json');
+    localStorage.setItem(AUTH_KEY, 'not-json');
     expect(getAuth()).toBeNull();
-    expect(localStorage.getItem('mrhelper_auth')).toBeNull();
+    expect(localStorage.getItem(AUTH_KEY)).toBeNull();
   });
 });
 
