@@ -244,9 +244,7 @@
   min-height: 44px;
   background: var(--accent);
   box-shadow: var(--shadow-sm);
-  transition:
-    background-color 120ms ease,
-    opacity 80ms ease;
+  transition: background-color 120ms ease;
 }
 
 .primary-button:hover {
@@ -591,7 +589,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  border: 1px solid #151719;
+  border: 1px solid var(--bg);
 }
 
 .task-list__slack-jump {
@@ -747,10 +745,10 @@
   z-index: 40;
   max-width: 320px;
   padding: 1rem 1.25rem;
-  background: #1a1c20;
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: var(--elevated);
+  border: 1px solid var(--border-strong);
   border-radius: 0.75rem;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 12px 30px oklch(0 0 0 / 0.45);
   font-size: 0.85rem;
 }
 
