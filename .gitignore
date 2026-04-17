@@ -24,3 +24,6 @@ publish/
 !.claude/instincts/**
 .playwright-mcp/
 .worktrees/
+
+.serena/
+graphify-out/
