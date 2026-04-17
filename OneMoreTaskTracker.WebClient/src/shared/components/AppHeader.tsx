@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../features/auth/AuthContext';
+import './AppHeader.css';
 
 export function AppHeader() {
   const { user, logout } = useAuth();

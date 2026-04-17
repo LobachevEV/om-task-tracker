@@ -1,4 +1,5 @@
 import type { IntegrationKind, IntegrationSignal } from './integrationStatus';
+import './IntegrationIcon.css';
 
 interface IntegrationIconProps {
   kind: IntegrationKind;

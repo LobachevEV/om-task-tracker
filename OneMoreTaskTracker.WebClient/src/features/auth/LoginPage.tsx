@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { login as apiLogin } from '../../shared/api/authApi';
 import { useAuth } from './AuthContext';
+import './AuthPages.css';
 
 export function LoginPage() {
   const [email, setEmail] = useState('');

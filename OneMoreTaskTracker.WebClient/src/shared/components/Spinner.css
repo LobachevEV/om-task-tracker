@@ -1,0 +1,26 @@
+.spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+}
+
+.spinner__ring {
+  display: block;
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid color-mix(in oklch, var(--border) 50%, transparent);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner__label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}

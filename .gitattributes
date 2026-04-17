@@ -1,0 +1,9 @@
+# CSS files: prefer union merge where possible. Union keeps both sides'
+# additions when two branches touch the same file, avoiding conflict markers.
+# The split-by-component architecture means same-file edits should be rare;
+# union is a safety net for edge cases.
+*.css merge=union
+
+# Lockfiles should never union-merge
+package-lock.json merge=binary
+yarn.lock merge=binary

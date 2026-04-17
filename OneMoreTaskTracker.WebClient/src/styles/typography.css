@@ -1,0 +1,32 @@
+/* Typography — owned by /typeset-type tasks.
+ * Font imports are in index.html. This file owns font-family declarations,
+ * the heading display axis, and text rendering defaults. */
+
+:root {
+  font-family: 'Onest', system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-feature-settings: 'ss01', 'tnum';
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Geologica', sans-serif;
+  font-variation-settings: 'wdth' 78, 'wght' 500;
+  letter-spacing: 0;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+/* Mono utility for identifiers (Jira IDs, branch names, shortcut keys) */
+.mono {
+  font-family: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-feature-settings: 'tnum';
+}

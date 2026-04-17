@@ -6,6 +6,7 @@ import { Spinner } from '../../shared/components/Spinner';
 import { STATE_CLASS, STATE_LABEL, STATE_STEPS } from '../../shared/constants/taskConstants';
 import { useKeyboardShortcut } from '../../shared/hooks/useKeyboardShortcut';
 import { useTaskDetail } from '../../shared/hooks/useTaskDetail';
+import './TaskDetailPage.css';
 
 export function TaskDetailPage() {
   const { jiraId = '' } = useParams<{ jiraId: string }>();

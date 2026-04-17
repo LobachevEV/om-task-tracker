@@ -1,3 +1,5 @@
+import './Spinner.css';
+
 interface SpinnerProps {
   label?: string;
 }

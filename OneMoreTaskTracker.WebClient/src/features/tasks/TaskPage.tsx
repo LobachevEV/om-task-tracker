@@ -11,6 +11,7 @@ import { useAuth } from '../auth/AuthContext';
 import type { Task, TaskState } from '../../shared/types/task';
 import { IntegrationIcon, SVG_PATHS } from './IntegrationIcon';
 import { deriveIntegrations } from './integrationStatus';
+import './TaskPage.css';
 
 type FilterState = TaskState | 'All';
 

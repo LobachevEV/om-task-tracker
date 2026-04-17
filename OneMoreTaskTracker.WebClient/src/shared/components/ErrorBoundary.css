@@ -1,0 +1,23 @@
+.error-boundary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  gap: 0.75rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.error-boundary__message {
+  font-size: 1.1rem;
+  color: var(--text);
+  margin: 0;
+}
+
+.error-boundary__detail {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+  max-width: 400px;
+}

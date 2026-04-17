@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { register as apiRegister } from '../../shared/api/authApi';
 import { useAuth } from './AuthContext';
+import './AuthPages.css';
 
 const MIN_PASSWORD_LENGTH = 8;
 

@@ -1,0 +1,57 @@
+/* Form field primitives: .field, .field__label, .field__input, .field__hint, .error-text */
+
+.field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.field__label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.field__input {
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  background-color: var(--bg);
+  color: var(--text);
+  padding: 0.6rem 0.85rem;
+  font-size: 0.92rem;
+  min-height: 44px;
+  box-sizing: border-box;
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.field__input:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--accent) 30%, transparent);
+  background-color: var(--surface);
+}
+
+.field__input::placeholder {
+  color: var(--text-dim);
+}
+
+.field__input--compact {
+  padding: 0.5rem 0.65rem;
+  font-size: 0.85rem;
+}
+
+.field__hint {
+  font-size: 0.78rem;
+  color: var(--danger);
+}
+
+.error-text {
+  margin-top: 0.6rem;
+  color: var(--danger);
+  font-size: 0.85rem;
+}

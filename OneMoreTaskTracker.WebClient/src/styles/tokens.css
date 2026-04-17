@@ -1,0 +1,39 @@
+/* Design tokens — owned by /colorize-type tasks.
+ * Edit here to change global palette. Per-component files consume via var(--*). */
+
+:root {
+  /* Base palette */
+  --bg:            oklch(0.12 0.010 60);
+  --surface:       oklch(0.16 0.008 60);
+  --elevated:      oklch(0.20 0.007 60);
+  --border:        oklch(0.24 0.006 60);
+  --border-strong: oklch(0.32 0.006 60);
+  --text:          oklch(0.94 0.005 60);
+  --text-muted:    oklch(0.65 0.008 60);
+  --text-dim:      oklch(0.50 0.008 60);
+  --accent:        oklch(0.75 0.14 85);
+  --accent-hover:  oklch(0.80 0.14 85);
+  --accent-ink:    oklch(0.18 0.02 85);
+
+  /* State palette — pipeline stages */
+  --state-not-started: oklch(0.40 0.006 60);
+  --state-in-dev:      oklch(0.75 0.14 85);
+  --state-mr-release:  oklch(0.72 0.10 190);
+  --state-in-test:     oklch(0.68 0.12 250);
+  --state-mr-master:   oklch(0.70 0.10 300);
+  --state-completed:   oklch(0.65 0.10 145);
+
+  /* Feedback */
+  --danger:  oklch(0.65 0.14 25);
+  --warning: oklch(0.75 0.14 85);
+  --success: oklch(0.65 0.10 145);
+
+  /* Shadow palette */
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.3);
+  --inset-light: 0 0 0 1px oklch(0 0 0 / 0.25) inset;
+  --inset-medium: 0 0 0 1px oklch(0 0 0 / 0.3) inset;
+
+  color-scheme: dark;
+  color: var(--text);
+  background-color: var(--bg);
+}

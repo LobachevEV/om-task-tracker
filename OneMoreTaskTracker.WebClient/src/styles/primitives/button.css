@@ -1,0 +1,50 @@
+/* Button primitives: .primary-button, .secondary-button
+ * Shared across features. Edit color via var(--accent) in tokens.css. */
+
+.primary-button {
+  border-radius: 999px;
+  border: none;
+  padding: 0.65rem 1.3rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--accent-ink);
+  min-height: 44px;
+  background: var(--accent);
+  box-shadow: var(--shadow-sm);
+  transition: background-color 120ms ease;
+}
+
+.primary-button:hover {
+  background: var(--accent-hover);
+}
+
+.primary-button:active {
+  background: var(--accent);
+  box-shadow: var(--inset-medium);
+}
+
+.primary-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+  box-shadow: none;
+}
+
+.secondary-button {
+  padding: 0.5rem 1.1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.secondary-button:hover {
+  background: color-mix(in oklch, var(--border) 20%, transparent);
+  border-color: var(--border-strong);
+}
