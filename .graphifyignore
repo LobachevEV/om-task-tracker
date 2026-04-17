@@ -16,6 +16,10 @@ node_modules/
 .vs/
 .vscode/
 
+.claude/
+.playwright-mcp/
+.serena/
+
 # Generated files
 *.g.cs
 *.AssemblyInfo.cs
