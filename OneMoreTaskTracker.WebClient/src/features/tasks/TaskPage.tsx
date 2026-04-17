@@ -1,10 +1,12 @@
 import type { FormEvent } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createTask, fetchTasks } from '../../shared/api/tasksApi';
 import { AppHeader } from '../../shared/components/AppHeader';
+import { ShortcutLegend } from '../../shared/components/ShortcutLegend';
 import { Spinner } from '../../shared/components/Spinner';
 import { STATE_CLASS } from '../../shared/constants/taskConstants';
+import { useKeyboardShortcut } from '../../shared/hooks/useKeyboardShortcut';
 import { useAuth } from '../auth/AuthContext';
 import type { Task, TaskState } from '../../shared/types/task';
 import { IntegrationIcon, SVG_PATHS } from './IntegrationIcon';
@@ -21,6 +23,10 @@ export function TaskPage() {
   const [newJiraId, setNewJiraId] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [filter, setFilter] = useState<FilterState>('All');
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+  const [showShortcutLegend, setShowShortcutLegend] = useState(false);
+  const newTaskInputRef = useRef<HTMLInputElement>(null);
+  const filterSelectRef = useRef<HTMLSelectElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -42,6 +48,57 @@ export function TaskPage() {
     () => (filter === 'All' ? tasks : tasks.filter((t) => t.state === filter)),
     [tasks, filter],
   );
+
+  // Reset selected index when filter changes
+  useEffect(() => {
+    setSelectedIndex(-1);
+  }, [filter]);
+
+  // Handle all keyboard shortcuts
+  useKeyboardShortcut([
+    {
+      key: 'ArrowDown',
+      handler: () => {
+        setSelectedIndex((prev) => Math.min(prev + 1, filteredTasks.length - 1));
+      },
+      preventDefault: true,
+    },
+    {
+      key: 'ArrowUp',
+      handler: () => {
+        setSelectedIndex((prev) => Math.max(prev - 1, -1));
+      },
+      preventDefault: true,
+    },
+    {
+      key: 'Enter',
+      handler: () => {
+        if (selectedIndex >= 0 && selectedIndex < filteredTasks.length) {
+          window.location.href = `/tasks/${encodeURIComponent(filteredTasks[selectedIndex].jiraId)}`;
+        }
+      },
+      enabled: selectedIndex >= 0,
+    },
+    {
+      key: '/',
+      handler: () => {
+        newTaskInputRef.current?.focus();
+      },
+    },
+    {
+      key: 'f',
+      handler: () => {
+        filterSelectRef.current?.focus();
+      },
+    },
+    {
+      key: '?',
+      shift: true,
+      handler: () => {
+        setShowShortcutLegend(true);
+      },
+    },
+  ]);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -77,6 +134,7 @@ export function TaskPage() {
                 onChange={(e) => setNewJiraId(e.target.value)}
                 placeholder="PROJ-1234"
                 maxLength={50}
+                ref={newTaskInputRef}
               />
             </label>
             <button className="primary-button" type="submit" disabled={!newJiraId.trim() || submitting}>
@@ -94,6 +152,7 @@ export function TaskPage() {
               className="field__input field__input--compact"
               value={filter}
               onChange={(e) => setFilter(e.target.value as FilterState)}
+              ref={filterSelectRef}
             >
               <option value="All">Все статусы</option>
               <option value="NotStarted">Not started</option>
@@ -109,48 +168,57 @@ export function TaskPage() {
           ) : filteredTasks.length === 0 ? (
             <p>Задач пока нет.</p>
           ) : (
-            <ul className="task-list">
-              {filteredTasks.map((task) => (
-                <li key={task.id} className="task-list__item">
-                  <Link to={`/tasks/${encodeURIComponent(task.jiraId)}`} className="task-list__link">
-                    <div className="task-list__main">
-                      <span className="task-list__jira">{task.jiraId}</span>
-                      <span className={`task-list__badge task-list__badge--${STATE_CLASS[task.state] ?? 'unknown'}`}>
-                        {task.state}
-                      </span>
-                      <span className="task-list__integrations">
-                        {deriveIntegrations(task).map((ind) => (
-                          <IntegrationIcon key={ind.kind} {...ind} />
-                        ))}
-                      </span>
-                      {isManager && task.userId !== user!.userId && (
-                        <span className="task-list__owner">uid:{task.userId}</span>
-                      )}
-                    </div>
-                  </Link>
-                  <a
-                    href={`https://slack.com/search?q=${encodeURIComponent(task.jiraId)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="task-list__slack-jump"
-                    aria-label="Открыть задачу в Slack"
-                    title="Открыть в Slack"
+            <>
+              <ul className="task-list">
+                {filteredTasks.map((task, index) => (
+                  <li
+                    key={task.id}
+                    className={`task-list__item${index === selectedIndex ? ' task-list__item--selected' : ''}`}
                   >
-                    <svg
-                      viewBox="0 0 14 14"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      aria-hidden="true"
+                    <Link to={`/tasks/${encodeURIComponent(task.jiraId)}`} className="task-list__link">
+                      <div className="task-list__main">
+                        <span className="task-list__jira">{task.jiraId}</span>
+                        <span className={`task-list__badge task-list__badge--${STATE_CLASS[task.state] ?? 'unknown'}`}>
+                          {task.state}
+                        </span>
+                        <span className="task-list__integrations">
+                          {deriveIntegrations(task).map((ind) => (
+                            <IntegrationIcon key={ind.kind} {...ind} />
+                          ))}
+                        </span>
+                        {isManager && task.userId !== user!.userId && (
+                          <span className="task-list__owner">uid:{task.userId}</span>
+                        )}
+                      </div>
+                    </Link>
+                    <a
+                      href={`https://slack.com/search?q=${encodeURIComponent(task.jiraId)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="task-list__slack-jump"
+                      aria-label="Открыть задачу в Slack"
+                      title="Открыть в Slack"
                     >
-                      <path d={SVG_PATHS.slack} />
-                    </svg>
-                  </a>
-                </li>
-              ))}
-            </ul>
+                      <svg
+                        viewBox="0 0 14 14"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path d={SVG_PATHS.slack} />
+                      </svg>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              <div className="shortcut-hint">Нажмите <kbd>?</kbd> для списка сочетаний клавиш</div>
+            </>
+
           )}
         </section>
       </main>
+
+      <ShortcutLegend isOpen={showShortcutLegend} onClose={() => setShowShortcutLegend(false)} />
     </div>
   );
 }

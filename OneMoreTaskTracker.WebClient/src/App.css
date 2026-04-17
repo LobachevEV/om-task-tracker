@@ -732,3 +732,73 @@
     font-size: 0.9rem;
   }
 }
+
+/* ── Keyboard Navigation ── */
+
+.task-list__item--selected .task-list__link {
+  outline: 2px solid rgba(255, 255, 255, 0.25);
+  outline-offset: -2px;
+}
+
+.shortcut-legend {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 40;
+  max-width: 320px;
+  padding: 1rem 1.25rem;
+  background: #1a1c20;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  font-size: 0.85rem;
+}
+
+.shortcut-legend__title {
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.shortcut-legend__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.4rem 0.85rem;
+}
+
+.shortcut-legend kbd {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-bottom-width: 2px;
+  border-radius: 0.35rem;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.9);
+  min-width: 1.5rem;
+  text-align: center;
+}
+
+.shortcut-hint {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: right;
+}
+
+.shortcut-hint kbd {
+  display: inline-block;
+  padding: 0.05rem 0.35rem;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 0.25rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+  background: rgba(255, 255, 255, 0.05);
+}
