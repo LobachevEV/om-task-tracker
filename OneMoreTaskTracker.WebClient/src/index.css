@@ -1,11 +1,38 @@
 :root {
+  /* Base palette */
+  --bg:            oklch(0.12 0.010 60);
+  --surface:       oklch(0.16 0.008 60);
+  --elevated:      oklch(0.20 0.007 60);
+  --border:        oklch(0.24 0.006 60);
+  --border-strong: oklch(0.32 0.006 60);
+  --text:          oklch(0.94 0.005 60);
+  --text-muted:    oklch(0.65 0.008 60);
+  --text-dim:      oklch(0.50 0.008 60);
+  --accent:        oklch(0.75 0.14 85);
+  --accent-hover:  oklch(0.80 0.14 85);
+  --accent-dim:    oklch(0.75 0.14 85 / 0.15);
+  --accent-ink:    oklch(0.18 0.02 85);
+
+  /* State palette */
+  --state-not-started: oklch(0.40 0.006 60);
+  --state-in-dev:      oklch(0.75 0.14 85);
+  --state-mr-release:  oklch(0.72 0.10 190);
+  --state-in-test:     oklch(0.68 0.12 250);
+  --state-mr-master:   oklch(0.70 0.10 300);
+  --state-completed:   oklch(0.65 0.10 145);
+
+  /* Feedback */
+  --danger:  oklch(0.65 0.14 25);
+  --warning: oklch(0.75 0.14 85);
+  --success: oklch(0.65 0.10 145);
+
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: var(--text);
+  background-color: var(--bg);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,11 +42,11 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--accent);
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: var(--accent-hover);
 }
 
 body {
