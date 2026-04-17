@@ -1,19 +1,34 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { moveTask } from '../../shared/api/tasksApi';
 import { ConfirmDialog } from '../../shared/components/ConfirmDialog';
 import { Spinner } from '../../shared/components/Spinner';
 import { STATE_CLASS, STATE_LABEL, STATE_STEPS } from '../../shared/constants/taskConstants';
+import { useKeyboardShortcut } from '../../shared/hooks/useKeyboardShortcut';
 import { useTaskDetail } from '../../shared/hooks/useTaskDetail';
 
 export function TaskDetailPage() {
   const { jiraId = '' } = useParams<{ jiraId: string }>();
+  const navigate = useNavigate();
   const { task, loading, error, refetch } = useTaskDetail(jiraId);
   const [showConfirm, setShowConfirm] = useState(false);
   const [moving, setMoving] = useState(false);
   const [moveError, setMoveError] = useState<string | null>(null);
 
   const isCompleted = task?.state === 'Completed';
+
+  // Handle Escape or Alt+Backspace to navigate back
+  useKeyboardShortcut([
+    {
+      key: 'Escape',
+      handler: () => navigate('/'),
+    },
+    {
+      key: 'Backspace',
+      alt: true,
+      handler: () => navigate('/'),
+    },
+  ]);
 
   const handleMoveConfirm = async () => {
     setShowConfirm(false);
@@ -40,6 +55,7 @@ export function TaskDetailPage() {
           confirmLabel="Продолжить"
           onConfirm={handleMoveConfirm}
           onCancel={() => setShowConfirm(false)}
+          isOpen={showConfirm}
         />
       )}
 
