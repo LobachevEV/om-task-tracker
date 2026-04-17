@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AuthProvider } from '../AuthContext';
 import { ProtectedRoute } from '../ProtectedRoute';
-import { setAuth, clearAuth, AUTH_KEY } from '../../../shared/auth/auth';
+import { clearAuth, AUTH_KEY } from '../../../shared/auth/auth';
 
 function renderWithRouter(element: React.ReactElement, initialEntries?: string[]) {
   return render(

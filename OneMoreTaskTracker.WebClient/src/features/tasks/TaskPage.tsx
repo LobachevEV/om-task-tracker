@@ -7,6 +7,8 @@ import { Spinner } from '../../shared/components/Spinner';
 import { STATE_CLASS } from '../../shared/constants/taskConstants';
 import { useAuth } from '../auth/AuthContext';
 import type { Task, TaskState } from '../../shared/types/task';
+import { IntegrationIcon, SVG_PATHS } from './IntegrationIcon';
+import { deriveIntegrations } from './integrationStatus';
 
 type FilterState = TaskState | 'All';
 
@@ -116,11 +118,33 @@ export function TaskPage() {
                       <span className={`task-list__badge task-list__badge--${STATE_CLASS[task.state] ?? 'unknown'}`}>
                         {task.state}
                       </span>
+                      <span className="task-list__integrations">
+                        {deriveIntegrations(task).map((ind) => (
+                          <IntegrationIcon key={ind.kind} {...ind} />
+                        ))}
+                      </span>
                       {isManager && task.userId !== user!.userId && (
                         <span className="task-list__owner">uid:{task.userId}</span>
                       )}
                     </div>
                   </Link>
+                  <a
+                    href={`https://slack.com/search?q=${encodeURIComponent(task.jiraId)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="task-list__slack-jump"
+                    aria-label="Открыть задачу в Slack"
+                    title="Открыть в Slack"
+                  >
+                    <svg
+                      viewBox="0 0 14 14"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d={SVG_PATHS.slack} />
+                    </svg>
+                  </a>
                 </li>
               ))}
             </ul>

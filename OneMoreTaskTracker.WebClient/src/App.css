@@ -574,8 +574,69 @@
 
 /* ── Task list link ── */
 
-.task-list__owner {
+.task-list__integrations {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+}
+
+.integration-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: rgba(255, 255, 255, 0.55);
+  flex-shrink: 0;
+}
+
+.integration-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.integration-icon__dot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1px solid #151719;
+}
+
+.task-list__slack-jump {
   margin-left: auto;
+  opacity: 0;
+  transition: opacity 120ms ease;
+  color: rgba(255, 255, 255, 0.55);
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.task-list__slack-jump svg {
+  width: 18px;
+  height: 18px;
+}
+
+.task-list__slack-jump:hover {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.task-list__item:hover .task-list__slack-jump,
+.task-list__item:focus-within .task-list__slack-jump {
+  opacity: 0.85;
+}
+
+.task-list__owner {
   font-size: 0.72rem;
   color: #9ca3af;
   background: rgba(148, 163, 184, 0.1);

@@ -48,7 +48,7 @@ describe('fetchTasks', () => {
 
   it('works without auth token', async () => {
     clearAuth();
-    const responseData = [];
+    const responseData: never[] = [];
     mockFetch.mockResolvedValueOnce(makeResponse(200, responseData));
 
     await fetchTasks();
@@ -148,7 +148,7 @@ describe('moveTask', () => {
 describe('createTask', () => {
   it('sends POST to /api/tasks with payload', async () => {
     setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'Developer' });
-    const payload: CreateTaskPayload = { jiraId: 'PROJ-NEW', projectId: 5 };
+    const payload: CreateTaskPayload = { jiraId: 'PROJ-NEW' };
     const responseData = { id: 10, jiraId: 'PROJ-NEW', state: 'NotStarted', userId: 1 };
     mockFetch.mockResolvedValueOnce(makeResponse(200, responseData));
 
@@ -166,7 +166,7 @@ describe('createTask', () => {
 
   it('includes auth header in create request', async () => {
     setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'Developer' });
-    const payload: CreateTaskPayload = { jiraId: 'PROJ-NEW', projectId: 5 };
+    const payload: CreateTaskPayload = { jiraId: 'PROJ-NEW' };
     const responseData = { id: 10, jiraId: 'PROJ-NEW', state: 'NotStarted', userId: 1 };
     mockFetch.mockResolvedValueOnce(makeResponse(200, responseData));
 
@@ -182,7 +182,7 @@ describe('createTask', () => {
 
   it('returns parsed created task', async () => {
     setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'Developer' });
-    const payload: CreateTaskPayload = { jiraId: 'PROJ-NEW', projectId: 5 };
+    const payload: CreateTaskPayload = { jiraId: 'PROJ-NEW' };
     const responseData = { id: 10, jiraId: 'PROJ-NEW', state: 'NotStarted', userId: 1 };
     mockFetch.mockResolvedValueOnce(makeResponse(200, responseData));
 

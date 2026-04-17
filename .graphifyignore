@@ -5,7 +5,7 @@ bin/
 # Git worktrees
 .worktrees/
 
-# graphify own output
+# graphify own output>
 graphify-out/
 
 # Node.js
