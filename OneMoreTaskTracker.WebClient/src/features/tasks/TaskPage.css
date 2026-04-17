@@ -16,7 +16,6 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.25rem;
-  box-sizing: border-box;
 }
 
 @media (min-width: 768px) {
@@ -44,8 +43,6 @@
 }
 
 .task-list {
-  list-style: none;
-  padding: 0;
   margin: 0.5rem 0 0;
   display: flex;
   flex-direction: column;
@@ -65,7 +62,6 @@
   justify-content: space-between;
   gap: 0.5rem;
   min-height: 44px;
-  box-sizing: border-box;
 }
 
 .task-list__item--selected .task-list__link {
@@ -93,7 +89,7 @@
 .task-list__jira {
   font-weight: 600;
   font-size: 0.95rem;
-  font-family: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-feature-settings: 'tnum';
 }
 

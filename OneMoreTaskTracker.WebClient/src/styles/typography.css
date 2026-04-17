@@ -3,7 +3,11 @@
  * the heading display axis, and text rendering defaults. */
 
 :root {
-  font-family: 'Onest', system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  --font-sans: 'Onest', system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  --font-display: 'Geologica', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  font-family: var(--font-sans);
   line-height: 1.5;
   font-weight: 400;
   font-feature-settings: 'ss01', 'tnum';
@@ -15,7 +19,7 @@
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Geologica', sans-serif;
+  font-family: var(--font-display);
   font-variation-settings: 'wdth' 78, 'wght' 500;
   letter-spacing: 0;
 }
@@ -27,6 +31,6 @@ h1 {
 
 /* Mono utility for identifiers (Jira IDs, branch names, shortcut keys) */
 .mono {
-  font-family: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-feature-settings: 'tnum';
 }

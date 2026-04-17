@@ -7,7 +7,7 @@
   color: var(--text-muted);
   text-decoration: none;
   font-size: 0.85rem;
-  transition: color 0.15s;
+  transition: color var(--transition-fast);
 }
 
 .back-link:hover {
@@ -59,8 +59,6 @@
 }
 
 .detail-list {
-  list-style: none;
-  padding: 0;
   margin: 0.75rem 0 0;
   display: flex;
   flex-direction: column;
@@ -89,6 +87,6 @@
 .detail-list__mr-branches {
   font-size: 0.78rem;
   color: var(--text-muted);
-  font-family: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-feature-settings: 'tnum';
 }

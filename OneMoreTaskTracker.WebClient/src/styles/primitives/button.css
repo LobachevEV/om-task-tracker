@@ -14,7 +14,7 @@
   min-height: 44px;
   background: var(--accent);
   box-shadow: var(--shadow-sm);
-  transition: background-color 120ms ease;
+  transition: background-color var(--transition-fast) ease;
 }
 
 .primary-button:hover {
@@ -41,7 +41,7 @@
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
 }
 
 .secondary-button:hover {

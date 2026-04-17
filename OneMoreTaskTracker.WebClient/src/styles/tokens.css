@@ -30,8 +30,18 @@
 
   /* Shadow palette */
   --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.3);
+  --shadow-lg: 0 12px 30px oklch(0 0 0 / 0.45);
   --inset-light: 0 0 0 1px oklch(0 0 0 / 0.25) inset;
   --inset-medium: 0 0 0 1px oklch(0 0 0 / 0.3) inset;
+
+  /* Motion tokens */
+  --transition-fast: 120ms;
+  --transition-base: 160ms;
+
+  /* Stacking scale */
+  --z-header: 10;
+  --z-popover: 40;
+  --z-modal: 50;
 
   color-scheme: dark;
   color: var(--text);
