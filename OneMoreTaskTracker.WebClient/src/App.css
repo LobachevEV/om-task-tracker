@@ -31,7 +31,9 @@
 .app-header__title h1 {
   margin: 0;
   font-size: 1.25rem;
-  letter-spacing: 0.02em;
+  font-family: 'Geologica', sans-serif;
+  font-variation-settings: 'wdth' 78, 'wght' 500;
+  letter-spacing: 0;
 }
 
 .app-header__title p {
@@ -51,7 +53,7 @@
   border-radius: 999px;
   font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
 }
 
@@ -88,6 +90,9 @@
 
   .app-header__title h1 {
     font-size: 1.5rem;
+    font-family: 'Geologica', sans-serif;
+    font-variation-settings: 'wdth' 78, 'wght' 500;
+    letter-spacing: 0;
   }
 
   .app-header__title p {
@@ -132,6 +137,9 @@
 .card h2 {
   margin: 0 0 0.5rem;
   font-size: 1.1rem;
+  font-family: 'Geologica', sans-serif;
+  font-variation-settings: 'wdth' 78, 'wght' 500;
+  letter-spacing: 0;
 }
 
 .card__header {
@@ -189,7 +197,7 @@
   font-size: 0.8rem;
   color: #9ca3af;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
 }
 
 .field__input {
@@ -230,7 +238,7 @@
   border: none;
   padding: 0.65rem 1.3rem;
   font-size: 0.9rem;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   font-weight: 600;
   cursor: pointer;
@@ -304,6 +312,8 @@
 .task-list__jira {
   font-weight: 600;
   font-size: 0.95rem;
+  font-family: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-feature-settings: 'tnum';
 }
 
 .task-list__badge {
@@ -363,6 +373,9 @@
 .task-detail__heading {
   margin: 0.3rem 0 0;
   font-size: 1.15rem;
+  font-family: 'Geologica', sans-serif;
+  font-variation-settings: 'wdth' 78, 'wght' 500;
+  letter-spacing: 0;
   color: #e5e7eb;
 }
 
@@ -440,7 +453,8 @@
 .detail-list__mr-branches {
   font-size: 0.78rem;
   color: #9ca3af;
-  font-family: monospace;
+  font-family: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-feature-settings: 'tnum';
 }
 
 /* ── Secondary button ── */
@@ -606,7 +620,9 @@
 .login-card__title {
   margin: 0;
   font-size: 1.35rem;
-  letter-spacing: 0.02em;
+  font-family: 'Geologica', sans-serif;
+  font-variation-settings: 'wdth' 78, 'wght' 500;
+  letter-spacing: 0;
   text-align: center;
 }
 
@@ -658,6 +674,9 @@
 
   .login-card__title {
     font-size: 1.6rem;
+    font-family: 'Geologica', sans-serif;
+    font-variation-settings: 'wdth' 78, 'wght' 500;
+    letter-spacing: 0;
   }
 
   .login-card__subtitle {
