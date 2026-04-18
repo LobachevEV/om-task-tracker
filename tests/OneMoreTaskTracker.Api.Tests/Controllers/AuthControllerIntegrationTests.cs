@@ -23,12 +23,6 @@ public sealed class AuthControllerIntegrationTests(ApiWebApplicationFactory fact
         return await client.PostAsync(uri, content);
     }
 
-    private static async Task<T?> ReadAsAsync<T>(HttpContent content)
-    {
-        var json = await content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-    }
-
     [Fact]
     public async Task Register_WithValidPayload_Returns200WithToken()
     {
