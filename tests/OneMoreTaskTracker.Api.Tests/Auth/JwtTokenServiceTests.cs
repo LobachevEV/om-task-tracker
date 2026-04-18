@@ -47,7 +47,7 @@ public sealed class JwtTokenServiceTests
         var service = CreateService();
         const int userId = 42;
         const string email = "test@example.com";
-        const string role = "Developer";
+        const string role = "FrontendDeveloper";
 
         var token = service.GenerateToken(userId, email, role);
 
@@ -67,7 +67,7 @@ public sealed class JwtTokenServiceTests
     {
         var service = CreateService();
 
-        var token = service.GenerateToken(1, "test@example.com", "Developer");
+        var token = service.GenerateToken(1, "test@example.com", "FrontendDeveloper");
 
         var decodedToken = DecodeToken(token);
         decodedToken.Should().NotBeNull();
@@ -81,7 +81,7 @@ public sealed class JwtTokenServiceTests
         var service = CreateService();
         var beforeGeneration = DateTime.UtcNow;
 
-        var token = service.GenerateToken(1, "test@example.com", "Developer");
+        var token = service.GenerateToken(1, "test@example.com", "FrontendDeveloper");
 
         var decodedToken = DecodeToken(token);
         var expiryTime = decodedToken.ValidTo;
@@ -99,7 +99,7 @@ public sealed class JwtTokenServiceTests
     {
         var service = CreateService();
 
-        var token1 = service.GenerateToken(1, "user1@example.com", "Developer");
+        var token1 = service.GenerateToken(1, "user1@example.com", "FrontendDeveloper");
         var token2 = service.GenerateToken(2, "user2@example.com", "Manager");
 
         token1.Should().NotBe(token2);
@@ -110,13 +110,13 @@ public sealed class JwtTokenServiceTests
     {
         var service = CreateService();
 
-        var developerToken = service.GenerateToken(1, "test@example.com", "Developer");
+        var developerToken = service.GenerateToken(1, "test@example.com", "FrontendDeveloper");
         var managerToken = service.GenerateToken(1, "test@example.com", "Manager");
 
         var decodedDeveloper = DecodeToken(developerToken);
         var decodedManager = DecodeToken(managerToken);
 
-        decodedDeveloper.Claims.First(c => c.Type == ClaimTypes.Role).Value.Should().Be("Developer");
+        decodedDeveloper.Claims.First(c => c.Type == ClaimTypes.Role).Value.Should().Be("FrontendDeveloper");
         decodedManager.Claims.First(c => c.Type == ClaimTypes.Role).Value.Should().Be("Manager");
     }
 }

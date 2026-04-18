@@ -27,6 +27,13 @@
   text-align: center;
 }
 
+.login-card__helper {
+  margin: 0.5rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
 .login-form {
   display: flex;
   flex-direction: column;

@@ -13,7 +13,7 @@ public sealed class UserServiceHandlerAuthenticateTests : UserServiceHandlerTest
     {
         const string password = "password123";
         const string email = "user@example.com";
-        var user = new User { Email = email, PasswordHash = Password123Hash, Role = "Developer" };
+        var user = new User { Email = email, PasswordHash = Password123Hash, Role = "FrontendDeveloper" };
         DbContext.Users.Add(user);
         await DbContext.SaveChangesAsync();
 
@@ -25,14 +25,14 @@ public sealed class UserServiceHandlerAuthenticateTests : UserServiceHandlerTest
         response.Success.Should().BeTrue();
         response.UserId.Should().Be(user.Id);
         response.Email.Should().Be(email);
-        response.Role.Should().Be("Developer");
+        response.Role.Should().Be("FrontendDeveloper");
     }
 
     [Fact]
     public async Task Authenticate_WithWrongPassword_ReturnsFailure()
     {
         const string email = "user@example.com";
-        var user = new User { Email = email, PasswordHash = Password123Hash, Role = "Developer" };
+        var user = new User { Email = email, PasswordHash = Password123Hash, Role = "FrontendDeveloper" };
         DbContext.Users.Add(user);
         await DbContext.SaveChangesAsync();
 

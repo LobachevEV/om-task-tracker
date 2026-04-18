@@ -1,4 +1,4 @@
-export type UserRole = 'Developer' | 'Manager';
+export type UserRole = 'Manager' | 'FrontendDeveloper' | 'BackendDeveloper' | 'Qa';
 
 export interface AuthState {
   token: string;

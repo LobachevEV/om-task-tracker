@@ -3,14 +3,13 @@ using Grpc.Core;
 using Microsoft.EntityFrameworkCore;
 using OneMoreTaskTracker.Proto.Users;
 using OneMoreTaskTracker.Users.Data;
+using OneMoreTaskTracker.Users.Services;
 
 namespace OneMoreTaskTracker.Users;
 
 // TODO: add xUnit tests for Register (validation, duplicate email, BCrypt) and Authenticate (success, wrong password, missing user)
 public class UserServiceHandler(UsersDbContext dbContext) : UserService.UserServiceBase
 {
-    private const string RoleDeveloper = "Developer";
-    private const string RoleManager = "Manager";
     private const int MinPasswordLength = 8;
     private const int MaxEmailLength = 254;
 
@@ -29,11 +28,25 @@ public class UserServiceHandler(UsersDbContext dbContext) : UserService.UserServ
         if (await dbContext.Users.AnyAsync(u => u.Email == request.Email, context.CancellationToken))
             throw new RpcException(new Status(StatusCode.AlreadyExists, "Email already registered"));
 
-        if (request.ManagerId > 0)
+        string userRole;
+
+        if (request.ManagerId == 0)
         {
+            // Self-registration: always Manager, ignore sent role
+            userRole = Roles.Manager;
+        }
+        else
+        {
+            // Managed creation: validate role and manager
+            if (!Roles.DeveloperRoles.Contains(request.Role))
+                throw new RpcException(new Status(StatusCode.InvalidArgument,
+                    "Role must be one of: FrontendDeveloper, BackendDeveloper, Qa"));
+
             var manager = await dbContext.Users.FindAsync([request.ManagerId], context.CancellationToken);
-            if (manager is null || manager.Role != RoleManager)
+            if (manager is null || manager.Role != Roles.Manager)
                 throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid ManagerId"));
+
+            userRole = request.Role;
         }
 
         var hash = await Task.Run(
@@ -43,7 +56,7 @@ public class UserServiceHandler(UsersDbContext dbContext) : UserService.UserServ
         {
             Email = request.Email,
             PasswordHash = hash,
-            Role = RoleDeveloper,
+            Role = userRole,
             ManagerId = request.ManagerId > 0 ? request.ManagerId : null
         };
 

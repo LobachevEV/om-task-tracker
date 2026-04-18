@@ -14,7 +14,7 @@ beforeEach(() => {
 
 describe('fetchTasks', () => {
   it('calls GET /api/tasks with auth header', async () => {
-    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'Developer' });
+    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'FrontendDeveloper' });
     const responseData = [
       { id: 1, jiraId: 'PROJ-1', state: 'NotStarted', userId: 1 },
       { id: 2, jiraId: 'PROJ-2', state: 'InDev', userId: 1 },
@@ -32,7 +32,7 @@ describe('fetchTasks', () => {
   });
 
   it('returns parsed task list', async () => {
-    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'Developer' });
+    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'FrontendDeveloper' });
     const responseData = [
       { id: 1, jiraId: 'PROJ-1', state: 'NotStarted', userId: 1 },
       { id: 2, jiraId: 'PROJ-2', state: 'Completed', userId: 1 },
@@ -64,7 +64,7 @@ describe('fetchTasks', () => {
 
 describe('fetchTaskDetail', () => {
   it('calls correct URL for task detail', async () => {
-    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'Developer' });
+    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'FrontendDeveloper' });
     const responseData = {
       jiraId: 'PROJ-42',
       state: 'InDev',
@@ -82,7 +82,7 @@ describe('fetchTaskDetail', () => {
   });
 
   it('encodes special characters in jiraId', async () => {
-    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'Developer' });
+    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'FrontendDeveloper' });
     const responseData = {
       jiraId: 'PROJ-1/SUB',
       state: 'NotStarted',
@@ -100,7 +100,7 @@ describe('fetchTaskDetail', () => {
   });
 
   it('returns parsed task detail', async () => {
-    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'Developer' });
+    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'FrontendDeveloper' });
     const responseData = {
       jiraId: 'PROJ-1',
       state: 'InDev',
@@ -119,7 +119,7 @@ describe('fetchTaskDetail', () => {
 
 describe('moveTask', () => {
   it('sends POST to /move endpoint', async () => {
-    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'Developer' });
+    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'FrontendDeveloper' });
     const responseData = { state: 'InDev' as const, projects: [] };
     mockFetch.mockResolvedValueOnce(makeResponse(200, responseData));
 
@@ -134,7 +134,7 @@ describe('moveTask', () => {
   });
 
   it('returns parsed move result', async () => {
-    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'Developer' });
+    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'FrontendDeveloper' });
     const responseData = { state: 'InDev' as const, projects: [{ id: 1, name: 'repo' }] };
     mockFetch.mockResolvedValueOnce(makeResponse(200, responseData));
 
@@ -147,7 +147,7 @@ describe('moveTask', () => {
 
 describe('createTask', () => {
   it('sends POST to /api/tasks with payload', async () => {
-    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'Developer' });
+    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'FrontendDeveloper' });
     const payload: CreateTaskPayload = { jiraId: 'PROJ-NEW' };
     const responseData = { id: 10, jiraId: 'PROJ-NEW', state: 'NotStarted', userId: 1 };
     mockFetch.mockResolvedValueOnce(makeResponse(200, responseData));
@@ -165,7 +165,7 @@ describe('createTask', () => {
   });
 
   it('includes auth header in create request', async () => {
-    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'Developer' });
+    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'FrontendDeveloper' });
     const payload: CreateTaskPayload = { jiraId: 'PROJ-NEW' };
     const responseData = { id: 10, jiraId: 'PROJ-NEW', state: 'NotStarted', userId: 1 };
     mockFetch.mockResolvedValueOnce(makeResponse(200, responseData));
@@ -181,7 +181,7 @@ describe('createTask', () => {
   });
 
   it('returns parsed created task', async () => {
-    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'Developer' });
+    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'FrontendDeveloper' });
     const payload: CreateTaskPayload = { jiraId: 'PROJ-NEW' };
     const responseData = { id: 10, jiraId: 'PROJ-NEW', state: 'NotStarted', userId: 1 };
     mockFetch.mockResolvedValueOnce(makeResponse(200, responseData));

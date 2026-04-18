@@ -9,18 +9,16 @@ namespace OneMoreTaskTracker.Tasks.Tasks.List;
 
 public class ListTasksHandler(TasksDbContext dbContext) : TaskLister.TaskListerBase
 {
-    private const string RoleDeveloper = "Developer";
-    private const string RoleManager = "Manager";
 
     public override async System.Threading.Tasks.Task<ListTasksResponse> ListTasks(ListTasksRequest request, ServerCallContext context)
     {
         IQueryable<Task> query = dbContext.Tasks;
 
-        if (request.Role == RoleDeveloper)
+        if (Roles.DeveloperRoles.Contains(request.Role))
         {
             query = query.Where(t => t.UserId == request.UserId);
         }
-        else if (request.Role == RoleManager)
+        else if (request.Role == Roles.Manager)
         {
             var allowedIds = request.TeamMemberIds.ToList();
             query = query.Where(t => allowedIds.Contains(t.UserId));

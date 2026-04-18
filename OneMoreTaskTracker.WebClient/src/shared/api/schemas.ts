@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const userRoleSchema = z.enum(['Developer', 'Manager']);
+export const userRoleSchema = z.enum(['Manager', 'FrontendDeveloper', 'BackendDeveloper', 'Qa']);
 
 export const authResponseSchema = z.object({
   token: z.string().min(1),

@@ -1,4 +1,4 @@
-/* Role badge pill — used in header and anywhere a user role is shown. */
+/* Role badge pill — used in header, roster table, and anywhere a user role is shown. */
 
 .role-badge {
   display: inline-block;
@@ -10,14 +10,26 @@
   text-transform: uppercase;
 }
 
-.role-badge--developer {
-  background: color-mix(in oklch, var(--state-in-test) 15%, transparent);
+.role-badge--manager {
+  background: color-mix(in oklch, var(--state-mr-master) 20%, transparent);
+  color: var(--state-mr-master);
+  border: 1px solid color-mix(in oklch, var(--state-mr-master) 30%, transparent);
+}
+
+.role-badge--frontend {
+  background: color-mix(in oklch, var(--state-in-test) 20%, transparent);
   color: var(--state-in-test);
   border: 1px solid color-mix(in oklch, var(--state-in-test) 30%, transparent);
 }
 
-.role-badge--manager {
-  background: color-mix(in oklch, var(--state-mr-master) 15%, transparent);
-  color: var(--state-mr-master);
-  border: 1px solid color-mix(in oklch, var(--state-mr-master) 30%, transparent);
+.role-badge--backend {
+  background: color-mix(in oklch, var(--state-mr-release) 20%, transparent);
+  color: var(--state-mr-release);
+  border: 1px solid color-mix(in oklch, var(--state-mr-release) 30%, transparent);
+}
+
+.role-badge--qa {
+  background: color-mix(in oklch, var(--state-completed) 20%, transparent);
+  color: var(--state-completed);
+  border: 1px solid color-mix(in oklch, var(--state-completed) 20%, transparent);
 }

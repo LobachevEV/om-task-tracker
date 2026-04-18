@@ -16,7 +16,7 @@ describe('AuthContext', () => {
   });
 
   it('initial state loads from localStorage', () => {
-    const authState = { token: 'test-token', userId: 42, email: 'user@example.com', role: 'Developer' as const };
+    const authState = { token: 'test-token', userId: 42, email: 'user@example.com', role: 'FrontendDeveloper' as const };
     const storedAuth = {
       token: authState.token,
       userId: authState.userId,
@@ -35,14 +35,14 @@ describe('AuthContext', () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
 
     act(() => {
-      result.current.login('new-token', 99, 'newuser@example.com', 'Developer');
+      result.current.login('new-token', 99, 'newuser@example.com', 'FrontendDeveloper');
     });
 
     expect(result.current.user).toEqual({
       token: 'new-token',
       userId: 99,
       email: 'newuser@example.com',
-      role: 'Developer',
+      role: 'FrontendDeveloper',
     });
 
     const storedAuth = getAuth();
@@ -50,12 +50,12 @@ describe('AuthContext', () => {
       token: 'new-token',
       userId: 99,
       email: 'newuser@example.com',
-      role: 'Developer',
+      role: 'FrontendDeveloper',
     });
   });
 
   it('logout clears user and localStorage', () => {
-    const authState = { token: 'test-token', userId: 42, email: 'user@example.com', role: 'Developer' as const };
+    const authState = { token: 'test-token', userId: 42, email: 'user@example.com', role: 'FrontendDeveloper' as const };
     const storedAuth = {
       token: authState.token,
       userId: authState.userId,

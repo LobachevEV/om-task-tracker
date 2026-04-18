@@ -19,7 +19,7 @@ beforeEach(() => {
 
 describe('ProtectedRoute', () => {
   it('renders children when user is authenticated', () => {
-    const authState = { token: 'test-token', userId: 42, email: 'user@example.com', role: 'Developer' as const };
+    const authState = { token: 'test-token', userId: 42, email: 'user@example.com', role: 'FrontendDeveloper' as const };
     const storedAuth = {
       token: authState.token,
       userId: authState.userId,

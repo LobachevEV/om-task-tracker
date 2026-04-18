@@ -6,7 +6,7 @@ const mockState: AuthState = {
   token: 'test-token',
   userId: 42,
   email: 'dev@example.com',
-  role: 'Developer',
+  role: 'FrontendDeveloper',
 };
 
 beforeEach(() => {

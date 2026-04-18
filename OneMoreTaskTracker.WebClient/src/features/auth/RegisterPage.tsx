@@ -11,7 +11,6 @@ export function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [managerId, setManagerId] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const { login } = useAuth();
@@ -32,11 +31,9 @@ export function RegisterPage() {
     try {
       setError(null);
       setSubmitting(true);
-      const parsedManagerId = managerId.trim() ? Number(managerId.trim()) : undefined;
       const response = await apiRegister({
         email: email.trim(),
         password,
-        managerId: parsedManagerId,
       });
       login(response.token, response.userId, response.email, response.role);
       navigate('/', { replace: true });
@@ -58,6 +55,7 @@ export function RegisterPage() {
         <section className="card login-card">
           <h2 className="login-card__title">One More Task Tracker</h2>
           <p className="login-card__subtitle">Создайте аккаунт</p>
+          <p className="login-card__helper">Вы станете менеджером новой команды</p>
           <form className="login-form" onSubmit={handleSubmit}>
             <label className="field">
               <span className="field__label">Email</span>
@@ -97,17 +95,6 @@ export function RegisterPage() {
               {passwordsMismatch && (
                 <span className="field__hint">Пароли не совпадают</span>
               )}
-            </label>
-            <label className="field">
-              <span className="field__label">ID менеджера (необязательно)</span>
-              <input
-                className="field__input"
-                type="number"
-                value={managerId}
-                onChange={(e) => setManagerId(e.target.value)}
-                placeholder="123"
-                min={1}
-              />
             </label>
             <button
               className="primary-button login-form__button"

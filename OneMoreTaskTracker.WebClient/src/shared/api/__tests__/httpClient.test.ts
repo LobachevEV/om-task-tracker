@@ -13,7 +13,7 @@ describe('authHeaders', () => {
   });
 
   it('returns Bearer token when auth is set', () => {
-    setAuth({ token: 'test-token-123', userId: 1, email: 'user@example.com', role: 'Developer' });
+    setAuth({ token: 'test-token-123', userId: 1, email: 'user@example.com', role: 'FrontendDeveloper' });
     const headers = authHeaders();
     expect(headers).toEqual({ Authorization: 'Bearer test-token-123' });
   });
@@ -51,7 +51,7 @@ describe('handleResponse', () => {
   });
 
   it('clears auth on 401 with token', async () => {
-    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'Developer' });
+    setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'FrontendDeveloper' });
     const response = makeResponse(401, {});
     await expect(handleResponse(response)).rejects.toThrow('Session expired');
     expect(getToken()).toBeNull();

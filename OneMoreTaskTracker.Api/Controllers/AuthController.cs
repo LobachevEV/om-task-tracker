@@ -20,7 +20,7 @@ public class AuthController(
         {
             Email = payload.Email,
             Password = payload.Password,
-            ManagerId = payload.ManagerId ?? 0
+            ManagerId = 0
         }, cancellationToken: cancellationToken);
 
         var token = jwtTokenService.GenerateToken(response.UserId, response.Email, response.Role);
@@ -48,8 +48,7 @@ public class AuthController(
 
 public record RegisterPayload(
     [Required][EmailAddress] string Email,
-    [Required][MinLength(8)] string Password,
-    int? ManagerId = null);
+    [Required][MinLength(8)] string Password);
 
 public record LoginPayload(
     [Required][EmailAddress] string Email,

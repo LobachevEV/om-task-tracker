@@ -13,6 +13,7 @@ message RegisterRequest {
   string email = 1;
   string password = 2;
   int32 manager_id = 3;
+  string role = 4;
 }
 
 message RegisterResponse {

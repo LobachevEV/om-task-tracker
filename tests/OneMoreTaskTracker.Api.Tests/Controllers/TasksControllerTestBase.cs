@@ -11,7 +11,7 @@ public abstract class TasksControllerTestBase(TasksControllerWebApplicationFacto
     protected readonly TasksControllerWebApplicationFactory Factory = factory;
 
     protected string TokenForDeveloper(int userId = 1) =>
-        Factory.GenerateToken(userId, "test@example.com", Roles.Developer);
+        Factory.GenerateToken(userId, "test@example.com", Roles.FrontendDeveloper);
 
     protected string TokenForManager(int userId = 1) =>
         Factory.GenerateToken(userId, "manager@example.com", Roles.Manager);

@@ -13,7 +13,7 @@ describe('login', () => {
 
   it('sends POST to /api/auth/login with payload', async () => {
     const payload: LoginPayload = { email: 'user@example.com', password: 'password123' };
-    const responseData = { token: 'jwt.token', userId: 1, email: 'user@example.com', role: 'Developer' };
+    const responseData = { token: 'jwt.token', userId: 1, email: 'user@example.com', role: 'FrontendDeveloper' as const };
     mockFetch.mockResolvedValueOnce(makeResponse(200, responseData));
 
     await login(payload);
@@ -30,7 +30,7 @@ describe('login', () => {
 
   it('returns parsed AuthResponse on success', async () => {
     const payload: LoginPayload = { email: 'user@example.com', password: 'password123' };
-    const responseData = { token: 'jwt.token', userId: 42, email: 'user@example.com', role: 'Developer' };
+    const responseData = { token: 'jwt.token', userId: 42, email: 'user@example.com', role: 'FrontendDeveloper' as const };
     mockFetch.mockResolvedValueOnce(makeResponse(200, responseData));
 
     const result = await login(payload);
@@ -62,7 +62,7 @@ describe('register', () => {
 
   it('sends POST to /api/auth/register', async () => {
     const payload: RegisterPayload = { email: 'newuser@example.com', password: 'password123' };
-    const responseData = { token: 'jwt.token', userId: 2, email: 'newuser@example.com', role: 'Developer' };
+    const responseData = { token: 'jwt.token', userId: 2, email: 'newuser@example.com', role: 'Manager' as const };
     mockFetch.mockResolvedValueOnce(makeResponse(200, responseData));
 
     await register(payload);
@@ -79,7 +79,7 @@ describe('register', () => {
 
   it('returns parsed AuthResponse on success', async () => {
     const payload: RegisterPayload = { email: 'newuser@example.com', password: 'password123' };
-    const responseData = { token: 'jwt.token', userId: 2, email: 'newuser@example.com', role: 'Developer' };
+    const responseData = { token: 'jwt.token', userId: 2, email: 'newuser@example.com', role: 'Manager' as const };
     mockFetch.mockResolvedValueOnce(makeResponse(200, responseData));
 
     const result = await register(payload);
@@ -88,9 +88,9 @@ describe('register', () => {
     expect(result.email).toBe('newuser@example.com');
   });
 
-  it('includes managerId when provided', async () => {
-    const payload: RegisterPayload = { email: 'user@example.com', password: 'password123', managerId: 5 };
-    const responseData = { token: 'jwt.token', userId: 3, email: 'user@example.com', role: 'Developer' };
+  it('only includes email and password fields', async () => {
+    const payload: RegisterPayload = { email: 'user@example.com', password: 'password123' };
+    const responseData = { token: 'jwt.token', userId: 3, email: 'user@example.com', role: 'Manager' as const };
     mockFetch.mockResolvedValueOnce(makeResponse(200, responseData));
 
     await register(payload);
@@ -101,5 +101,9 @@ describe('register', () => {
         body: JSON.stringify(payload),
       }),
     );
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(callBody).toEqual({ email: 'user@example.com', password: 'password123' });
+    expect(callBody.managerId).toBeUndefined();
   });
 });

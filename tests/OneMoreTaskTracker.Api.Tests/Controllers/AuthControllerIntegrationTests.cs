@@ -38,7 +38,7 @@ public sealed class AuthControllerIntegrationTests(ApiWebApplicationFactory fact
             {
                 UserId = 1,
                 Email = "test@example.com",
-                Role = "Developer"
+                Role = "Manager"
             }));
 
         var response = await PostAsJsonAsync(_client, "/api/auth/register", payload);
@@ -51,7 +51,7 @@ public sealed class AuthControllerIntegrationTests(ApiWebApplicationFactory fact
         root.GetProperty("token").GetString().Should().NotBeNullOrEmpty();
         root.GetProperty("userId").GetInt32().Should().Be(1);
         root.GetProperty("email").GetString().Should().Be("test@example.com");
-        root.GetProperty("role").GetString().Should().Be("Developer");
+        root.GetProperty("role").GetString().Should().Be("Manager");
     }
 
     [Fact]
@@ -106,9 +106,9 @@ public sealed class AuthControllerIntegrationTests(ApiWebApplicationFactory fact
     }
 
     [Fact]
-    public async Task Register_WithManagerId_PassesItToGrpcService()
+    public async Task Register_WithValidPayload_PassesManagerId0ToGrpcService()
     {
-        var payload = new { email = "dev@example.com", password = "password123", managerId = 5 };
+        var payload = new { email = "user@example.com", password = "password123" };
 
         factory.MockUserService
             .RegisterAsync(
@@ -119,18 +119,51 @@ public sealed class AuthControllerIntegrationTests(ApiWebApplicationFactory fact
             .Returns(x =>
             {
                 var req = (RegisterRequest)x[0];
-                req.ManagerId.Should().Be(5);
+                req.ManagerId.Should().Be(0);
                 return GrpcTestHelpers.UnaryCall(new RegisterResponse
                 {
-                    UserId = 2,
-                    Email = "dev@example.com",
-                    Role = "Developer"
+                    UserId = 1,
+                    Email = "user@example.com",
+                    Role = "Manager"
                 });
             });
 
         var response = await PostAsJsonAsync(_client, "/api/auth/register", payload);
 
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task Register_WithExtraManagerIdField_IsIgnoredAndRoleIsManager()
+    {
+        var payload = new { email = "user@example.com", password = "password123", managerId = 5 };
+
+        factory.MockUserService
+            .RegisterAsync(
+                Arg.Any<RegisterRequest>(),
+                Arg.Any<Metadata>(),
+                Arg.Any<DateTime?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(x =>
+            {
+                var req = (RegisterRequest)x[0];
+                // Extra field should be ignored, so ManagerId should still be 0
+                req.ManagerId.Should().Be(0);
+                return GrpcTestHelpers.UnaryCall(new RegisterResponse
+                {
+                    UserId = 1,
+                    Email = "user@example.com",
+                    Role = "Manager"
+                });
+            });
+
+        var response = await PostAsJsonAsync(_client, "/api/auth/register", payload);
+
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
+
+        var json = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(json);
+        doc.RootElement.GetProperty("role").GetString().Should().Be("Manager");
     }
 
     [Fact]
@@ -149,7 +182,7 @@ public sealed class AuthControllerIntegrationTests(ApiWebApplicationFactory fact
                 Success = true,
                 UserId = 1,
                 Email = "test@example.com",
-                Role = "Developer"
+                Role = "FrontendDeveloper"
             }));
 
         var response = await PostAsJsonAsync(_client, "/api/auth/login", payload);
@@ -162,7 +195,7 @@ public sealed class AuthControllerIntegrationTests(ApiWebApplicationFactory fact
         root.GetProperty("token").GetString().Should().NotBeNullOrEmpty();
         root.GetProperty("userId").GetInt32().Should().Be(1);
         root.GetProperty("email").GetString().Should().Be("test@example.com");
-        root.GetProperty("role").GetString().Should().Be("Developer");
+        root.GetProperty("role").GetString().Should().Be("FrontendDeveloper");
     }
 
     [Fact]

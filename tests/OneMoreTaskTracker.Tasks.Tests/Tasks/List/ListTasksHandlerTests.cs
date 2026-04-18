@@ -25,7 +25,7 @@ public sealed class ListTasksHandlerTests
         await db.SaveChangesAsync();
 
         var handler = new ListTasksHandler(db);
-        var request = new ListTasksRequest { UserId = 1, Role = "Developer" };
+        var request = new ListTasksRequest { UserId = 1, Role = "FrontendDeveloper" };
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
 
@@ -95,7 +95,7 @@ public sealed class ListTasksHandlerTests
         await db.SaveChangesAsync();
 
         var handler = new ListTasksHandler(db);
-        var request = new ListTasksRequest { UserId = 1, Role = "Developer" };
+        var request = new ListTasksRequest { UserId = 1, Role = "FrontendDeveloper" };
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
 
@@ -116,7 +116,7 @@ public sealed class ListTasksHandlerTests
         await db.SaveChangesAsync();
 
         var handler = new ListTasksHandler(db);
-        var request = new ListTasksRequest { UserId = 1, Role = "Developer" };
+        var request = new ListTasksRequest { UserId = 1, Role = "FrontendDeveloper" };
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
 

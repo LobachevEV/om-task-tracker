@@ -1,4 +1,4 @@
-namespace OneMoreTaskTracker.Api.Auth;
+namespace OneMoreTaskTracker.Users.Services;
 
 public static class Roles
 {

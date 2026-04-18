@@ -14,11 +14,11 @@ describe('authResponseSchema', () => {
       token: 'jwt.token.here',
       userId: 1,
       email: 'user@example.com',
-      role: 'Developer',
+      role: 'FrontendDeveloper',
     };
     const result = authResponseSchema.parse(data);
     expect(result.token).toBe('jwt.token.here');
-    expect(result.role).toBe('Developer');
+    expect(result.role).toBe('FrontendDeveloper');
   });
 
   it('rejects an invalid role', () => {
@@ -27,7 +27,7 @@ describe('authResponseSchema', () => {
   });
 
   it('rejects a missing token', () => {
-    const data = { userId: 1, email: 'a@b.com', role: 'Developer' };
+    const data = { userId: 1, email: 'a@b.com', role: 'FrontendDeveloper' };
     expect(() => authResponseSchema.parse(data)).toThrow();
   });
 });
