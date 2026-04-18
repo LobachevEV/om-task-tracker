@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { isDeveloperRole } from '../../shared/auth/roles';
 import type { UserRole } from '../../shared/auth/roles';
@@ -12,6 +12,8 @@ import { ConfirmDialog } from '../../shared/components/ConfirmDialog';
 import { sortRoster } from './sort';
 import './TeamPage.css';
 
+const TOAST_AUTO_DISMISS_MS = 30_000;
+
 interface PasswordToast {
   email: string;
   role: UserRole;
@@ -20,7 +22,7 @@ interface PasswordToast {
 
 export default function TeamPage() {
   const { user } = useAuth();
-  if (!user) return null; // Should not happen due to ProtectedRoute, but guard anyway
+  if (!user) return null;
 
   const viewerRole = user.role as UserRole;
   const isManager = viewerRole === 'Manager';
@@ -52,12 +54,11 @@ export default function TeamPage() {
     loadRoster();
   }, []);
 
-  // Auto-dismiss toast after 30 seconds
   useEffect(() => {
     if (passwordToast) {
       const timer = setTimeout(() => {
         setPasswordToast(null);
-      }, 30000);
+      }, TOAST_AUTO_DISMISS_MS);
       return () => clearTimeout(timer);
     }
   }, [passwordToast]);
@@ -66,19 +67,16 @@ export default function TeamPage() {
     try {
       setInviteError(null);
       const response = await teamApi.inviteMember(args);
-      // Show toast with password
       setPasswordToast({
         email: args.email,
         role: args.role,
         password: response.temporaryPassword,
       });
-      // Refetch roster
       await loadRoster();
     } catch (err: unknown) {
-      // Parse error response
       const errorMsg = err instanceof Error ? err.message : 'Unknown error';
       setInviteError(errorMsg);
-      throw err; // Re-throw so InviteRow can handle it
+      throw err;
     }
   };
 
@@ -96,7 +94,6 @@ export default function TeamPage() {
       setConfirmRemoveUser(null);
       await loadRoster();
     } catch (err) {
-      // Show error and don't close dialog; user can dismiss and retry
       setRemoveError('Не удалось удалить участника · Could not remove member');
     }
   };
@@ -106,29 +103,27 @@ export default function TeamPage() {
     setRemoveError(null);
   };
 
-  // Filter roster by query
-  let filteredRoster = roster || [];
-  if (query) {
-    const q = query.toLowerCase();
-    filteredRoster = filteredRoster.filter(
-      (m) =>
-        m.displayName.toLowerCase().includes(q) ||
-        m.email.toLowerCase().includes(q)
-    );
-  }
+  const sortedRoster = useMemo(() => {
+    const source = roster ?? [];
+    const filtered = query
+      ? source.filter((m) => {
+          const q = query.toLowerCase();
+          return (
+            m.displayName.toLowerCase().includes(q) ||
+            m.email.toLowerCase().includes(q)
+          );
+        })
+      : source;
+    return sortRoster(filtered, user.userId);
+  }, [roster, query, user.userId]);
 
-  // Sort roster
-  const sortedRoster = sortRoster(filteredRoster, user.userId);
+  const developerCount = useMemo(
+    () => (roster ?? []).filter((m) => !m.isSelf && m.role !== 'Manager').length,
+    [roster],
+  );
 
-  // Count developers in unfiltered roster
-  const developerCount = (roster || []).filter(
-    (m) => !m.isSelf && m.role !== 'Manager'
-  ).length;
-
-  // Determine if showing empty state:
-  // - Show if filter results in zero rows AND
-  // - Either there's an active filter OR the team has more than just self
-  const showEmptyState = sortedRoster.length === 0 && (query || (roster || []).length > 1);
+  const showEmptyState =
+    sortedRoster.length === 0 && (query !== '' || (roster ?? []).length > 1);
 
   if (loadError) {
     return (
@@ -146,7 +141,6 @@ export default function TeamPage() {
   return (
     <div className="team-main">
       <div className="team-page">
-        {/* Team toolbar */}
         <div className="team-toolbar">
           <div className="team-toolbar__info">
             <h1 className="team-toolbar__title">Моя команда · My team</h1>
@@ -173,7 +167,6 @@ export default function TeamPage() {
           </div>
         </div>
 
-        {/* Invite row (Manager only) */}
         {isManager && (
           <InviteRow
             onInvite={handleInvite}
@@ -181,14 +174,12 @@ export default function TeamPage() {
           />
         )}
 
-        {/* Invite error banner */}
         {inviteError && (
           <div className="team-error-banner">
             {inviteError}
           </div>
         )}
 
-        {/* Password toast */}
         {passwordToast && (
           <div className="team-toast">
             <div className="team-toast__content">
@@ -217,31 +208,26 @@ export default function TeamPage() {
           </div>
         )}
 
-        {/* Read-only banner (Developer only) */}
         {isDev && (
           <div className="team-readonly-note">
             Только для просмотра. Управлять командой может менеджер · Read-only — only managers can modify.
           </div>
         )}
 
-        {/* State legend */}
         <StateBarLegend />
 
-        {/* Loading spinner */}
         {loading && (
           <div className="team-page__spinner">
             <div className="spinner" aria-label="Loading" />
           </div>
         )}
 
-        {/* Empty state */}
         {!loading && showEmptyState && (
           <div className="team-empty-state">
             Никого не найдено · No members match
           </div>
         )}
 
-        {/* Roster table */}
         {!loading && !showEmptyState && sortedRoster.length > 0 && (
           <Roster
             members={sortedRoster}
@@ -250,14 +236,12 @@ export default function TeamPage() {
           />
         )}
 
-        {/* Remove error */}
         {removeError && (
           <div className="team-error-banner">
             {removeError}
           </div>
         )}
 
-        {/* Remove confirm dialog */}
         <ConfirmDialog
           isOpen={!!confirmRemoveUser}
           title="Удалить из команды · Remove from team"

@@ -292,8 +292,11 @@ public sealed class UserServiceHandlerRegisterTests : UserServiceHandlerTestBase
             .Where(e => e.StatusCode == StatusCode.InvalidArgument);
     }
 
-    [Fact]
-    public async Task Register_ManagedCreation_AcceptsFrontendDeveloper()
+    [Theory]
+    [InlineData(Roles.FrontendDeveloper, "frontend@example.com")]
+    [InlineData(Roles.BackendDeveloper, "backend@example.com")]
+    [InlineData(Roles.Qa, "qa@example.com")]
+    public async Task Register_ManagedCreation_AcceptsDeveloperRole(string role, string memberEmail)
     {
         var manager = new User
         {
@@ -306,79 +309,19 @@ public sealed class UserServiceHandlerRegisterTests : UserServiceHandlerTestBase
 
         var request = new RegisterRequest
         {
-            Email = "frontend@example.com",
+            Email = memberEmail,
             Password = "validPassword123",
             ManagerId = manager.Id,
-            Role = Roles.FrontendDeveloper
+            Role = role
         };
 
         var response = await Sut.Register(request, Ctx);
 
-        response.Role.Should().Be(Roles.FrontendDeveloper);
+        response.Role.Should().Be(role);
 
-        var savedUser = await DbContext.Users.FirstOrDefaultAsync(u => u.Email == "frontend@example.com");
+        var savedUser = await DbContext.Users.FirstOrDefaultAsync(u => u.Email == memberEmail);
         savedUser.Should().NotBeNull();
-        savedUser!.Role.Should().Be(Roles.FrontendDeveloper);
-        savedUser.ManagerId.Should().Be(manager.Id);
-    }
-
-    [Fact]
-    public async Task Register_ManagedCreation_AcceptsBackendDeveloper()
-    {
-        var manager = new User
-        {
-            Email = "manager@example.com",
-            PasswordHash = Password123Hash,
-            Role = Roles.Manager
-        };
-        DbContext.Users.Add(manager);
-        await DbContext.SaveChangesAsync();
-
-        var request = new RegisterRequest
-        {
-            Email = "backend@example.com",
-            Password = "validPassword123",
-            ManagerId = manager.Id,
-            Role = Roles.BackendDeveloper
-        };
-
-        var response = await Sut.Register(request, Ctx);
-
-        response.Role.Should().Be(Roles.BackendDeveloper);
-
-        var savedUser = await DbContext.Users.FirstOrDefaultAsync(u => u.Email == "backend@example.com");
-        savedUser.Should().NotBeNull();
-        savedUser!.Role.Should().Be(Roles.BackendDeveloper);
-        savedUser.ManagerId.Should().Be(manager.Id);
-    }
-
-    [Fact]
-    public async Task Register_ManagedCreation_AcceptsQa()
-    {
-        var manager = new User
-        {
-            Email = "manager@example.com",
-            PasswordHash = Password123Hash,
-            Role = Roles.Manager
-        };
-        DbContext.Users.Add(manager);
-        await DbContext.SaveChangesAsync();
-
-        var request = new RegisterRequest
-        {
-            Email = "qa@example.com",
-            Password = "validPassword123",
-            ManagerId = manager.Id,
-            Role = Roles.Qa
-        };
-
-        var response = await Sut.Register(request, Ctx);
-
-        response.Role.Should().Be(Roles.Qa);
-
-        var savedUser = await DbContext.Users.FirstOrDefaultAsync(u => u.Email == "qa@example.com");
-        savedUser.Should().NotBeNull();
-        savedUser!.Role.Should().Be(Roles.Qa);
+        savedUser!.Role.Should().Be(role);
         savedUser.ManagerId.Should().Be(manager.Id);
     }
 

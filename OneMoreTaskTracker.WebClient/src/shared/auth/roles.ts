@@ -28,3 +28,7 @@ export const DEVELOPER_ROLES: readonly UserRole[] = [
 export function isDeveloperRole(r: UserRole): boolean {
   return (DEVELOPER_ROLES as readonly UserRole[]).includes(r);
 }
+
+export function isUserRole(r: string): r is UserRole {
+  return r in ROLE_BADGE_CLASS;
+}

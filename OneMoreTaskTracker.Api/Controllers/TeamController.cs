@@ -24,7 +24,6 @@ public class TeamController(
         if (callerId == 0 || string.IsNullOrEmpty(callerRole))
             return Unauthorized();
 
-        // Determine which manager's roster to fetch
         int managerId;
         if (callerRole == Roles.Manager)
         {
@@ -32,11 +31,9 @@ public class TeamController(
         }
         else if (Roles.DeveloperRoles.Contains(callerRole))
         {
-            // Get caller's manager ID from the token (if available)
             var managerIdClaim = User.FindFirst("manager_id")?.Value;
             if (string.IsNullOrEmpty(managerIdClaim) || !int.TryParse(managerIdClaim, out managerId) || managerId == 0)
             {
-                // Developer with no manager - return empty roster
                 return Ok(Array.Empty<TeamRosterDto>());
             }
         }
@@ -47,20 +44,16 @@ public class TeamController(
 
         try
         {
-            // Fetch roster from Users service
             var rosterRequest = new GetTeamRosterRequest { ManagerId = managerId };
             var rosterResponse = await userService.GetTeamRosterAsync(rosterRequest, cancellationToken: cancellationToken);
 
-            // Fetch assignee task summaries from Tasks service
             var userIds = rosterResponse.Members.Select(m => m.UserId).ToList();
             var summaryRequest = new BatchGetAssigneeTaskSummaryRequest();
             summaryRequest.AssigneeUserIds.AddRange(userIds);
             var summaryResponse = await taskAggregateQueryClient.BatchGetAssigneeTaskSummaryAsync(summaryRequest, cancellationToken: cancellationToken);
 
-            // Create summary map
             var statusMap = summaryResponse.Summaries.ToDictionary(s => s.AssigneeUserId);
 
-            // Merge and transform
             var roster = rosterResponse.Members
                 .Select(member =>
                 {
@@ -104,26 +97,15 @@ public class TeamController(
         if (callerId == 0)
             return Unauthorized();
 
-        try
+        var deleteRequest = new DeleteUserRequest
         {
-            var deleteRequest = new DeleteUserRequest
-            {
-                UserId = userId,
-                ManagerId = callerId
-            };
+            UserId = userId,
+            ManagerId = callerId
+        };
 
-            await userService.DeleteUserAsync(deleteRequest, cancellationToken: cancellationToken);
+        await userService.DeleteUserAsync(deleteRequest, cancellationToken: cancellationToken);
 
-            return NoContent();
-        }
-        catch (RpcException ex) when (ex.StatusCode == Grpc.Core.StatusCode.NotFound)
-        {
-            return NotFound();
-        }
-        catch (RpcException ex) when (ex.StatusCode == Grpc.Core.StatusCode.PermissionDenied)
-        {
-            return Forbid();
-        }
+        return NoContent();
     }
 
     [HttpPost]
@@ -132,21 +114,15 @@ public class TeamController(
         [FromBody] InviteMemberRequest request,
         CancellationToken cancellationToken)
     {
-        // Validate request
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        // Validate role is one of the developer roles
         if (!Roles.DeveloperRoles.Contains(request.Role))
             return BadRequest(new { code = "invalid_role", message = "Неверная роль · Invalid role" });
 
-        // Get the caller's user ID from the JWT token
         var managerId = User.GetUserId();
-
-        // Generate temporary password
         var tempPassword = TemporaryPasswordGenerator.Generate();
 
-        // Call gRPC service to register the user
         try
         {
             var grpcRequest = new RegisterRequest
@@ -159,7 +135,6 @@ public class TeamController(
 
             var grpcResponse = await userService.RegisterAsync(grpcRequest, cancellationToken: cancellationToken);
 
-            // Return 201 Created with response
             var response = new InviteMemberResponse(
                 UserId: grpcResponse.UserId,
                 Email: grpcResponse.Email,
@@ -167,7 +142,6 @@ public class TeamController(
                 ManagerId: managerId,
                 TemporaryPassword: tempPassword);
 
-            // Set Cache-Control: no-store to prevent password caching
             Response.Headers.CacheControl = "no-store";
 
             return Created($"/api/team/members/{grpcResponse.UserId}", response);
@@ -185,7 +159,6 @@ public class TeamController(
     private static string ExtractDisplayName(string email)
     {
         var localPart = email.Split('@')[0];
-        // Convert "john.doe" -> "John Doe"
         return string.Join(" ", localPart.Split('.', '-', '_').Select(part =>
             char.ToUpperInvariant(part[0]) + part[1..]));
     }

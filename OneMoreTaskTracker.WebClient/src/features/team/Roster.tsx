@@ -2,9 +2,16 @@ import { RoleBadge } from './RoleBadge';
 import { StateBar } from './StateBar';
 import { RowMenu } from './RowMenu';
 import { formatLastActiveRu } from './time';
-import type { UserRole } from '../../shared/auth/roles';
+import { isUserRole, type UserRole } from '../../shared/auth/roles';
 import type { TeamRosterMember } from '../../shared/api/teamApi';
 import './Roster.css';
+
+const ROLE_AVATAR_CLASS: Record<UserRole, string> = {
+  Manager: 'avatar--mgr',
+  FrontendDeveloper: 'avatar--frontend',
+  BackendDeveloper: 'avatar--backend',
+  Qa: 'avatar--qa',
+};
 
 interface RosterProps {
   members: TeamRosterMember[];
@@ -13,13 +20,7 @@ interface RosterProps {
 }
 
 function getAvatarClass(role: string): string {
-  const roleMap: Record<string, string> = {
-    Manager: 'avatar--mgr',
-    FrontendDeveloper: 'avatar--frontend',
-    BackendDeveloper: 'avatar--backend',
-    Qa: 'avatar--qa',
-  };
-  return roleMap[role] || 'avatar';
+  return isUserRole(role) ? ROLE_AVATAR_CLASS[role] : 'avatar';
 }
 
 function getAvatarInitials(displayName: string): string {
@@ -65,10 +66,9 @@ export function Roster({ members, viewerRole, onRemoveClick }: RosterProps) {
                 </div>
               </td>
 
-              {/* Role column */}
               <td className="roster-table__role-cell">
-                {['Manager', 'FrontendDeveloper', 'BackendDeveloper', 'Qa'].includes(member.role) ? (
-                  <RoleBadge role={member.role as UserRole} />
+                {isUserRole(member.role) ? (
+                  <RoleBadge role={member.role} />
                 ) : (
                   <span className="role-badge">{member.role}</span>
                 )}
