@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ROLE_LABEL_SHORT } from '../../shared/auth/roles';
+import type { UserRole } from '../../shared/auth/roles';
 import './InviteRow.css';
 
 export type DeveloperRole = 'FrontendDeveloper' | 'BackendDeveloper' | 'Qa';
@@ -7,6 +8,7 @@ export type DeveloperRole = 'FrontendDeveloper' | 'BackendDeveloper' | 'Qa';
 export interface InviteRowProps {
   onInvite: (args: { email: string; role: DeveloperRole }) => Promise<void>;
   disabled?: boolean;
+  error?: string | null;
 }
 
 const DEVELOPER_ROLES: DeveloperRole[] = [
@@ -77,7 +79,7 @@ export function InviteRow({ onInvite, disabled = false }: InviteRowProps) {
             }
             disabled={busy || disabled}
           >
-            {ROLE_LABEL_SHORT[r]}
+            {ROLE_LABEL_SHORT[r as UserRole]}
           </button>
         ))}
       </div>
