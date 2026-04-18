@@ -221,6 +221,33 @@ public class UserServiceHandlerTests : IDisposable
         savedUser!.ManagerId.Should().Be(manager.Id);
     }
 
+    [Fact]
+    public async Task Register_BCryptsHashCorrectly_AndAuthenticateVerifiesRoundTrip()
+    {
+        const string password = "mySecurePassword123";
+        var request = new RegisterRequest
+        {
+            Email = "test@example.com",
+            Password = password
+        };
+
+        var registerResponse = await _sut.Register(request, _ctx);
+
+        var savedUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == registerResponse.UserId);
+        savedUser.Should().NotBeNull();
+
+        // Verify the hash is not the plain password
+        savedUser!.PasswordHash.Should().NotBe(password);
+
+        // Verify we can authenticate with the stored hash
+        var authRequest = new AuthenticateRequest { Email = "test@example.com", Password = password };
+        var authResponse = await _sut.Authenticate(authRequest, _ctx);
+
+        authResponse.Success.Should().BeTrue();
+        authResponse.UserId.Should().Be(registerResponse.UserId);
+    }
+
+
     #endregion
 
     #region Authenticate Tests
@@ -276,6 +303,7 @@ public class UserServiceHandlerTests : IDisposable
         response.Success.Should().BeFalse();
     }
 
+
     #endregion
 
     #region GetTeamMemberIds Tests
@@ -318,6 +346,7 @@ public class UserServiceHandlerTests : IDisposable
         response.Should().NotBeNull();
         response.UserIds.Should().BeEmpty();
     }
+
 
     #endregion
 }

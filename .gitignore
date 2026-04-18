@@ -26,5 +26,5 @@ publish/
 .worktrees/
 
 .serena/
-graphify-out/
+.specs/
 .design/
