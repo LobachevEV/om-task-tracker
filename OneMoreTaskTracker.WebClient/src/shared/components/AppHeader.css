@@ -8,11 +8,18 @@
 }
 
 .app-header__inner {
-  max-width: 960px;
+  max-width: 1200px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
+  gap: 0.75rem;
+}
+
+.app-header__left {
+  display: flex;
+  flex-direction: column;
   gap: 0.5rem;
+  flex: 1;
 }
 
 .app-header__title h1 {
@@ -24,6 +31,31 @@
   margin: 0.25rem 0 0;
   color: var(--text-muted);
   font-size: 0.8rem;
+}
+
+.app-header__nav {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.app-header__nav-item {
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.app-header__nav-item:hover {
+  color: var(--text);
+  border-bottom-color: var(--border);
+}
+
+.app-header__nav-item--active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+  font-weight: 500;
 }
 
 .app-header__email {
@@ -48,6 +80,13 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  .app-header__left {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 2rem;
   }
 
   .app-header__title h1 {
@@ -56,5 +95,9 @@
 
   .app-header__title p {
     font-size: 0.9rem;
+  }
+
+  .app-header__nav {
+    gap: 1.5rem;
   }
 }

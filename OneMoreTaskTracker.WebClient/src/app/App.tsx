@@ -5,6 +5,7 @@ import { ProtectedRoute } from '../features/auth/ProtectedRoute';
 import { RegisterPage } from '../features/auth/RegisterPage';
 import { TaskDetailPage } from '../features/tasks/TaskDetailPage';
 import { TaskPage } from '../features/tasks/TaskPage';
+import TeamPage from '../features/team/TeamPage';
 import { ErrorBoundary } from '../shared/components/ErrorBoundary';
 
 function App() {
@@ -28,6 +29,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <TaskDetailPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/team"
+              element={
+                <ProtectedRoute>
+                  <TeamPage />
                 </ProtectedRoute>
               }
             />

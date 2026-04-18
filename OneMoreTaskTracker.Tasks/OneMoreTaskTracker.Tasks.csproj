@@ -133,7 +133,4 @@
       <Generator>MSBuild:Compile</Generator>
     </Protobuf>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Tasks\Move\" />
-  </ItemGroup>
 </Project>

@@ -1,0 +1,41 @@
+/* State bar — horizontal bar divided into segments proportional to task counts per state. */
+
+.statebar {
+  display: flex;
+  gap: 0;
+  height: 6px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.statebar__segment {
+  flex: 1;
+  height: 100%;
+}
+
+.statebar__segment--inDev {
+  background-color: var(--state-in-dev);
+}
+
+.statebar__segment--mrToRelease {
+  background-color: var(--state-mr-release);
+}
+
+.statebar__segment--inTest {
+  background-color: var(--state-in-test);
+}
+
+.statebar__segment--mrToMaster {
+  background-color: var(--state-mr-master);
+}
+
+.statebar__segment--completed {
+  background-color: var(--state-completed);
+}
+
+.statebar__empty {
+  display: block;
+  height: 6px;
+  border-radius: 2px;
+  background-color: var(--border);
+}

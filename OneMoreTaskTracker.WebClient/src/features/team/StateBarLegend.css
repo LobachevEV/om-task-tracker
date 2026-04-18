@@ -1,0 +1,28 @@
+/* State bar legend — muted row showing the five states with their colored swatches and labels. */
+
+.state-legend {
+  display: flex;
+  gap: 1.5rem;
+  margin: 0.9rem 0 1rem 0;
+  padding: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+
+.state-legend__entry {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.state-legend__swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.state-legend__label {
+  white-space: nowrap;
+}

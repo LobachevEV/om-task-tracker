@@ -1,0 +1,222 @@
+/* Team page layout and containers. */
+
+.team-main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.team-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Team toolbar */
+.team-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+@media (min-width: 768px) {
+  .team-toolbar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.team-toolbar__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.team-toolbar__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text);
+}
+
+.team-toolbar__summary {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.team-toolbar__search {
+  display: flex;
+}
+
+.team-search-input {
+  width: 100%;
+  max-width: 320px;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  background-color: var(--surface);
+  color: var(--text);
+  transition: border-color 0.2s;
+}
+
+.team-search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--accent) 15%, transparent);
+}
+
+.team-search-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Error banner */
+.team-error-banner {
+  padding: 1rem;
+  background-color: color-mix(in oklch, var(--error) 15%, var(--surface));
+  border: 1px solid color-mix(in oklch, var(--error) 40%, transparent);
+  border-radius: 0.5rem;
+  color: var(--error);
+  font-size: 0.9rem;
+}
+
+/* Read-only note banner */
+.team-readonly-note {
+  padding: 1rem;
+  background-color: color-mix(in oklch, var(--text-muted) 15%, var(--surface));
+  border-left: 4px solid var(--text-muted);
+  border-radius: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* Password toast */
+.team-toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: color-mix(in oklch, var(--accent) 15%, var(--surface));
+  border: 1px solid color-mix(in oklch, var(--accent) 40%, transparent);
+  border-radius: 0.5rem;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.team-toast__content {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.team-toast__content p {
+  margin: 0;
+}
+
+.team-toast__password {
+  display: inline-block;
+  margin: 0 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background-color: var(--bg);
+  border-radius: 0.25rem;
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--accent);
+}
+
+.team-toast__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.team-toast__copy-btn {
+  padding: 0.5rem 1rem;
+  background-color: var(--accent);
+  color: var(--accent-ink);
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.team-toast__copy-btn:hover {
+  background-color: color-mix(in oklch, var(--accent) 90%, var(--text));
+}
+
+.team-toast__close-btn {
+  padding: 0.25rem 0.5rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.team-toast__close-btn:hover {
+  color: var(--text);
+}
+
+/* Empty state */
+.team-empty-state {
+  padding: 3rem 2rem;
+  text-align: center;
+  color: var(--text-muted);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  font-size: 0.95rem;
+}
+
+/* Loading spinner */
+.team-page__spinner {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 2rem;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error state */
+.team-page__error {
+  padding: 2rem;
+  text-align: center;
+  background-color: var(--surface);
+  border-radius: 1rem;
+}
+
+.team-page__error p {
+  color: var(--error);
+  margin: 0 0 1rem;
+}

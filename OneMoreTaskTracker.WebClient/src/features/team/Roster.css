@@ -1,0 +1,176 @@
+/* Roster table — dense table showing team members with roles, activity, and state distribution. */
+
+.roster-card {
+  background: var(--surface);
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.roster-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.roster-table thead {
+  background-color: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.roster-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.roster-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.roster-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.roster-table__row--self {
+  background-color: color-mix(in oklch, var(--accent) 5%, var(--surface));
+}
+
+/* Header column sizing */
+.roster-table__header-member {
+  width: 34%;
+}
+
+.roster-table__header-role {
+  width: auto;
+}
+
+.roster-table__header-active {
+  width: 70px;
+  text-align: right;
+}
+
+.roster-table__header-mix {
+  width: 210px;
+}
+
+.roster-table__header-last {
+  width: auto;
+}
+
+.roster-table__header-actions {
+  width: 40px;
+}
+
+/* Member column */
+.roster-table__name-cell {
+  width: 34%;
+}
+
+.roster-table__name-stack {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.roster-table__name-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.member-name {
+  font-weight: 500;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.member-handle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  word-break: break-all;
+}
+
+/* Role column */
+.roster-table__role-cell {
+  padding: 0.85rem 1rem;
+}
+
+/* Active count column */
+.roster-table__active {
+  text-align: right;
+  width: 70px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* Mix column */
+.roster-table__mix-cell {
+  width: 210px;
+  padding: 0.85rem 1rem;
+}
+
+/* Last active column */
+.roster-table__last-active {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* Actions column */
+.roster-table__actions {
+  width: 40px;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+/* Avatar styling for roster table */
+.roster-table .avatar {
+  background-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.roster-table .avatar--mgr {
+  background: color-mix(in oklch, var(--state-mr-master) 80%, var(--bg));
+  color: oklch(0.14 0.02 300);
+}
+
+.roster-table .avatar--frontend {
+  background: color-mix(in oklch, var(--state-in-test) 80%, var(--bg));
+  color: oklch(0.14 0.02 250);
+}
+
+.roster-table .avatar--backend {
+  background: color-mix(in oklch, var(--state-mr-release) 80%, var(--bg));
+  color: oklch(0.14 0.02 190);
+}
+
+.roster-table .avatar--qa {
+  background: color-mix(in oklch, var(--state-completed) 80%, var(--bg));
+  color: oklch(0.14 0.02 145);
+}
+
+/* "YOU" chip */
+.chip-you {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  padding: 0.15rem 0.4rem;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
