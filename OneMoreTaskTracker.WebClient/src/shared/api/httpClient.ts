@@ -24,5 +24,9 @@ export async function handleResponse<T>(response: Response): Promise<T> {
     const detail = await response.text().catch(() => response.statusText);
     throw new Error(`Request failed (${response.status}): ${detail}`);
   }
+  // Handle 204 No Content
+  if (response.status === 204) {
+    return undefined as T;
+  }
   return response.json() as Promise<T>;
 }

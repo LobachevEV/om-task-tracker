@@ -9,6 +9,30 @@ export interface InviteMemberResponse {
   temporaryPassword: string;
 }
 
+export interface StateMix {
+  inDev: number;
+  mrToRelease: number;
+  inTest: number;
+  mrToMaster: number;
+  completed: number;
+}
+
+export interface UserStatus {
+  active: number;
+  lastActive: string | null;
+  mix: StateMix;
+}
+
+export interface TeamRosterMember {
+  userId: number;
+  email: string;
+  role: string;
+  managerId: number | null;
+  displayName: string;
+  isSelf: boolean;
+  status: UserStatus;
+}
+
 export async function inviteMember(args: {
   email: string;
   role: DeveloperRole;
@@ -24,4 +48,27 @@ export async function inviteMember(args: {
 
   const data = await handleResponse<unknown>(response);
   return data as InviteMemberResponse;
+}
+
+export async function getRoster(): Promise<TeamRosterMember[]> {
+  const response = await fetch(`${API_BASE_URL}/api/team/members`, {
+    method: 'GET',
+    headers: {
+      ...authHeaders(),
+    },
+  });
+
+  const data = await handleResponse<unknown>(response);
+  return data as TeamRosterMember[];
+}
+
+export async function removeMember(userId: number): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/team/members/${userId}`, {
+    method: 'DELETE',
+    headers: {
+      ...authHeaders(),
+    },
+  });
+
+  await handleResponse<void>(response);
 }

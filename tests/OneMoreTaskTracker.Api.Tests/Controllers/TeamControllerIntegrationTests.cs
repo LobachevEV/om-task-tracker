@@ -6,6 +6,7 @@ using Grpc.Core;
 using NSubstitute;
 using OneMoreTaskTracker.Api.Auth;
 using OneMoreTaskTracker.Api.Tests.Infra;
+using OneMoreTaskTracker.Proto.Tasks.GetUserStatusQuery;
 using OneMoreTaskTracker.Proto.Users;
 using Xunit;
 
@@ -225,5 +226,110 @@ public sealed class TeamControllerIntegrationTests(TasksControllerWebApplication
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
         root.GetProperty("managerId").GetInt32().Should().Be(actualManagerId);
+    }
+
+    [Fact]
+    public async Task DeleteMember_WithoutAuthentication_Returns401()
+    {
+        var client = factory.CreateClient();
+        var response = await client.DeleteAsync("/api/team/members/5");
+
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task DeleteMember_WithDeveloperRole_Returns403()
+    {
+        var client = ClientWithToken(userId: 2, role: Roles.FrontendDeveloper);
+        var response = await client.DeleteAsync("/api/team/members/5");
+
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task DeleteMember_WithValidMember_Returns204()
+    {
+        var managerId = 7;
+        var memberId = 5;
+        var client = ClientWithToken(userId: managerId, role: Roles.Manager);
+
+        factory.MockUserService
+            .DeleteUserAsync(
+                Arg.Any<DeleteUserRequest>(),
+                Arg.Any<Metadata>(),
+                Arg.Any<DateTime?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new DeleteUserResponse()));
+
+        var response = await client.DeleteAsync($"/api/team/members/{memberId}");
+
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.NoContent);
+    }
+
+    [Fact]
+    public async Task DeleteMember_WithNonexistentUser_Returns404()
+    {
+        var managerId = 7;
+        var memberId = 9999;
+        var client = ClientWithToken(userId: managerId, role: Roles.Manager);
+
+        factory.MockUserService
+            .DeleteUserAsync(
+                Arg.Any<DeleteUserRequest>(),
+                Arg.Any<Metadata>(),
+                Arg.Any<DateTime?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(_ => throw new RpcException(new Status(StatusCode.NotFound, "User not found")));
+
+        var response = await client.DeleteAsync($"/api/team/members/{memberId}");
+
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task DeleteMember_WithUserFromDifferentTeam_Returns403()
+    {
+        var managerId = 7;
+        var memberId = 5;
+        var client = ClientWithToken(userId: managerId, role: Roles.Manager);
+
+        factory.MockUserService
+            .DeleteUserAsync(
+                Arg.Any<DeleteUserRequest>(),
+                Arg.Any<Metadata>(),
+                Arg.Any<DateTime?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(_ => throw new RpcException(new Status(StatusCode.PermissionDenied, "User is not on your team")));
+
+        var response = await client.DeleteAsync($"/api/team/members/{memberId}");
+
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task DeleteMember_CallsDeleteUserWithCorrectRequest()
+    {
+        var managerId = 7;
+        var memberId = 5;
+        var client = ClientWithToken(userId: managerId, role: Roles.Manager);
+
+        factory.MockUserService.ClearReceivedCalls();
+        factory.MockUserService
+            .DeleteUserAsync(
+                Arg.Any<DeleteUserRequest>(),
+                Arg.Any<Metadata>(),
+                Arg.Any<DateTime?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new DeleteUserResponse()));
+
+        await client.DeleteAsync($"/api/team/members/{memberId}");
+
+        factory.MockUserService
+            .Received(1)
+            .DeleteUserAsync(
+                Arg.Is<DeleteUserRequest>(req => req.UserId == memberId && req.ManagerId == managerId),
+                Arg.Any<Metadata>(),
+                Arg.Any<DateTime?>(),
+                Arg.Any<CancellationToken>());
     }
 }

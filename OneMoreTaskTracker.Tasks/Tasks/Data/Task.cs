@@ -50,4 +50,10 @@ public class Task
             _ => State
         };
     }
+
+    // For testing only - allows setting state in test data
+    public void SetStateForTesting(int state)
+    {
+        State = state;
+    }
 }
