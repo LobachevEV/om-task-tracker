@@ -1,0 +1,111 @@
+/* Invite row - inline form for adding team members */
+
+.invite-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 1rem;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  background: transparent;
+  flex-wrap: wrap;
+}
+
+.invite-row__plus {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.invite-row__email {
+  flex: 1 1 auto;
+  min-width: 200px;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color var(--transition-fast);
+}
+
+.invite-row__email:hover {
+  border-color: var(--border-strong);
+}
+
+.invite-row__email:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.invite-row__email::placeholder {
+  color: var(--text-muted);
+}
+
+.invite-row__email:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.invite-row__role {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.invite-role-chip {
+  min-height: 44px;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast) ease;
+}
+
+.invite-role-chip:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: color-mix(in oklch, var(--accent) 5%, transparent);
+}
+
+.invite-role-chip--on {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+
+.invite-role-chip:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.invite-row__submit {
+  flex-shrink: 0;
+}
+
+/* Responsive: wrap on narrow viewports */
+@media (max-width: 599px) {
+  .invite-row {
+    flex-wrap: wrap;
+  }
+
+  .invite-row__email {
+    flex: 1 1 100%;
+    order: 1;
+  }
+
+  .invite-row__role {
+    flex: 0 1 auto;
+    order: 2;
+  }
+
+  .invite-row__submit {
+    flex: 0 1 auto;
+    order: 3;
+  }
+}

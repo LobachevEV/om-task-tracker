@@ -1,4 +1,10 @@
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
+
+// Mock fetch globally
+if (typeof window !== 'undefined') {
+  window.fetch = vi.fn() as any;
+}
 
 // Fix localStorage.clear in jsdom environment
 if (typeof window !== 'undefined') {
