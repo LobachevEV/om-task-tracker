@@ -6,7 +6,7 @@ using Grpc.Core;
 using NSubstitute;
 using OneMoreTaskTracker.Api.Auth;
 using OneMoreTaskTracker.Api.Tests.Infra;
-using OneMoreTaskTracker.Proto.Tasks.GetUserStatusQuery;
+using OneMoreTaskTracker.Proto.Tasks.TaskAggregateQuery;
 using OneMoreTaskTracker.Proto.Users;
 using Xunit;
 

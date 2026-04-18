@@ -1,0 +1,32 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "OneMoreTaskTracker.Proto.Tasks.TaskAggregateQuery";
+package mr_helper.tasks;
+
+service TaskAggregateQuery {
+  rpc BatchGetAssigneeTaskSummary(BatchGetAssigneeTaskSummaryRequest) returns (BatchGetAssigneeTaskSummaryResponse);
+}
+
+message BatchGetAssigneeTaskSummaryRequest {
+  repeated int32 assignee_user_ids = 1;
+}
+
+message TaskStateMix {
+  int32 in_dev = 1;
+  int32 mr_to_release = 2;
+  int32 in_test = 3;
+  int32 mr_to_master = 4;
+  int32 completed = 5;
+}
+
+message AssigneeTaskSummary {
+  int32 assignee_user_id = 1;
+  int32 active_count = 2;
+  google.protobuf.Timestamp last_activity_at = 3;
+  TaskStateMix mix = 4;
+}
+
+message BatchGetAssigneeTaskSummaryResponse {
+  repeated AssigneeTaskSummary summaries = 1;
+}

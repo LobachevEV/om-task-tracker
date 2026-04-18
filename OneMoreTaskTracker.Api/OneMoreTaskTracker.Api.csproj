@@ -55,7 +55,7 @@
       <CompileOutputs>True</CompileOutputs>
       <Generator>MSBuild:Compile</Generator>
     </Protobuf>
-    <Protobuf Include="..\OneMoreTaskTracker.Tasks\Protos\GetUserStatusQuery\batch_get_user_status.proto">
+    <Protobuf Include="..\OneMoreTaskTracker.Tasks\Protos\TaskAggregateQuery\assignee_task_summary.proto">
       <GrpcServices>Client</GrpcServices>
       <Access>Public</Access>
       <ProtoCompile>True</ProtoCompile>

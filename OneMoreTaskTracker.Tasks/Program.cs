@@ -8,7 +8,7 @@ using OneMoreTaskTracker.Tasks.Projects;
 using OneMoreTaskTracker.Tasks.Tasks.Create;
 using OneMoreTaskTracker.Tasks.Tasks.Data;
 using OneMoreTaskTracker.Tasks.Tasks.Get;
-using OneMoreTaskTracker.Tasks.Tasks.GetUserStatus;
+using OneMoreTaskTracker.Tasks.Tasks.AssigneeSummary;
 using OneMoreTaskTracker.Tasks.Tasks.List;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -77,7 +77,7 @@ if (app.Environment.IsDevelopment())
 app.MapGrpcService<GetTaskHandler>();
 app.MapGrpcService<CreateTaskHandler>();
 app.MapGrpcService<ListTasksHandler>();
-app.MapGrpcService<BatchGetUserStatusHandler>();
+app.MapGrpcService<GetAssigneeTaskSummaryHandler>();
 
 app.Run();
 return;

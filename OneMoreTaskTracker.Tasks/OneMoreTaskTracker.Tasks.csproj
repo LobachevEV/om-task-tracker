@@ -123,7 +123,7 @@
       <OutputDir>obj/Release/net10.0/</OutputDir>
       <Generator>MSBuild:Compile</Generator>
     </Protobuf>
-    <Protobuf Include="Protos\GetUserStatusQuery\batch_get_user_status.proto">
+    <Protobuf Include="Protos\TaskAggregateQuery\assignee_task_summary.proto">
       <GrpcServices>Server</GrpcServices>
       <Access>Public</Access>
       <ProtoCompile>True</ProtoCompile>

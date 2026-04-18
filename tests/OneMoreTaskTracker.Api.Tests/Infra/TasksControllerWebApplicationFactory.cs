@@ -11,7 +11,7 @@ using OneMoreTaskTracker.Api.Auth;
 using OneMoreTaskTracker.Proto.Tasks;
 using OneMoreTaskTracker.Proto.Tasks.CreateTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.GetTaskQuery;
-using OneMoreTaskTracker.Proto.Tasks.GetUserStatusQuery;
+using OneMoreTaskTracker.Proto.Tasks.TaskAggregateQuery;
 using OneMoreTaskTracker.Proto.Tasks.ListTasksQuery;
 using OneMoreTaskTracker.Proto.Users;
 
@@ -34,8 +34,8 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
     public UserService.UserServiceClient MockUserService { get; } =
         Substitute.For<UserService.UserServiceClient>();
 
-    public UserStatusQuery.UserStatusQueryClient MockUserStatusQuery { get; } =
-        Substitute.For<UserStatusQuery.UserStatusQueryClient>();
+    public TaskAggregateQuery.TaskAggregateQueryClient MockTaskAggregateQuery { get; } =
+        Substitute.For<TaskAggregateQuery.TaskAggregateQueryClient>();
 
     public string GenerateToken(int userId, string email, string role)
     {
@@ -68,7 +68,7 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
                 d.ServiceType == typeof(TaskLister.TaskListerClient) ||
                 d.ServiceType == typeof(TaskGetter.TaskGetterClient) ||
                 d.ServiceType == typeof(TaskMover.TaskMoverClient) ||
-                d.ServiceType == typeof(UserStatusQuery.UserStatusQueryClient)
+                d.ServiceType == typeof(TaskAggregateQuery.TaskAggregateQueryClient)
             ).ToList();
 
             foreach (var descriptor in descriptors)
@@ -79,7 +79,7 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
             services.AddSingleton(MockTaskLister);
             services.AddSingleton(MockTaskGetter);
             services.AddSingleton(MockTaskMover);
-            services.AddSingleton(MockUserStatusQuery);
+            services.AddSingleton(MockTaskAggregateQuery);
 
             services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
             {

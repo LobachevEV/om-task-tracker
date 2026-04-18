@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OneMoreTaskTracker.Api.Auth;
 using OneMoreTaskTracker.Proto.Users;
-using OneMoreTaskTracker.Proto.Tasks.GetUserStatusQuery;
+using OneMoreTaskTracker.Proto.Tasks.TaskAggregateQuery;
 
 namespace OneMoreTaskTracker.Api.Controllers;
 
@@ -13,7 +13,7 @@ namespace OneMoreTaskTracker.Api.Controllers;
 [Authorize]
 public class TeamController(
     UserService.UserServiceClient userService,
-    UserStatusQuery.UserStatusQueryClient userStatusQueryClient) : ControllerBase
+    TaskAggregateQuery.TaskAggregateQueryClient taskAggregateQueryClient) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<TeamRosterDto[]>> GetRoster(CancellationToken cancellationToken)
@@ -51,14 +51,14 @@ public class TeamController(
             var rosterRequest = new GetTeamRosterRequest { ManagerId = managerId };
             var rosterResponse = await userService.GetTeamRosterAsync(rosterRequest, cancellationToken: cancellationToken);
 
-            // Fetch user statuses from Tasks service
+            // Fetch assignee task summaries from Tasks service
             var userIds = rosterResponse.Members.Select(m => m.UserId).ToList();
-            var statusRequest = new BatchGetUserStatusRequest();
-            statusRequest.UserIds.AddRange(userIds);
-            var statusResponse = await userStatusQueryClient.BatchGetUserStatusAsync(statusRequest, cancellationToken: cancellationToken);
+            var summaryRequest = new BatchGetAssigneeTaskSummaryRequest();
+            summaryRequest.AssigneeUserIds.AddRange(userIds);
+            var summaryResponse = await taskAggregateQueryClient.BatchGetAssigneeTaskSummaryAsync(summaryRequest, cancellationToken: cancellationToken);
 
-            // Create status map
-            var statusMap = statusResponse.Statuses.ToDictionary(s => s.UserId);
+            // Create summary map
+            var statusMap = summaryResponse.Summaries.ToDictionary(s => s.AssigneeUserId);
 
             // Merge and transform
             var roster = rosterResponse.Members
@@ -73,8 +73,8 @@ public class TeamController(
                         DisplayName: ExtractDisplayName(member.Email),
                         IsSelf: member.UserId == callerId,
                         Status: status != null ? new UserStatusDto(
-                            Active: status.Active,
-                            LastActive: status.LastActive?.ToDateTime(),
+                            Active: status.ActiveCount,
+                            LastActive: status.LastActivityAt?.ToDateTime(),
                             Mix: new StateMixDto(
                                 InDev: status.Mix.InDev,
                                 MrToRelease: status.Mix.MrToRelease,
