@@ -1,9 +1,9 @@
 ---
 name: onemoretracker-patterns
-description: Coding patterns extracted from OneMoreTaskTracker repository — gRPC handlers, microservice structure, EF Core, and frontend conventions
-version: 1.0.0
+description: Coding patterns extracted from OneMoreTaskTracker repository — gRPC handlers, microservice structure, EF Core, frontend conventions, and CSS architecture
+version: 1.1.0
 source: local-git-analysis
-analyzed_commits: 52
+analyzed_commits: 68
 ---
 
 # OneMoreTaskTracker Patterns
@@ -238,6 +238,67 @@ Files that change together — update all when touching one:
 | New domain entity | EF entity class + DbContext + migration |
 | Architecture change | `docs/CODEMAPS/*.md` + `CLAUDE.md` |
 | New microservice | `OneMoreTaskTracker.slnx` + `Program.cs` + `Dockerfile` + appsettings |
+
+## CSS Architecture (WebClient)
+
+Styles are split by concern and colocated with components to prevent parallel-agent merge collisions. Design tokens live at the root of `src/styles/`; primitives live one level down; component-specific styles live next to the `.tsx` file that owns them.
+
+```
+src/styles/
+├── tokens.css              ← OKLCH colors, shadows, motion, z-index (owner: /colorize)
+├── typography.css          ← font-family vars, h1-h6 display (owner: /typeset)
+├── reset.css               ← box-sizing, body/a/button defaults
+└── primitives/
+    ├── button.css          ← .primary-button, .secondary-button
+    ├── field.css           ← .field, .field__input, .error-text
+    ├── card.css            ← .card shell
+    └── role-badge.css
+
+src/shared/components/
+├── AppHeader.{tsx,css}     ← colocated
+├── ConfirmDialog.{tsx,css}
+├── Spinner.{tsx,css}
+└── ShortcutLegend.{tsx,css}
+
+src/features/{auth,tasks}/
+└── {Component}.{tsx,css}   ← colocated per component
+```
+
+`src/index.css` is an `@import` aggregator only. Each component `.tsx` imports its own `.css`.
+
+**`.gitattributes` sets `*.css merge=union`** as a safety net for cases where two agents must touch the same CSS file — union merge keeps both additions instead of producing conflict markers.
+
+## Design Tokens: OKLCH-first
+
+All color values use `oklch()` for perceptually uniform ramps. Transparency uses `color-mix(in oklch, var(--x) N%, transparent)` — never the invalid `var(--x) / 0.15` syntax.
+
+```css
+:root {
+  --bg: oklch(0.12 0.010 60);
+  --accent: oklch(0.75 0.14 85);
+  --accent-hover: oklch(0.80 0.14 85);
+
+  --state-in-dev: oklch(0.75 0.14 85);
+  --state-in-test: oklch(0.68 0.12 250);
+  --state-completed: oklch(0.65 0.10 145);
+
+  --font-sans: 'Onest', system-ui, sans-serif;
+  --font-display: 'Geologica', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.3);
+  --shadow-lg: 0 12px 30px oklch(0 0 0 / 0.45);
+  --transition-fast: 120ms;
+  --transition-base: 160ms;
+  --z-header: 10;
+  --z-popover: 40;
+  --z-modal: 50;
+}
+```
+
+## Parallel Agent Worktree Strategy
+
+When dispatching 2+ agents to parallel git worktrees on design or refactor tasks, consult `.impeccable.md` for the task ownership matrix. Each task type (`/colorize`, `/typeset`, `/animate`, `/quieter`, `/adapt`, `/shape`, `/layout`) owns specific files or token categories. Enforcing file-level partitioning structurally beats prompt-level "please don't touch X" instructions.
 
 ## JWT Auth: Gateway-Only Pattern
 
