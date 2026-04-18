@@ -5,50 +5,13 @@ using NSubstitute;
 using OneMoreTaskTracker.GitLab.Proxy;
 using OneMoreTaskTracker.GitLab.Proxy.MergeRequests;
 using OneMoreTaskTracker.GitLab.Proxy.Services;
+using OneMoreTaskTracker.GitLab.Proxy.Tests.TestHelpers;
 using Xunit;
 
 namespace OneMoreTaskTracker.GitLab.Proxy.Tests.Services;
 
 public class MergeMrServiceTests
 {
-    private sealed class TestAsyncStreamReader : IAsyncStreamReader<MergeMrRequest>
-    {
-        private readonly Queue<MergeMrRequest> _requests;
-
-        public MergeMrRequest Current { get; private set; } = null!;
-
-        public TestAsyncStreamReader(params MergeMrRequest[] requests)
-        {
-            _requests = new Queue<MergeMrRequest>(requests);
-        }
-
-        public Task<bool> MoveNext(CancellationToken cancellationToken)
-        {
-            if (_requests.Count == 0)
-                return Task.FromResult(false);
-
-            Current = _requests.Dequeue();
-            return Task.FromResult(true);
-        }
-
-        public void Dispose() { }
-    }
-
-    private sealed class TestServerStreamWriter : IServerStreamWriter<MergeMrResponse>
-    {
-        private readonly List<MergeMrResponse> _responses = [];
-
-        public WriteOptions? WriteOptions { get; set; }
-
-        public async Task WriteAsync(MergeMrResponse message)
-        {
-            _responses.Add(message);
-            await Task.CompletedTask;
-        }
-
-        public IReadOnlyList<MergeMrResponse> GetResponses() => _responses.AsReadOnly();
-    }
-
     [Fact]
     public async Task Merge_WithSuccessfulPut_ReturnsMergeMrStatusSuccess()
     {
@@ -64,8 +27,8 @@ public class MergeMrServiceTests
             .Returns(result);
 
         var request = new MergeMrRequest { ProjectId = 123, MrId = 456 };
-        var requestStream = new TestAsyncStreamReader(request);
-        var responseStream = new TestServerStreamWriter();
+        var requestStream = new QueueAsyncStreamReader<MergeMrRequest>(request);
+        var responseStream = new ListServerStreamWriter<MergeMrResponse>();
         var context = Substitute.For<ServerCallContext>();
         context.CancellationToken.Returns(CancellationToken.None);
 
@@ -73,7 +36,7 @@ public class MergeMrServiceTests
         await service.Merge(requestStream, responseStream, context);
 
         // Assert
-        var responses = responseStream.GetResponses();
+        var responses = responseStream.Responses;
         responses.Should().HaveCount(1);
         responses[0].Status.Should().Be(MergeMrStatus.Success);
     }
@@ -94,8 +57,8 @@ public class MergeMrServiceTests
             .Returns(result);
 
         var request = new MergeMrRequest { ProjectId = 123, MrId = 456 };
-        var requestStream = new TestAsyncStreamReader(request);
-        var responseStream = new TestServerStreamWriter();
+        var requestStream = new QueueAsyncStreamReader<MergeMrRequest>(request);
+        var responseStream = new ListServerStreamWriter<MergeMrResponse>();
         var context = Substitute.For<ServerCallContext>();
         context.CancellationToken.Returns(CancellationToken.None);
 
@@ -103,7 +66,7 @@ public class MergeMrServiceTests
         await service.Merge(requestStream, responseStream, context);
 
         // Assert
-        var responses = responseStream.GetResponses();
+        var responses = responseStream.Responses;
         responses.Should().HaveCount(1);
         responses[0].Status.Should().Be(MergeMrStatus.Fail);
     }
@@ -124,8 +87,8 @@ public class MergeMrServiceTests
             .Returns(result);
 
         var request = new MergeMrRequest { ProjectId = 123, MrId = 456 };
-        var requestStream = new TestAsyncStreamReader(request);
-        var responseStream = new TestServerStreamWriter();
+        var requestStream = new QueueAsyncStreamReader<MergeMrRequest>(request);
+        var responseStream = new ListServerStreamWriter<MergeMrResponse>();
         var context = Substitute.For<ServerCallContext>();
         context.CancellationToken.Returns(CancellationToken.None);
 
@@ -133,7 +96,7 @@ public class MergeMrServiceTests
         await service.Merge(requestStream, responseStream, context);
 
         // Assert
-        var responses = responseStream.GetResponses();
+        var responses = responseStream.Responses;
         responses.Should().HaveCount(1);
         responses[0].Status.Should().Be(MergeMrStatus.Fail);
     }
@@ -152,8 +115,8 @@ public class MergeMrServiceTests
             .Returns(result);
 
         var request = new MergeMrRequest { ProjectId = 123, MrId = 456 };
-        var requestStream = new TestAsyncStreamReader(request);
-        var responseStream = new TestServerStreamWriter();
+        var requestStream = new QueueAsyncStreamReader<MergeMrRequest>(request);
+        var responseStream = new ListServerStreamWriter<MergeMrResponse>();
         var context = Substitute.For<ServerCallContext>();
         context.CancellationToken.Returns(CancellationToken.None);
 
@@ -161,7 +124,7 @@ public class MergeMrServiceTests
         await service.Merge(requestStream, responseStream, context);
 
         // Assert
-        var responses = responseStream.GetResponses();
+        var responses = responseStream.Responses;
         responses.Should().HaveCount(1);
         responses[0].Status.Should().Be(MergeMrStatus.Fail);
     }
@@ -186,8 +149,8 @@ public class MergeMrServiceTests
             new MergeMrRequest { ProjectId = 456, MrId = 3 }
         };
 
-        var requestStream = new TestAsyncStreamReader(requests);
-        var responseStream = new TestServerStreamWriter();
+        var requestStream = new QueueAsyncStreamReader<MergeMrRequest>(requests);
+        var responseStream = new ListServerStreamWriter<MergeMrResponse>();
         var context = Substitute.For<ServerCallContext>();
         context.CancellationToken.Returns(CancellationToken.None);
 
@@ -195,7 +158,7 @@ public class MergeMrServiceTests
         await service.Merge(requestStream, responseStream, context);
 
         // Assert
-        var responses = responseStream.GetResponses();
+        var responses = responseStream.Responses;
         responses.Should().HaveCount(3);
         responses.Should().AllSatisfy(r => r.Status.Should().Be(MergeMrStatus.Success));
     }
@@ -233,8 +196,8 @@ public class MergeMrServiceTests
             new MergeMrRequest { ProjectId = 456, MrId = 3 }
         };
 
-        var requestStream = new TestAsyncStreamReader(requests);
-        var responseStream = new TestServerStreamWriter();
+        var requestStream = new QueueAsyncStreamReader<MergeMrRequest>(requests);
+        var responseStream = new ListServerStreamWriter<MergeMrResponse>();
         var context = Substitute.For<ServerCallContext>();
         context.CancellationToken.Returns(CancellationToken.None);
 
@@ -242,7 +205,7 @@ public class MergeMrServiceTests
         await service.Merge(requestStream, responseStream, context);
 
         // Assert
-        var responses = responseStream.GetResponses();
+        var responses = responseStream.Responses;
         responses.Should().HaveCount(3);
         responses[0].Status.Should().Be(MergeMrStatus.Success);
         responses[1].Status.Should().Be(MergeMrStatus.Fail);
@@ -257,8 +220,8 @@ public class MergeMrServiceTests
         var apiClient = Substitute.For<IGitLabApiClient>();
         var service = new MergeMrService(logger, apiClient);
 
-        var requestStream = new TestAsyncStreamReader();
-        var responseStream = new TestServerStreamWriter();
+        var requestStream = new QueueAsyncStreamReader<MergeMrRequest>();
+        var responseStream = new ListServerStreamWriter<MergeMrResponse>();
         var context = Substitute.For<ServerCallContext>();
         context.CancellationToken.Returns(CancellationToken.None);
 
@@ -266,7 +229,7 @@ public class MergeMrServiceTests
         await service.Merge(requestStream, responseStream, context);
 
         // Assert
-        var responses = responseStream.GetResponses();
+        var responses = responseStream.Responses;
         responses.Should().BeEmpty();
         apiClient.DidNotReceive().Put<MergeResult>(Arg.Any<Uri>(), Arg.Any<CancellationToken>());
     }
@@ -291,8 +254,8 @@ public class MergeMrServiceTests
             });
 
         var request = new MergeMrRequest { ProjectId = 999, MrId = 789 };
-        var requestStream = new TestAsyncStreamReader(request);
-        var responseStream = new TestServerStreamWriter();
+        var requestStream = new QueueAsyncStreamReader<MergeMrRequest>(request);
+        var responseStream = new ListServerStreamWriter<MergeMrResponse>();
         var context = Substitute.For<ServerCallContext>();
         context.CancellationToken.Returns(CancellationToken.None);
 
@@ -330,8 +293,8 @@ public class MergeMrServiceTests
             new MergeMrRequest { ProjectId = 300, MrId = 3 }
         };
 
-        var requestStream = new TestAsyncStreamReader(requests);
-        var responseStream = new TestServerStreamWriter();
+        var requestStream = new QueueAsyncStreamReader<MergeMrRequest>(requests);
+        var responseStream = new ListServerStreamWriter<MergeMrResponse>();
         var context = Substitute.For<ServerCallContext>();
         context.CancellationToken.Returns(CancellationToken.None);
 
@@ -359,8 +322,8 @@ public class MergeMrServiceTests
             .Returns(result);
 
         var request = new MergeMrRequest { ProjectId = 123, MrId = 555 };
-        var requestStream = new TestAsyncStreamReader(request);
-        var responseStream = new TestServerStreamWriter();
+        var requestStream = new QueueAsyncStreamReader<MergeMrRequest>(request);
+        var responseStream = new ListServerStreamWriter<MergeMrResponse>();
         var context = Substitute.For<ServerCallContext>();
         context.CancellationToken.Returns(CancellationToken.None);
 
@@ -368,7 +331,7 @@ public class MergeMrServiceTests
         await service.Merge(requestStream, responseStream, context);
 
         // Assert
-        var responses = responseStream.GetResponses();
+        var responses = responseStream.Responses;
         responses.Should().HaveCount(1);
         responses[0].Status.Should().Be(MergeMrStatus.Success);
     }

@@ -4,56 +4,13 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using OneMoreTaskTracker.GitLab.Proxy.Branches;
 using OneMoreTaskTracker.GitLab.Proxy.Services;
+using OneMoreTaskTracker.GitLab.Proxy.Tests.TestHelpers;
 using Xunit;
 
 namespace OneMoreTaskTracker.GitLab.Proxy.Tests.Services;
 
 public class CreateBranchHandlerTests
 {
-    private sealed class TestAsyncStreamReader : IAsyncStreamReader<CreateBranchRequest>
-    {
-        private readonly Queue<CreateBranchRequest> _requests;
-
-        public CreateBranchRequest Current { get; private set; } = null!;
-
-        public TestAsyncStreamReader(params CreateBranchRequest[] requests)
-        {
-            _requests = new Queue<CreateBranchRequest>(requests);
-        }
-
-        public Task<bool> MoveNext(CancellationToken cancellationToken)
-        {
-            if (_requests.Count == 0)
-                return Task.FromResult(false);
-
-            Current = _requests.Dequeue();
-            return Task.FromResult(true);
-        }
-
-        public void Dispose() { }
-    }
-
-    private sealed class TestServerStreamWriter : IServerStreamWriter<CreateBranchResponse>
-    {
-        private readonly List<CreateBranchResponse> _responses = [];
-
-        public WriteOptions? WriteOptions { get; set; }
-
-        public Task WriteAsync(CreateBranchResponse message)
-        {
-            _responses.Add(message);
-            return Task.CompletedTask;
-        }
-
-        public Task WriteAsync(CreateBranchResponse message, CancellationToken cancellationToken)
-        {
-            _responses.Add(message);
-            return Task.CompletedTask;
-        }
-
-        public IReadOnlyList<CreateBranchResponse> GetResponses() => _responses.AsReadOnly();
-    }
-
     [Fact]
     public async Task Create_WithSuccessfulPost_ReturnsSuccessStatus()
     {
@@ -72,8 +29,8 @@ public class CreateBranchHandlerTests
             BaseBranch = "develop"
         };
 
-        var requestStream = new TestAsyncStreamReader(request);
-        var responseStream = new TestServerStreamWriter();
+        var requestStream = new QueueAsyncStreamReader<CreateBranchRequest>(request);
+        var responseStream = new ListServerStreamWriter<CreateBranchResponse>();
         var context = Substitute.For<ServerCallContext>();
         context.CancellationToken.Returns(CancellationToken.None);
 
@@ -81,7 +38,7 @@ public class CreateBranchHandlerTests
         await handler.Create(requestStream, responseStream, context);
 
         // Assert
-        var responses = responseStream.GetResponses();
+        var responses = responseStream.Responses;
         responses.Should().HaveCount(1);
         responses[0].Status.Should().Be(CreateBranchStatus.Success);
     }
@@ -104,8 +61,8 @@ public class CreateBranchHandlerTests
             BaseBranch = "develop"
         };
 
-        var requestStream = new TestAsyncStreamReader(request);
-        var responseStream = new TestServerStreamWriter();
+        var requestStream = new QueueAsyncStreamReader<CreateBranchRequest>(request);
+        var responseStream = new ListServerStreamWriter<CreateBranchResponse>();
         var context = Substitute.For<ServerCallContext>();
         context.CancellationToken.Returns(CancellationToken.None);
 
@@ -113,7 +70,7 @@ public class CreateBranchHandlerTests
         await handler.Create(requestStream, responseStream, context);
 
         // Assert
-        var responses = responseStream.GetResponses();
+        var responses = responseStream.Responses;
         responses.Should().HaveCount(1);
         responses[0].Status.Should().Be(CreateBranchStatus.Fail);
     }
@@ -136,8 +93,8 @@ public class CreateBranchHandlerTests
             new CreateBranchRequest { ProjectId = 456, BranchName = "feature/three", BaseBranch = "master" }
         };
 
-        var requestStream = new TestAsyncStreamReader(requests);
-        var responseStream = new TestServerStreamWriter();
+        var requestStream = new QueueAsyncStreamReader<CreateBranchRequest>(requests);
+        var responseStream = new ListServerStreamWriter<CreateBranchResponse>();
         var context = Substitute.For<ServerCallContext>();
         context.CancellationToken.Returns(CancellationToken.None);
 
@@ -145,7 +102,7 @@ public class CreateBranchHandlerTests
         await handler.Create(requestStream, responseStream, context);
 
         // Assert
-        var responses = responseStream.GetResponses();
+        var responses = responseStream.Responses;
         responses.Should().HaveCount(3);
         responses.Should().AllSatisfy(r => r.Status.Should().Be(CreateBranchStatus.Success));
     }
@@ -173,8 +130,8 @@ public class CreateBranchHandlerTests
             new CreateBranchRequest { ProjectId = 456, BranchName = "feature/three", BaseBranch = "master" }
         };
 
-        var requestStream = new TestAsyncStreamReader(requests);
-        var responseStream = new TestServerStreamWriter();
+        var requestStream = new QueueAsyncStreamReader<CreateBranchRequest>(requests);
+        var responseStream = new ListServerStreamWriter<CreateBranchResponse>();
         var context = Substitute.For<ServerCallContext>();
         context.CancellationToken.Returns(CancellationToken.None);
 
@@ -182,7 +139,7 @@ public class CreateBranchHandlerTests
         await handler.Create(requestStream, responseStream, context);
 
         // Assert
-        var responses = responseStream.GetResponses();
+        var responses = responseStream.Responses;
         responses.Should().HaveCount(3);
         responses[0].Status.Should().Be(CreateBranchStatus.Success);
         responses[1].Status.Should().Be(CreateBranchStatus.Fail);
@@ -197,8 +154,8 @@ public class CreateBranchHandlerTests
         var apiClient = Substitute.For<IGitLabApiClient>();
         var handler = new CreateBranchHandler(logger, apiClient);
 
-        var requestStream = new TestAsyncStreamReader();
-        var responseStream = new TestServerStreamWriter();
+        var requestStream = new QueueAsyncStreamReader<CreateBranchRequest>();
+        var responseStream = new ListServerStreamWriter<CreateBranchResponse>();
         var context = Substitute.For<ServerCallContext>();
         context.CancellationToken.Returns(CancellationToken.None);
 
@@ -206,7 +163,7 @@ public class CreateBranchHandlerTests
         await handler.Create(requestStream, responseStream, context);
 
         // Assert
-        var responses = responseStream.GetResponses();
+        var responses = responseStream.Responses;
         responses.Should().BeEmpty();
         apiClient.DidNotReceive().Post(Arg.Any<Uri>(), Arg.Any<CancellationToken>());
     }
@@ -234,8 +191,8 @@ public class CreateBranchHandlerTests
             BaseBranch = "master"
         };
 
-        var requestStream = new TestAsyncStreamReader(request);
-        var responseStream = new TestServerStreamWriter();
+        var requestStream = new QueueAsyncStreamReader<CreateBranchRequest>(request);
+        var responseStream = new ListServerStreamWriter<CreateBranchResponse>();
         var context = Substitute.For<ServerCallContext>();
         context.CancellationToken.Returns(CancellationToken.None);
 
@@ -272,8 +229,8 @@ public class CreateBranchHandlerTests
             BaseBranch = "develop"
         };
 
-        var requestStream = new TestAsyncStreamReader(request);
-        var responseStream = new TestServerStreamWriter();
+        var requestStream = new QueueAsyncStreamReader<CreateBranchRequest>(request);
+        var responseStream = new ListServerStreamWriter<CreateBranchResponse>();
         var context = Substitute.For<ServerCallContext>();
         context.CancellationToken.Returns(CancellationToken.None);
 
@@ -303,8 +260,8 @@ public class CreateBranchHandlerTests
             BaseBranch = "develop"
         };
 
-        var requestStream = new TestAsyncStreamReader(request);
-        var responseStream = new TestServerStreamWriter();
+        var requestStream = new QueueAsyncStreamReader<CreateBranchRequest>(request);
+        var responseStream = new ListServerStreamWriter<CreateBranchResponse>();
         var cts = new CancellationTokenSource();
         var context = Substitute.For<ServerCallContext>();
         context.CancellationToken.Returns(cts.Token);

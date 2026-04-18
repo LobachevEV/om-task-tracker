@@ -11,29 +11,6 @@ namespace OneMoreTaskTracker.GitLab.Proxy.Tests.Services;
 
 public sealed class CreateMrHandlerTests
 {
-    private sealed class QueueAsyncStreamReader : IAsyncStreamReader<CreateMrRequest>
-    {
-        private readonly Queue<CreateMrRequest> _requests;
-
-        public CreateMrRequest Current { get; private set; } = null!;
-
-        public QueueAsyncStreamReader(params CreateMrRequest[] requests)
-        {
-            _requests = new Queue<CreateMrRequest>(requests);
-        }
-
-        public Task<bool> MoveNext(CancellationToken cancellationToken)
-        {
-            if (_requests.Count == 0)
-                return Task.FromResult(false);
-
-            Current = _requests.Dequeue();
-            return Task.FromResult(true);
-        }
-
-        public void Dispose() { }
-    }
-
     private static ServerCallContext NoneContext()
     {
         var ctx = Substitute.For<ServerCallContext>();
@@ -49,7 +26,7 @@ public sealed class CreateMrHandlerTests
             .Returns((true, "Created"));
         var handler = new CreateMrHandler(Substitute.For<ILogger<CreateMrHandler>>(), apiClient);
 
-        var requestStream = new QueueAsyncStreamReader(new CreateMrRequest
+        var requestStream = new QueueAsyncStreamReader<CreateMrRequest>(new CreateMrRequest
         {
             ProjectId = 1, ProjectName = "repo", SourceBranch = "feature/test", TargetBranch = "develop", Title = "Test MR"
         });
@@ -69,7 +46,7 @@ public sealed class CreateMrHandlerTests
             .Returns((false, "Conflict"));
         var handler = new CreateMrHandler(Substitute.For<ILogger<CreateMrHandler>>(), apiClient);
 
-        var requestStream = new QueueAsyncStreamReader(new CreateMrRequest
+        var requestStream = new QueueAsyncStreamReader<CreateMrRequest>(new CreateMrRequest
         {
             ProjectId = 1, ProjectName = "repo", SourceBranch = "feature/test", TargetBranch = "develop", Title = "Test MR"
         });
@@ -96,7 +73,7 @@ public sealed class CreateMrHandlerTests
             });
         var handler = new CreateMrHandler(Substitute.For<ILogger<CreateMrHandler>>(), apiClient);
 
-        var requestStream = new QueueAsyncStreamReader(new CreateMrRequest
+        var requestStream = new QueueAsyncStreamReader<CreateMrRequest>(new CreateMrRequest
         {
             ProjectId = 1, ProjectName = "repo", SourceBranch = "feature/test", TargetBranch = "master", Title = "Test MR"
         });
@@ -120,7 +97,7 @@ public sealed class CreateMrHandlerTests
         {
             ProjectId = 1, ProjectName = "repo", SourceBranch = "s", TargetBranch = "develop", Title = "t"
         };
-        var requestStream = new QueueAsyncStreamReader(Req(), Req(), Req());
+        var requestStream = new QueueAsyncStreamReader<CreateMrRequest>(Req(), Req(), Req());
         var responseStream = new ListServerStreamWriter<CreateMrResponse>();
 
         await handler.Create(requestStream, responseStream, NoneContext());
@@ -137,7 +114,7 @@ public sealed class CreateMrHandlerTests
 
         var responseStream = new ListServerStreamWriter<CreateMrResponse>();
 
-        await handler.Create(new QueueAsyncStreamReader(), responseStream, NoneContext());
+        await handler.Create(new QueueAsyncStreamReader<CreateMrRequest>(), responseStream, NoneContext());
 
         responseStream.Responses.Should().BeEmpty();
         await apiClient.DidNotReceive().Post(

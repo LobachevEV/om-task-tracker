@@ -173,14 +173,9 @@ public sealed class MrsProviderTests
             headers: null, deadline: null, cancellationToken: Arg.Any<CancellationToken>());
     }
 
-    private class MockAsyncStreamReader : IAsyncStreamReader<FindMrResponse>
+    private class MockAsyncStreamReader(IAsyncEnumerable<FindMrResponse> enumerable) : IAsyncStreamReader<FindMrResponse>
     {
-        private readonly IAsyncEnumerator<FindMrResponse> _enumerator;
-
-        public MockAsyncStreamReader(IAsyncEnumerable<FindMrResponse> enumerable)
-        {
-            _enumerator = enumerable.GetAsyncEnumerator();
-        }
+        private readonly IAsyncEnumerator<FindMrResponse> _enumerator = enumerable.GetAsyncEnumerator();
 
         public FindMrResponse Current => _enumerator.Current;
 

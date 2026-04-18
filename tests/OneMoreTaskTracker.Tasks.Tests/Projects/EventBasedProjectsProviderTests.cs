@@ -235,14 +235,9 @@ public sealed class EventBasedProjectsProviderTests
         await act.Should().ThrowAsync<RpcException>();
     }
 
-    private class MockAsyncStreamReader : IAsyncStreamReader<FindEventsResponse>
+    private class MockAsyncStreamReader(IAsyncEnumerable<FindEventsResponse> enumerable) : IAsyncStreamReader<FindEventsResponse>
     {
-        private readonly IAsyncEnumerator<FindEventsResponse> _enumerator;
-
-        public MockAsyncStreamReader(IAsyncEnumerable<FindEventsResponse> enumerable)
-        {
-            _enumerator = enumerable.GetAsyncEnumerator();
-        }
+        private readonly IAsyncEnumerator<FindEventsResponse> _enumerator = enumerable.GetAsyncEnumerator();
 
         public FindEventsResponse Current => _enumerator.Current;
 
