@@ -28,3 +28,5 @@ publish/
 .serena/
 .specs/
 .design/
+
+graphify-out/cache/

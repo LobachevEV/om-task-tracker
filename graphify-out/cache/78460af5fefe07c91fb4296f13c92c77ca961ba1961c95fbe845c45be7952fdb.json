@@ -1,1 +1,0 @@
-{"nodes": [{"id": "onemoretasktracker_gitlab_proxy_obj_release_net10_0_protos_branches_createbranchresponsegrpc_cs", "label": "CreateBranchResponseGrpc.cs", "file_type": "code", "source_file": "OneMoreTaskTracker.GitLab.Proxy/obj/Release/net10.0/Protos/Branches/CreateBranchResponseGrpc.cs", "source_location": "L1"}], "edges": [], "raw_calls": []}
