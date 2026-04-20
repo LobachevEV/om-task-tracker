@@ -13,13 +13,13 @@ A distributed system for managing GitLab merge requests and tasks.
 
 **Bounded contexts:**
 
-| Context | Responsibility | Owns |
-|---|---|---|
-| `OneMoreTaskTracker.Users` | Identity, auth, team membership | `users` schema; user records; role taxonomy (`Manager`, `FrontendDeveloper`, `BackendDeveloper`, `Qa`) |
-| `OneMoreTaskTracker.Tasks` | Task lifecycle + assignee aggregates | `tasks` schema; state machine (`NOT_STARTED → IN_DEV → MR_TO_RELEASE → IN_TEST → MR_TO_MASTER → COMPLETED`); per-assignee task summaries |
-| `OneMoreTaskTracker.GitLab.Proxy` | Anti-corruption layer around GitLab REST API | outbound GitLab API translation; no persistent state |
-| `OneMoreTaskTracker.Api` | REST gateway / BFF | JWT issuance + validation; cross-service composition; upstream-error → HTTP mapping (`GrpcExceptionMiddleware`) |
-| `OneMoreTaskTracker.WebClient` | React 19 SPA | client-facing DTOs; no direct knowledge of sibling-service contracts |
+| Context                           | Responsibility                               | Owns                                                                                                                                     |
+|-----------------------------------|----------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| `OneMoreTaskTracker.Users`        | Identity, auth, team membership              | `users` schema; user records; role taxonomy (`Manager`, `FrontendDeveloper`, `BackendDeveloper`, `Qa`)                                   |
+| `OneMoreTaskTracker.Tasks`        | Task lifecycle + assignee aggregates         | `tasks` schema; state machine (`NOT_STARTED → IN_DEV → MR_TO_RELEASE → IN_TEST → MR_TO_MASTER → COMPLETED`); per-assignee task summaries |
+| `OneMoreTaskTracker.GitLab.Proxy` | Anti-corruption layer around GitLab REST API | outbound GitLab API translation; no persistent state                                                                                     |
+| `OneMoreTaskTracker.Api`          | REST gateway / BFF                           | JWT issuance + validation; cross-service composition; upstream-error → HTTP mapping (`GrpcExceptionMiddleware`)                          |
+| `OneMoreTaskTracker.WebClient`    | React 19 SPA                                 | client-facing DTOs; no direct knowledge of sibling-service contracts                                                                     |
 
 **DDD conventions applied here:**
 - Each bounded context's public contract uses its own domain vocabulary (e.g. Tasks exposes `AssigneeTaskSummary`, not `UserStatus`). Cross-context identities use role-prefixed references (`assignee_user_id`). See `~/.claude/rules/microservices/contracts.md`.
