@@ -42,4 +42,13 @@ public sealed class JwtTokenService
 
         return Handler.WriteToken(token);
     }
+
+    /// <summary>
+    /// Generates a JWT token from an IAuthUserContext, collapsing the 4-parameter
+    /// overload into a single interface argument per microservices/contracts.md.
+    /// </summary>
+    public string GenerateToken(IAuthUserContext userContext)
+    {
+        return GenerateToken(userContext.UserId, userContext.Email, userContext.Role, userContext.ManagerId);
+    }
 }

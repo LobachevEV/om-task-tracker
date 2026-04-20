@@ -119,4 +119,76 @@ public sealed class JwtTokenServiceTests
         decodedDeveloper.Claims.First(c => c.Type == ClaimTypes.Role).Value.Should().Be("FrontendDeveloper");
         decodedManager.Claims.First(c => c.Type == ClaimTypes.Role).Value.Should().Be("Manager");
     }
+
+    [Fact]
+    public void GenerateToken_WithIAuthUserContext_ContainsCorrectClaims()
+    {
+        var service = CreateService();
+        var userContext = new MockAuthUserContext
+        {
+            UserId = 42,
+            Email = "test@example.com",
+            Role = "FrontendDeveloper",
+            ManagerId = null
+        };
+
+        var token = service.GenerateToken(userContext);
+
+        token.Should().NotBeNullOrEmpty();
+
+        var decodedToken = DecodeToken(token);
+        decodedToken.Claims.Should().Contain(c =>
+            c.Type == ClaimTypes.NameIdentifier && c.Value == "42");
+        decodedToken.Claims.Should().Contain(c =>
+            c.Type == ClaimTypes.Email && c.Value == "test@example.com");
+        decodedToken.Claims.Should().Contain(c =>
+            c.Type == ClaimTypes.Role && c.Value == "FrontendDeveloper");
+    }
+
+    [Fact]
+    public void GenerateToken_WithIAuthUserContext_IncludesManagerIdWhenPresent()
+    {
+        var service = CreateService();
+        var userContext = new MockAuthUserContext
+        {
+            UserId = 42,
+            Email = "test@example.com",
+            Role = "FrontendDeveloper",
+            ManagerId = 99
+        };
+
+        var token = service.GenerateToken(userContext);
+
+        token.Should().NotBeNullOrEmpty();
+
+        var decodedToken = DecodeToken(token);
+        decodedToken.Claims.Should().Contain(c =>
+            c.Type == "manager_id" && c.Value == "99");
+    }
+
+    [Fact]
+    public void GenerateToken_WithIAuthUserContext_OmitsManagerIdWhenNull()
+    {
+        var service = CreateService();
+        var userContext = new MockAuthUserContext
+        {
+            UserId = 42,
+            Email = "test@example.com",
+            Role = "FrontendDeveloper",
+            ManagerId = null
+        };
+
+        var token = service.GenerateToken(userContext);
+
+        var decodedToken = DecodeToken(token);
+        decodedToken.Claims.Should().NotContain(c => c.Type == "manager_id");
+    }
+
+    private sealed class MockAuthUserContext : IAuthUserContext
+    {
+        public int UserId { get; init; }
+        public string Email { get; init; } = string.Empty;
+        public string Role { get; init; } = string.Empty;
+        public int? ManagerId { get; init; }
+    }
 }
