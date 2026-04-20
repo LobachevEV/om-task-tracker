@@ -37,11 +37,11 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
     public TaskAggregateQuery.TaskAggregateQueryClient MockTaskAggregateQuery { get; } =
         Substitute.For<TaskAggregateQuery.TaskAggregateQueryClient>();
 
-    public string GenerateToken(int userId, string email, string role)
+    public string GenerateToken(int userId, string email, string role, int? managerId = null)
     {
         using var scope = Services.CreateScope();
         var tokenService = scope.ServiceProvider.GetRequiredService<JwtTokenService>();
-        return tokenService.GenerateToken(userId, email, role);
+        return tokenService.GenerateToken(userId, email, role, managerId);
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

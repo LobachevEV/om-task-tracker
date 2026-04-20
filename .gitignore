@@ -22,6 +22,8 @@ publish/
 !.claude/skills/**
 !.claude/instincts/
 !.claude/instincts/**
+!.claude/settings.json
+!.claude/memory.md
 .playwright-mcp/
 .worktrees/
 

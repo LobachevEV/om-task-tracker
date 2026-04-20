@@ -22,6 +22,7 @@ message RegisterResponse {
   int32 user_id = 1;
   string email = 2;
   string role = 3;
+  int32 manager_user_id = 4;
 }
 
 message AuthenticateRequest {
@@ -34,6 +35,7 @@ message AuthenticateResponse {
   int32 user_id = 2;
   string email = 3;
   string role = 4;
+  int32 manager_user_id = 5;
 }
 
 message GetTeamMemberIdsRequest {

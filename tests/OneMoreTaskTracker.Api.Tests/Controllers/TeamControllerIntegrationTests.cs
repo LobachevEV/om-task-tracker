@@ -24,9 +24,9 @@ public sealed class TeamControllerIntegrationTests(TasksControllerWebApplication
         return await client.PostAsync(uri, content);
     }
 
-    private HttpClient ClientWithToken(int userId, string role, string email = "manager@example.com")
+    private HttpClient ClientWithToken(int userId, string role, string email = "manager@example.com", int? managerId = null)
     {
-        var token = factory.GenerateToken(userId, email, role);
+        var token = factory.GenerateToken(userId, email, role, managerId);
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return client;
@@ -82,6 +82,62 @@ public sealed class TeamControllerIntegrationTests(TasksControllerWebApplication
         roster.Should().HaveCount(2);
         roster[0].GetProperty("userId").GetInt32().Should().Be(10);
         roster[0].GetProperty("status").GetProperty("active").GetInt32().Should().Be(3);
+        roster[1].GetProperty("userId").GetInt32().Should().Be(11);
+        roster[1].GetProperty("status").GetProperty("active").GetInt32().Should().Be(0);
+    }
+
+    [Fact]
+    public async Task GetRoster_AsDeveloperWithManagerClaim_Returns200WithManagerRoster()
+    {
+        const int developerId = 10;
+        const int managerUserId = 7;
+        var client = ClientWithToken(userId: developerId, role: Roles.FrontendDeveloper, 
+            email: "alice.dev@example.com", managerId: managerUserId);
+
+        factory.MockUserService
+            .GetTeamRosterAsync(
+                Arg.Is<GetTeamRosterRequest>(req => req.ManagerId == managerUserId),
+                Arg.Any<Metadata>(),
+                Arg.Any<DateTime?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new GetTeamRosterResponse
+            {
+                Members =
+                {
+                    new TeamRosterMember { UserId = 10, Email = "alice.dev@example.com", Role = Roles.FrontendDeveloper, ManagerId = managerUserId },
+                    new TeamRosterMember { UserId = 11, Email = "bob.qa@example.com", Role = Roles.Qa, ManagerId = managerUserId }
+                }
+            }));
+
+        factory.MockTaskAggregateQuery
+            .BatchGetAssigneeTaskSummaryAsync(
+                Arg.Is<BatchGetAssigneeTaskSummaryRequest>(req =>
+                    req.AssigneeUserIds.Contains(10) && req.AssigneeUserIds.Contains(11)),
+                Arg.Any<Metadata>(),
+                Arg.Any<DateTime?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new BatchGetAssigneeTaskSummaryResponse
+            {
+                Summaries =
+                {
+                    new AssigneeTaskSummary
+                    {
+                        AssigneeUserId = 10,
+                        ActiveCount = 2,
+                        Mix = new TaskStateMix { InDev = 1, MrToRelease = 1, InTest = 0, MrToMaster = 0, Completed = 0 }
+                    }
+                }
+            }));
+
+        var response = await client.GetAsync("/api/team/members");
+
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
+        var json = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(json);
+        var roster = doc.RootElement.EnumerateArray().ToList();
+        roster.Should().HaveCount(2);
+        roster[0].GetProperty("userId").GetInt32().Should().Be(10);
+        roster[0].GetProperty("status").GetProperty("active").GetInt32().Should().Be(2);
         roster[1].GetProperty("userId").GetInt32().Should().Be(11);
         roster[1].GetProperty("status").GetProperty("active").GetInt32().Should().Be(0);
     }

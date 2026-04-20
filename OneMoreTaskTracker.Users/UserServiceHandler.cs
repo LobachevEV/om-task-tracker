@@ -68,7 +68,8 @@ public class UserServiceHandler(UsersDbContext dbContext) : UserService.UserServ
         {
             UserId = user.Id,
             Email = user.Email,
-            Role = user.Role
+            Role = user.Role,
+            ManagerUserId = user.ManagerId ?? 0
         };
     }
 
@@ -91,7 +92,8 @@ public class UserServiceHandler(UsersDbContext dbContext) : UserService.UserServ
             Success = true,
             UserId = user.Id,
             Email = user.Email,
-            Role = user.Role
+            Role = user.Role,
+            ManagerUserId = user.ManagerId ?? 0
         };
     }
 

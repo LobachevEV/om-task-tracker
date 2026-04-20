@@ -1,112 +1,136 @@
-# Graph Report - .  (2026-04-18)
+# Graph Report - .  (2026-04-20)
 
 ## Corpus Check
-- Corpus is ~32,008 words - fits in a single context window. You may not need a graph.
+- 160 files · ~39,392 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 617 nodes · 911 edges · 75 communities detected
-- Extraction: 79% EXTRACTED · 21% INFERRED · 0% AMBIGUOUS · INFERRED: 194 edges (avg confidence: 0.79)
+- 821 nodes · 1250 edges · 98 communities detected
+- Extraction: 75% EXTRACTED · 25% INFERRED · 0% AMBIGUOUS · INFERRED: 310 edges (avg confidence: 0.79)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_GitLab Proxy Handlers|GitLab Proxy Handlers]]
-- [[_COMMUNITY_Task Creation & MR Queries|Task Creation & MR Queries]]
-- [[_COMMUNITY_System Architecture & Docs|System Architecture & Docs]]
-- [[_COMMUNITY_Integration Test Harness|Integration Test Harness]]
-- [[_COMMUNITY_Branch Creation Handler|Branch Creation Handler]]
-- [[_COMMUNITY_GitLab API Client|GitLab API Client]]
-- [[_COMMUNITY_Task Domain Entity|Task Domain Entity]]
-- [[_COMMUNITY_Auth Controllers & Pages|Auth Controllers & Pages]]
-- [[_COMMUNITY_Merge MR Service|Merge MR Service]]
-- [[_COMMUNITY_Frontend Auth Storage|Frontend Auth Storage]]
-- [[_COMMUNITY_Auth Integration Tests|Auth Integration Tests]]
-- [[_COMMUNITY_Create MR Extensions|Create MR Extensions]]
-- [[_COMMUNITY_React App Overview (docs)|React App Overview (docs)]]
-- [[_COMMUNITY_Codemap Navigation|Codemap Navigation]]
-- [[_COMMUNITY_Database Migrations|Database Migrations]]
-- [[_COMMUNITY_List Tasks Handler|List Tasks Handler]]
-- [[_COMMUNITY_gRPC Exception Middleware|gRPC Exception Middleware]]
-- [[_COMMUNITY_Backend Domain Docs|Backend Domain Docs]]
-- [[_COMMUNITY_ClaimsPrincipal Extensions|ClaimsPrincipal Extensions]]
-- [[_COMMUNITY_DB Model Snapshots|DB Model Snapshots]]
-- [[_COMMUNITY_Frontend Toolchain|Frontend Toolchain]]
-- [[_COMMUNITY_Error Boundary|Error Boundary]]
-- [[_COMMUNITY_Auth Context & Login|Auth Context & Login]]
-- [[_COMMUNITY_EF Core DbContexts|EF Core DbContexts]]
-- [[_COMMUNITY_Dialogs & Shortcuts|Dialogs & Shortcuts]]
-- [[_COMMUNITY_ErrorBoundary Tests|ErrorBoundary Tests]]
-- [[_COMMUNITY_MRs Provider|MRs Provider]]
-- [[_COMMUNITY_Tasks Initial Migration|Tasks Initial Migration]]
-- [[_COMMUNITY_Projects Provider|Projects Provider]]
-- [[_COMMUNITY_Users Initial Migration|Users Initial Migration]]
-- [[_COMMUNITY_Frontend App Root|Frontend App Root]]
-- [[_COMMUNITY_Integration Icon|Integration Icon]]
-- [[_COMMUNITY_Auth API Client|Auth API Client]]
-- [[_COMMUNITY_MR DTO & Extensions|MR DTO & Extensions]]
-- [[_COMMUNITY_IMrsProvider Interface|IMrsProvider Interface]]
-- [[_COMMUNITY_IProjectsProvider Interface|IProjectsProvider Interface]]
-- [[_COMMUNITY_SVG Assets & Gradients|SVG Assets & Gradients]]
-- [[_COMMUNITY_Test Utils|Test Utils]]
-- [[_COMMUNITY_Integration Status Util|Integration Status Util]]
-- [[_COMMUNITY_AuthContext Test Wrapper|AuthContext Test Wrapper]]
-- [[_COMMUNITY_Spinner|Spinner]]
-- [[_COMMUNITY_useTaskDetail Hook|useTaskDetail Hook]]
-- [[_COMMUNITY_IMrInfo Interface|IMrInfo Interface]]
-- [[_COMMUNITY_User Entity|User Entity]]
-- [[_COMMUNITY_Program Entry Point|Program Entry Point]]
-- [[_COMMUNITY_ClaimsPrincipal Helpers|ClaimsPrincipal Helpers]]
-- [[_COMMUNITY_JWT Options|JWT Options]]
-- [[_COMMUNITY_Roles Constants|Roles Constants]]
-- [[_COMMUNITY_ESLint Config|ESLint Config]]
-- [[_COMMUNITY_Vitest Config|Vitest Config]]
-- [[_COMMUNITY_Frontend Test Setup|Frontend Test Setup]]
-- [[_COMMUNITY_Integration Status Test|Integration Status Test]]
-- [[_COMMUNITY_Task Type|Task Type]]
-- [[_COMMUNITY_Auth Type|Auth Type]]
-- [[_COMMUNITY_Auth Type Test|Auth Type Test]]
-- [[_COMMUNITY_Task Constants|Task Constants]]
-- [[_COMMUNITY_AppHeader|AppHeader]]
-- [[_COMMUNITY_ConfirmDialog Test|ConfirmDialog Test]]
-- [[_COMMUNITY_useTaskDetail Test|useTaskDetail Test]]
-- [[_COMMUNITY_useKeyboardShortcut Test|useKeyboardShortcut Test]]
-- [[_COMMUNITY_Zod Schemas|Zod Schemas]]
-- [[_COMMUNITY_Schemas Test|Schemas Test]]
-- [[_COMMUNITY_HTTP Client Test|HTTP Client Test]]
-- [[_COMMUNITY_Tasks API Test|Tasks API Test]]
-- [[_COMMUNITY_Auth API Test|Auth API Test]]
-- [[_COMMUNITY_Fake MR Info|Fake MR Info]]
-- [[_COMMUNITY_Proxy Program Entry|Proxy Program Entry]]
-- [[_COMMUNITY_MergeRequestInfo Type|MergeRequestInfo Type]]
-- [[_COMMUNITY_MergeRequest Entity|MergeRequest Entity]]
-- [[_COMMUNITY_GitRepo Entity|GitRepo Entity]]
-- [[_COMMUNITY_Project Entity|Project Entity]]
-- [[_COMMUNITY_Result Type|Result Type]]
-- [[_COMMUNITY_Tasks Program Entry|Tasks Program Entry]]
-- [[_COMMUNITY_Users Program Entry|Users Program Entry]]
-- [[_COMMUNITY_Mapster Mapping|Mapster Mapping]]
+- [[_COMMUNITY_Community 0|Community 0]]
+- [[_COMMUNITY_Community 1|Community 1]]
+- [[_COMMUNITY_Community 2|Community 2]]
+- [[_COMMUNITY_Community 3|Community 3]]
+- [[_COMMUNITY_Community 4|Community 4]]
+- [[_COMMUNITY_Community 5|Community 5]]
+- [[_COMMUNITY_Community 6|Community 6]]
+- [[_COMMUNITY_Community 7|Community 7]]
+- [[_COMMUNITY_Community 8|Community 8]]
+- [[_COMMUNITY_Community 9|Community 9]]
+- [[_COMMUNITY_Community 10|Community 10]]
+- [[_COMMUNITY_Community 11|Community 11]]
+- [[_COMMUNITY_Community 12|Community 12]]
+- [[_COMMUNITY_Community 13|Community 13]]
+- [[_COMMUNITY_Community 14|Community 14]]
+- [[_COMMUNITY_Community 15|Community 15]]
+- [[_COMMUNITY_Community 16|Community 16]]
+- [[_COMMUNITY_Community 17|Community 17]]
+- [[_COMMUNITY_Community 18|Community 18]]
+- [[_COMMUNITY_Community 19|Community 19]]
+- [[_COMMUNITY_Community 20|Community 20]]
+- [[_COMMUNITY_Community 21|Community 21]]
+- [[_COMMUNITY_Community 22|Community 22]]
+- [[_COMMUNITY_Community 23|Community 23]]
+- [[_COMMUNITY_Community 24|Community 24]]
+- [[_COMMUNITY_Community 25|Community 25]]
+- [[_COMMUNITY_Community 26|Community 26]]
+- [[_COMMUNITY_Community 27|Community 27]]
+- [[_COMMUNITY_Community 28|Community 28]]
+- [[_COMMUNITY_Community 29|Community 29]]
+- [[_COMMUNITY_Community 30|Community 30]]
+- [[_COMMUNITY_Community 31|Community 31]]
+- [[_COMMUNITY_Community 32|Community 32]]
+- [[_COMMUNITY_Community 33|Community 33]]
+- [[_COMMUNITY_Community 34|Community 34]]
+- [[_COMMUNITY_Community 35|Community 35]]
+- [[_COMMUNITY_Community 36|Community 36]]
+- [[_COMMUNITY_Community 37|Community 37]]
+- [[_COMMUNITY_Community 38|Community 38]]
+- [[_COMMUNITY_Community 39|Community 39]]
+- [[_COMMUNITY_Community 40|Community 40]]
+- [[_COMMUNITY_Community 41|Community 41]]
+- [[_COMMUNITY_Community 42|Community 42]]
+- [[_COMMUNITY_Community 43|Community 43]]
+- [[_COMMUNITY_Community 44|Community 44]]
+- [[_COMMUNITY_Community 45|Community 45]]
+- [[_COMMUNITY_Community 46|Community 46]]
+- [[_COMMUNITY_Community 47|Community 47]]
+- [[_COMMUNITY_Community 48|Community 48]]
+- [[_COMMUNITY_Community 49|Community 49]]
+- [[_COMMUNITY_Community 50|Community 50]]
+- [[_COMMUNITY_Community 51|Community 51]]
+- [[_COMMUNITY_Community 52|Community 52]]
+- [[_COMMUNITY_Community 53|Community 53]]
+- [[_COMMUNITY_Community 54|Community 54]]
+- [[_COMMUNITY_Community 55|Community 55]]
+- [[_COMMUNITY_Community 56|Community 56]]
+- [[_COMMUNITY_Community 57|Community 57]]
+- [[_COMMUNITY_Community 58|Community 58]]
+- [[_COMMUNITY_Community 59|Community 59]]
+- [[_COMMUNITY_Community 60|Community 60]]
+- [[_COMMUNITY_Community 61|Community 61]]
+- [[_COMMUNITY_Community 62|Community 62]]
+- [[_COMMUNITY_Community 63|Community 63]]
+- [[_COMMUNITY_Community 64|Community 64]]
+- [[_COMMUNITY_Community 65|Community 65]]
+- [[_COMMUNITY_Community 66|Community 66]]
+- [[_COMMUNITY_Community 67|Community 67]]
+- [[_COMMUNITY_Community 68|Community 68]]
+- [[_COMMUNITY_Community 69|Community 69]]
+- [[_COMMUNITY_Community 70|Community 70]]
+- [[_COMMUNITY_Community 71|Community 71]]
+- [[_COMMUNITY_Community 72|Community 72]]
+- [[_COMMUNITY_Community 73|Community 73]]
+- [[_COMMUNITY_Community 74|Community 74]]
+- [[_COMMUNITY_Community 75|Community 75]]
+- [[_COMMUNITY_Community 76|Community 76]]
+- [[_COMMUNITY_Community 77|Community 77]]
+- [[_COMMUNITY_Community 78|Community 78]]
+- [[_COMMUNITY_Community 79|Community 79]]
+- [[_COMMUNITY_Community 80|Community 80]]
+- [[_COMMUNITY_Community 81|Community 81]]
+- [[_COMMUNITY_Community 82|Community 82]]
+- [[_COMMUNITY_Community 83|Community 83]]
+- [[_COMMUNITY_Community 84|Community 84]]
+- [[_COMMUNITY_Community 85|Community 85]]
+- [[_COMMUNITY_Community 86|Community 86]]
+- [[_COMMUNITY_Community 87|Community 87]]
+- [[_COMMUNITY_Community 88|Community 88]]
+- [[_COMMUNITY_Community 89|Community 89]]
+- [[_COMMUNITY_Community 90|Community 90]]
+- [[_COMMUNITY_Community 91|Community 91]]
+- [[_COMMUNITY_Community 92|Community 92]]
+- [[_COMMUNITY_Community 93|Community 93]]
+- [[_COMMUNITY_Community 94|Community 94]]
+- [[_COMMUNITY_Community 95|Community 95]]
+- [[_COMMUNITY_Community 96|Community 96]]
+- [[_COMMUNITY_Community 97|Community 97]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `TasksControllerIntegrationTests` - 31 edges
-2. `UserServiceHandlerTests` - 20 edges
-3. `AuthControllerIntegrationTests` - 14 edges
-4. `EventBasedProjectsProviderTests` - 14 edges
-5. `TaskAddMrTests` - 11 edges
-6. `MergeMrServiceTests` - 11 edges
-7. `MrsProviderTests` - 10 edges
-8. `TasksController` - 10 edges
-9. `Microservice Architecture Design` - 10 edges
-10. `Frontend React Application` - 10 edges
+1. `TeamControllerIntegrationTests` - 23 edges
+2. `UserServiceHandlerRegisterTests` - 19 edges
+3. `AuthControllerIntegrationTests` - 17 edges
+4. `EventBasedProjectsProviderTests` - 13 edges
+5. `RolesTests` - 12 edges
+6. `MrsProviderTests` - 11 edges
+7. `TaskAddMrTests` - 11 edges
+8. `MergeMrServiceTests` - 11 edges
+9. `TasksController` - 10 edges
+10. `Microservice Architecture Design` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `React Logo SVG Asset` --used_in--> `OneMoreTaskTracker.WebClient (React Frontend)`  [EXTRACTED]
-  OneMoreTaskTracker.WebClient/src/assets/react.svg → docs/CODEMAPS/architecture.md
+- `OneMoreTaskTracker.WebClient (React Frontend)` --used_in--> `React Logo SVG Asset`  [EXTRACTED]
+  docs/CODEMAPS/architecture.md → OneMoreTaskTracker.WebClient/src/assets/react.svg
+- `inviteMember()` --calls--> `authHeaders()`  [INFERRED]
+  OneMoreTaskTracker.WebClient/src/shared/api/teamApi.ts → OneMoreTaskTracker.WebClient/src/shared/api/httpClient.ts
+- `getRoster()` --calls--> `authHeaders()`  [INFERRED]
+  OneMoreTaskTracker.WebClient/src/shared/api/teamApi.ts → OneMoreTaskTracker.WebClient/src/shared/api/httpClient.ts
+- `removeMember()` --calls--> `authHeaders()`  [INFERRED]
+  OneMoreTaskTracker.WebClient/src/shared/api/teamApi.ts → OneMoreTaskTracker.WebClient/src/shared/api/httpClient.ts
 - `fetchTasks()` --calls--> `authHeaders()`  [INFERRED]
-  OneMoreTaskTracker.WebClient/src/shared/api/tasksApi.ts → OneMoreTaskTracker.WebClient/src/shared/api/httpClient.ts
-- `fetchTaskDetail()` --calls--> `authHeaders()`  [INFERRED]
-  OneMoreTaskTracker.WebClient/src/shared/api/tasksApi.ts → OneMoreTaskTracker.WebClient/src/shared/api/httpClient.ts
-- `moveTask()` --calls--> `authHeaders()`  [INFERRED]
-  OneMoreTaskTracker.WebClient/src/shared/api/tasksApi.ts → OneMoreTaskTracker.WebClient/src/shared/api/httpClient.ts
-- `createTask()` --calls--> `authHeaders()`  [INFERRED]
   OneMoreTaskTracker.WebClient/src/shared/api/tasksApi.ts → OneMoreTaskTracker.WebClient/src/shared/api/httpClient.ts
 
 ## Hyperedges (group relationships)
@@ -122,400 +146,520 @@
 
 ## Communities
 
-### Community 0 - "GitLab Proxy Handlers"
-Cohesion: 0.03
-Nodes (44): AsyncEnumerableAdapter, CancellationToken Pattern, CreateBranchHandler, CreateBranchHandlerTests, FindMrRequest (Proto DTO), FindMrResponse (Proto DTO), FluentAssertions, IGitLabApiClient (+36 more)
+### Community 0 - "Community 0"
+Cohesion: 0.04
+Nodes (32): CancellationToken Pattern, CreateBranchHandler, CreateBranchHandlerTests, FindMrRequest (Proto DTO), FindMrResponse (Proto DTO), FluentAssertions, IGitLabApiClient, MergeMrService (+24 more)
 
-### Community 1 - "Task Creation & MR Queries"
-Cohesion: 0.06
-Nodes (14): CreateTaskHandler, CreateTaskHandlerTests, EventBasedProjectsProviderTests, EventsExtension, FindEventsHandler, FindEventsHandlerTests, FindMrExtension, FindMrHandler (+6 more)
+### Community 1 - "Community 1"
+Cohesion: 0.07
+Nodes (13): CreateTaskHandlerTests, EventBasedProjectsProviderTests, FindEventsHandlerTests, FindMrExtension, FindMrHandler, FindMrHandlerTests, GetProjectHandler, ProjectGetterExtensions (+5 more)
 
-### Community 2 - "System Architecture & Docs"
-Cohesion: 0.05
-Nodes (44): OneMoreTaskTracker.Api (REST API Gateway), Microservice Architecture Design, AuthController (REST Endpoint), BCrypt Password Hashing (Work Factor 12), OneMoreTaskTracker System, OneMoreTaskTracker CLI (Console App), Code Conventions: C# Best Practices, CORS Configuration for Frontend Origin (+36 more)
+### Community 2 - "Community 2"
+Cohesion: 0.04
+Nodes (54): OneMoreTaskTracker.Api (REST API Gateway), Microservice Architecture Design, AuthController (REST Endpoint), Backend Services Layer, BCrypt Password Hashing (Work Factor 12), OneMoreTaskTracker System, OneMoreTaskTracker CLI (Console App), Code Conventions: C# Best Practices (+46 more)
 
-### Community 3 - "Integration Test Harness"
+### Community 3 - "Community 3"
+Cohesion: 0.09
+Nodes (8): GitLabApiClientTests, GrpcTestHelpers, TasksControllerCreateTaskTests, TasksControllerGetTasksTests, TasksControllerGetTaskTests, TasksControllerMoveTaskTests, TasksControllerTestBase, TasksControllerTestBase
+
+### Community 4 - "Community 4"
+Cohesion: 0.12
+Nodes (4): AuthControllerIntegrationTests, IClassFixture, ProgramDiTests, TeamControllerIntegrationTests
+
+### Community 5 - "Community 5"
+Cohesion: 0.08
+Nodes (9): handleMoveConfirm(), handleSubmit(), TasksController, UserServiceHandler, UserServiceHandlerAuthenticateTests, UserServiceHandlerDeleteUserTests, UserServiceHandlerGetTeamMemberIdsTests, UserServiceHandlerGetTeamRosterTests (+1 more)
+
+### Community 6 - "Community 6"
 Cohesion: 0.1
-Nodes (5): ApiWebApplicationFactory, IClassFixture, TasksControllerIntegrationTests, TasksControllerWebApplicationFactory, WebApplicationFactory
+Nodes (5): AuthController, ControllerBase, handleSubmit(), TeamController, UserServiceHandlerRegisterTests
 
-### Community 4 - "Branch Creation Handler"
-Cohesion: 0.13
-Nodes (6): BranchesExtension, CreateBranchHandler, CreateBranchHandlerTests, GitLabApiClient, GitLabApiClientTests, IGitLabApiClient
+### Community 7 - "Community 7"
+Cohesion: 0.14
+Nodes (6): BranchesExtension, CreateBranchHandler, CreateBranchHandlerTests, CreateMrHandlerTests, GitLabApiClient, IGitLabApiClient
 
-### Community 5 - "GitLab API Client"
+### Community 8 - "Community 8"
 Cohesion: 0.1
-Nodes (4): IDisposable, IGitLabApiClient, UserServiceHandler, UserServiceHandlerTests
+Nodes (7): CreateMrExtensionTests, CreateMrExtension, CreateMrHandler, EventsExtension, FindEventsHandler, GrpcExceptionMiddleware, GrpcExceptionMiddlewareTests
 
-### Community 6 - "Task Domain Entity"
-Cohesion: 0.16
-Nodes (3): Task, TaskAddMrTests, TaskAddProjectTests
+### Community 9 - "Community 9"
+Cohesion: 0.14
+Nodes (4): CreateTaskHandler, Task, TaskAddMrTests, TaskAddProjectTests
 
-### Community 7 - "Auth Controllers & Pages"
+### Community 10 - "Community 10"
+Cohesion: 0.14
+Nodes (19): architecture.md Codemap, AsyncEnumerableAdapter, backend.md Codemap, CODEMAPS Navigation Hub, data.md Codemap, dependencies.md Codemap, frontend.md Codemap, Handler Pattern Architecture (+11 more)
+
+### Community 11 - "Community 11"
+Cohesion: 0.18
+Nodes (12): clearAuth(), getAuth(), getToken(), authHeaders(), handleResponse(), createTask(), fetchTaskDetail(), fetchTasks() (+4 more)
+
+### Community 12 - "Community 12"
 Cohesion: 0.13
-Nodes (6): AuthController, ControllerBase, handleSubmit(), handleMoveConfirm(), handleSubmit(), TasksController
+Nodes (2): Roles, RolesTests
 
-### Community 8 - "Merge MR Service"
-Cohesion: 0.23
+### Community 13 - "Community 13"
+Cohesion: 0.2
 Nodes (3): MergeMrExtensions, MergeMrService, MergeMrServiceTests
 
-### Community 9 - "Frontend Auth Storage"
-Cohesion: 0.23
-Nodes (9): clearAuth(), getAuth(), getToken(), authHeaders(), handleResponse(), createTask(), fetchTaskDetail(), fetchTasks() (+1 more)
+### Community 14 - "Community 14"
+Cohesion: 0.12
+Nodes (7): InitialCreate, OneMoreTaskTracker.Tasks.Migrations, InitialCreate, OneMoreTaskTracker.Users.Migrations, OneMoreTaskTracker.Users.Migrations, SplitDeveloperRole, Migration
 
-### Community 10 - "Auth Integration Tests"
-Cohesion: 0.33
-Nodes (1): AuthControllerIntegrationTests
+### Community 15 - "Community 15"
+Cohesion: 0.13
+Nodes (7): useAuth(), LoginPage(), ProtectedRoute(), isDeveloperRole(), isUserRole(), getAvatarClass(), TeamPage()
 
-### Community 11 - "Create MR Extensions"
-Cohesion: 0.23
-Nodes (3): CreateMrExtensionTests, CreateMrExtension, CreateMrHandler
+### Community 16 - "Community 16"
+Cohesion: 0.13
+Nodes (5): MockAsyncStreamReader, AsyncEnumerableAdapter, IAsyncStreamReader, MockAsyncStreamReader, QueueAsyncStreamReader
 
-### Community 12 - "React App Overview (docs)"
+### Community 17 - "Community 17"
+Cohesion: 0.27
+Nodes (11): addSortIndicators(), enableUI(), getNthColumn(), getTable(), getTableBody(), getTableHeader(), loadColumns(), loadData() (+3 more)
+
+### Community 18 - "Community 18"
+Cohesion: 0.15
+Nodes (4): ErrorBoundary, renderWithRouter(), renderPage(), renderWithAuth()
+
+### Community 19 - "Community 19"
+Cohesion: 0.41
+Nodes (2): GetAssigneeTaskSummaryHandler, GetAssigneeTaskSummaryHandlerTests
+
+### Community 20 - "Community 20"
 Cohesion: 0.15
 Nodes (13): AppHeader Shared Component, React Context for Authentication State, ErrorBoundary React Component, Frontend React Application, LoginPage React Component, React 19 with TypeScript, RegisterPage React Component, TaskDetailPage React Component (+5 more)
 
-### Community 13 - "Codemap Navigation"
-Cohesion: 0.21
-Nodes (13): architecture.md Codemap, backend.md Codemap, CODEMAPS Navigation Hub, data.md Codemap, dependencies.md Codemap, frontend.md Codemap, Handler Pattern Architecture, TaskCreator (gRPC Service) (+5 more)
+### Community 21 - "Community 21"
+Cohesion: 0.35
+Nodes (8): a(), B(), D(), g(), i(), k(), Q(), y()
 
-### Community 14 - "Database Migrations"
-Cohesion: 0.18
-Nodes (5): InitialCreate, OneMoreTaskTracker.Tasks.Migrations, InitialCreate, OneMoreTaskTracker.Users.Migrations, Migration
+### Community 22 - "Community 22"
+Cohesion: 0.2
+Nodes (4): ApiWebApplicationFactory, ProductionWiringWebApplicationFactory, TasksControllerWebApplicationFactory, WebApplicationFactory
 
-### Community 15 - "List Tasks Handler"
+### Community 23 - "Community 23"
 Cohesion: 0.4
 Nodes (2): ListTasksHandler, ListTasksHandlerTests
 
-### Community 16 - "gRPC Exception Middleware"
-Cohesion: 0.33
-Nodes (2): GrpcExceptionMiddleware, GrpcExceptionMiddlewareTests
+### Community 24 - "Community 24"
+Cohesion: 0.2
+Nodes (3): IDisposable, IGitLabApiClient, UserServiceHandlerTestBase
 
-### Community 17 - "Backend Domain Docs"
-Cohesion: 0.24
-Nodes (10): Backend Services Layer, OneMoreTaskTracker.Domain (Core Domain Logic), DevToRelease (DTR) Workflow, Entity Framework Core ORM with DbContext, Handler Pattern (One Per Use-Case), Mapster Data Mapping Library, MergeMrs (MMR) Workflow, Why providers abstract data access for testing (+2 more)
-
-### Community 18 - "ClaimsPrincipal Extensions"
+### Community 25 - "Community 25"
 Cohesion: 0.36
 Nodes (1): ClaimsPrincipalExtensionsTests
 
-### Community 19 - "DB Model Snapshots"
+### Community 26 - "Community 26"
 Cohesion: 0.22
 Nodes (5): ModelSnapshot, OneMoreTaskTracker.Tasks.Migrations, TasksDbContextModelSnapshot, OneMoreTaskTracker.Users.Migrations, UsersDbContextModelSnapshot
 
-### Community 20 - "Frontend Toolchain"
+### Community 27 - "Community 27"
 Cohesion: 0.25
 Nodes (8): ESLint Configuration, React 19, React Compiler, TypeScript, Vite Bundler, Vite React Plugin (@vitejs/plugin-react), Vite React SWC Plugin (@vitejs/plugin-react-swc), WebClient README Documentation
 
-### Community 21 - "Error Boundary"
-Cohesion: 0.25
-Nodes (2): ErrorBoundary, renderWithRouter()
-
-### Community 22 - "Auth Context & Login"
+### Community 28 - "Community 28"
 Cohesion: 0.29
-Nodes (3): useAuth(), LoginPage(), ProtectedRoute()
+Nodes (1): ResultTests
 
-### Community 23 - "EF Core DbContexts"
+### Community 29 - "Community 29"
 Cohesion: 0.29
 Nodes (3): DbContext, TasksDbContext, UsersDbContext
 
-### Community 24 - "Dialogs & Shortcuts"
+### Community 30 - "Community 30"
 Cohesion: 0.33
 Nodes (3): ConfirmDialog(), ShortcutLegend(), useKeyboardShortcut()
 
-### Community 25 - "ErrorBoundary Tests"
+### Community 31 - "Community 31"
+Cohesion: 0.7
+Nodes (4): goToNext(), goToPrevious(), makeCurrent(), toggleClass()
+
+### Community 32 - "Community 32"
 Cohesion: 0.5
 Nodes (0): 
 
-### Community 26 - "MRs Provider"
+### Community 33 - "Community 33"
 Cohesion: 0.5
-Nodes (2): IMrsProvider, MrsProvider
+Nodes (0): 
 
-### Community 27 - "Tasks Initial Migration"
-Cohesion: 0.5
-Nodes (2): InitialCreate, OneMoreTaskTracker.Tasks.Migrations
-
-### Community 28 - "Projects Provider"
+### Community 34 - "Community 34"
 Cohesion: 0.5
 Nodes (2): EventBasedProjectsProvider, IProjectsProvider
 
-### Community 29 - "Users Initial Migration"
+### Community 35 - "Community 35"
+Cohesion: 0.5
+Nodes (2): IMrsProvider, MrsProvider
+
+### Community 36 - "Community 36"
+Cohesion: 0.5
+Nodes (2): InitialCreate, OneMoreTaskTracker.Tasks.Migrations
+
+### Community 37 - "Community 37"
 Cohesion: 0.5
 Nodes (2): InitialCreate, OneMoreTaskTracker.Users.Migrations
 
-### Community 30 - "Frontend App Root"
+### Community 38 - "Community 38"
+Cohesion: 0.5
+Nodes (2): OneMoreTaskTracker.Users.Migrations, SplitDeveloperRole
+
+### Community 39 - "Community 39"
 Cohesion: 0.67
 Nodes (0): 
 
-### Community 31 - "Integration Icon"
+### Community 40 - "Community 40"
 Cohesion: 1.0
 Nodes (2): getSignalColor(), IntegrationIcon()
 
-### Community 32 - "Auth API Client"
+### Community 41 - "Community 41"
 Cohesion: 0.67
 Nodes (0): 
 
-### Community 33 - "MR DTO & Extensions"
+### Community 42 - "Community 42"
 Cohesion: 0.67
 Nodes (2): IMrInfo, MrDto
 
-### Community 34 - "IMrsProvider Interface"
+### Community 43 - "Community 43"
 Cohesion: 0.67
 Nodes (1): IMrsProvider
 
-### Community 35 - "IProjectsProvider Interface"
+### Community 44 - "Community 44"
 Cohesion: 0.67
 Nodes (1): IProjectsProvider
 
-### Community 36 - "SVG Assets & Gradients"
+### Community 45 - "Community 45"
 Cohesion: 0.67
 Nodes (3): Cyan to Purple Linear Gradient, Yellow to Orange Linear Gradient, Vite Logo SVG Asset
 
-### Community 37 - "Test Utils"
+### Community 46 - "Community 46"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 38 - "Integration Status Util"
+### Community 47 - "Community 47"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 39 - "AuthContext Test Wrapper"
+### Community 48 - "Community 48"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 40 - "Spinner"
+### Community 49 - "Community 49"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 41 - "useTaskDetail Hook"
+### Community 50 - "Community 50"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 42 - "IMrInfo Interface"
+### Community 51 - "Community 51"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 52 - "Community 52"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 53 - "Community 53"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 54 - "Community 54"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 55 - "Community 55"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 56 - "Community 56"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 57 - "Community 57"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 58 - "Community 58"
+Cohesion: 1.0
+Nodes (1): TestJwtDefaults
+
+### Community 59 - "Community 59"
 Cohesion: 1.0
 Nodes (1): IMrInfo
 
-### Community 43 - "User Entity"
+### Community 60 - "Community 60"
 Cohesion: 1.0
 Nodes (1): User
 
-### Community 44 - "Program Entry Point"
+### Community 61 - "Community 61"
 Cohesion: 1.0
 Nodes (1): Program
 
-### Community 45 - "ClaimsPrincipal Helpers"
+### Community 62 - "Community 62"
 Cohesion: 1.0
 Nodes (1): ClaimsPrincipalExtensions
 
-### Community 46 - "JWT Options"
+### Community 63 - "Community 63"
 Cohesion: 1.0
 Nodes (1): JwtOptions
 
-### Community 47 - "Roles Constants"
-Cohesion: 1.0
-Nodes (1): Roles
-
-### Community 48 - "ESLint Config"
+### Community 64 - "Community 64"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 49 - "Vitest Config"
+### Community 65 - "Community 65"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 50 - "Frontend Test Setup"
+### Community 66 - "Community 66"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 51 - "Integration Status Test"
+### Community 67 - "Community 67"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 52 - "Task Type"
+### Community 68 - "Community 68"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 53 - "Auth Type"
+### Community 69 - "Community 69"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 54 - "Auth Type Test"
+### Community 70 - "Community 70"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 55 - "Task Constants"
+### Community 71 - "Community 71"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 56 - "AppHeader"
+### Community 72 - "Community 72"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 57 - "ConfirmDialog Test"
+### Community 73 - "Community 73"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 58 - "useTaskDetail Test"
+### Community 74 - "Community 74"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 59 - "useKeyboardShortcut Test"
+### Community 75 - "Community 75"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 60 - "Zod Schemas"
+### Community 76 - "Community 76"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 61 - "Schemas Test"
+### Community 77 - "Community 77"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 62 - "HTTP Client Test"
+### Community 78 - "Community 78"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 63 - "Tasks API Test"
+### Community 79 - "Community 79"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 64 - "Auth API Test"
+### Community 80 - "Community 80"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 65 - "Fake MR Info"
+### Community 81 - "Community 81"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 66 - "Proxy Program Entry"
+### Community 82 - "Community 82"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 67 - "MergeRequestInfo Type"
+### Community 83 - "Community 83"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 68 - "MergeRequest Entity"
+### Community 84 - "Community 84"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 69 - "GitRepo Entity"
+### Community 85 - "Community 85"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 70 - "Project Entity"
+### Community 86 - "Community 86"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 71 - "Result Type"
+### Community 87 - "Community 87"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 72 - "Tasks Program Entry"
+### Community 88 - "Community 88"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 73 - "Users Program Entry"
+### Community 89 - "Community 89"
 Cohesion: 1.0
 Nodes (0): 
 
-### Community 74 - "Mapster Mapping"
+### Community 90 - "Community 90"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 91 - "Community 91"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 92 - "Community 92"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 93 - "Community 93"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 94 - "Community 94"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 95 - "Community 95"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 96 - "Community 96"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 97 - "Community 97"
 Cohesion: 1.0
 Nodes (1): Mapster Object Mapping
 
 ## Knowledge Gaps
-- **59 isolated node(s):** `TestDto`, `IMrInfo`, `OneMoreTaskTracker.Tasks.Migrations`, `OneMoreTaskTracker.Tasks.Migrations`, `OneMoreTaskTracker.Tasks.Migrations` (+54 more)
+- **61 isolated node(s):** `TestJwtDefaults`, `TestDto`, `IMrInfo`, `OneMoreTaskTracker.Tasks.Migrations`, `OneMoreTaskTracker.Tasks.Migrations` (+56 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Test Utils`** (2 nodes): `testUtils.ts`, `makeResponse()`
+- **Thin community `Community 46`** (2 nodes): `testUtils.ts`, `makeResponse()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Integration Status Util`** (2 nodes): `deriveIntegrations()`, `integrationStatus.ts`
+- **Thin community `Community 47`** (2 nodes): `deriveIntegrations()`, `integrationStatus.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `AuthContext Test Wrapper`** (2 nodes): `wrapper()`, `AuthContext.test.tsx`
+- **Thin community `Community 48`** (2 nodes): `wrapper()`, `AuthContext.test.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Spinner`** (2 nodes): `Spinner.tsx`, `Spinner()`
+- **Thin community `Community 49`** (2 nodes): `Roster.test.tsx`, `createMember()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `useTaskDetail Hook`** (2 nodes): `useTaskDetail.ts`, `useTaskDetail()`
+- **Thin community `Community 50`** (2 nodes): `StateBar.tsx`, `StateBar()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `IMrInfo Interface`** (2 nodes): `IMrInfo`, `IMrInfo.cs`
+- **Thin community `Community 51`** (2 nodes): `InviteRow()`, `InviteRow.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `User Entity`** (2 nodes): `User.cs`, `User`
+- **Thin community `Community 52`** (2 nodes): `sort.test.ts`, `createMember()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Program Entry Point`** (2 nodes): `Program.cs`, `Program`
+- **Thin community `Community 53`** (2 nodes): `RoleBadge.tsx`, `RoleBadge()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ClaimsPrincipal Helpers`** (2 nodes): `ClaimsPrincipalExtensions`, `ClaimsPrincipalExtensions.cs`
+- **Thin community `Community 54`** (2 nodes): `StateBarLegend.tsx`, `StateBarLegend()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `JWT Options`** (2 nodes): `JwtOptions`, `JwtOptions.cs`
+- **Thin community `Community 55`** (2 nodes): `time.ts`, `formatLastActiveRu()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Roles Constants`** (2 nodes): `Roles.cs`, `Roles`
+- **Thin community `Community 56`** (2 nodes): `Spinner.tsx`, `Spinner()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ESLint Config`** (1 nodes): `eslint.config.js`
+- **Thin community `Community 57`** (2 nodes): `useTaskDetail.ts`, `useTaskDetail()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Vitest Config`** (1 nodes): `vitest.config.ts`
+- **Thin community `Community 58`** (2 nodes): `TestJwtDefaults`, `TestJwtDefaults.cs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Frontend Test Setup`** (1 nodes): `setup.ts`
+- **Thin community `Community 59`** (2 nodes): `IMrInfo`, `IMrInfo.cs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Integration Status Test`** (1 nodes): `integrationStatus.test.ts`
+- **Thin community `Community 60`** (2 nodes): `User.cs`, `User`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Task Type`** (1 nodes): `task.ts`
+- **Thin community `Community 61`** (2 nodes): `Program.cs`, `Program`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Auth Type`** (1 nodes): `auth.ts`
+- **Thin community `Community 62`** (2 nodes): `ClaimsPrincipalExtensions`, `ClaimsPrincipalExtensions.cs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Auth Type Test`** (1 nodes): `auth.test.ts`
+- **Thin community `Community 63`** (2 nodes): `JwtOptions`, `JwtOptions.cs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Task Constants`** (1 nodes): `taskConstants.ts`
+- **Thin community `Community 64`** (1 nodes): `eslint.config.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `AppHeader`** (1 nodes): `AppHeader.tsx`
+- **Thin community `Community 65`** (1 nodes): `vitest.config.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `ConfirmDialog Test`** (1 nodes): `ConfirmDialog.test.tsx`
+- **Thin community `Community 66`** (1 nodes): `setup.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `useTaskDetail Test`** (1 nodes): `useTaskDetail.test.ts`
+- **Thin community `Community 67`** (1 nodes): `integrationStatus.test.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `useKeyboardShortcut Test`** (1 nodes): `useKeyboardShortcut.test.ts`
+- **Thin community `Community 68`** (1 nodes): `StateBar.test.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Zod Schemas`** (1 nodes): `schemas.ts`
+- **Thin community `Community 69`** (1 nodes): `InviteRow.test.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Schemas Test`** (1 nodes): `schemas.test.ts`
+- **Thin community `Community 70`** (1 nodes): `StateBarLegend.test.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `HTTP Client Test`** (1 nodes): `httpClient.test.ts`
+- **Thin community `Community 71`** (1 nodes): `time.test.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Tasks API Test`** (1 nodes): `tasksApi.test.ts`
+- **Thin community `Community 72`** (1 nodes): `RoleBadge.test.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Auth API Test`** (1 nodes): `authApi.test.ts`
+- **Thin community `Community 73`** (1 nodes): `task.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Fake MR Info`** (1 nodes): `FakeMrInfo.cs`
+- **Thin community `Community 74`** (1 nodes): `auth.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Proxy Program Entry`** (1 nodes): `Program.cs`
+- **Thin community `Community 75`** (1 nodes): `roles.test.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `MergeRequestInfo Type`** (1 nodes): `MergeRequestInfo.cs`
+- **Thin community `Community 76`** (1 nodes): `auth.test.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `MergeRequest Entity`** (1 nodes): `MergeRequest.cs`
+- **Thin community `Community 77`** (1 nodes): `taskConstants.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `GitRepo Entity`** (1 nodes): `GitRepo.cs`
+- **Thin community `Community 78`** (1 nodes): `AppHeader.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Project Entity`** (1 nodes): `Project.cs`
+- **Thin community `Community 79`** (1 nodes): `ConfirmDialog.test.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Result Type`** (1 nodes): `Result.cs`
+- **Thin community `Community 80`** (1 nodes): `useTaskDetail.test.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Tasks Program Entry`** (1 nodes): `Program.cs`
+- **Thin community `Community 81`** (1 nodes): `useKeyboardShortcut.test.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Users Program Entry`** (1 nodes): `Program.cs`
+- **Thin community `Community 82`** (1 nodes): `schemas.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Mapster Mapping`** (1 nodes): `Mapster Object Mapping`
+- **Thin community `Community 83`** (1 nodes): `schemas.test.ts`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 84`** (1 nodes): `httpClient.test.ts`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 85`** (1 nodes): `teamApi.test.ts`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 86`** (1 nodes): `tasksApi.test.ts`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 87`** (1 nodes): `authApi.test.ts`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 88`** (1 nodes): `FakeMrInfo.cs`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 89`** (1 nodes): `Program.cs`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 90`** (1 nodes): `MergeRequestInfo.cs`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 91`** (1 nodes): `MergeRequest.cs`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 92`** (1 nodes): `GitRepo.cs`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 93`** (1 nodes): `Project.cs`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 94`** (1 nodes): `Result.cs`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 95`** (1 nodes): `Program.cs`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 96`** (1 nodes): `Program.cs`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 97`** (1 nodes): `Mapster Object Mapping`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `UserServiceHandlerTests` connect `GitLab API Client` to `GitLab Proxy Handlers`, `Auth Controllers & Pages`?**
-  _High betweenness centrality (0.061) - this node is a cross-community bridge._
-- **Why does `TasksControllerIntegrationTests` connect `Integration Test Harness` to `GitLab Proxy Handlers`?**
-  _High betweenness centrality (0.050) - this node is a cross-community bridge._
-- **Why does `AuthControllerIntegrationTests` connect `Auth Integration Tests` to `GitLab Proxy Handlers`, `Integration Test Harness`?**
-  _High betweenness centrality (0.025) - this node is a cross-community bridge._
-- **What connects `TestDto`, `IMrInfo`, `OneMoreTaskTracker.Tasks.Migrations` to the rest of the system?**
-  _59 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `GitLab Proxy Handlers` be split into smaller, more focused modules?**
-  _Cohesion score 0.03 - nodes in this community are weakly interconnected._
-- **Should `Task Creation & MR Queries` be split into smaller, more focused modules?**
-  _Cohesion score 0.06 - nodes in this community are weakly interconnected._
-- **Should `System Architecture & Docs` be split into smaller, more focused modules?**
-  _Cohesion score 0.05 - nodes in this community are weakly interconnected._
+- **Why does `UserServiceHandlerRegisterTests` connect `Community 6` to `Community 0`, `Community 5`?**
+  _High betweenness centrality (0.024) - this node is a cross-community bridge._
+- **Why does `TeamControllerIntegrationTests` connect `Community 4` to `Community 0`, `Community 3`?**
+  _High betweenness centrality (0.024) - this node is a cross-community bridge._
+- **Why does `RolesTests` connect `Community 12` to `Community 0`?**
+  _High betweenness centrality (0.024) - this node is a cross-community bridge._
+- **What connects `TestJwtDefaults`, `TestDto`, `IMrInfo` to the rest of the system?**
+  _61 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Community 0` be split into smaller, more focused modules?**
+  _Cohesion score 0.04 - nodes in this community are weakly interconnected._
+- **Should `Community 1` be split into smaller, more focused modules?**
+  _Cohesion score 0.07 - nodes in this community are weakly interconnected._
+- **Should `Community 2` be split into smaller, more focused modules?**
+  _Cohesion score 0.04 - nodes in this community are weakly interconnected._
