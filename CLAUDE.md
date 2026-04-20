@@ -1,6 +1,31 @@
+@~/.claude/rules/microservices/contracts.md
+@~/.claude/rules/microservices/composition.md
+@~/.claude/rules/microservices/security.md
+@~/.claude/rules/microservices/data.md
+
 # OneMoreTaskTracker
 
-A distributed system for managing GitLab merge requests and tasks via a microservice architecture.
+A distributed system for managing GitLab merge requests and tasks.
+
+## Architecture
+
+**Microservices + Domain-Driven Design.** Each service is a bounded context with its own schema, wire contract, and deployment lifecycle. The gateway (`OneMoreTaskTracker.Api`) owns all cross-service composition; sibling services do NOT call each other east-west. The design rules that govern this architecture live in `~/.claude/rules/microservices/*.md` (imported at the top of this file).
+
+**Bounded contexts:**
+
+| Context | Responsibility | Owns |
+|---|---|---|
+| `OneMoreTaskTracker.Users` | Identity, auth, team membership | `users` schema; user records; role taxonomy (`Manager`, `FrontendDeveloper`, `BackendDeveloper`, `Qa`) |
+| `OneMoreTaskTracker.Tasks` | Task lifecycle + assignee aggregates | `tasks` schema; state machine (`NOT_STARTED → IN_DEV → MR_TO_RELEASE → IN_TEST → MR_TO_MASTER → COMPLETED`); per-assignee task summaries |
+| `OneMoreTaskTracker.GitLab.Proxy` | Anti-corruption layer around GitLab REST API | outbound GitLab API translation; no persistent state |
+| `OneMoreTaskTracker.Api` | REST gateway / BFF | JWT issuance + validation; cross-service composition; upstream-error → HTTP mapping (`GrpcExceptionMiddleware`) |
+| `OneMoreTaskTracker.WebClient` | React 19 SPA | client-facing DTOs; no direct knowledge of sibling-service contracts |
+
+**DDD conventions applied here:**
+- Each bounded context's public contract uses its own domain vocabulary (e.g. Tasks exposes `AssigneeTaskSummary`, not `UserStatus`). Cross-context identities use role-prefixed references (`assignee_user_id`). See `~/.claude/rules/microservices/contracts.md`.
+- Handler-per-use-case pattern (`CreateTaskHandler`, `FindMrHandler`, `RegisterHandler` etc.) aligns with Application-layer use cases.
+- `Task.UserId` column is an opaque FK to the Users context; no DB-level FK constraint across schemas.
+- Role strings (`Manager`, `FrontendDeveloper`, …) are the canonical identifier for the Users context's aggregate; every other context mirrors them verbatim (see the per-service `Roles.cs` / `Roles` mirrors).
 
 ## Tech Stack
 
@@ -98,11 +123,10 @@ Rules:
 Before implementing any task:
 
 1. **Check the knowledge graph** — `graphify-out/wiki/index.md` for a map of the system; drill into relevant community articles for involved components and their edges
-2. **Read `docs/`** — especially `docs/CODEMAPS/` for domain, data model, architecture, and component interactions
-3. **Identify components** — services, handlers, entities, proto messages, and tests to touch
-4. **Then read code** — only after understanding the design, navigate to source files
+2. **Identify components** — services, handlers, entities, proto messages, and tests to touch
+3. **Then read code** — only after understanding the design, navigate to source files
 
-`docs/` + `graphify-out/wiki/` together are the source of truth for architecture decisions.
+`graphify-out/wiki/` together are the source of truth for architecture decisions.
 
 ## Code Conventions
 
