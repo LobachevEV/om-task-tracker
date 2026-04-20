@@ -299,4 +299,128 @@ public sealed class AuthControllerIntegrationTests(ApiWebApplicationFactory fact
             Arg.Any<DateTime?>(),
             Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public async Task Register_WithManagerUser_IncludesManagerIdClaimInToken()
+    {
+        var payload = new { email = "developer@example.com", password = "password123" };
+
+        factory.MockUserService
+            .RegisterAsync(
+                Arg.Any<RegisterRequest>(),
+                Arg.Any<Metadata>(),
+                Arg.Any<DateTime?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new RegisterResponse
+            {
+                UserId = 2,
+                Email = "developer@example.com",
+                Role = "FrontendDeveloper",
+                ManagerUserId = 1  // Developer is managed by user 1
+            }));
+
+        var response = await PostAsJsonAsync(_client, "/api/auth/register", payload);
+        var json = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(json);
+        var token = doc.RootElement.GetProperty("token").GetString();
+
+        var handler = new JwtSecurityTokenHandler();
+        var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
+        jwtToken.Should().NotBeNull();
+        jwtToken!.Claims.Should().Contain(c =>
+            c.Type == "manager_id" && c.Value == "1");
+    }
+
+    [Fact]
+    public async Task Register_WithoutManager_DoesNotIncludeManagerIdClaimInToken()
+    {
+        var payload = new { email = "manager@example.com", password = "password123" };
+
+        factory.MockUserService
+            .RegisterAsync(
+                Arg.Any<RegisterRequest>(),
+                Arg.Any<Metadata>(),
+                Arg.Any<DateTime?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new RegisterResponse
+            {
+                UserId = 1,
+                Email = "manager@example.com",
+                Role = "Manager",
+                ManagerUserId = 0  // No manager
+            }));
+
+        var response = await PostAsJsonAsync(_client, "/api/auth/register", payload);
+        var json = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(json);
+        var token = doc.RootElement.GetProperty("token").GetString();
+
+        var handler = new JwtSecurityTokenHandler();
+        var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
+        jwtToken.Should().NotBeNull();
+        jwtToken!.Claims.Should().NotContain(c => c.Type == "manager_id");
+    }
+
+    [Fact]
+    public async Task Login_WithManagerUser_IncludesManagerIdClaimInToken()
+    {
+        var payload = new { email = "developer@example.com", password = "password123" };
+
+        factory.MockUserService
+            .AuthenticateAsync(
+                Arg.Any<AuthenticateRequest>(),
+                Arg.Any<Metadata>(),
+                Arg.Any<DateTime?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new AuthenticateResponse
+            {
+                Success = true,
+                UserId = 2,
+                Email = "developer@example.com",
+                Role = "FrontendDeveloper",
+                ManagerUserId = 1  // Developer is managed by user 1
+            }));
+
+        var response = await PostAsJsonAsync(_client, "/api/auth/login", payload);
+        var json = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(json);
+        var token = doc.RootElement.GetProperty("token").GetString();
+
+        var handler = new JwtSecurityTokenHandler();
+        var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
+        jwtToken.Should().NotBeNull();
+        jwtToken!.Claims.Should().Contain(c =>
+            c.Type == "manager_id" && c.Value == "1");
+    }
+
+    [Fact]
+    public async Task Login_WithoutManager_DoesNotIncludeManagerIdClaimInToken()
+    {
+        var payload = new { email = "manager@example.com", password = "password123" };
+
+        factory.MockUserService
+            .AuthenticateAsync(
+                Arg.Any<AuthenticateRequest>(),
+                Arg.Any<Metadata>(),
+                Arg.Any<DateTime?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new AuthenticateResponse
+            {
+                Success = true,
+                UserId = 1,
+                Email = "manager@example.com",
+                Role = "Manager",
+                ManagerUserId = 0  // No manager
+            }));
+
+        var response = await PostAsJsonAsync(_client, "/api/auth/login", payload);
+        var json = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(json);
+        var token = doc.RootElement.GetProperty("token").GetString();
+
+        var handler = new JwtSecurityTokenHandler();
+        var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
+        jwtToken.Should().NotBeNull();
+        jwtToken!.Claims.Should().NotContain(c => c.Type == "manager_id");
+    }
 }

@@ -19,20 +19,36 @@ public sealed class JwtTokenService
         _credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
     }
 
-    public string GenerateToken(int userId, string email, string role)
+    public string GenerateToken(int userId, string email, string role, int? managerId = null)
     {
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+            new Claim(ClaimTypes.Email, email),
+            new Claim(ClaimTypes.Role, role)
+        };
+
+        if (managerId.HasValue)
+        {
+            claims.Add(new Claim("manager_id", managerId.Value.ToString()));
+        }
+
         var token = new JwtSecurityToken(
             issuer: _options.Issuer,
             audience: _options.Audience,
-            claims:
-            [
-                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim(ClaimTypes.Email, email),
-                new Claim(ClaimTypes.Role, role)
-            ],
+            claims: claims,
             expires: DateTime.UtcNow.AddMinutes(_options.ExpirationMinutes),
             signingCredentials: _credentials);
 
         return Handler.WriteToken(token);
+    }
+
+    /// <summary>
+    /// Generates a JWT token from an IAuthUserContext, collapsing the 4-parameter
+    /// overload into a single interface argument per microservices/contracts.md.
+    /// </summary>
+    public string GenerateToken(IAuthUserContext userContext)
+    {
+        return GenerateToken(userContext.UserId, userContext.Email, userContext.Role, userContext.ManagerId);
     }
 }

@@ -23,7 +23,7 @@ public class AuthController(
             ManagerId = 0
         }, cancellationToken: cancellationToken);
 
-        var token = jwtTokenService.GenerateToken(response.UserId, response.Email, response.Role);
+        var token = jwtTokenService.GenerateToken(response);
         return Ok(new AuthResponse(token, response.UserId, response.Email, response.Role));
     }
 
@@ -41,7 +41,7 @@ public class AuthController(
         if (!response.Success)
             return Unauthorized(new { error = "Invalid email or password" });
 
-        var token = jwtTokenService.GenerateToken(response.UserId, response.Email, response.Role);
+        var token = jwtTokenService.GenerateToken(response);
         return Ok(new AuthResponse(token, response.UserId, response.Email, response.Role));
     }
 }
