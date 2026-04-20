@@ -101,6 +101,25 @@ describe('ConfirmDialog', () => {
     expect(screen.getByRole('button', { name: 'Отмена' })).toBeInTheDocument();
   });
 
+  it('does not render when isOpen is false', () => {
+    const onConfirm = vi.fn();
+    const onCancel = vi.fn();
+
+    render(
+      <ConfirmDialog
+        isOpen={false}
+        title="Hidden"
+        message="Should not appear"
+        onConfirm={onConfirm}
+        onCancel={onCancel}
+      />,
+    );
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByText('Hidden')).not.toBeInTheDocument();
+    expect(screen.queryByText('Should not appear')).not.toBeInTheDocument();
+  });
+
   it('renders with proper dialog attributes', () => {
     const onConfirm = vi.fn();
     const onCancel = vi.fn();

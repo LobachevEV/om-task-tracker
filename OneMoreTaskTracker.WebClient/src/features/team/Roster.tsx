@@ -1,7 +1,8 @@
+import { useTranslation } from 'react-i18next';
 import { RoleBadge } from './RoleBadge';
 import { StateBar } from './StateBar';
 import { RowMenu } from './RowMenu';
-import { formatLastActiveRu } from './time';
+import { formatLastActive } from './time';
 import { isUserRole, type UserRole } from '../../shared/auth/roles';
 import type { TeamRosterMember } from '../../shared/api/teamApi';
 import './Roster.css';
@@ -32,6 +33,7 @@ function getAvatarInitials(displayName: string): string {
 }
 
 export function Roster({ members, viewerRole, onRemoveClick }: RosterProps) {
+  const { t } = useTranslation('team');
   const isManager = viewerRole === 'Manager';
 
   return (
@@ -39,11 +41,11 @@ export function Roster({ members, viewerRole, onRemoveClick }: RosterProps) {
       <table className="roster-table">
         <thead>
           <tr>
-            <th className="roster-table__header-member">Участник · Member</th>
-            <th className="roster-table__header-role">Роль · Role</th>
-            <th className="roster-table__header-active">Активн.</th>
-            <th className="roster-table__header-mix">Распределение · State mix</th>
-            <th className="roster-table__header-last">Посл. активность · Last active</th>
+            <th className="roster-table__header-member">{t('roster.member')}</th>
+            <th className="roster-table__header-role">{t('roster.role')}</th>
+            <th className="roster-table__header-active">{t('roster.active')}</th>
+            <th className="roster-table__header-mix">{t('roster.stateMix')}</th>
+            <th className="roster-table__header-last">{t('roster.lastActive')}</th>
             {isManager && <th className="roster-table__header-actions" />}
           </tr>
         </thead>
@@ -59,7 +61,7 @@ export function Roster({ members, viewerRole, onRemoveClick }: RosterProps) {
                   <div className="roster-table__name-info">
                     <div className="member-name">
                       {member.displayName}
-                      {member.isSelf && <span className="chip-you">ВЫ · YOU</span>}
+                      {member.isSelf && <span className="chip-you">{t('you')}</span>}
                     </div>
                     <div className="member-handle">{member.email}</div>
                   </div>
@@ -84,7 +86,7 @@ export function Roster({ members, viewerRole, onRemoveClick }: RosterProps) {
 
               {/* Last active column */}
               <td className="roster-table__last-active">
-                {formatLastActiveRu(member.status.lastActive)}
+                {formatLastActive(member.status.lastActive)}
               </td>
 
               {/* Actions column */}

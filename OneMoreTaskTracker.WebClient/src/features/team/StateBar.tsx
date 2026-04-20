@@ -1,4 +1,6 @@
+import { useTranslation } from 'react-i18next';
 import type { StateMix } from '../../shared/api/teamApi';
+import { TEAM_STATE_ENTRIES } from './stateConfig';
 import './StateBar.css';
 
 interface StateBarProps {
@@ -6,13 +8,12 @@ interface StateBarProps {
 }
 
 export function StateBar({ mix }: StateBarProps) {
-  const states = [
-    { key: 'inDev', label: 'В разработке · In Dev', count: mix.inDev },
-    { key: 'mrToRelease', label: 'MR в релиз · MR to Release', count: mix.mrToRelease },
-    { key: 'inTest', label: 'В тесте · In Test', count: mix.inTest },
-    { key: 'mrToMaster', label: 'MR в мастер · MR to Master', count: mix.mrToMaster },
-    { key: 'completed', label: 'Готово · Completed', count: mix.completed },
-  ] as const;
+  const { t } = useTranslation('tasks');
+  const states = TEAM_STATE_ENTRIES.map((entry) => ({
+    key: entry.key,
+    label: t(entry.i18nKey),
+    count: mix[entry.key],
+  }));
 
   const total = mix.inDev + mix.mrToRelease + mix.inTest + mix.mrToMaster + mix.completed;
   const isEmpty = total === 0;

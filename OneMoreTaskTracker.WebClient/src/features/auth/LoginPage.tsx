@@ -1,11 +1,13 @@
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { login as apiLogin } from '../../shared/api/authApi';
 import { useAuth } from './AuthContext';
 import './AuthPages.css';
 
 export function LoginPage() {
+  const { t } = useTranslation('auth');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +26,7 @@ export function LoginPage() {
       login(response.token, response.userId, response.email, response.role);
       navigate('/', { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      setError(err instanceof Error ? err.message : t('login.failed'));
     } finally {
       setSubmitting(false);
     }
@@ -35,10 +37,10 @@ export function LoginPage() {
       <main className="login-main">
         <section className="card login-card">
           <h2 className="login-card__title">One More Task Tracker</h2>
-          <p className="login-card__subtitle">Войдите в систему</p>
+          <p className="login-card__subtitle">{t('login.subtitle')}</p>
           <form className="login-form" onSubmit={handleSubmit}>
             <label className="field">
-              <span className="field__label">Email</span>
+              <span className="field__label">{t('field.email')}</span>
               <input
                 className="field__input"
                 type="email"
@@ -49,7 +51,7 @@ export function LoginPage() {
               />
             </label>
             <label className="field">
-              <span className="field__label">Пароль</span>
+              <span className="field__label">{t('field.password')}</span>
               <input
                 className="field__input"
                 type="password"
@@ -64,12 +66,12 @@ export function LoginPage() {
               type="submit"
               disabled={!email.trim() || !password || submitting}
             >
-              Войти
+              {t('login.submit')}
             </button>
           </form>
           {error && <p className="error-text">{error}</p>}
           <p className="login-card__nav">
-            Нет аккаунта? <Link to="/register" className="login-card__link">Зарегистрироваться</Link>
+            {t('login.noAccount')} <Link to="/register" className="login-card__link">{t('login.registerLink')}</Link>
           </p>
         </section>
       </main>

@@ -1,0 +1,44 @@
+{
+  "title": "My team",
+  "managerLabel": "Manager",
+  "developersCount_one": "{{count}} developer",
+  "developersCount_other": "{{count}} developers",
+  "emptyTeam": "team is empty",
+  "searchPlaceholder": "Search by name / email",
+  "loadFailed": "Could not load team",
+  "retry": "Retry",
+  "removeFailed": "Could not remove member",
+  "readonly": "Read-only — only managers can modify.",
+  "noMatches": "No members match",
+  "you": "YOU",
+  "remove": {
+    "menuItem": "Remove from team",
+    "title": "Remove from team",
+    "message": "{{name}} ({{email}}) will be removed from your team. Tasks stay, but unassigned.",
+    "confirm": "Remove"
+  },
+  "invite": {
+    "placeholder": "dev@onemore.dev — add by email",
+    "submit": "Add",
+    "submitBusy": "Adding…"
+  },
+  "passwordToast": {
+    "message": "{{email}} added as {{role}}. Temporary password:",
+    "copy": "Copy",
+    "close": "Close"
+  },
+  "roster": {
+    "member": "Member",
+    "role": "Role",
+    "active": "Active",
+    "stateMix": "State mix",
+    "lastActive": "Last active"
+  },
+  "lastActive": {
+    "never": "—",
+    "minutesAgo": "{{count}} min ago",
+    "hoursAgo": "{{count}} hr ago",
+    "yesterday": "yesterday",
+    "daysAgo": "{{count}} d ago"
+  }
+}

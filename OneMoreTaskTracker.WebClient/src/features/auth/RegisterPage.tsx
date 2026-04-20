@@ -1,6 +1,7 @@
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { register as apiRegister } from '../../shared/api/authApi';
 import { useAuth } from './AuthContext';
 import './AuthPages.css';
@@ -8,6 +9,7 @@ import './AuthPages.css';
 const MIN_PASSWORD_LENGTH = 8;
 
 export function RegisterPage() {
+  const { t } = useTranslation('auth');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -38,9 +40,9 @@ export function RegisterPage() {
       login(response.token, response.userId, response.email, response.role);
       navigate('/', { replace: true });
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Registration failed';
+      const message = err instanceof Error ? err.message : t('register.failed');
       if (message.includes('409')) {
-        setError('Этот email уже зарегистрирован');
+        setError(t('register.emailTaken'));
       } else {
         setError(message);
       }
@@ -54,11 +56,11 @@ export function RegisterPage() {
       <main className="login-main">
         <section className="card login-card">
           <h2 className="login-card__title">One More Task Tracker</h2>
-          <p className="login-card__subtitle">Создайте аккаунт</p>
-          <p className="login-card__helper">Вы станете менеджером новой команды</p>
+          <p className="login-card__subtitle">{t('register.subtitle')}</p>
+          <p className="login-card__helper">{t('register.helper')}</p>
           <form className="login-form" onSubmit={handleSubmit}>
             <label className="field">
-              <span className="field__label">Email</span>
+              <span className="field__label">{t('field.email')}</span>
               <input
                 className="field__input"
                 type="email"
@@ -69,21 +71,21 @@ export function RegisterPage() {
               />
             </label>
             <label className="field">
-              <span className="field__label">Пароль</span>
+              <span className="field__label">{t('field.password')}</span>
               <input
                 className="field__input"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Минимум 8 символов"
+                placeholder={t('register.passwordPlaceholder', { count: MIN_PASSWORD_LENGTH })}
                 autoComplete="new-password"
               />
               {passwordTooShort && (
-                <span className="field__hint">Минимум {MIN_PASSWORD_LENGTH} символов</span>
+                <span className="field__hint">{t('register.minLengthHint', { count: MIN_PASSWORD_LENGTH })}</span>
               )}
             </label>
             <label className="field">
-              <span className="field__label">Подтвердите пароль</span>
+              <span className="field__label">{t('field.passwordConfirm')}</span>
               <input
                 className="field__input"
                 type="password"
@@ -93,7 +95,7 @@ export function RegisterPage() {
                 autoComplete="new-password"
               />
               {passwordsMismatch && (
-                <span className="field__hint">Пароли не совпадают</span>
+                <span className="field__hint">{t('register.passwordsMismatch')}</span>
               )}
             </label>
             <button
@@ -101,12 +103,12 @@ export function RegisterPage() {
               type="submit"
               disabled={!canSubmit}
             >
-              Зарегистрироваться
+              {t('register.submit')}
             </button>
           </form>
           {error && <p className="error-text">{error}</p>}
           <p className="login-card__nav">
-            Уже есть аккаунт? <Link to="/login" className="login-card__link">Войти</Link>
+            {t('register.haveAccount')} <Link to="/login" className="login-card__link">{t('register.loginLink')}</Link>
           </p>
         </section>
       </main>

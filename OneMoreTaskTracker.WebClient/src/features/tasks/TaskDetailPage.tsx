@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { moveTask } from '../../shared/api/tasksApi';
 import { ConfirmDialog } from '../../shared/components/ConfirmDialog';
 import { Spinner } from '../../shared/components/Spinner';
-import { STATE_CLASS, STATE_LABEL, STATE_STEPS } from '../../shared/constants/taskConstants';
+import { STATE_CLASS, STATE_STEPS } from '../../shared/constants/taskConstants';
 import { useKeyboardShortcut } from '../../shared/hooks/useKeyboardShortcut';
 import { useTaskDetail } from '../../shared/hooks/useTaskDetail';
 import './TaskDetailPage.css';
 
 export function TaskDetailPage() {
+  const { t } = useTranslation('tasks');
   const { jiraId = '' } = useParams<{ jiraId: string }>();
   const navigate = useNavigate();
   const { task, loading, error, refetch } = useTaskDetail(jiraId);
@@ -39,7 +41,7 @@ export function TaskDetailPage() {
       await moveTask(jiraId);
       refetch();
     } catch (err) {
-      setMoveError(err instanceof Error ? err.message : 'Не удалось изменить статус');
+      setMoveError(err instanceof Error ? err.message : t('detail.moveFailed'));
     } finally {
       setMoving(false);
     }
@@ -51,9 +53,9 @@ export function TaskDetailPage() {
     <div className="app-shell">
       {showConfirm && (
         <ConfirmDialog
-          title="Переход на следующий этап"
-          message={`Это создаст ветки или MR в GitLab. Продолжить для задачи ${jiraId}?`}
-          confirmLabel="Продолжить"
+          title={t('confirm.title')}
+          message={t('confirm.message', { jiraId })}
+          confirmLabel={t('confirm.submit')}
           onConfirm={handleMoveConfirm}
           onCancel={() => setShowConfirm(false)}
           isOpen={showConfirm}
@@ -63,7 +65,7 @@ export function TaskDetailPage() {
       <header className="app-header">
         <div className="app-header__inner">
           <div className="app-header__title">
-            <Link to="/" className="back-link">← Список задач</Link>
+            <Link to="/" className="back-link">{t('detail.back')}</Link>
             {task && <h1 className="task-detail__heading">{task.jiraId}</h1>}
           </div>
           {task && !isCompleted && (
@@ -74,7 +76,7 @@ export function TaskDetailPage() {
                 disabled={moving}
                 onClick={() => setShowConfirm(true)}
               >
-                {moving ? 'Обработка…' : 'Следующий этап →'}
+                {moving ? t('detail.processing') : t('detail.nextStage')}
               </button>
             </div>
           )}
@@ -88,7 +90,7 @@ export function TaskDetailPage() {
         {task && (
           <>
             <section className="card card--full">
-              <h2>Состояние задачи</h2>
+              <h2>{t('detail.state')}</h2>
               <div className="state-stepper">
                 {STATE_STEPS.map((step, stepIdx) => {
                   const status =
@@ -104,7 +106,7 @@ export function TaskDetailPage() {
                     >
                       <div className="state-stepper__dot" />
                       <span className={`task-list__badge task-list__badge--${STATE_CLASS[step]}`}>
-                        {STATE_LABEL[step]}
+                        {t(`state.${step}`)}
                       </span>
                     </div>
                   );
@@ -114,7 +116,7 @@ export function TaskDetailPage() {
 
             {task.projects.length > 0 && (
               <section className="card">
-                <h2>Репозитории</h2>
+                <h2>{t('detail.repositories')}</h2>
                 <ul className="detail-list">
                   {task.projects.map((p) => (
                     <li key={p.id} className="detail-list__item">
@@ -127,7 +129,7 @@ export function TaskDetailPage() {
 
             {task.mergeRequests.length > 0 && (
               <section className="card">
-                <h2>Merge Requests</h2>
+                <h2>{t('detail.mergeRequests')}</h2>
                 <ul className="detail-list">
                   {task.mergeRequests.map((mr) => (
                     <li key={mr.id} className="detail-list__item detail-list__item--mr">

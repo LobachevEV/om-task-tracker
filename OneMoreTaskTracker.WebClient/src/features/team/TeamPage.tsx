@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthContext';
 import { isDeveloperRole } from '../../shared/auth/roles';
 import type { UserRole } from '../../shared/auth/roles';
@@ -21,6 +22,7 @@ interface PasswordToast {
 }
 
 export default function TeamPage() {
+  const { t } = useTranslation('team');
   const { user } = useAuth();
   if (!user) return null;
 
@@ -44,7 +46,7 @@ export default function TeamPage() {
       const data = await teamApi.getRoster();
       setRoster(data);
     } catch (err) {
-      setLoadError('Не удалось загрузить команду · Could not load team');
+      setLoadError(t('loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -94,7 +96,7 @@ export default function TeamPage() {
       setConfirmRemoveUser(null);
       await loadRoster();
     } catch (err) {
-      setRemoveError('Не удалось удалить участника · Could not remove member');
+      setRemoveError(t('removeFailed'));
     }
   };
 
@@ -131,7 +133,7 @@ export default function TeamPage() {
         <div className="team-page__error">
           <p>{loadError}</p>
           <button onClick={loadRoster} className="secondary-button">
-            Повторить · Retry
+            {t('retry')}
           </button>
         </div>
       </div>
@@ -143,15 +145,15 @@ export default function TeamPage() {
       <div className="team-page">
         <div className="team-toolbar">
           <div className="team-toolbar__info">
-            <h1 className="team-toolbar__title">Моя команда · My team</h1>
+            <h1 className="team-toolbar__title">{t('title')}</h1>
             <p className="team-toolbar__summary">
               {isManager ? (
                 <>
-                  Менеджер · Manager: <strong>{user.email}</strong> · {developerCount > 0 ? `${developerCount} разраб. · developers` : 'команда пуста · team is empty'}
+                  {t('managerLabel')}: <strong>{user.email}</strong> · {developerCount > 0 ? t('developersCount', { count: developerCount }) : t('emptyTeam')}
                 </>
               ) : (
                 <>
-                  Менеджер · Manager: <strong>{roster?.[0]?.displayName}</strong> · {developerCount} разраб. · developers
+                  {t('managerLabel')}: <strong>{roster?.[0]?.displayName}</strong> · {t('developersCount', { count: developerCount })}
                 </>
               )}
             </p>
@@ -159,7 +161,7 @@ export default function TeamPage() {
           <div className="team-toolbar__search">
             <input
               type="text"
-              placeholder="Поиск · Search by name / email"
+              placeholder={t('searchPlaceholder')}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="team-search-input"
@@ -184,7 +186,7 @@ export default function TeamPage() {
           <div className="team-toast">
             <div className="team-toast__content">
               <p>
-                {passwordToast.email} добавлен как {passwordToast.role}. Временный пароль:{' '}
+                {t('passwordToast.message', { email: passwordToast.email, role: passwordToast.role })}{' '}
                 <code className="team-toast__password">{passwordToast.password}</code>
               </p>
             </div>
@@ -195,12 +197,12 @@ export default function TeamPage() {
                   navigator.clipboard.writeText(passwordToast.password);
                 }}
               >
-                Copy · Скопировать
+                {t('passwordToast.copy')}
               </button>
               <button
                 className="team-toast__close-btn"
                 onClick={() => setPasswordToast(null)}
-                aria-label="Close"
+                aria-label={t('passwordToast.close')}
               >
                 ×
               </button>
@@ -210,7 +212,7 @@ export default function TeamPage() {
 
         {isDev && (
           <div className="team-readonly-note">
-            Только для просмотра. Управлять командой может менеджер · Read-only — only managers can modify.
+            {t('readonly')}
           </div>
         )}
 
@@ -224,7 +226,7 @@ export default function TeamPage() {
 
         {!loading && showEmptyState && (
           <div className="team-empty-state">
-            Никого не найдено · No members match
+            {t('noMatches')}
           </div>
         )}
 
@@ -244,14 +246,13 @@ export default function TeamPage() {
 
         <ConfirmDialog
           isOpen={!!confirmRemoveUser}
-          title="Удалить из команды · Remove from team"
+          title={t('remove.title')}
           message={
             confirmRemoveUser
-              ? `${confirmRemoveUser.displayName} (${confirmRemoveUser.email}) будет удалён из вашей команды. Задачи останутся, но без исполнителя.`
+              ? t('remove.message', { name: confirmRemoveUser.displayName, email: confirmRemoveUser.email })
               : ''
           }
-          confirmLabel="Удалить · Remove"
-          cancelLabel="Отмена · Cancel"
+          confirmLabel={t('remove.confirm')}
           onConfirm={handleConfirmRemove}
           onCancel={handleCancelRemove}
         />

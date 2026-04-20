@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import './RowMenu.css';
 
 interface RowMenuProps {
@@ -6,6 +7,7 @@ interface RowMenuProps {
 }
 
 export function RowMenu({ onRemove }: RowMenuProps) {
+  const { t } = useTranslation('team');
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -64,7 +66,7 @@ export function RowMenu({ onRemove }: RowMenuProps) {
       {isOpen && (
         <div ref={menuRef} className="row-menu__popover">
           <button className="row-menu__item row-menu__item--danger" onClick={handleRemoveClick}>
-            Удалить из команды · Remove from team
+            {t('remove.menuItem')}
           </button>
         </div>
       )}

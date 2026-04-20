@@ -1,5 +1,12 @@
 import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import { beforeEach, vi } from 'vitest';
+import i18n from '../i18n/config';
+
+beforeEach(async () => {
+  if (i18n.language !== 'ru') {
+    await i18n.changeLanguage('ru');
+  }
+});
 
 // Mock fetch globally
 if (typeof window !== 'undefined') {

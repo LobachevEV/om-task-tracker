@@ -1,6 +1,7 @@
 import type { FormEvent } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Trans, useTranslation } from 'react-i18next';
 import { createTask, fetchTasks } from '../../shared/api/tasksApi';
 import { AppHeader } from '../../shared/components/AppHeader';
 import { ShortcutLegend } from '../../shared/components/ShortcutLegend';
@@ -16,6 +17,7 @@ import './TaskPage.css';
 type FilterState = TaskState | 'All';
 
 export function TaskPage() {
+  const { t } = useTranslation('tasks');
   const { user } = useAuth();
   const isManager = user?.role === 'Manager';
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -37,7 +39,7 @@ export function TaskPage() {
         const data = await fetchTasks();
         if (!cancelled) setTasks(data);
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Unknown error');
+        if (!cancelled) setError(err instanceof Error ? err.message : t('failed.unknown'));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -113,7 +115,7 @@ export function TaskPage() {
       setTasks((prev) => [created, ...prev]);
       setNewJiraId('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create task');
+      setError(err instanceof Error ? err.message : t('failed.createTask'));
     } finally {
       setSubmitting(false);
     }
@@ -125,10 +127,10 @@ export function TaskPage() {
 
       <main className="app-main">
         <section className="card">
-          <h2>Новая задача</h2>
+          <h2>{t('newTitle')}</h2>
           <form className="task-form" onSubmit={handleSubmit}>
             <label className="field">
-              <span className="field__label">Jira Task ID</span>
+              <span className="field__label">{t('new.jiraLabel')}</span>
               <input
                 className="field__input"
                 value={newJiraId}
@@ -139,7 +141,7 @@ export function TaskPage() {
               />
             </label>
             <button className="primary-button" type="submit" disabled={!newJiraId.trim() || submitting}>
-              Добавить
+              {t('new.submit')}
             </button>
           </form>
           {error && <p className="error-text">{error}</p>}
@@ -147,27 +149,27 @@ export function TaskPage() {
 
         <section className="card">
           <div className="card__header">
-            <h2>Список задач</h2>
+            <h2>{t('listTitle')}</h2>
             <select
-              aria-label="Filter by status"
+              aria-label={t('filter.ariaLabel')}
               className="field__input field__input--compact"
               value={filter}
               onChange={(e) => setFilter(e.target.value as FilterState)}
               ref={filterSelectRef}
             >
-              <option value="All">Все статусы</option>
-              <option value="NotStarted">Not started</option>
-              <option value="InDev">In dev</option>
-              <option value="MrToRelease">MR to release</option>
-              <option value="InTest">In test</option>
-              <option value="MrToMaster">MR to master</option>
-              <option value="Completed">Completed</option>
+              <option value="All">{t('filter.all')}</option>
+              <option value="NotStarted">{t('state.NotStarted')}</option>
+              <option value="InDev">{t('state.InDev')}</option>
+              <option value="MrToRelease">{t('state.MrToRelease')}</option>
+              <option value="InTest">{t('state.InTest')}</option>
+              <option value="MrToMaster">{t('state.MrToMaster')}</option>
+              <option value="Completed">{t('state.Completed')}</option>
             </select>
           </div>
           {loading ? (
             <Spinner />
           ) : filteredTasks.length === 0 ? (
-            <p>Задач пока нет.</p>
+            <p>{t('empty')}</p>
           ) : (
             <>
               <ul className="task-list">
@@ -197,8 +199,8 @@ export function TaskPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="task-list__slack-jump"
-                      aria-label="Открыть задачу в Slack"
-                      title="Открыть в Slack"
+                      aria-label={t('slack.ariaLabel')}
+                      title={t('slack.title')}
                     >
                       <svg
                         viewBox="0 0 14 14"
@@ -212,7 +214,7 @@ export function TaskPage() {
                   </li>
                 ))}
               </ul>
-              <div className="shortcut-hint">Нажмите <kbd>?</kbd> для списка сочетаний клавиш</div>
+              <div className="shortcut-hint"><Trans t={t} i18nKey="shortcutHint"><kbd>?</kbd></Trans></div>
             </>
 
           )}

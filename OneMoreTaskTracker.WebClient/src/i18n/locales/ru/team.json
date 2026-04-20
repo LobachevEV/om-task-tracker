@@ -1,0 +1,46 @@
+{
+  "title": "Моя команда",
+  "managerLabel": "Менеджер",
+  "developersCount_one": "{{count}} разраб.",
+  "developersCount_few": "{{count}} разраб.",
+  "developersCount_many": "{{count}} разраб.",
+  "developersCount_other": "{{count}} разраб.",
+  "emptyTeam": "команда пуста",
+  "searchPlaceholder": "Поиск по имени / email",
+  "loadFailed": "Не удалось загрузить команду",
+  "retry": "Повторить",
+  "removeFailed": "Не удалось удалить участника",
+  "readonly": "Только для просмотра. Управлять командой может менеджер.",
+  "noMatches": "Никого не найдено",
+  "you": "ВЫ",
+  "remove": {
+    "menuItem": "Удалить из команды",
+    "title": "Удалить из команды",
+    "message": "{{name}} ({{email}}) будет удалён из вашей команды. Задачи останутся, но без исполнителя.",
+    "confirm": "Удалить"
+  },
+  "invite": {
+    "placeholder": "dev@onemore.dev — добавить по email",
+    "submit": "Добавить",
+    "submitBusy": "Добавление…"
+  },
+  "passwordToast": {
+    "message": "{{email}} добавлен как {{role}}. Временный пароль:",
+    "copy": "Скопировать",
+    "close": "Закрыть"
+  },
+  "roster": {
+    "member": "Участник",
+    "role": "Роль",
+    "active": "Активн.",
+    "stateMix": "Распределение",
+    "lastActive": "Посл. активность"
+  },
+  "lastActive": {
+    "never": "—",
+    "minutesAgo": "{{count}} мин назад",
+    "hoursAgo": "{{count}} ч назад",
+    "yesterday": "вчера",
+    "daysAgo": "{{count}} дн назад"
+  }
+}

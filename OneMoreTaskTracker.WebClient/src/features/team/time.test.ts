@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { formatLastActiveRu } from './time';
+import { formatLastActive } from './time';
 
-describe('formatLastActiveRu', () => {
+describe('formatLastActive', () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -11,7 +11,7 @@ describe('formatLastActiveRu', () => {
   });
 
   it('returns "—" for null', () => {
-    expect(formatLastActiveRu(null)).toBe('—');
+    expect(formatLastActive(null)).toBe('—');
   });
 
   it('formats minutes ago (< 60 minutes)', () => {
@@ -19,7 +19,7 @@ describe('formatLastActiveRu', () => {
     vi.setSystemTime(now);
 
     const then = new Date('2026-04-18T11:45:00Z');
-    expect(formatLastActiveRu(then.toISOString())).toBe('15 мин назад');
+    expect(formatLastActive(then.toISOString())).toBe('15 мин назад');
   });
 
   it('formats hours ago (< 24 hours)', () => {
@@ -27,7 +27,7 @@ describe('formatLastActiveRu', () => {
     vi.setSystemTime(now);
 
     const then = new Date('2026-04-18T08:00:00Z');
-    expect(formatLastActiveRu(then.toISOString())).toBe('4 ч назад');
+    expect(formatLastActive(then.toISOString())).toBe('4 ч назад');
   });
 
   it('formats yesterday (exactly 24 hours ago)', () => {
@@ -35,7 +35,7 @@ describe('formatLastActiveRu', () => {
     vi.setSystemTime(now);
 
     const then = new Date('2026-04-17T12:00:00Z');
-    expect(formatLastActiveRu(then.toISOString())).toBe('вчера');
+    expect(formatLastActive(then.toISOString())).toBe('вчера');
   });
 
   it('formats days ago (> 24 hours)', () => {
@@ -43,7 +43,7 @@ describe('formatLastActiveRu', () => {
     vi.setSystemTime(now);
 
     const then = new Date('2026-04-15T12:00:00Z');
-    expect(formatLastActiveRu(then.toISOString())).toBe('3 дн назад');
+    expect(formatLastActive(then.toISOString())).toBe('3 дн назад');
   });
 
   it('formats edge case: 23 hours 59 minutes ago as hours', () => {
@@ -51,7 +51,7 @@ describe('formatLastActiveRu', () => {
     vi.setSystemTime(now);
 
     const then = new Date('2026-04-17T12:01:00Z');
-    expect(formatLastActiveRu(then.toISOString())).toBe('23 ч назад');
+    expect(formatLastActive(then.toISOString())).toBe('23 ч назад');
   });
 
   it('formats edge case: 59 minutes ago as minutes', () => {
@@ -59,6 +59,6 @@ describe('formatLastActiveRu', () => {
     vi.setSystemTime(now);
 
     const then = new Date('2026-04-18T11:01:00Z');
-    expect(formatLastActiveRu(then.toISOString())).toBe('59 мин назад');
+    expect(formatLastActive(then.toISOString())).toBe('59 мин назад');
   });
 });

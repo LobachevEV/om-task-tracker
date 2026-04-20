@@ -1,0 +1,53 @@
+{
+  "newTitle": "New task",
+  "listTitle": "Tasks",
+  "new": {
+    "jiraLabel": "Jira Task ID",
+    "submit": "Add"
+  },
+  "filter": {
+    "ariaLabel": "Filter by status",
+    "all": "All statuses"
+  },
+  "empty": "No tasks yet.",
+  "failed": {
+    "unknown": "Unknown error",
+    "createTask": "Failed to create task"
+  },
+  "detail": {
+    "back": "← Tasks",
+    "state": "Task state",
+    "repositories": "Repositories",
+    "mergeRequests": "Merge Requests",
+    "nextStage": "Next stage →",
+    "processing": "Processing…",
+    "moveFailed": "Failed to change status"
+  },
+  "confirm": {
+    "title": "Move to next stage",
+    "message": "This will create GitLab branches or MRs. Continue for task {{jiraId}}?",
+    "submit": "Continue"
+  },
+  "slack": {
+    "ariaLabel": "Open task in Slack",
+    "title": "Open in Slack"
+  },
+  "shortcutHint": "Press <1>?</1> for keyboard shortcut list",
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "focusNew": "Focus new task input",
+    "navigate": "Navigate task list",
+    "open": "Open selected task",
+    "focusFilter": "Focus filter",
+    "showPanel": "Show this panel",
+    "closeDialogs": "Close dialogs"
+  },
+  "state": {
+    "NotStarted": "Not Started",
+    "InDev": "In Dev",
+    "MrToRelease": "MR to Release",
+    "InTest": "In Test",
+    "MrToMaster": "MR to Master",
+    "Completed": "Completed"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "cancel": "Отмена",
+  "confirm": "Подтвердить",
+  "retry": "Попробовать снова",
+  "errorBoundary": {
+    "message": "Что-то пошло не так."
+  },
+  "role": {
+    "full": {
+      "Manager": "Менеджер",
+      "FrontendDeveloper": "Фронтенд",
+      "BackendDeveloper": "Бэкенд",
+      "Qa": "QA"
+    }
+  }
+}

@@ -7,13 +7,6 @@ export const ROLE_BADGE_CLASS: Record<UserRole, string> = {
   Qa:                'role-badge--qa',
 };
 
-export const ROLE_LABEL_FULL: Record<UserRole, string> = {
-  Manager:           'Менеджер · Manager',
-  FrontendDeveloper: 'Фронтенд · Frontend',
-  BackendDeveloper:  'Бэкенд · Backend',
-  Qa:                'QA · QA',
-};
-
 export const ROLE_LABEL_SHORT: Record<UserRole, string> = {
   Manager:           'Manager',
   FrontendDeveloper: 'FE',

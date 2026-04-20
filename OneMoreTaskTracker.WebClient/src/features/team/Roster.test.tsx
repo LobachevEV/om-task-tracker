@@ -41,7 +41,7 @@ describe('Roster', () => {
     const rows = container.querySelectorAll('tbody tr');
     // First tbody row should be self
     expect(rows[0]).toHaveClass('roster-table__row--self');
-    expect(screen.getByText(/ВЫ · YOU/)).toBeInTheDocument();
+    expect(screen.getByText(/ВЫ/)).toBeInTheDocument();
   });
 
   it('shows menu only for non-self rows when viewer is Manager', () => {
@@ -97,7 +97,7 @@ describe('Roster', () => {
 
     render(<Roster members={members} viewerRole="Manager" onRemoveClick={vi.fn()} />);
 
-    expect(screen.getByText(/Бэкенд · Backend/)).toBeInTheDocument();
+    expect(screen.getByText(/Бэкенд/)).toBeInTheDocument();
   });
 
   it('displays active count', () => {

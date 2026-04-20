@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
   ROLE_BADGE_CLASS,
-  ROLE_LABEL_FULL,
   ROLE_LABEL_SHORT,
   DEVELOPER_ROLES,
   isDeveloperRole,
@@ -28,24 +27,6 @@ describe('roles', () => {
 
     it('has exactly 4 roles', () => {
       expect(Object.keys(ROLE_BADGE_CLASS)).toHaveLength(4);
-    });
-  });
-
-  describe('ROLE_LABEL_FULL', () => {
-    it('Manager has bilingual label', () => {
-      expect(ROLE_LABEL_FULL.Manager).toBe('Менеджер · Manager');
-    });
-
-    it('FrontendDeveloper has bilingual label', () => {
-      expect(ROLE_LABEL_FULL.FrontendDeveloper).toBe('Фронтенд · Frontend');
-    });
-
-    it('BackendDeveloper has bilingual label', () => {
-      expect(ROLE_LABEL_FULL.BackendDeveloper).toBe('Бэкенд · Backend');
-    });
-
-    it('Qa has bilingual label', () => {
-      expect(ROLE_LABEL_FULL.Qa).toBe('QA · QA');
     });
   });
 
@@ -115,13 +96,6 @@ describe('roles', () => {
   describe('type alignment', () => {
     it('all ROLE_BADGE_CLASS keys are valid UserRole', () => {
       const keys = Object.keys(ROLE_BADGE_CLASS) as UserRole[];
-      keys.forEach((role) => {
-        expect(['Manager', 'FrontendDeveloper', 'BackendDeveloper', 'Qa']).toContain(role);
-      });
-    });
-
-    it('all ROLE_LABEL_FULL keys are valid UserRole', () => {
-      const keys = Object.keys(ROLE_LABEL_FULL) as UserRole[];
       keys.forEach((role) => {
         expect(['Manager', 'FrontendDeveloper', 'BackendDeveloper', 'Qa']).toContain(role);
       });

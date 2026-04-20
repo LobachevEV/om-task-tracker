@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useKeyboardShortcut } from '../hooks/useKeyboardShortcut';
 import './ConfirmDialog.css';
 
@@ -15,12 +16,15 @@ interface ConfirmDialogProps {
 export function ConfirmDialog({
   title,
   message,
-  confirmLabel = 'Подтвердить',
-  cancelLabel = 'Отмена',
+  confirmLabel,
+  cancelLabel,
   onConfirm,
   onCancel,
   isOpen = true,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation('common');
+  const resolvedConfirmLabel = confirmLabel ?? t('confirm');
+  const resolvedCancelLabel = cancelLabel ?? t('cancel');
   const confirmButtonRef = useRef<HTMLButtonElement>(null);
 
   // Auto-focus confirm button when dialog opens
@@ -44,6 +48,8 @@ export function ConfirmDialog({
     },
   ]);
 
+  if (!isOpen) return null;
+
   return (
     <div className="dialog-overlay" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
       <div className="dialog">
@@ -51,10 +57,10 @@ export function ConfirmDialog({
         <p className="dialog__message">{message}</p>
         <div className="dialog__actions">
           <button className="secondary-button" type="button" onClick={onCancel}>
-            {cancelLabel}
+            {resolvedCancelLabel}
           </button>
           <button className="primary-button" type="button" onClick={onConfirm} ref={confirmButtonRef}>
-            {confirmLabel}
+            {resolvedConfirmLabel}
           </button>
         </div>
       </div>

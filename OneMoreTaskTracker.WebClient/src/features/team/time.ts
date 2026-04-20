@@ -1,13 +1,7 @@
-/**
- * Format a timestamp to a human-readable relative time in Russian.
- * Returns "—" for null, otherwise one of:
- * - "<N> мин назад" (minutes ago)
- * - "<N> ч назад" (hours ago)
- * - "вчера" (yesterday)
- * - "<N> дн назад" (days ago)
- */
-export function formatLastActiveRu(iso: string | null): string {
-  if (!iso) return '—';
+import i18n from '../../i18n/config';
+
+export function formatLastActive(iso: string | null): string {
+  if (!iso) return i18n.t('team:lastActive.never');
 
   const now = new Date();
   const then = new Date(iso);
@@ -17,16 +11,16 @@ export function formatLastActiveRu(iso: string | null): string {
   const diffDays = Math.floor(diffHours / 24);
 
   if (diffMins < 60) {
-    return `${diffMins} мин назад`;
+    return i18n.t('team:lastActive.minutesAgo', { count: diffMins });
   }
 
   if (diffHours < 24) {
-    return `${diffHours} ч назад`;
+    return i18n.t('team:lastActive.hoursAgo', { count: diffHours });
   }
 
   if (diffDays === 1) {
-    return 'вчера';
+    return i18n.t('team:lastActive.yesterday');
   }
 
-  return `${diffDays} дн назад`;
+  return i18n.t('team:lastActive.daysAgo', { count: diffDays });
 }

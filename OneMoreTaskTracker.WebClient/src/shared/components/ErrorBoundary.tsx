@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
+import i18n from '../../i18n/config';
 import './ErrorBoundary.css';
 
 interface Props {
@@ -41,10 +42,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
       return (
         <div className="error-boundary">
-          <p className="error-boundary__message">Что-то пошло не так.</p>
+          <p className="error-boundary__message">{i18n.t('common:errorBoundary.message')}</p>
           <p className="error-boundary__detail">{this.state.message}</p>
           <button className="primary-button" type="button" onClick={this.handleReset}>
-            Попробовать снова
+            {i18n.t('common:retry')}
           </button>
         </div>
       );

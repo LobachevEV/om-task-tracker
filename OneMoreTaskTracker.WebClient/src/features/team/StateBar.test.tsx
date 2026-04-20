@@ -16,7 +16,7 @@ describe('StateBar', () => {
 
     const bar = screen.getByRole('img');
     expect(bar).toHaveClass('statebar__empty');
-    expect(bar).toHaveAttribute('aria-label', 'В разработке · In Dev: 0, MR в релиз · MR to Release: 0, В тесте · In Test: 0, MR в мастер · MR to Master: 0, Готово · Completed: 0');
+    expect(bar).toHaveAttribute('aria-label', 'В разработке: 0, MR в релиз: 0, В тесте: 0, MR в мастер: 0, Готово: 0');
   });
 
   it('renders only non-zero segments', () => {
@@ -83,7 +83,7 @@ describe('StateBar', () => {
     const bar = screen.getByRole('img');
     expect(bar).toHaveAttribute(
       'aria-label',
-      'В разработке · In Dev: 3, MR в релиз · MR to Release: 0, В тесте · In Test: 2, MR в мастер · MR to Master: 0, Готово · Completed: 1'
+      'В разработке: 3, MR в релиз: 0, В тесте: 2, MR в мастер: 0, Готово: 1'
     );
   });
 });

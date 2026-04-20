@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ROLE_LABEL_SHORT } from '../../shared/auth/roles';
 import type { UserRole } from '../../shared/auth/roles';
 import './InviteRow.css';
@@ -18,6 +19,7 @@ const DEVELOPER_ROLES: DeveloperRole[] = [
 ];
 
 export function InviteRow({ onInvite, disabled = false }: InviteRowProps) {
+  const { t } = useTranslation(['team', 'common']);
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<DeveloperRole>('FrontendDeveloper');
   const [busy, setBusy] = useState(false);
@@ -54,7 +56,7 @@ export function InviteRow({ onInvite, disabled = false }: InviteRowProps) {
       <input
         type="email"
         className="invite-row__email"
-        placeholder="dev@onemore.dev · добавить по email · add by email"
+        placeholder={t('team:invite.placeholder')}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         disabled={busy || disabled}
@@ -70,13 +72,7 @@ export function InviteRow({ onInvite, disabled = false }: InviteRowProps) {
               role === r ? 'invite-role-chip--on' : ''
             }`}
             onClick={() => handleRoleChange(r)}
-            title={
-              r === 'FrontendDeveloper'
-                ? 'Фронтенд · Frontend'
-                : r === 'BackendDeveloper'
-                  ? 'Бэкенд · Backend'
-                  : 'QA · QA'
-            }
+            title={t(`common:role.full.${r}`)}
             disabled={busy || disabled}
           >
             {ROLE_LABEL_SHORT[r as UserRole]}
@@ -89,7 +85,7 @@ export function InviteRow({ onInvite, disabled = false }: InviteRowProps) {
         className="primary-button invite-row__submit"
         disabled={isSubmitDisabled}
       >
-        {busy ? 'Добавление…' : 'Добавить · Add'}
+        {busy ? t('team:invite.submitBusy') : t('team:invite.submit')}
       </button>
     </form>
   );

@@ -1,0 +1,11 @@
+{
+  "subtitle": "Browse and create tasks by Jira ID",
+  "nav": {
+    "tasks": "Tasks",
+    "team": "Team"
+  },
+  "logout": "Log out",
+  "language": {
+    "switchTo": "Switch language"
+  }
+}

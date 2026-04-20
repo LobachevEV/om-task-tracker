@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useKeyboardShortcut } from '../hooks/useKeyboardShortcut';
 import './ShortcutLegend.css';
 
@@ -8,6 +9,7 @@ interface ShortcutLegendProps {
 }
 
 export function ShortcutLegend({ isOpen, onClose }: ShortcutLegendProps) {
+  const { t } = useTranslation('tasks');
   const legendRef = useRef<HTMLDivElement>(null);
 
   // Close when Escape is pressed
@@ -35,31 +37,31 @@ export function ShortcutLegend({ isOpen, onClose }: ShortcutLegendProps) {
 
   return (
     <div className="shortcut-legend" ref={legendRef}>
-      <h3 className="shortcut-legend__title">Shortcuts</h3>
+      <h3 className="shortcut-legend__title">{t('shortcuts.title')}</h3>
       <ul className="shortcut-legend__list">
         <li>
           <kbd>/</kbd>
-          <span>Focus new task input</span>
+          <span>{t('shortcuts.focusNew')}</span>
         </li>
         <li>
           <kbd>↑ ↓</kbd>
-          <span>Navigate task list</span>
+          <span>{t('shortcuts.navigate')}</span>
         </li>
         <li>
           <kbd>Enter</kbd>
-          <span>Open selected task</span>
+          <span>{t('shortcuts.open')}</span>
         </li>
         <li>
           <kbd>f</kbd>
-          <span>Focus filter</span>
+          <span>{t('shortcuts.focusFilter')}</span>
         </li>
         <li>
           <kbd>?</kbd>
-          <span>Show this panel</span>
+          <span>{t('shortcuts.showPanel')}</span>
         </li>
         <li>
           <kbd>Esc</kbd>
-          <span>Close dialogs</span>
+          <span>{t('shortcuts.closeDialogs')}</span>
         </li>
       </ul>
     </div>

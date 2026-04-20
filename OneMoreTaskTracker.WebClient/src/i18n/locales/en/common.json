@@ -1,0 +1,16 @@
+{
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "retry": "Try again",
+  "errorBoundary": {
+    "message": "Something went wrong."
+  },
+  "role": {
+    "full": {
+      "Manager": "Manager",
+      "FrontendDeveloper": "Frontend",
+      "BackendDeveloper": "Backend",
+      "Qa": "QA"
+    }
+  }
+}

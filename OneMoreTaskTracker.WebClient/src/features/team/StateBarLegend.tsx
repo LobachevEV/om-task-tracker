@@ -1,25 +1,21 @@
+import { useTranslation } from 'react-i18next';
+import { TEAM_STATE_ENTRIES } from './stateConfig';
 import './StateBarLegend.css';
 
 export function StateBarLegend() {
-  const states = [
-    { key: 'inDev', label: 'В разработке · In Dev', variable: '--state-in-dev' },
-    { key: 'mrToRelease', label: 'MR в релиз · MR to Release', variable: '--state-mr-release' },
-    { key: 'inTest', label: 'В тесте · In Test', variable: '--state-in-test' },
-    { key: 'mrToMaster', label: 'MR в мастер · MR to Master', variable: '--state-mr-master' },
-    { key: 'completed', label: 'Готово · Completed', variable: '--state-completed' },
-  ] as const;
+  const { t } = useTranslation('tasks');
 
   return (
     <div className="state-legend">
-      {states.map((s) => (
-        <div key={s.key} className="state-legend__entry">
+      {TEAM_STATE_ENTRIES.map((entry) => (
+        <div key={entry.key} className="state-legend__entry">
           <div
             className="state-legend__swatch"
             style={{
-              backgroundColor: `var(${s.variable})`,
+              backgroundColor: `var(${entry.cssVar})`,
             }}
           />
-          <span className="state-legend__label">{s.label}</span>
+          <span className="state-legend__label">{t(entry.i18nKey)}</span>
         </div>
       ))}
     </div>

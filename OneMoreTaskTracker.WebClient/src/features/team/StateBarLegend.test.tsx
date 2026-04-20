@@ -7,11 +7,11 @@ describe('StateBarLegend', () => {
     render(<StateBarLegend />);
 
     const labels = [
-      'В разработке · In Dev',
-      'MR в релиз · MR to Release',
-      'В тесте · In Test',
-      'MR в мастер · MR to Master',
-      'Готово · Completed',
+      'В разработке',
+      'MR в релиз',
+      'В тесте',
+      'MR в мастер',
+      'Готово',
     ];
 
     labels.forEach((label) => {

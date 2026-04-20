@@ -236,7 +236,7 @@ describe('TeamPage', () => {
     }, { timeout: 3000 });
 
     // Check that a retry button is present
-    const retryBtn = screen.getByText(/Повторить · Retry/);
+    const retryBtn = screen.getByText(/Повторить/);
     expect(retryBtn).toBeInTheDocument();
   });
 
@@ -267,7 +267,7 @@ describe('TeamPage', () => {
     const emailInput = screen.getByPlaceholderText(/dev@onemore.dev/) as HTMLInputElement;
     fireEvent.change(emailInput, { target: { value: 'newdev@example.com' } });
 
-    const submitBtn = screen.getByText(/Добавить · Add/);
+    const submitBtn = screen.getByText(/Добавить/);
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
@@ -298,7 +298,7 @@ describe('TeamPage', () => {
     const emailInput = screen.getByPlaceholderText(/dev@onemore.dev/) as HTMLInputElement;
     fireEvent.change(emailInput, { target: { value: 'newdev@example.com' } });
 
-    const submitBtn = screen.getByText(/Добавить · Add/);
+    const submitBtn = screen.getByText(/Добавить/);
     fireEvent.click(submitBtn);
 
     await waitFor(() => {

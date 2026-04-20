@@ -1,0 +1,53 @@
+{
+  "newTitle": "Новая задача",
+  "listTitle": "Список задач",
+  "new": {
+    "jiraLabel": "Jira Task ID",
+    "submit": "Добавить"
+  },
+  "filter": {
+    "ariaLabel": "Фильтр по статусу",
+    "all": "Все статусы"
+  },
+  "empty": "Задач пока нет.",
+  "failed": {
+    "unknown": "Неизвестная ошибка",
+    "createTask": "Не удалось создать задачу"
+  },
+  "detail": {
+    "back": "← Список задач",
+    "state": "Состояние задачи",
+    "repositories": "Репозитории",
+    "mergeRequests": "Merge Requests",
+    "nextStage": "Следующий этап →",
+    "processing": "Обработка…",
+    "moveFailed": "Не удалось изменить статус"
+  },
+  "confirm": {
+    "title": "Переход на следующий этап",
+    "message": "Это создаст ветки или MR в GitLab. Продолжить для задачи {{jiraId}}?",
+    "submit": "Продолжить"
+  },
+  "slack": {
+    "ariaLabel": "Открыть задачу в Slack",
+    "title": "Открыть в Slack"
+  },
+  "shortcutHint": "Нажмите <1>?</1> для списка сочетаний клавиш",
+  "shortcuts": {
+    "title": "Сочетания клавиш",
+    "focusNew": "Фокус на ввод новой задачи",
+    "navigate": "Навигация по списку",
+    "open": "Открыть выбранную задачу",
+    "focusFilter": "Фокус на фильтр",
+    "showPanel": "Показать эту панель",
+    "closeDialogs": "Закрыть диалоги"
+  },
+  "state": {
+    "NotStarted": "Не начато",
+    "InDev": "В разработке",
+    "MrToRelease": "MR в релиз",
+    "InTest": "В тесте",
+    "MrToMaster": "MR в мастер",
+    "Completed": "Готово"
+  }
+}
