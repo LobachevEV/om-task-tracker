@@ -240,7 +240,7 @@ export default function TeamPage() {
 
         {loading && (
           <div className="team-page__spinner">
-            <div className="spinner" aria-label="Loading" />
+            <div className="spinner" role="status" aria-label={t('loading')} />
           </div>
         )}
 

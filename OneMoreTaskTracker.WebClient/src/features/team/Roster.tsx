@@ -46,7 +46,7 @@ export function Roster({ members, viewerRole, onRemoveClick }: RosterProps) {
             <th className="roster-table__header-active">{t('roster.active')}</th>
             <th className="roster-table__header-mix">{t('roster.stateMix')}</th>
             <th className="roster-table__header-last">{t('roster.lastActive')}</th>
-            {isManager && <th className="roster-table__header-actions" />}
+            {isManager && <th className="roster-table__header-actions"><span className="sr-only">{t('roster.actions')}</span></th>}
           </tr>
         </thead>
         <tbody>

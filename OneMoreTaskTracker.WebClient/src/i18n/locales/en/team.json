@@ -1,5 +1,6 @@
 {
   "title": "My team",
+  "loading": "Loading",
   "managerLabel": "Manager",
   "developersCount_one": "{{count}} developer",
   "developersCount_other": "{{count}} developers",
@@ -35,7 +36,8 @@
     "role": "Role",
     "active": "Active",
     "stateMix": "State mix",
-    "lastActive": "Last active"
+    "lastActive": "Last active",
+    "actions": "Actions"
   },
   "lastActive": {
     "never": "—",

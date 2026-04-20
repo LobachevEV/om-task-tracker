@@ -54,13 +54,14 @@
 .team-search-input {
   width: 100%;
   max-width: 320px;
-  padding: 0.85rem 0.85rem;
+  padding: 0.95rem 1rem;
+  min-height: 2.75rem;
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   font-size: 0.9rem;
   background-color: var(--surface);
   color: var(--text);
-  transition: border-color 0.2s;
+  transition: border-color var(--transition-base);
 }
 
 .team-search-input:focus {
@@ -89,7 +90,7 @@
   background-color: color-mix(in oklch, var(--text-muted) 10%, var(--surface));
   border: 1px solid color-mix(in oklch, var(--text-muted) 25%, transparent);
   border-radius: 0.5rem;
-  color: var(--text-muted);
+  color: var(--text);
   font-size: 0.9rem;
 }
 
@@ -153,7 +154,7 @@
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-fast);
 }
 
 .team-toast__copy-btn:hover {
@@ -173,7 +174,7 @@
   font-size: 1.5rem;
   cursor: pointer;
   line-height: 1;
-  transition: color 0.2s;
+  transition: color var(--transition-fast);
 }
 
 .team-toast__close-btn:hover {

@@ -1,5 +1,6 @@
 {
   "title": "Моя команда",
+  "loading": "Загрузка",
   "managerLabel": "Менеджер",
   "developersCount_one": "{{count}} разраб.",
   "developersCount_few": "{{count}} разраб.",
@@ -37,7 +38,8 @@
     "role": "Роль",
     "active": "Активн.",
     "stateMix": "Распределение",
-    "lastActive": "Посл. активность"
+    "lastActive": "Посл. активность",
+    "actions": "Действия"
   },
   "lastActive": {
     "never": "—",
