@@ -25,9 +25,12 @@
   "passwordToast": {
     "message": "{{email}} added as {{role}}. Temporary password:",
     "copy": "Copy",
+    "copied": "Copied",
+    "copyError": "Copy failed",
     "close": "Close"
   },
   "roster": {
+    "ariaLabel": "Team roster",
     "member": "Member",
     "role": "Role",
     "active": "Active",

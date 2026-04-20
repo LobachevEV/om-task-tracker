@@ -2,10 +2,12 @@
 
 .roster-card {
   background: var(--surface);
-  border-radius: 1rem;
+  border-radius: 0.5rem;
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .roster-table {
@@ -173,4 +175,19 @@
   padding: 0.15rem 0.4rem;
   text-transform: uppercase;
   flex-shrink: 0;
+}
+
+/* Mobile responsive — horizontal scroll for narrow viewports */
+@media (max-width: 640px) {
+  .roster-table {
+    min-width: 640px;
+  }
+
+  .roster-table th {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .roster-table td {
+    padding: 0.65rem 0.75rem;
+  }
 }

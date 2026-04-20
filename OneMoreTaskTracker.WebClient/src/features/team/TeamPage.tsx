@@ -39,6 +39,7 @@ export default function TeamPage() {
   const [passwordToast, setPasswordToast] = useState<PasswordToast | null>(null);
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [removeError, setRemoveError] = useState<string | null>(null);
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
 
   const loadRoster = async () => {
     try {
@@ -132,16 +133,16 @@ export default function TeamPage() {
     return (
       <div className="app-shell">
         <AppHeader />
-        <div className="team-main">
+        <main className="team-main">
           <div className="team-page">
             <div className="team-page__error">
               <p>{loadError}</p>
-              <button onClick={loadRoster} className="secondary-button">
+              <button onClick={() => { void loadRoster(); }} className="secondary-button">
                 {t('retry')}
               </button>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     );
   }
@@ -149,7 +150,7 @@ export default function TeamPage() {
   return (
     <div className="app-shell">
       <AppHeader />
-      <div className="team-main">
+      <main className="team-main">
         <div className="team-page">
         <div className="team-toolbar">
           <div className="team-toolbar__info">
@@ -170,6 +171,7 @@ export default function TeamPage() {
             <input
               type="text"
               placeholder={t('searchPlaceholder')}
+              aria-label={t('searchPlaceholder')}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="team-search-input"
@@ -191,7 +193,7 @@ export default function TeamPage() {
         )}
 
         {passwordToast && (
-          <div className="team-toast">
+          <div className="team-toast" role="status" aria-live="polite" aria-atomic="true">
             <div className="team-toast__content">
               <p>
                 {t('passwordToast.message', { email: passwordToast.email, role: passwordToast.role })}{' '}
@@ -201,15 +203,25 @@ export default function TeamPage() {
             <div className="team-toast__actions">
               <button
                 className="team-toast__copy-btn"
-                onClick={() => {
-                  navigator.clipboard.writeText(passwordToast.password);
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(passwordToast.password);
+                    setCopyState('copied');
+                    setTimeout(() => setCopyState('idle'), 1500);
+                  } catch {
+                    setCopyState('error');
+                    setTimeout(() => setCopyState('idle'), 2500);
+                  }
                 }}
               >
-                {t('passwordToast.copy')}
+                {copyState === 'copied' ? t('passwordToast.copied') : copyState === 'error' ? t('passwordToast.copyError') : t('passwordToast.copy')}
               </button>
               <button
                 className="team-toast__close-btn"
-                onClick={() => setPasswordToast(null)}
+                onClick={() => {
+                  setPasswordToast(null);
+                  setCopyState('idle');
+                }}
                 aria-label={t('passwordToast.close')}
               >
                 ×
@@ -265,7 +277,7 @@ export default function TeamPage() {
           onCancel={handleCancelRemove}
         />
       </div>
-      </div>
+      </main>
     </div>
   );
 }

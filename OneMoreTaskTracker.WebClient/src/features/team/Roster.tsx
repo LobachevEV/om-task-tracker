@@ -38,7 +38,7 @@ export function Roster({ members, viewerRole, onRemoveClick }: RosterProps) {
 
   return (
     <div className="roster-card">
-      <table className="roster-table">
+      <table className="roster-table" aria-label={t('roster.ariaLabel')}>
         <thead>
           <tr>
             <th className="roster-table__header-member">{t('roster.member')}</th>
