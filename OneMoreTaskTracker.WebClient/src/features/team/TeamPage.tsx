@@ -9,6 +9,7 @@ import { InviteRow } from './InviteRow';
 import type { DeveloperRole } from './InviteRow';
 import { Roster } from './Roster';
 import { StateBarLegend } from './StateBarLegend';
+import { AppHeader } from '../../shared/components/AppHeader';
 import { ConfirmDialog } from '../../shared/components/ConfirmDialog';
 import { sortRoster } from './sort';
 import './TeamPage.css';
@@ -129,20 +130,27 @@ export default function TeamPage() {
 
   if (loadError) {
     return (
-      <div className="team-page">
-        <div className="team-page__error">
-          <p>{loadError}</p>
-          <button onClick={loadRoster} className="secondary-button">
-            {t('retry')}
-          </button>
+      <div className="app-shell">
+        <AppHeader />
+        <div className="team-main">
+          <div className="team-page">
+            <div className="team-page__error">
+              <p>{loadError}</p>
+              <button onClick={loadRoster} className="secondary-button">
+                {t('retry')}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="team-main">
-      <div className="team-page">
+    <div className="app-shell">
+      <AppHeader />
+      <div className="team-main">
+        <div className="team-page">
         <div className="team-toolbar">
           <div className="team-toolbar__info">
             <h1 className="team-toolbar__title">{t('title')}</h1>
@@ -256,6 +264,7 @@ export default function TeamPage() {
           onConfirm={handleConfirmRemove}
           onCancel={handleCancelRemove}
         />
+      </div>
       </div>
     </div>
   );

@@ -71,6 +71,20 @@ describe('TeamPage', () => {
     vi.clearAllMocks();
   });
 
+  it('renders AppHeader with navigation links so users can switch tabs', async () => {
+    vi.mocked(teamApi.getRoster).mockResolvedValue([
+      createMember(1, 'Manager', 'Manager', true),
+    ]);
+
+    renderWithAuth(<TeamPage />);
+
+    const tasksLink = await screen.findByRole('link', { name: /Задачи/ });
+    const teamLink = await screen.findByRole('link', { name: /Команда/ });
+
+    expect(tasksLink).toHaveAttribute('href', '/');
+    expect(teamLink).toHaveAttribute('href', '/team');
+  });
+
   it('loads roster on mount', async () => {
     const mockRoster = [
       createMember(1, 'Manager', 'Manager', true),
