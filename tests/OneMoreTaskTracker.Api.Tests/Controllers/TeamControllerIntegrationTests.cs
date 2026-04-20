@@ -33,6 +33,69 @@ public sealed class TeamControllerIntegrationTests(TasksControllerWebApplication
     }
 
     [Fact]
+    public async Task GetRoster_AsManager_Returns200WithComposedRoster()
+    {
+        const int managerUserId = 7;
+        var client = ClientWithToken(userId: managerUserId, role: Roles.Manager);
+
+        factory.MockUserService
+            .GetTeamRosterAsync(
+                Arg.Is<GetTeamRosterRequest>(req => req.ManagerId == managerUserId),
+                Arg.Any<Metadata>(),
+                Arg.Any<DateTime?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new GetTeamRosterResponse
+            {
+                Members =
+                {
+                    new TeamRosterMember { UserId = 10, Email = "alice.dev@example.com", Role = Roles.FrontendDeveloper, ManagerId = managerUserId },
+                    new TeamRosterMember { UserId = 11, Email = "bob.qa@example.com", Role = Roles.Qa, ManagerId = managerUserId }
+                }
+            }));
+
+        factory.MockTaskAggregateQuery
+            .BatchGetAssigneeTaskSummaryAsync(
+                Arg.Is<BatchGetAssigneeTaskSummaryRequest>(req =>
+                    req.AssigneeUserIds.Contains(10) && req.AssigneeUserIds.Contains(11)),
+                Arg.Any<Metadata>(),
+                Arg.Any<DateTime?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new BatchGetAssigneeTaskSummaryResponse
+            {
+                Summaries =
+                {
+                    new AssigneeTaskSummary
+                    {
+                        AssigneeUserId = 10,
+                        ActiveCount = 3,
+                        Mix = new TaskStateMix { InDev = 1, MrToRelease = 1, InTest = 1, MrToMaster = 0, Completed = 0 }
+                    }
+                }
+            }));
+
+        var response = await client.GetAsync("/api/team/members");
+
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
+        var json = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(json);
+        var roster = doc.RootElement.EnumerateArray().ToList();
+        roster.Should().HaveCount(2);
+        roster[0].GetProperty("userId").GetInt32().Should().Be(10);
+        roster[0].GetProperty("status").GetProperty("active").GetInt32().Should().Be(3);
+        roster[1].GetProperty("userId").GetInt32().Should().Be(11);
+        roster[1].GetProperty("status").GetProperty("active").GetInt32().Should().Be(0);
+    }
+
+    [Fact]
+    public async Task GetRoster_WithoutAuthentication_Returns401()
+    {
+        var client = factory.CreateClient();
+        var response = await client.GetAsync("/api/team/members");
+
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
     public async Task PostMember_WithoutAuthentication_Returns401()
     {
         var payload = new { email = "dev@example.com", role = "FrontendDeveloper" };

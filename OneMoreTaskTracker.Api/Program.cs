@@ -7,6 +7,7 @@ using OneMoreTaskTracker.Proto.Tasks;
 using OneMoreTaskTracker.Proto.Tasks.CreateTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.GetTaskQuery;
 using OneMoreTaskTracker.Proto.Tasks.ListTasksQuery;
+using OneMoreTaskTracker.Proto.Tasks.TaskAggregateQuery;
 using OneMoreTaskTracker.Proto.Users;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -74,6 +75,9 @@ builder.Services
 
 builder.Services
     .AddGrpcClient<TaskMover.TaskMoverClient>(o => o.Address = new Uri(tasksServiceAddress));
+
+builder.Services
+    .AddGrpcClient<TaskAggregateQuery.TaskAggregateQueryClient>(o => o.Address = new Uri(tasksServiceAddress));
 
 builder.Services
     .AddGrpcClient<UserService.UserServiceClient>(o => o.Address = new Uri(usersServiceAddress));
