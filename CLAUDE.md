@@ -113,20 +113,21 @@ An agent-crawlable knowledge graph of this project lives at `./graphify-out/`, p
 - **`graphify-out/graph.json`** — raw graph (617 nodes, 911 edges). Query via `/graphify query "<question>"`, `/graphify path "A" "B"`, `/graphify explain "<node>"`.
 - **`graphify-out/graph.html`** — interactive visual graph.
 
+**Freshness warning — the wiki may be stale.** Only `graph.json` and `GRAPH_REPORT.md` are kept current automatically (by the `post-commit` and `post-checkout` git hooks in `.git/hooks/`, which run `graphify`'s AST-only `_rebuild_code`). The `graphify-out/wiki/` directory and semantic (INFERRED / AMBIGUOUS) edges are only refreshed by the LLM-powered `/graphify --update`, which is run manually. Treat wiki content as a snapshot that may lag current code.
+
 Rules:
 1. Before answering "how does X work" or "where is Y" — read `graphify-out/wiki/index.md` first, then the relevant community article(s).
-2. When tracing a behavior across modules, prefer the wiki's community view over grepping individual files.
-3. After modifying code, the background `graphify watch` picks up code changes automatically (AST-only, no LLM cost). After changing docs/images, run `/graphify --update` to refresh semantic edges.
+2. When tracing a behavior across modules, prefer the wiki's community view over grepping individual files, but verify load-bearing claims against the current source before acting on them (the wiki can be stale).
+3. `graph.json` and `GRAPH_REPORT.md` auto-refresh on every commit and branch switch via git hooks (AST-only, no LLM cost). The wiki and semantic edges do NOT — run `/graphify --update` after docs/image changes or when you notice wiki drift from current code.
+4. If a wiki claim contradicts what you see in the source, trust the source and flag the drift to the user.
 
 ## Planning Workflow
 
 Before implementing any task:
 
-1. **Check the knowledge graph** — `graphify-out/wiki/index.md` for a map of the system; drill into relevant community articles for involved components and their edges
+1. **Check the knowledge graph** — `graphify-out/wiki/index.md` for a map of the system; drill into relevant community articles for involved components and their edges (remember the wiki may be stale — verify before acting)
 2. **Identify components** — services, handlers, entities, proto messages, and tests to touch
-3. **Then read code** — only after understanding the design, navigate to source files
-
-`graphify-out/wiki/` together are the source of truth for architecture decisions.
+3. **Then read code** — only after understanding the design, navigate to source files; source is always authoritative over the wiki
 
 ## Code Conventions
 
