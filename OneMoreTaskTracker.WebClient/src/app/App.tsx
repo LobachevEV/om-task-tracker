@@ -1,26 +1,28 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { AuthProvider } from '../features/auth/AuthContext';
-import { LoginPage } from '../features/auth/LoginPage';
-import { ProtectedRoute } from '../features/auth/ProtectedRoute';
-import { RegisterPage } from '../features/auth/RegisterPage';
-import { TaskDetailPage } from '../features/tasks/TaskDetailPage';
-import { TaskPage } from '../features/tasks/TaskPage';
+import {BrowserRouter, Route, Routes} from 'react-router-dom';
+import {AuthProvider} from '../features/auth/AuthContext';
+import {LoginPage} from '../features/auth/LoginPage';
+import {ProtectedRoute} from '../features/auth/ProtectedRoute';
+import {RegisterPage} from '../features/auth/RegisterPage';
+import {TaskDetailPage} from '../features/tasks/TaskDetailPage';
+import {TaskPage} from '../features/tasks/TaskPage';
 import TeamPage from '../features/team/TeamPage';
-import { ErrorBoundary } from '../shared/components/ErrorBoundary';
+import {ErrorBoundary} from '../shared/components/ErrorBoundary';
+import {AppHeader} from "../shared/components/AppHeader.tsx";
 
 function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
         <BrowserRouter>
+          <AppHeader/>
           <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/login" element={<LoginPage/>}/>
+            <Route path="/register" element={<RegisterPage/>}/>
             <Route
               path="/"
               element={
                 <ProtectedRoute>
-                  <TaskPage />
+                  <TaskPage/>
                 </ProtectedRoute>
               }
             />
@@ -28,7 +30,7 @@ function App() {
               path="/tasks/:jiraId"
               element={
                 <ProtectedRoute>
-                  <TaskDetailPage />
+                  <TaskDetailPage/>
                 </ProtectedRoute>
               }
             />
@@ -36,7 +38,7 @@ function App() {
               path="/team"
               element={
                 <ProtectedRoute>
-                  <TeamPage />
+                  <TeamPage/>
                 </ProtectedRoute>
               }
             />

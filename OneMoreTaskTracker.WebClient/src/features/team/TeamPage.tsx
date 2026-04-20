@@ -9,7 +9,6 @@ import { InviteRow } from './InviteRow';
 import type { DeveloperRole } from './InviteRow';
 import { Roster } from './Roster';
 import { StateBarLegend } from './StateBarLegend';
-import { AppHeader } from '../../shared/components/AppHeader';
 import { ConfirmDialog } from '../../shared/components/ConfirmDialog';
 import { sortRoster } from './sort';
 import './TeamPage.css';
@@ -132,7 +131,6 @@ export default function TeamPage() {
   if (loadError) {
     return (
       <div className="app-shell">
-        <AppHeader />
         <main className="team-main">
           <div className="team-page">
             <div className="team-page__error">
@@ -149,7 +147,6 @@ export default function TeamPage() {
 
   return (
     <div className="app-shell">
-      <AppHeader />
       <main className="team-main">
         <div className="team-page">
         <div className="team-toolbar">

@@ -1,17 +1,16 @@
-import type { FormEvent } from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Trans, useTranslation } from 'react-i18next';
-import { createTask, fetchTasks } from '../../shared/api/tasksApi';
-import { AppHeader } from '../../shared/components/AppHeader';
-import { ShortcutLegend } from '../../shared/components/ShortcutLegend';
-import { Spinner } from '../../shared/components/Spinner';
-import { STATE_CLASS } from '../../shared/constants/taskConstants';
-import { useKeyboardShortcut } from '../../shared/hooks/useKeyboardShortcut';
-import { useAuth } from '../auth/AuthContext';
-import type { Task, TaskState } from '../../shared/types/task';
-import { IntegrationIcon, SVG_PATHS } from './IntegrationIcon';
-import { deriveIntegrations } from './integrationStatus';
+import type {FormEvent} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
+import {Link} from 'react-router-dom';
+import {Trans, useTranslation} from 'react-i18next';
+import {createTask, fetchTasks} from '../../shared/api/tasksApi';
+import {ShortcutLegend} from '../../shared/components/ShortcutLegend';
+import {Spinner} from '../../shared/components/Spinner';
+import {STATE_CLASS} from '../../shared/constants/taskConstants';
+import {useKeyboardShortcut} from '../../shared/hooks/useKeyboardShortcut';
+import {useAuth} from '../auth/AuthContext';
+import type {Task, TaskState} from '../../shared/types/task';
+import {IntegrationIcon, SVG_PATHS} from './IntegrationIcon';
+import {deriveIntegrations} from './integrationStatus';
 import './TaskPage.css';
 
 type FilterState = TaskState | 'All';
@@ -123,8 +122,6 @@ export function TaskPage() {
 
   return (
     <div className="app-shell">
-      <AppHeader />
-
       <main className="app-main">
         <section className="card">
           <h2>{t('newTitle')}</h2>
