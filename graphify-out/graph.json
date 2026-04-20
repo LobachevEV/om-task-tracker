@@ -125,7 +125,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/eslint.config.js",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_eslint_config_js",
-      "community": 64,
+      "community": 63,
       "norm_label": "eslint.config.js"
     },
     {
@@ -143,7 +143,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/vitest.config.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_vitest_config_ts",
-      "community": 65,
+      "community": 64,
       "norm_label": "vitest.config.ts"
     },
     {
@@ -296,7 +296,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/coverage/sorter.js",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_coverage_sorter_js",
-      "community": 17,
+      "community": 16,
       "norm_label": "sorter.js"
     },
     {
@@ -305,7 +305,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/coverage/sorter.js",
       "source_location": "L11",
       "id": "sorter_gettable",
-      "community": 17,
+      "community": 16,
       "norm_label": "gettable()"
     },
     {
@@ -314,7 +314,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/coverage/sorter.js",
       "source_location": "L15",
       "id": "sorter_gettableheader",
-      "community": 17,
+      "community": 16,
       "norm_label": "gettableheader()"
     },
     {
@@ -323,7 +323,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/coverage/sorter.js",
       "source_location": "L19",
       "id": "sorter_gettablebody",
-      "community": 17,
+      "community": 16,
       "norm_label": "gettablebody()"
     },
     {
@@ -332,7 +332,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/coverage/sorter.js",
       "source_location": "L23",
       "id": "sorter_getnthcolumn",
-      "community": 17,
+      "community": 16,
       "norm_label": "getnthcolumn()"
     },
     {
@@ -341,7 +341,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/coverage/sorter.js",
       "source_location": "L27",
       "id": "sorter_onfilterinput",
-      "community": 17,
+      "community": 16,
       "norm_label": "onfilterinput()"
     },
     {
@@ -350,7 +350,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/coverage/sorter.js",
       "source_location": "L59",
       "id": "sorter_addsearchbox",
-      "community": 17,
+      "community": 16,
       "norm_label": "addsearchbox()"
     },
     {
@@ -359,7 +359,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/coverage/sorter.js",
       "source_location": "L67",
       "id": "sorter_loadcolumns",
-      "community": 17,
+      "community": 16,
       "norm_label": "loadcolumns()"
     },
     {
@@ -368,7 +368,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/coverage/sorter.js",
       "source_location": "L92",
       "id": "sorter_loadrowdata",
-      "community": 17,
+      "community": 16,
       "norm_label": "loadrowdata()"
     },
     {
@@ -377,7 +377,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/coverage/sorter.js",
       "source_location": "L111",
       "id": "sorter_loaddata",
-      "community": 17,
+      "community": 16,
       "norm_label": "loaddata()"
     },
     {
@@ -386,7 +386,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/coverage/sorter.js",
       "source_location": "L120",
       "id": "sorter_sortbyindex",
-      "community": 17,
+      "community": 16,
       "norm_label": "sortbyindex()"
     },
     {
@@ -395,7 +395,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/coverage/sorter.js",
       "source_location": "L151",
       "id": "sorter_removesortindicators",
-      "community": 17,
+      "community": 16,
       "norm_label": "removesortindicators()"
     },
     {
@@ -404,7 +404,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/coverage/sorter.js",
       "source_location": "L159",
       "id": "sorter_addsortindicators",
-      "community": 17,
+      "community": 16,
       "norm_label": "addsortindicators()"
     },
     {
@@ -413,7 +413,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/coverage/sorter.js",
       "source_location": "L165",
       "id": "sorter_enableui",
-      "community": 17,
+      "community": 16,
       "norm_label": "enableui()"
     },
     {
@@ -422,7 +422,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/main.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_main_tsx",
-      "community": 39,
+      "community": 38,
       "norm_label": "main.tsx"
     },
     {
@@ -431,7 +431,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/app/App.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_app_app_tsx",
-      "community": 39,
+      "community": 38,
       "norm_label": "app.tsx"
     },
     {
@@ -440,7 +440,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/app/App.tsx",
       "source_location": "L11",
       "id": "app_app",
-      "community": 39,
+      "community": 38,
       "norm_label": "app()"
     },
     {
@@ -449,7 +449,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/test/setup.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_test_setup_ts",
-      "community": 66,
+      "community": 65,
       "norm_label": "setup.ts"
     },
     {
@@ -458,7 +458,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/test/testUtils.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_test_testutils_ts",
-      "community": 46,
+      "community": 45,
       "norm_label": "testutils.ts"
     },
     {
@@ -467,7 +467,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/test/testUtils.ts",
       "source_location": "L1",
       "id": "testutils_makeresponse",
-      "community": 46,
+      "community": 45,
       "norm_label": "makeresponse()"
     },
     {
@@ -476,7 +476,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/tasks/integrationStatus.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_tasks_integrationstatus_ts",
-      "community": 47,
+      "community": 46,
       "norm_label": "integrationstatus.ts"
     },
     {
@@ -485,7 +485,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/tasks/integrationStatus.ts",
       "source_location": "L14",
       "id": "integrationstatus_deriveintegrations",
-      "community": 47,
+      "community": 46,
       "norm_label": "deriveintegrations()"
     },
     {
@@ -494,7 +494,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/tasks/TaskDetailPage.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_tasks_taskdetailpage_tsx",
-      "community": 5,
+      "community": 9,
       "norm_label": "taskdetailpage.tsx"
     },
     {
@@ -503,7 +503,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/tasks/TaskDetailPage.tsx",
       "source_location": "L34",
       "id": "taskdetailpage_handlemoveconfirm",
-      "community": 5,
+      "community": 9,
       "norm_label": "handlemoveconfirm()"
     },
     {
@@ -512,7 +512,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/tasks/IntegrationIcon.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_tasks_integrationicon_tsx",
-      "community": 40,
+      "community": 39,
       "norm_label": "integrationicon.tsx"
     },
     {
@@ -521,7 +521,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/tasks/IntegrationIcon.tsx",
       "source_location": "L17",
       "id": "integrationicon_getsignalcolor",
-      "community": 40,
+      "community": 39,
       "norm_label": "getsignalcolor()"
     },
     {
@@ -530,7 +530,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/tasks/IntegrationIcon.tsx",
       "source_location": "L30",
       "id": "integrationicon_integrationicon",
-      "community": 40,
+      "community": 39,
       "norm_label": "integrationicon()"
     },
     {
@@ -539,7 +539,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/tasks/TaskPage.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_tasks_taskpage_tsx",
-      "community": 5,
+      "community": 9,
       "norm_label": "taskpage.tsx"
     },
     {
@@ -548,7 +548,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/tasks/TaskPage.tsx",
       "source_location": "L104",
       "id": "taskpage_handlesubmit",
-      "community": 5,
+      "community": 9,
       "norm_label": "handlesubmit()"
     },
     {
@@ -557,7 +557,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/tasks/__tests__/integrationStatus.test.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_tasks_tests_integrationstatus_test_ts",
-      "community": 67,
+      "community": 66,
       "norm_label": "integrationstatus.test.ts"
     },
     {
@@ -566,7 +566,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/auth/RegisterPage.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_auth_registerpage_tsx",
-      "community": 6,
+      "community": 3,
       "norm_label": "registerpage.tsx"
     },
     {
@@ -575,7 +575,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/auth/RegisterPage.tsx",
       "source_location": "L27",
       "id": "registerpage_handlesubmit",
-      "community": 6,
+      "community": 3,
       "norm_label": "handlesubmit()"
     },
     {
@@ -584,7 +584,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/auth/LoginPage.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_auth_loginpage_tsx",
-      "community": 15,
+      "community": 14,
       "norm_label": "loginpage.tsx"
     },
     {
@@ -593,7 +593,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/auth/LoginPage.tsx",
       "source_location": "L8",
       "id": "loginpage_loginpage",
-      "community": 15,
+      "community": 14,
       "norm_label": "loginpage()"
     },
     {
@@ -602,7 +602,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/auth/ProtectedRoute.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_auth_protectedroute_tsx",
-      "community": 15,
+      "community": 14,
       "norm_label": "protectedroute.tsx"
     },
     {
@@ -611,7 +611,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/auth/ProtectedRoute.tsx",
       "source_location": "L5",
       "id": "protectedroute_protectedroute",
-      "community": 15,
+      "community": 14,
       "norm_label": "protectedroute()"
     },
     {
@@ -620,7 +620,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/auth/AuthContext.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_auth_authcontext_tsx",
-      "community": 15,
+      "community": 14,
       "norm_label": "authcontext.tsx"
     },
     {
@@ -629,7 +629,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/auth/AuthContext.tsx",
       "source_location": "L14",
       "id": "authcontext_authprovider",
-      "community": 15,
+      "community": 14,
       "norm_label": "authprovider()"
     },
     {
@@ -638,7 +638,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/auth/AuthContext.tsx",
       "source_location": "L33",
       "id": "authcontext_useauth",
-      "community": 15,
+      "community": 14,
       "norm_label": "useauth()"
     },
     {
@@ -647,7 +647,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/auth/__tests__/AuthContext.test.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_auth_tests_authcontext_test_tsx",
-      "community": 48,
+      "community": 47,
       "norm_label": "authcontext.test.tsx"
     },
     {
@@ -656,7 +656,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/auth/__tests__/AuthContext.test.tsx",
       "source_location": "L6",
       "id": "authcontext_test_wrapper",
-      "community": 48,
+      "community": 47,
       "norm_label": "wrapper()"
     },
     {
@@ -665,7 +665,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/auth/__tests__/ProtectedRoute.test.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_auth_tests_protectedroute_test_tsx",
-      "community": 18,
+      "community": 17,
       "norm_label": "protectedroute.test.tsx"
     },
     {
@@ -674,7 +674,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/auth/__tests__/ProtectedRoute.test.tsx",
       "source_location": "L8",
       "id": "protectedroute_test_renderwithrouter",
-      "community": 18,
+      "community": 17,
       "norm_label": "renderwithrouter()"
     },
     {
@@ -683,7 +683,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/auth/__tests__/RegisterPage.test.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_auth_tests_registerpage_test_tsx",
-      "community": 18,
+      "community": 17,
       "norm_label": "registerpage.test.tsx"
     },
     {
@@ -692,7 +692,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/auth/__tests__/RegisterPage.test.tsx",
       "source_location": "L11",
       "id": "registerpage_test_renderpage",
-      "community": 18,
+      "community": 17,
       "norm_label": "renderpage()"
     },
     {
@@ -701,7 +701,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/Roster.test.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_team_roster_test_tsx",
-      "community": 49,
+      "community": 48,
       "norm_label": "roster.test.tsx"
     },
     {
@@ -710,7 +710,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/Roster.test.tsx",
       "source_location": "L6",
       "id": "roster_test_createmember",
-      "community": 49,
+      "community": 48,
       "norm_label": "createmember()"
     },
     {
@@ -719,7 +719,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/StateBar.test.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_team_statebar_test_tsx",
-      "community": 68,
+      "community": 67,
       "norm_label": "statebar.test.tsx"
     },
     {
@@ -728,7 +728,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/StateBar.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_team_statebar_tsx",
-      "community": 50,
+      "community": 49,
       "norm_label": "statebar.tsx"
     },
     {
@@ -737,7 +737,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/StateBar.tsx",
       "source_location": "L8",
       "id": "statebar_statebar",
-      "community": 50,
+      "community": 49,
       "norm_label": "statebar()"
     },
     {
@@ -746,7 +746,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/InviteRow.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_team_inviterow_tsx",
-      "community": 51,
+      "community": 50,
       "norm_label": "inviterow.tsx"
     },
     {
@@ -755,7 +755,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/InviteRow.tsx",
       "source_location": "L20",
       "id": "inviterow_inviterow",
-      "community": 51,
+      "community": 50,
       "norm_label": "inviterow()"
     },
     {
@@ -764,7 +764,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/sort.test.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_team_sort_test_ts",
-      "community": 52,
+      "community": 51,
       "norm_label": "sort.test.ts"
     },
     {
@@ -773,7 +773,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/sort.test.ts",
       "source_location": "L5",
       "id": "sort_test_createmember",
-      "community": 52,
+      "community": 51,
       "norm_label": "createmember()"
     },
     {
@@ -782,7 +782,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/InviteRow.test.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_team_inviterow_test_tsx",
-      "community": 69,
+      "community": 68,
       "norm_label": "inviterow.test.tsx"
     },
     {
@@ -791,7 +791,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/StateBarLegend.test.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_team_statebarlegend_test_tsx",
-      "community": 70,
+      "community": 69,
       "norm_label": "statebarlegend.test.tsx"
     },
     {
@@ -800,7 +800,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/RoleBadge.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_team_rolebadge_tsx",
-      "community": 53,
+      "community": 52,
       "norm_label": "rolebadge.tsx"
     },
     {
@@ -809,7 +809,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/RoleBadge.tsx",
       "source_location": "L9",
       "id": "rolebadge_rolebadge",
-      "community": 53,
+      "community": 52,
       "norm_label": "rolebadge()"
     },
     {
@@ -818,7 +818,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/TeamPage.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_team_teampage_tsx",
-      "community": 15,
+      "community": 14,
       "norm_label": "teampage.tsx"
     },
     {
@@ -827,7 +827,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/TeamPage.tsx",
       "source_location": "L23",
       "id": "teampage_teampage",
-      "community": 15,
+      "community": 14,
       "norm_label": "teampage()"
     },
     {
@@ -890,7 +890,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/TeamPage.test.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_team_teampage_test_tsx",
-      "community": 18,
+      "community": 17,
       "norm_label": "teampage.test.tsx"
     },
     {
@@ -899,7 +899,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/TeamPage.test.tsx",
       "source_location": "L10",
       "id": "teampage_test_createmember",
-      "community": 18,
+      "community": 17,
       "norm_label": "createmember()"
     },
     {
@@ -908,7 +908,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/TeamPage.test.tsx",
       "source_location": "L36",
       "id": "teampage_test_renderwithauth",
-      "community": 18,
+      "community": 17,
       "norm_label": "renderwithauth()"
     },
     {
@@ -917,7 +917,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/StateBarLegend.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_team_statebarlegend_tsx",
-      "community": 54,
+      "community": 53,
       "norm_label": "statebarlegend.tsx"
     },
     {
@@ -926,7 +926,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/StateBarLegend.tsx",
       "source_location": "L3",
       "id": "statebarlegend_statebarlegend",
-      "community": 54,
+      "community": 53,
       "norm_label": "statebarlegend()"
     },
     {
@@ -935,7 +935,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/Roster.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_team_roster_tsx",
-      "community": 15,
+      "community": 14,
       "norm_label": "roster.tsx"
     },
     {
@@ -944,7 +944,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/Roster.tsx",
       "source_location": "L22",
       "id": "roster_getavatarclass",
-      "community": 15,
+      "community": 14,
       "norm_label": "getavatarclass()"
     },
     {
@@ -953,7 +953,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/Roster.tsx",
       "source_location": "L26",
       "id": "roster_getavatarinitials",
-      "community": 15,
+      "community": 14,
       "norm_label": "getavatarinitials()"
     },
     {
@@ -962,7 +962,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/time.test.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_team_time_test_ts",
-      "community": 71,
+      "community": 70,
       "norm_label": "time.test.ts"
     },
     {
@@ -971,7 +971,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/time.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_team_time_ts",
-      "community": 55,
+      "community": 54,
       "norm_label": "time.ts"
     },
     {
@@ -980,7 +980,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/time.ts",
       "source_location": "L9",
       "id": "time_formatlastactiveru",
-      "community": 55,
+      "community": 54,
       "norm_label": "formatlastactiveru()"
     },
     {
@@ -989,7 +989,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/features/team/RoleBadge.test.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_features_team_rolebadge_test_tsx",
-      "community": 72,
+      "community": 71,
       "norm_label": "rolebadge.test.tsx"
     },
     {
@@ -998,7 +998,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/types/task.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_types_task_ts",
-      "community": 73,
+      "community": 72,
       "norm_label": "task.ts"
     },
     {
@@ -1007,7 +1007,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/types/auth.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_types_auth_ts",
-      "community": 74,
+      "community": 73,
       "norm_label": "auth.ts"
     },
     {
@@ -1016,7 +1016,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/auth/roles.test.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_auth_roles_test_ts",
-      "community": 75,
+      "community": 74,
       "norm_label": "roles.test.ts"
     },
     {
@@ -1025,7 +1025,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/auth/roles.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_auth_roles_ts",
-      "community": 15,
+      "community": 14,
       "norm_label": "roles.ts"
     },
     {
@@ -1034,7 +1034,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/auth/roles.ts",
       "source_location": "L28",
       "id": "roles_isdeveloperrole",
-      "community": 15,
+      "community": 14,
       "norm_label": "isdeveloperrole()"
     },
     {
@@ -1043,7 +1043,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/auth/roles.ts",
       "source_location": "L32",
       "id": "roles_isuserrole",
-      "community": 15,
+      "community": 14,
       "norm_label": "isuserrole()"
     },
     {
@@ -1052,7 +1052,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/auth/auth.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_auth_auth_ts",
-      "community": 11,
+      "community": 10,
       "norm_label": "auth.ts"
     },
     {
@@ -1061,7 +1061,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/auth/auth.ts",
       "source_location": "L13",
       "id": "auth_getauth",
-      "community": 11,
+      "community": 10,
       "norm_label": "getauth()"
     },
     {
@@ -1070,7 +1070,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/auth/auth.ts",
       "source_location": "L24",
       "id": "auth_gettoken",
-      "community": 11,
+      "community": 10,
       "norm_label": "gettoken()"
     },
     {
@@ -1079,7 +1079,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/auth/auth.ts",
       "source_location": "L28",
       "id": "auth_setauth",
-      "community": 11,
+      "community": 10,
       "norm_label": "setauth()"
     },
     {
@@ -1088,7 +1088,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/auth/auth.ts",
       "source_location": "L32",
       "id": "auth_clearauth",
-      "community": 11,
+      "community": 10,
       "norm_label": "clearauth()"
     },
     {
@@ -1097,7 +1097,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/auth/__tests__/auth.test.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_auth_tests_auth_test_ts",
-      "community": 76,
+      "community": 75,
       "norm_label": "auth.test.ts"
     },
     {
@@ -1106,7 +1106,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/constants/taskConstants.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_constants_taskconstants_ts",
-      "community": 77,
+      "community": 76,
       "norm_label": "taskconstants.ts"
     },
     {
@@ -1151,7 +1151,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/components/AppHeader.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_components_appheader_tsx",
-      "community": 78,
+      "community": 77,
       "norm_label": "appheader.tsx"
     },
     {
@@ -1160,7 +1160,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/components/Spinner.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_components_spinner_tsx",
-      "community": 56,
+      "community": 55,
       "norm_label": "spinner.tsx"
     },
     {
@@ -1169,7 +1169,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/components/Spinner.tsx",
       "source_location": "L7",
       "id": "spinner_spinner",
-      "community": 56,
+      "community": 55,
       "norm_label": "spinner()"
     },
     {
@@ -1178,7 +1178,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/components/ErrorBoundary.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_components_errorboundary_tsx",
-      "community": 18,
+      "community": 17,
       "norm_label": "errorboundary.tsx"
     },
     {
@@ -1187,7 +1187,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/components/ErrorBoundary.tsx",
       "source_location": "L15",
       "id": "errorboundary_errorboundary",
-      "community": 18,
+      "community": 17,
       "norm_label": "errorboundary"
     },
     {
@@ -1196,7 +1196,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/components/ErrorBoundary.tsx",
       "source_location": "L16",
       "id": "errorboundary_errorboundary_constructor",
-      "community": 18,
+      "community": 17,
       "norm_label": ".constructor()"
     },
     {
@@ -1205,7 +1205,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/components/ErrorBoundary.tsx",
       "source_location": "L21",
       "id": "errorboundary_errorboundary_getderivedstatefromerror",
-      "community": 18,
+      "community": 17,
       "norm_label": ".getderivedstatefromerror()"
     },
     {
@@ -1214,7 +1214,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/components/ErrorBoundary.tsx",
       "source_location": "L26",
       "id": "errorboundary_errorboundary_componentdidcatch",
-      "community": 18,
+      "community": 17,
       "norm_label": ".componentdidcatch()"
     },
     {
@@ -1223,7 +1223,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/components/ErrorBoundary.tsx",
       "source_location": "L38",
       "id": "errorboundary_errorboundary_render",
-      "community": 18,
+      "community": 17,
       "norm_label": ".render()"
     },
     {
@@ -1232,7 +1232,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/components/__tests__/ConfirmDialog.test.tsx",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_components_tests_confirmdialog_test_tsx",
-      "community": 79,
+      "community": 78,
       "norm_label": "confirmdialog.test.tsx"
     },
     {
@@ -1295,7 +1295,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/hooks/useTaskDetail.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_hooks_usetaskdetail_ts",
-      "community": 57,
+      "community": 56,
       "norm_label": "usetaskdetail.ts"
     },
     {
@@ -1304,7 +1304,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/hooks/useTaskDetail.ts",
       "source_location": "L12",
       "id": "usetaskdetail_usetaskdetail",
-      "community": 57,
+      "community": 56,
       "norm_label": "usetaskdetail()"
     },
     {
@@ -1313,7 +1313,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/hooks/__tests__/useTaskDetail.test.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_hooks_tests_usetaskdetail_test_ts",
-      "community": 80,
+      "community": 79,
       "norm_label": "usetaskdetail.test.ts"
     },
     {
@@ -1322,7 +1322,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/hooks/__tests__/useKeyboardShortcut.test.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_hooks_tests_usekeyboardshortcut_test_ts",
-      "community": 81,
+      "community": 80,
       "norm_label": "usekeyboardshortcut.test.ts"
     },
     {
@@ -1331,7 +1331,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/authApi.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_api_authapi_ts",
-      "community": 41,
+      "community": 40,
       "norm_label": "authapi.ts"
     },
     {
@@ -1340,7 +1340,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/authApi.ts",
       "source_location": "L5",
       "id": "authapi_login",
-      "community": 41,
+      "community": 40,
       "norm_label": "login()"
     },
     {
@@ -1349,7 +1349,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/authApi.ts",
       "source_location": "L15",
       "id": "authapi_register",
-      "community": 41,
+      "community": 40,
       "norm_label": "register()"
     },
     {
@@ -1358,7 +1358,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/schemas.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_api_schemas_ts",
-      "community": 82,
+      "community": 81,
       "norm_label": "schemas.ts"
     },
     {
@@ -1367,7 +1367,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/teamApi.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_api_teamapi_ts",
-      "community": 11,
+      "community": 10,
       "norm_label": "teamapi.ts"
     },
     {
@@ -1376,7 +1376,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/teamApi.ts",
       "source_location": "L36",
       "id": "teamapi_invitemember",
-      "community": 11,
+      "community": 10,
       "norm_label": "invitemember()"
     },
     {
@@ -1385,7 +1385,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/teamApi.ts",
       "source_location": "L53",
       "id": "teamapi_getroster",
-      "community": 11,
+      "community": 10,
       "norm_label": "getroster()"
     },
     {
@@ -1394,7 +1394,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/teamApi.ts",
       "source_location": "L65",
       "id": "teamapi_removemember",
-      "community": 11,
+      "community": 10,
       "norm_label": "removemember()"
     },
     {
@@ -1403,7 +1403,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/tasksApi.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_api_tasksapi_ts",
-      "community": 11,
+      "community": 10,
       "norm_label": "tasksapi.ts"
     },
     {
@@ -1412,7 +1412,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/tasksApi.ts",
       "source_location": "L5",
       "id": "tasksapi_fetchtasks",
-      "community": 11,
+      "community": 10,
       "norm_label": "fetchtasks()"
     },
     {
@@ -1421,7 +1421,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/tasksApi.ts",
       "source_location": "L13",
       "id": "tasksapi_fetchtaskdetail",
-      "community": 11,
+      "community": 10,
       "norm_label": "fetchtaskdetail()"
     },
     {
@@ -1430,7 +1430,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/tasksApi.ts",
       "source_location": "L21",
       "id": "tasksapi_movetask",
-      "community": 11,
+      "community": 10,
       "norm_label": "movetask()"
     },
     {
@@ -1439,7 +1439,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/tasksApi.ts",
       "source_location": "L33",
       "id": "tasksapi_createtask",
-      "community": 11,
+      "community": 10,
       "norm_label": "createtask()"
     },
     {
@@ -1448,7 +1448,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/httpClient.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_api_httpclient_ts",
-      "community": 11,
+      "community": 10,
       "norm_label": "httpclient.ts"
     },
     {
@@ -1457,7 +1457,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/httpClient.ts",
       "source_location": "L9",
       "id": "httpclient_authheaders",
-      "community": 11,
+      "community": 10,
       "norm_label": "authheaders()"
     },
     {
@@ -1466,7 +1466,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/httpClient.ts",
       "source_location": "L14",
       "id": "httpclient_handleresponse",
-      "community": 11,
+      "community": 10,
       "norm_label": "handleresponse()"
     },
     {
@@ -1475,7 +1475,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/__tests__/schemas.test.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_api_tests_schemas_test_ts",
-      "community": 83,
+      "community": 82,
       "norm_label": "schemas.test.ts"
     },
     {
@@ -1484,7 +1484,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/__tests__/httpClient.test.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_api_tests_httpclient_test_ts",
-      "community": 84,
+      "community": 83,
       "norm_label": "httpclient.test.ts"
     },
     {
@@ -1493,7 +1493,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/__tests__/teamApi.test.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_api_tests_teamapi_test_ts",
-      "community": 85,
+      "community": 84,
       "norm_label": "teamapi.test.ts"
     },
     {
@@ -1502,7 +1502,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/__tests__/tasksApi.test.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_api_tests_tasksapi_test_ts",
-      "community": 86,
+      "community": 85,
       "norm_label": "tasksapi.test.ts"
     },
     {
@@ -1511,7 +1511,7 @@
       "source_file": "OneMoreTaskTracker.WebClient/src/shared/api/__tests__/authApi.test.ts",
       "source_location": "L1",
       "id": "onemoretasktracker_webclient_src_shared_api_tests_authapi_test_ts",
-      "community": 87,
+      "community": 86,
       "norm_label": "authapi.test.ts"
     },
     {
@@ -1529,7 +1529,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerGetTeamMemberIdsTests.cs",
       "source_location": "L9",
       "id": "userservicehandlergetteammemberidstests_userservicehandlergetteammemberidstests",
-      "community": 5,
+      "community": 9,
       "norm_label": "userservicehandlergetteammemberidstests"
     },
     {
@@ -1538,7 +1538,7 @@
       "source_file": "",
       "source_location": "",
       "id": "userservicehandlertestbase",
-      "community": 5,
+      "community": 3,
       "norm_label": "userservicehandlertestbase"
     },
     {
@@ -1547,7 +1547,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerGetTeamMemberIdsTests.cs",
       "source_location": "L11",
       "id": "userservicehandlergetteammemberidstests_userservicehandlergetteammemberidstests_getteammemberids_returnsidsofmemberswithmatchingmanagerid",
-      "community": 5,
+      "community": 9,
       "norm_label": ".getteammemberids_returnsidsofmemberswithmatchingmanagerid()"
     },
     {
@@ -1556,7 +1556,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerGetTeamMemberIdsTests.cs",
       "source_location": "L35",
       "id": "userservicehandlergetteammemberidstests_userservicehandlergetteammemberidstests_getteammemberids_whennomembers_returnsemptylist",
-      "community": 5,
+      "community": 9,
       "norm_label": ".getteammemberids_whennomembers_returnsemptylist()"
     },
     {
@@ -1574,7 +1574,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs",
       "source_location": "L12",
       "id": "userservicehandlerregistertests_userservicehandlerregistertests",
-      "community": 6,
+      "community": 3,
       "norm_label": "userservicehandlerregistertests"
     },
     {
@@ -1583,7 +1583,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs",
       "source_location": "L14",
       "id": "userservicehandlerregistertests_userservicehandlerregistertests_register_whenemailisempty_throwsinvalidargument",
-      "community": 6,
+      "community": 3,
       "norm_label": ".register_whenemailisempty_throwsinvalidargument()"
     },
     {
@@ -1592,7 +1592,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs",
       "source_location": "L25",
       "id": "userservicehandlerregistertests_userservicehandlerregistertests_register_whenpasswordisempty_throwsinvalidargument",
-      "community": 6,
+      "community": 3,
       "norm_label": ".register_whenpasswordisempty_throwsinvalidargument()"
     },
     {
@@ -1601,7 +1601,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs",
       "source_location": "L36",
       "id": "userservicehandlerregistertests_userservicehandlerregistertests_register_whenemailiswhitespace_throwsinvalidargument",
-      "community": 6,
+      "community": 3,
       "norm_label": ".register_whenemailiswhitespace_throwsinvalidargument()"
     },
     {
@@ -1610,7 +1610,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs",
       "source_location": "L47",
       "id": "userservicehandlerregistertests_userservicehandlerregistertests_register_whenemailistoolong_throwsinvalidargument",
-      "community": 6,
+      "community": 3,
       "norm_label": ".register_whenemailistoolong_throwsinvalidargument()"
     },
     {
@@ -1619,7 +1619,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs",
       "source_location": "L59",
       "id": "userservicehandlerregistertests_userservicehandlerregistertests_register_whenemailisinvalid_throwsinvalidargument",
-      "community": 6,
+      "community": 3,
       "norm_label": ".register_whenemailisinvalid_throwsinvalidargument()"
     },
     {
@@ -1628,7 +1628,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs",
       "source_location": "L70",
       "id": "userservicehandlerregistertests_userservicehandlerregistertests_register_whenpasswordtooshort_throwsinvalidargument",
-      "community": 6,
+      "community": 3,
       "norm_label": ".register_whenpasswordtooshort_throwsinvalidargument()"
     },
     {
@@ -1637,7 +1637,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs",
       "source_location": "L85",
       "id": "userservicehandlerregistertests_userservicehandlerregistertests_register_whenemailalreadyexists_throwsalreadyexists",
-      "community": 6,
+      "community": 3,
       "norm_label": ".register_whenemailalreadyexists_throwsalreadyexists()"
     },
     {
@@ -1646,7 +1646,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs",
       "source_location": "L108",
       "id": "userservicehandlerregistertests_userservicehandlerregistertests_register_whenmanageridisnonzerobutnotfound_throwsinvalidargument",
-      "community": 6,
+      "community": 3,
       "norm_label": ".register_whenmanageridisnonzerobutnotfound_throwsinvalidargument()"
     },
     {
@@ -1655,7 +1655,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs",
       "source_location": "L124",
       "id": "userservicehandlerregistertests_userservicehandlerregistertests_register_whenmanageridreferstononmanager_throwsinvalidargument",
-      "community": 6,
+      "community": 3,
       "norm_label": ".register_whenmanageridreferstononmanager_throwsinvalidargument()"
     },
     {
@@ -1664,7 +1664,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs",
       "source_location": "L150",
       "id": "userservicehandlerregistertests_userservicehandlerregistertests_register_withvaliddata_returnsuserwithmanagerrole",
-      "community": 6,
+      "community": 3,
       "norm_label": ".register_withvaliddata_returnsuserwithmanagerrole()"
     },
     {
@@ -1673,7 +1673,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs",
       "source_location": "L172",
       "id": "userservicehandlerregistertests_userservicehandlerregistertests_register_withvalidmanagerid_succeeds",
-      "community": 6,
+      "community": 3,
       "norm_label": ".register_withvalidmanagerid_succeeds()"
     },
     {
@@ -1682,7 +1682,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs",
       "source_location": "L203",
       "id": "userservicehandlerregistertests_userservicehandlerregistertests_register_bcryptshashcorrectly_andauthenticateverifiesroundtrip",
-      "community": 6,
+      "community": 3,
       "norm_label": ".register_bcryptshashcorrectly_andauthenticateverifiesroundtrip()"
     },
     {
@@ -1691,7 +1691,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs",
       "source_location": "L222",
       "id": "userservicehandlerregistertests_userservicehandlerregistertests_register_selfregistration_forcesmanagerrole_ignoressentrole",
-      "community": 6,
+      "community": 3,
       "norm_label": ".register_selfregistration_forcesmanagerrole_ignoressentrole()"
     },
     {
@@ -1700,7 +1700,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs",
       "source_location": "L243",
       "id": "userservicehandlerregistertests_userservicehandlerregistertests_register_managedcreation_requiresvaliddeveloperrole_rejectsmanager",
-      "community": 6,
+      "community": 3,
       "norm_label": ".register_managedcreation_requiresvaliddeveloperrole_rejectsmanager()"
     },
     {
@@ -1709,7 +1709,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs",
       "source_location": "L269",
       "id": "userservicehandlerregistertests_userservicehandlerregistertests_register_managedcreation_requiresvaliddeveloperrole_rejectsempty",
-      "community": 6,
+      "community": 3,
       "norm_label": ".register_managedcreation_requiresvaliddeveloperrole_rejectsempty()"
     },
     {
@@ -1718,7 +1718,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs",
       "source_location": "L295",
       "id": "userservicehandlerregistertests_userservicehandlerregistertests_register_managedcreation_acceptsdeveloperrole",
-      "community": 6,
+      "community": 3,
       "norm_label": ".register_managedcreation_acceptsdeveloperrole()"
     },
     {
@@ -1727,7 +1727,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs",
       "source_location": "L328",
       "id": "userservicehandlerregistertests_userservicehandlerregistertests_register_managedcreation_rejectsarbitraryrole",
-      "community": 6,
+      "community": 3,
       "norm_label": ".register_managedcreation_rejectsarbitraryrole()"
     },
     {
@@ -1745,7 +1745,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerDeleteUserTests.cs",
       "source_location": "L10",
       "id": "userservicehandlerdeleteusertests_userservicehandlerdeleteusertests",
-      "community": 5,
+      "community": 3,
       "norm_label": "userservicehandlerdeleteusertests"
     },
     {
@@ -1754,7 +1754,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerDeleteUserTests.cs",
       "source_location": "L12",
       "id": "userservicehandlerdeleteusertests_userservicehandlerdeleteusertests_deleteuser_withvalidmemberofteam_removesuserandreturnssuccess",
-      "community": 5,
+      "community": 3,
       "norm_label": ".deleteuser_withvalidmemberofteam_removesuserandreturnssuccess()"
     },
     {
@@ -1763,7 +1763,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerDeleteUserTests.cs",
       "source_location": "L30",
       "id": "userservicehandlerdeleteusertests_userservicehandlerdeleteusertests_deleteuser_whenusernotfound_throwsnotfound",
-      "community": 5,
+      "community": 3,
       "norm_label": ".deleteuser_whenusernotfound_throwsnotfound()"
     },
     {
@@ -1772,7 +1772,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerDeleteUserTests.cs",
       "source_location": "L41",
       "id": "userservicehandlerdeleteusertests_userservicehandlerdeleteusertests_deleteuser_whenuserdoesnotbelongtomanager_throwspermissiondenied",
-      "community": 5,
+      "community": 3,
       "norm_label": ".deleteuser_whenuserdoesnotbelongtomanager_throwspermissiondenied()"
     },
     {
@@ -1781,7 +1781,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerDeleteUserTests.cs",
       "source_location": "L61",
       "id": "userservicehandlerdeleteusertests_userservicehandlerdeleteusertests_deleteuser_doesnotremoveuserifmanageridmismatch",
-      "community": 5,
+      "community": 3,
       "norm_label": ".deleteuser_doesnotremoveuserifmanageridmismatch()"
     },
     {
@@ -1799,7 +1799,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerAuthenticateTests.cs",
       "source_location": "L9",
       "id": "userservicehandlerauthenticatetests_userservicehandlerauthenticatetests",
-      "community": 5,
+      "community": 3,
       "norm_label": "userservicehandlerauthenticatetests"
     },
     {
@@ -1808,7 +1808,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerAuthenticateTests.cs",
       "source_location": "L11",
       "id": "userservicehandlerauthenticatetests_userservicehandlerauthenticatetests_authenticate_withcorrectcredentials_returnssuccess",
-      "community": 5,
+      "community": 3,
       "norm_label": ".authenticate_withcorrectcredentials_returnssuccess()"
     },
     {
@@ -1817,7 +1817,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerAuthenticateTests.cs",
       "source_location": "L31",
       "id": "userservicehandlerauthenticatetests_userservicehandlerauthenticatetests_authenticate_withwrongpassword_returnsfailure",
-      "community": 5,
+      "community": 3,
       "norm_label": ".authenticate_withwrongpassword_returnsfailure()"
     },
     {
@@ -1826,7 +1826,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerAuthenticateTests.cs",
       "source_location": "L47",
       "id": "userservicehandlerauthenticatetests_userservicehandlerauthenticatetests_authenticate_withnonexistentemail_returnsfailure",
-      "community": 5,
+      "community": 3,
       "norm_label": ".authenticate_withnonexistentemail_returnsfailure()"
     },
     {
@@ -1844,7 +1844,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerGetTeamRosterTests.cs",
       "source_location": "L10",
       "id": "userservicehandlergetteamrostertests_userservicehandlergetteamrostertests",
-      "community": 5,
+      "community": 3,
       "norm_label": "userservicehandlergetteamrostertests"
     },
     {
@@ -1853,7 +1853,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerGetTeamRosterTests.cs",
       "source_location": "L12",
       "id": "userservicehandlergetteamrostertests_userservicehandlergetteamrostertests_getteamroster_returnsmanagerrowplusalldirectreports",
-      "community": 5,
+      "community": 3,
       "norm_label": ".getteamroster_returnsmanagerrowplusalldirectreports()"
     },
     {
@@ -1862,7 +1862,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerGetTeamRosterTests.cs",
       "source_location": "L40",
       "id": "userservicehandlergetteamrostertests_userservicehandlergetteamrostertests_getteamroster_whenmanagerhasnomembers_returnsonlymanagerrow",
-      "community": 5,
+      "community": 3,
       "norm_label": ".getteamroster_whenmanagerhasnomembers_returnsonlymanagerrow()"
     },
     {
@@ -1871,7 +1871,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerGetTeamRosterTests.cs",
       "source_location": "L55",
       "id": "userservicehandlergetteamrostertests_userservicehandlergetteamrostertests_getteamroster_whenmanageridnotfound_throwsinvalidargument",
-      "community": 5,
+      "community": 3,
       "norm_label": ".getteamroster_whenmanageridnotfound_throwsinvalidargument()"
     },
     {
@@ -1880,7 +1880,7 @@
       "source_file": "tests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerGetTeamRosterTests.cs",
       "source_location": "L66",
       "id": "userservicehandlergetteamrostertests_userservicehandlergetteamrostertests_getteamroster_whenmanageridreferstononmanager_throwsinvalidargument",
-      "community": 5,
+      "community": 3,
       "norm_label": ".getteamroster_whenmanageridreferstononmanager_throwsinvalidargument()"
     },
     {
@@ -1934,7 +1934,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs",
       "source_location": "L12",
       "id": "grpcexceptionmiddlewaretests_grpcexceptionmiddlewaretests",
-      "community": 8,
+      "community": 7,
       "norm_label": "grpcexceptionmiddlewaretests"
     },
     {
@@ -1943,7 +1943,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs",
       "source_location": "L14",
       "id": "grpcexceptionmiddlewaretests_grpcexceptionmiddlewaretests_invokewithexception",
-      "community": 8,
+      "community": 7,
       "norm_label": ".invokewithexception()"
     },
     {
@@ -1952,7 +1952,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs",
       "source_location": "L31",
       "id": "grpcexceptionmiddlewaretests_grpcexceptionmiddlewaretests_getresponsebody",
-      "community": 8,
+      "community": 7,
       "norm_label": ".getresponsebody()"
     },
     {
@@ -1961,7 +1961,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs",
       "source_location": "L38",
       "id": "grpcexceptionmiddlewaretests_grpcexceptionmiddlewaretests_invokeasync_whennoexception_passesthrough",
-      "community": 8,
+      "community": 7,
       "norm_label": ".invokeasync_whennoexception_passesthrough()"
     },
     {
@@ -1970,7 +1970,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs",
       "source_location": "L58",
       "id": "grpcexceptionmiddlewaretests_grpcexceptionmiddlewaretests_invokeasync_mapsgrpcstatustohttpstatus",
-      "community": 8,
+      "community": 7,
       "norm_label": ".invokeasync_mapsgrpcstatustohttpstatus()"
     },
     {
@@ -1979,7 +1979,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs",
       "source_location": "L72",
       "id": "grpcexceptionmiddlewaretests_grpcexceptionmiddlewaretests_invokeasync_responseisvalidjson",
-      "community": 8,
+      "community": 7,
       "norm_label": ".invokeasync_responseisvalidjson()"
     },
     {
@@ -1988,7 +1988,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs",
       "source_location": "L87",
       "id": "grpcexceptionmiddlewaretests_grpcexceptionmiddlewaretests_invokeasync_logstheexception",
-      "community": 8,
+      "community": 7,
       "norm_label": ".invokeasync_logstheexception()"
     },
     {
@@ -1997,7 +1997,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/TestJwtDefaults.cs",
       "source_location": "L1",
       "id": "tests_onemoretasktracker_api_tests_infra_testjwtdefaults_cs",
-      "community": 58,
+      "community": 57,
       "norm_label": "testjwtdefaults.cs"
     },
     {
@@ -2006,7 +2006,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/TestJwtDefaults.cs",
       "source_location": "L3",
       "id": "testjwtdefaults_testjwtdefaults",
-      "community": 58,
+      "community": 57,
       "norm_label": "testjwtdefaults"
     },
     {
@@ -2015,16 +2015,16 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/ProgramDiTests.cs",
       "source_location": "L1",
       "id": "tests_onemoretasktracker_api_tests_infra_programditests_cs",
-      "community": 0,
+      "community": 5,
       "norm_label": "programditests.cs"
     },
     {
       "label": "ProgramDiTests",
       "file_type": "code",
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/ProgramDiTests.cs",
-      "source_location": "L21",
+      "source_location": "L16",
       "id": "programditests_programditests",
-      "community": 4,
+      "community": 5,
       "norm_label": "programditests"
     },
     {
@@ -2033,16 +2033,16 @@
       "source_file": "",
       "source_location": "",
       "id": "iclassfixture",
-      "community": 4,
+      "community": 5,
       "norm_label": "iclassfixture"
     },
     {
       "label": ".Program_ConfiguresAllGrpcClients_SuccessfullyResolvable()",
       "file_type": "code",
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/ProgramDiTests.cs",
-      "source_location": "L30",
+      "source_location": "L19",
       "id": "programditests_programditests_program_configuresallgrpcclients_successfullyresolvable",
-      "community": 4,
+      "community": 5,
       "norm_label": ".program_configuresallgrpcclients_successfullyresolvable()"
     },
     {
@@ -2051,7 +2051,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/GrpcTestHelpers.cs",
       "source_location": "L1",
       "id": "tests_onemoretasktracker_api_tests_infra_grpctesthelpers_cs",
-      "community": 16,
+      "community": 15,
       "norm_label": "grpctesthelpers.cs"
     },
     {
@@ -2060,7 +2060,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/GrpcTestHelpers.cs",
       "source_location": "L6",
       "id": "grpctesthelpers_grpctesthelpers",
-      "community": 3,
+      "community": 4,
       "norm_label": "grpctesthelpers"
     },
     {
@@ -2069,7 +2069,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/GrpcTestHelpers.cs",
       "source_location": "L8",
       "id": "grpctesthelpers_grpctesthelpers_unarycall",
-      "community": 4,
+      "community": 5,
       "norm_label": ".unarycall()"
     },
     {
@@ -2078,7 +2078,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/GrpcTestHelpers.cs",
       "source_location": "L15",
       "id": "grpctesthelpers_grpctesthelpers_streamingcall",
-      "community": 3,
+      "community": 4,
       "norm_label": ".streamingcall()"
     },
     {
@@ -2087,7 +2087,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/GrpcTestHelpers.cs",
       "source_location": "L18",
       "id": "grpctesthelpers_grpctesthelpers_emptystreamingcall",
-      "community": 3,
+      "community": 4,
       "norm_label": ".emptystreamingcall()"
     },
     {
@@ -2096,7 +2096,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/GrpcTestHelpers.cs",
       "source_location": "L21",
       "id": "grpctesthelpers_grpctesthelpers_readasasync",
-      "community": 3,
+      "community": 4,
       "norm_label": ".readasasync()"
     },
     {
@@ -2105,7 +2105,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/GrpcTestHelpers.cs",
       "source_location": "L28",
       "id": "grpctesthelpers_grpctesthelpers_streamingcallfrom",
-      "community": 3,
+      "community": 4,
       "norm_label": ".streamingcallfrom()"
     },
     {
@@ -2114,7 +2114,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/GrpcTestHelpers.cs",
       "source_location": "L36",
       "id": "grpctesthelpers_asyncenumerableadapter",
-      "community": 16,
+      "community": 15,
       "norm_label": "asyncenumerableadapter"
     },
     {
@@ -2123,7 +2123,7 @@
       "source_file": "",
       "source_location": "",
       "id": "iasyncstreamreader",
-      "community": 16,
+      "community": 15,
       "norm_label": "iasyncstreamreader"
     },
     {
@@ -2132,7 +2132,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/GrpcTestHelpers.cs",
       "source_location": "L42",
       "id": "grpctesthelpers_asyncenumerableadapter_movenext",
-      "community": 16,
+      "community": 15,
       "norm_label": ".movenext()"
     },
     {
@@ -2141,7 +2141,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/GrpcTestHelpers.cs",
       "source_location": "L47",
       "id": "grpctesthelpers_asyncenumerableadapter_dispose",
-      "community": 16,
+      "community": 15,
       "norm_label": ".dispose()"
     },
     {
@@ -2157,7 +2157,7 @@
       "label": "ProductionWiringWebApplicationFactory",
       "file_type": "code",
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/ProductionWiringWebApplicationFactory.cs",
-      "source_location": "L14",
+      "source_location": "L10",
       "id": "productionwiringwebapplicationfactory_productionwiringwebapplicationfactory",
       "community": 22,
       "norm_label": "productionwiringwebapplicationfactory"
@@ -2175,7 +2175,7 @@
       "label": ".ConfigureWebHost()",
       "file_type": "code",
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/ProductionWiringWebApplicationFactory.cs",
-      "source_location": "L16",
+      "source_location": "L12",
       "id": "productionwiringwebapplicationfactory_productionwiringwebapplicationfactory_configurewebhost",
       "community": 22,
       "norm_label": ".configurewebhost()"
@@ -2231,7 +2231,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/TasksControllerWebApplicationFactory.cs",
       "source_location": "L40",
       "id": "taskscontrollerwebapplicationfactory_taskscontrollerwebapplicationfactory_generatetoken",
-      "community": 3,
+      "community": 4,
       "norm_label": ".generatetoken()"
     },
     {
@@ -2348,7 +2348,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Auth/RolesTests.cs",
       "source_location": "L7",
       "id": "rolestests_rolestests",
-      "community": 12,
+      "community": 11,
       "norm_label": "rolestests"
     },
     {
@@ -2357,7 +2357,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Auth/RolesTests.cs",
       "source_location": "L9",
       "id": "rolestests_rolestests_manager_hascorrectvalue",
-      "community": 12,
+      "community": 11,
       "norm_label": ".manager_hascorrectvalue()"
     },
     {
@@ -2366,7 +2366,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Auth/RolesTests.cs",
       "source_location": "L15",
       "id": "rolestests_rolestests_frontenddeveloper_hascorrectvalue",
-      "community": 12,
+      "community": 11,
       "norm_label": ".frontenddeveloper_hascorrectvalue()"
     },
     {
@@ -2375,7 +2375,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Auth/RolesTests.cs",
       "source_location": "L21",
       "id": "rolestests_rolestests_backenddeveloper_hascorrectvalue",
-      "community": 12,
+      "community": 11,
       "norm_label": ".backenddeveloper_hascorrectvalue()"
     },
     {
@@ -2384,7 +2384,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Auth/RolesTests.cs",
       "source_location": "L27",
       "id": "rolestests_rolestests_qa_hascorrectvalue",
-      "community": 12,
+      "community": 11,
       "norm_label": ".qa_hascorrectvalue()"
     },
     {
@@ -2393,7 +2393,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Auth/RolesTests.cs",
       "source_location": "L33",
       "id": "rolestests_rolestests_developerroles_containsexactlythreeroles",
-      "community": 12,
+      "community": 11,
       "norm_label": ".developerroles_containsexactlythreeroles()"
     },
     {
@@ -2402,7 +2402,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Auth/RolesTests.cs",
       "source_location": "L39",
       "id": "rolestests_rolestests_developerroles_containsexpectedroles",
-      "community": 12,
+      "community": 11,
       "norm_label": ".developerroles_containsexpectedroles()"
     },
     {
@@ -2411,7 +2411,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Auth/RolesTests.cs",
       "source_location": "L48",
       "id": "rolestests_rolestests_isvalid_returnstrueforvalidroles",
-      "community": 12,
+      "community": 11,
       "norm_label": ".isvalid_returnstrueforvalidroles()"
     },
     {
@@ -2420,7 +2420,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Auth/RolesTests.cs",
       "source_location": "L58",
       "id": "rolestests_rolestests_isvalid_returnsfalseforinvalidroles",
-      "community": 12,
+      "community": 11,
       "norm_label": ".isvalid_returnsfalseforinvalidroles()"
     },
     {
@@ -2429,7 +2429,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Auth/RolesTests.cs",
       "source_location": "L68",
       "id": "rolestests_rolestests_isvalid_returnsfalsefornull",
-      "community": 12,
+      "community": 11,
       "norm_label": ".isvalid_returnsfalsefornull()"
     },
     {
@@ -2438,7 +2438,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Auth/RolesTests.cs",
       "source_location": "L74",
       "id": "rolestests_rolestests_developerroles_doesnotcontainmanager",
-      "community": 12,
+      "community": 11,
       "norm_label": ".developerroles_doesnotcontainmanager()"
     },
     {
@@ -2447,7 +2447,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Auth/RolesTests.cs",
       "source_location": "L80",
       "id": "rolestests_rolestests_developerroles_isreadonly",
-      "community": 12,
+      "community": 11,
       "norm_label": ".developerroles_isreadonly()"
     },
     {
@@ -2465,7 +2465,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L15",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests",
-      "community": 4,
+      "community": 5,
       "norm_label": "teamcontrollerintegrationtests"
     },
     {
@@ -2474,7 +2474,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L18",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_postasjsonasync",
-      "community": 4,
+      "community": 5,
       "norm_label": ".postasjsonasync()"
     },
     {
@@ -2483,7 +2483,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L27",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_clientwithtoken",
-      "community": 4,
+      "community": 5,
       "norm_label": ".clientwithtoken()"
     },
     {
@@ -2492,7 +2492,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L35",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_getroster_asmanager_returns200withcomposedroster",
-      "community": 4,
+      "community": 5,
       "norm_label": ".getroster_asmanager_returns200withcomposedroster()"
     },
     {
@@ -2501,7 +2501,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L89",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_getroster_asdeveloperwithmanagerclaim_returns200withmanagerroster",
-      "community": 4,
+      "community": 5,
       "norm_label": ".getroster_asdeveloperwithmanagerclaim_returns200withmanagerroster()"
     },
     {
@@ -2510,7 +2510,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L145",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_getroster_withoutauthentication_returns401",
-      "community": 3,
+      "community": 4,
       "norm_label": ".getroster_withoutauthentication_returns401()"
     },
     {
@@ -2519,7 +2519,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L154",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_postmember_withoutauthentication_returns401",
-      "community": 4,
+      "community": 5,
       "norm_label": ".postmember_withoutauthentication_returns401()"
     },
     {
@@ -2528,7 +2528,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L164",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_postmember_withdeveloperrole_returns403",
-      "community": 4,
+      "community": 5,
       "norm_label": ".postmember_withdeveloperrole_returns403()"
     },
     {
@@ -2537,7 +2537,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L175",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_postmember_asmanagerwithvalidpayload_returns201withresponse",
-      "community": 4,
+      "community": 5,
       "norm_label": ".postmember_asmanagerwithvalidpayload_returns201withresponse()"
     },
     {
@@ -2546,7 +2546,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L211",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_postmember_withmanagerrole_returns400",
-      "community": 4,
+      "community": 5,
       "norm_label": ".postmember_withmanagerrole_returns400()"
     },
     {
@@ -2555,7 +2555,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L222",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_postmember_withemptyrole_returns400",
-      "community": 4,
+      "community": 5,
       "norm_label": ".postmember_withemptyrole_returns400()"
     },
     {
@@ -2564,7 +2564,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L233",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_postmember_withinvalidrole_returns400",
-      "community": 4,
+      "community": 5,
       "norm_label": ".postmember_withinvalidrole_returns400()"
     },
     {
@@ -2573,7 +2573,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L244",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_postmember_withduplicateemail_returns409",
-      "community": 4,
+      "community": 5,
       "norm_label": ".postmember_withduplicateemail_returns409()"
     },
     {
@@ -2582,7 +2582,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L266",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_postmember_responseshouldhavecachecontrolnostore",
-      "community": 4,
+      "community": 5,
       "norm_label": ".postmember_responseshouldhavecachecontrolnostore()"
     },
     {
@@ -2591,7 +2591,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L290",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_postmember_callsregisterwithcorrectmanagerid",
-      "community": 4,
+      "community": 5,
       "norm_label": ".postmember_callsregisterwithcorrectmanagerid()"
     },
     {
@@ -2600,7 +2600,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L320",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_postmember_ignoresmanageridinrequestbody",
-      "community": 4,
+      "community": 5,
       "norm_label": ".postmember_ignoresmanageridinrequestbody()"
     },
     {
@@ -2609,7 +2609,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L350",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_deletemember_withoutauthentication_returns401",
-      "community": 3,
+      "community": 4,
       "norm_label": ".deletemember_withoutauthentication_returns401()"
     },
     {
@@ -2618,7 +2618,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L359",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_deletemember_withdeveloperrole_returns403",
-      "community": 4,
+      "community": 5,
       "norm_label": ".deletemember_withdeveloperrole_returns403()"
     },
     {
@@ -2627,7 +2627,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L368",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_deletemember_withvalidmember_returns204",
-      "community": 4,
+      "community": 5,
       "norm_label": ".deletemember_withvalidmember_returns204()"
     },
     {
@@ -2636,7 +2636,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L388",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_deletemember_withnonexistentuser_returns404",
-      "community": 4,
+      "community": 5,
       "norm_label": ".deletemember_withnonexistentuser_returns404()"
     },
     {
@@ -2645,7 +2645,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L408",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_deletemember_withuserfromdifferentteam_returns403",
-      "community": 4,
+      "community": 5,
       "norm_label": ".deletemember_withuserfromdifferentteam_returns403()"
     },
     {
@@ -2654,7 +2654,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L428",
       "id": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_deletemember_callsdeleteuserwithcorrectrequest",
-      "community": 4,
+      "community": 5,
       "norm_label": ".deletemember_callsdeleteuserwithcorrectrequest()"
     },
     {
@@ -2672,7 +2672,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L13",
       "id": "authcontrollerintegrationtests_authcontrollerintegrationtests",
-      "community": 4,
+      "community": 5,
       "norm_label": "authcontrollerintegrationtests"
     },
     {
@@ -2681,7 +2681,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L17",
       "id": "authcontrollerintegrationtests_authcontrollerintegrationtests_postasjsonasync",
-      "community": 4,
+      "community": 5,
       "norm_label": ".postasjsonasync()"
     },
     {
@@ -2690,7 +2690,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L26",
       "id": "authcontrollerintegrationtests_authcontrollerintegrationtests_register_withvalidpayload_returns200withtoken",
-      "community": 4,
+      "community": 5,
       "norm_label": ".register_withvalidpayload_returns200withtoken()"
     },
     {
@@ -2699,7 +2699,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L57",
       "id": "authcontrollerintegrationtests_authcontrollerintegrationtests_register_tokencanbedecoded",
-      "community": 4,
+      "community": 5,
       "norm_label": ".register_tokencanbedecoded()"
     },
     {
@@ -2708,7 +2708,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L99",
       "id": "authcontrollerintegrationtests_authcontrollerintegrationtests_register_withinvalidbody_returns400",
-      "community": 4,
+      "community": 5,
       "norm_label": ".register_withinvalidbody_returns400()"
     },
     {
@@ -2717,7 +2717,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L108",
       "id": "authcontrollerintegrationtests_authcontrollerintegrationtests_register_withvalidpayload_passesmanagerid0togrpcservice",
-      "community": 4,
+      "community": 5,
       "norm_label": ".register_withvalidpayload_passesmanagerid0togrpcservice()"
     },
     {
@@ -2726,7 +2726,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L136",
       "id": "authcontrollerintegrationtests_authcontrollerintegrationtests_register_withextramanageridfield_isignoredandroleismanager",
-      "community": 4,
+      "community": 5,
       "norm_label": ".register_withextramanageridfield_isignoredandroleismanager()"
     },
     {
@@ -2735,7 +2735,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L169",
       "id": "authcontrollerintegrationtests_authcontrollerintegrationtests_login_withvalidcredentials_returns200withtoken",
-      "community": 4,
+      "community": 5,
       "norm_label": ".login_withvalidcredentials_returns200withtoken()"
     },
     {
@@ -2744,7 +2744,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L201",
       "id": "authcontrollerintegrationtests_authcontrollerintegrationtests_login_withinvalidcredentials_returns401",
-      "community": 4,
+      "community": 5,
       "norm_label": ".login_withinvalidcredentials_returns401()"
     },
     {
@@ -2753,7 +2753,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L230",
       "id": "authcontrollerintegrationtests_authcontrollerintegrationtests_login_withinvalidbody_returns400",
-      "community": 4,
+      "community": 5,
       "norm_label": ".login_withinvalidbody_returns400()"
     },
     {
@@ -2762,7 +2762,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L239",
       "id": "authcontrollerintegrationtests_authcontrollerintegrationtests_login_tokencanbedecoded",
-      "community": 4,
+      "community": 5,
       "norm_label": ".login_tokencanbedecoded()"
     },
     {
@@ -2771,7 +2771,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L274",
       "id": "authcontrollerintegrationtests_authcontrollerintegrationtests_login_passescorrectemailandpasswordtogrpcservice",
-      "community": 4,
+      "community": 5,
       "norm_label": ".login_passescorrectemailandpasswordtogrpcservice()"
     },
     {
@@ -2780,7 +2780,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L303",
       "id": "authcontrollerintegrationtests_authcontrollerintegrationtests_register_withmanageruser_includesmanageridclaimintoken",
-      "community": 4,
+      "community": 5,
       "norm_label": ".register_withmanageruser_includesmanageridclaimintoken()"
     },
     {
@@ -2789,7 +2789,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L334",
       "id": "authcontrollerintegrationtests_authcontrollerintegrationtests_register_withoutmanager_doesnotincludemanageridclaimintoken",
-      "community": 4,
+      "community": 5,
       "norm_label": ".register_withoutmanager_doesnotincludemanageridclaimintoken()"
     },
     {
@@ -2798,7 +2798,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L364",
       "id": "authcontrollerintegrationtests_authcontrollerintegrationtests_login_withmanageruser_includesmanageridclaimintoken",
-      "community": 4,
+      "community": 5,
       "norm_label": ".login_withmanageruser_includesmanageridclaimintoken()"
     },
     {
@@ -2807,7 +2807,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L396",
       "id": "authcontrollerintegrationtests_authcontrollerintegrationtests_login_withoutmanager_doesnotincludemanageridclaimintoken",
-      "community": 4,
+      "community": 5,
       "norm_label": ".login_withoutmanager_doesnotincludemanageridclaimintoken()"
     },
     {
@@ -2825,7 +2825,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerCreateTaskTests.cs",
       "source_location": "L14",
       "id": "taskscontrollercreatetasktests_taskscontrollercreatetasktests",
-      "community": 3,
+      "community": 4,
       "norm_label": "taskscontrollercreatetasktests"
     },
     {
@@ -2834,7 +2834,7 @@
       "source_file": "",
       "source_location": "",
       "id": "taskscontrollertestbase",
-      "community": 3,
+      "community": 4,
       "norm_label": "taskscontrollertestbase"
     },
     {
@@ -2843,7 +2843,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerCreateTaskTests.cs",
       "source_location": "L17",
       "id": "taskscontrollercreatetasktests_taskscontrollercreatetasktests_jsonbody",
-      "community": 3,
+      "community": 4,
       "norm_label": ".jsonbody()"
     },
     {
@@ -2852,7 +2852,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerCreateTaskTests.cs",
       "source_location": "L20",
       "id": "taskscontrollercreatetasktests_taskscontrollercreatetasktests_createtask_withoutauthentication_returns401",
-      "community": 3,
+      "community": 4,
       "norm_label": ".createtask_withoutauthentication_returns401()"
     },
     {
@@ -2861,7 +2861,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerCreateTaskTests.cs",
       "source_location": "L28",
       "id": "taskscontrollercreatetasktests_taskscontrollercreatetasktests_createtask_withvalidpayload_returns200",
-      "community": 3,
+      "community": 4,
       "norm_label": ".createtask_withvalidpayload_returns200()"
     },
     {
@@ -2870,7 +2870,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerCreateTaskTests.cs",
       "source_location": "L48",
       "id": "taskscontrollercreatetasktests_taskscontrollercreatetasktests_createtask_withinvalidjiraid_returns400",
-      "community": 3,
+      "community": 4,
       "norm_label": ".createtask_withinvalidjiraid_returns400()"
     },
     {
@@ -2879,7 +2879,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerCreateTaskTests.cs",
       "source_location": "L60",
       "id": "taskscontrollercreatetasktests_taskscontrollercreatetasktests_createtask_withnoresponses_returns500",
-      "community": 3,
+      "community": 4,
       "norm_label": ".createtask_withnoresponses_returns500()"
     },
     {
@@ -2897,7 +2897,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerGetTasksTests.cs",
       "source_location": "L12",
       "id": "taskscontrollergettaskstests_taskscontrollergettaskstests",
-      "community": 3,
+      "community": 4,
       "norm_label": "taskscontrollergettaskstests"
     },
     {
@@ -2906,7 +2906,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerGetTasksTests.cs",
       "source_location": "L14",
       "id": "taskscontrollergettaskstests_taskscontrollergettaskstests_gettasks_withoutauthentication_returns401",
-      "community": 3,
+      "community": 4,
       "norm_label": ".gettasks_withoutauthentication_returns401()"
     },
     {
@@ -2915,7 +2915,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerGetTasksTests.cs",
       "source_location": "L22",
       "id": "taskscontrollergettaskstests_taskscontrollergettaskstests_gettasks_withdeveloperrole_returns200",
-      "community": 3,
+      "community": 4,
       "norm_label": ".gettasks_withdeveloperrole_returns200()"
     },
     {
@@ -2924,7 +2924,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerGetTasksTests.cs",
       "source_location": "L42",
       "id": "taskscontrollergettaskstests_taskscontrollergettaskstests_gettasks_withmanagerrole_callsgetteammemberids",
-      "community": 3,
+      "community": 4,
       "norm_label": ".gettasks_withmanagerrole_callsgetteammemberids()"
     },
     {
@@ -2933,7 +2933,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerGetTasksTests.cs",
       "source_location": "L68",
       "id": "taskscontrollergettaskstests_taskscontrollergettaskstests_gettasks_withemptyresult_returnsokwithemptyarray",
-      "community": 3,
+      "community": 4,
       "norm_label": ".gettasks_withemptyresult_returnsokwithemptyarray()"
     },
     {
@@ -2942,7 +2942,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerTestBase.cs",
       "source_location": "L1",
       "id": "tests_onemoretasktracker_api_tests_controllers_taskscontrollertestbase_cs",
-      "community": 3,
+      "community": 4,
       "norm_label": "taskscontrollertestbase.cs"
     },
     {
@@ -2951,7 +2951,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerTestBase.cs",
       "source_location": "L8",
       "id": "taskscontrollertestbase_taskscontrollertestbase",
-      "community": 3,
+      "community": 4,
       "norm_label": "taskscontrollertestbase"
     },
     {
@@ -2960,7 +2960,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerTestBase.cs",
       "source_location": "L13",
       "id": "taskscontrollertestbase_taskscontrollertestbase_tokenfordeveloper",
-      "community": 3,
+      "community": 4,
       "norm_label": ".tokenfordeveloper()"
     },
     {
@@ -2969,7 +2969,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerTestBase.cs",
       "source_location": "L16",
       "id": "taskscontrollertestbase_taskscontrollertestbase_tokenformanager",
-      "community": 3,
+      "community": 4,
       "norm_label": ".tokenformanager()"
     },
     {
@@ -2978,7 +2978,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerTestBase.cs",
       "source_location": "L19",
       "id": "taskscontrollertestbase_taskscontrollertestbase_clientwithtoken",
-      "community": 3,
+      "community": 4,
       "norm_label": ".clientwithtoken()"
     },
     {
@@ -2996,7 +2996,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerMoveTaskTests.cs",
       "source_location": "L10",
       "id": "taskscontrollermovetasktests_taskscontrollermovetasktests",
-      "community": 3,
+      "community": 4,
       "norm_label": "taskscontrollermovetasktests"
     },
     {
@@ -3005,7 +3005,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerMoveTaskTests.cs",
       "source_location": "L12",
       "id": "taskscontrollermovetasktests_taskscontrollermovetasktests_movetask_withoutauthentication_returns401",
-      "community": 3,
+      "community": 4,
       "norm_label": ".movetask_withoutauthentication_returns401()"
     },
     {
@@ -3014,7 +3014,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerMoveTaskTests.cs",
       "source_location": "L20",
       "id": "taskscontrollermovetasktests_taskscontrollermovetasktests_movetask_withvalidid_returns200",
-      "community": 3,
+      "community": 4,
       "norm_label": ".movetask_withvalidid_returns200()"
     },
     {
@@ -3023,7 +3023,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerMoveTaskTests.cs",
       "source_location": "L41",
       "id": "taskscontrollermovetasktests_taskscontrollermovetasktests_movetask_withmultipleprojects_returnsall",
-      "community": 3,
+      "community": 4,
       "norm_label": ".movetask_withmultipleprojects_returnsall()"
     },
     {
@@ -3032,7 +3032,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerMoveTaskTests.cs",
       "source_location": "L66",
       "id": "taskscontrollermovetasktests_taskscontrollermovetasktests_movetask_withnoresponses_returns500",
-      "community": 3,
+      "community": 4,
       "norm_label": ".movetask_withnoresponses_returns500()"
     },
     {
@@ -3041,7 +3041,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerMoveTaskTests.cs",
       "source_location": "L80",
       "id": "taskscontrollermovetasktests_taskscontrollermovetasktests_movetask_mapstaskstatescorrectly",
-      "community": 3,
+      "community": 4,
       "norm_label": ".movetask_mapstaskstatescorrectly()"
     },
     {
@@ -3059,7 +3059,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerGetTaskTests.cs",
       "source_location": "L11",
       "id": "taskscontrollergettasktests_taskscontrollergettasktests",
-      "community": 3,
+      "community": 4,
       "norm_label": "taskscontrollergettasktests"
     },
     {
@@ -3068,7 +3068,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerGetTaskTests.cs",
       "source_location": "L13",
       "id": "taskscontrollergettasktests_taskscontrollergettasktests_gettask_withoutauthentication_returns401",
-      "community": 3,
+      "community": 4,
       "norm_label": ".gettask_withoutauthentication_returns401()"
     },
     {
@@ -3077,7 +3077,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerGetTaskTests.cs",
       "source_location": "L21",
       "id": "taskscontrollergettasktests_taskscontrollergettasktests_gettask_withvalidid_returns200",
-      "community": 3,
+      "community": 4,
       "norm_label": ".gettask_withvalidid_returns200()"
     },
     {
@@ -3086,7 +3086,7 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerGetTaskTests.cs",
       "source_location": "L45",
       "id": "taskscontrollergettasktests_taskscontrollergettasktests_gettask_withmultipleprojects_returnsall",
-      "community": 3,
+      "community": 4,
       "norm_label": ".gettask_withmultipleprojects_returnsall()"
     },
     {
@@ -3176,7 +3176,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/MergeRequests/MrsProviderTests.cs",
       "source_location": "L176",
       "id": "mrsprovidertests_mockasyncstreamreader",
-      "community": 16,
+      "community": 15,
       "norm_label": "mockasyncstreamreader"
     },
     {
@@ -3185,7 +3185,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/MergeRequests/MrsProviderTests.cs",
       "source_location": "L182",
       "id": "mrsprovidertests_mockasyncstreamreader_movenext",
-      "community": 16,
+      "community": 15,
       "norm_label": ".movenext()"
     },
     {
@@ -3194,7 +3194,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/MergeRequests/MrsProviderTests.cs",
       "source_location": "L187",
       "id": "mrsprovidertests_mockasyncstreamreader_dispose",
-      "community": 16,
+      "community": 15,
       "norm_label": ".dispose()"
     },
     {
@@ -3293,7 +3293,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/AssigneeSummary/GetAssigneeTaskSummaryHandlerTests.cs",
       "source_location": "L15",
       "id": "getassigneetasksummaryhandlertests_getassigneetasksummaryhandlertests",
-      "community": 19,
+      "community": 18,
       "norm_label": "getassigneetasksummaryhandlertests"
     },
     {
@@ -3302,7 +3302,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/AssigneeSummary/GetAssigneeTaskSummaryHandlerTests.cs",
       "source_location": "L17",
       "id": "getassigneetasksummaryhandlertests_getassigneetasksummaryhandlertests_createdb",
-      "community": 19,
+      "community": 18,
       "norm_label": ".createdb()"
     },
     {
@@ -3311,7 +3311,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/AssigneeSummary/GetAssigneeTaskSummaryHandlerTests.cs",
       "source_location": "L25",
       "id": "getassigneetasksummaryhandlertests_getassigneetasksummaryhandlertests_createcontext",
-      "community": 19,
+      "community": 18,
       "norm_label": ".createcontext()"
     },
     {
@@ -3320,7 +3320,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/AssigneeSummary/GetAssigneeTaskSummaryHandlerTests.cs",
       "source_location": "L32",
       "id": "getassigneetasksummaryhandlertests_getassigneetasksummaryhandlertests_batchgetassigneetasksummary_returnsonesummaryperinputid_includingzerotaskassignees",
-      "community": 19,
+      "community": 18,
       "norm_label": ".batchgetassigneetasksummary_returnsonesummaryperinputid_includingzerotaskassignees()"
     },
     {
@@ -3329,7 +3329,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/AssigneeSummary/GetAssigneeTaskSummaryHandlerTests.cs",
       "source_location": "L65",
       "id": "getassigneetasksummaryhandlertests_getassigneetasksummaryhandlertests_batchgetassigneetasksummary_correctlybucketsbystate",
-      "community": 19,
+      "community": 18,
       "norm_label": ".batchgetassigneetasksummary_correctlybucketsbystate()"
     },
     {
@@ -3338,7 +3338,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/AssigneeSummary/GetAssigneeTaskSummaryHandlerTests.cs",
       "source_location": "L99",
       "id": "getassigneetasksummaryhandlertests_getassigneetasksummaryhandlertests_batchgetassigneetasksummary_lastactivityatisnullwhentaskmodelhasnotimestamp",
-      "community": 19,
+      "community": 18,
       "norm_label": ".batchgetassigneetasksummary_lastactivityatisnullwhentaskmodelhasnotimestamp()"
     },
     {
@@ -3347,7 +3347,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/AssigneeSummary/GetAssigneeTaskSummaryHandlerTests.cs",
       "source_location": "L126",
       "id": "getassigneetasksummaryhandlertests_getassigneetasksummaryhandlertests_batchgetassigneetasksummary_assigneewithnotasks_hasemptylastactivityat",
-      "community": 19,
+      "community": 18,
       "norm_label": ".batchgetassigneetasksummary_assigneewithnotasks_hasemptylastactivityat()"
     },
     {
@@ -3356,7 +3356,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/AssigneeSummary/GetAssigneeTaskSummaryHandlerTests.cs",
       "source_location": "L143",
       "id": "getassigneetasksummaryhandlertests_getassigneetasksummaryhandlertests_batchgetassigneetasksummary_issuedassinglegroupedquery",
-      "community": 19,
+      "community": 18,
       "norm_label": ".batchgetassigneetasksummary_issuedassinglegroupedquery()"
     },
     {
@@ -3365,7 +3365,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/AssigneeSummary/GetAssigneeTaskSummaryHandlerTests.cs",
       "source_location": "L168",
       "id": "getassigneetasksummaryhandlertests_getassigneetasksummaryhandlertests_batchgetassigneetasksummary_emptyrequestreturnsemptyresponse",
-      "community": 19,
+      "community": 18,
       "norm_label": ".batchgetassigneetasksummary_emptyrequestreturnsemptyresponse()"
     },
     {
@@ -3455,7 +3455,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/Data/TaskAddProjectTests.cs",
       "source_location": "L9",
       "id": "taskaddprojecttests_taskaddprojecttests",
-      "community": 9,
+      "community": 8,
       "norm_label": "taskaddprojecttests"
     },
     {
@@ -3464,7 +3464,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/Data/TaskAddProjectTests.cs",
       "source_location": "L11",
       "id": "taskaddprojecttests_taskaddprojecttests_addproject_whennotstarted_setsstateindev",
-      "community": 9,
+      "community": 8,
       "norm_label": ".addproject_whennotstarted_setsstateindev()"
     },
     {
@@ -3473,7 +3473,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/Data/TaskAddProjectTests.cs",
       "source_location": "L21",
       "id": "taskaddprojecttests_taskaddprojecttests_addproject_whenindev_stateunchanged",
-      "community": 9,
+      "community": 8,
       "norm_label": ".addproject_whenindev_stateunchanged()"
     },
     {
@@ -3482,7 +3482,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/Data/TaskAddProjectTests.cs",
       "source_location": "L32",
       "id": "taskaddprojecttests_taskaddprojecttests_addproject_whenmrtorelease_stateunchanged",
-      "community": 9,
+      "community": 8,
       "norm_label": ".addproject_whenmrtorelease_stateunchanged()"
     },
     {
@@ -3491,7 +3491,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/Data/TaskAddProjectTests.cs",
       "source_location": "L43",
       "id": "taskaddprojecttests_taskaddprojecttests_addproject_whenmrtomaster_stateunchanged",
-      "community": 9,
+      "community": 8,
       "norm_label": ".addproject_whenmrtomaster_stateunchanged()"
     },
     {
@@ -3500,7 +3500,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/Data/TaskAddProjectTests.cs",
       "source_location": "L54",
       "id": "taskaddprojecttests_taskaddprojecttests_addproject_addsgitrepo_whennotpresent",
-      "community": 9,
+      "community": 8,
       "norm_label": ".addproject_addsgitrepo_whennotpresent()"
     },
     {
@@ -3509,7 +3509,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/Data/TaskAddProjectTests.cs",
       "source_location": "L66",
       "id": "taskaddprojecttests_taskaddprojecttests_addproject_doesnotduplicategitrepo_whensameexternalid",
-      "community": 9,
+      "community": 8,
       "norm_label": ".addproject_doesnotduplicategitrepo_whensameexternalid()"
     },
     {
@@ -3518,7 +3518,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/Data/TaskAddProjectTests.cs",
       "source_location": "L77",
       "id": "taskaddprojecttests_taskaddprojecttests_addproject_storesnamecorrectly",
-      "community": 9,
+      "community": 8,
       "norm_label": ".addproject_storesnamecorrectly()"
     },
     {
@@ -3536,7 +3536,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/Data/TaskAddMrTests.cs",
       "source_location": "L9",
       "id": "taskaddmrtests_taskaddmrtests",
-      "community": 9,
+      "community": 8,
       "norm_label": "taskaddmrtests"
     },
     {
@@ -3545,7 +3545,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/Data/TaskAddMrTests.cs",
       "source_location": "L11",
       "id": "taskaddmrtests_taskaddmrtests_addmr_whennotstartedandtargetismaster_setsstatemrtomaster",
-      "community": 9,
+      "community": 8,
       "norm_label": ".addmr_whennotstartedandtargetismaster_setsstatemrtomaster()"
     },
     {
@@ -3554,7 +3554,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/Data/TaskAddMrTests.cs",
       "source_location": "L22",
       "id": "taskaddmrtests_taskaddmrtests_addmr_whennotstartedandtargetisnotmaster_setsstatemrtorelease",
-      "community": 9,
+      "community": 8,
       "norm_label": ".addmr_whennotstartedandtargetisnotmaster_setsstatemrtorelease()"
     },
     {
@@ -3563,7 +3563,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/Data/TaskAddMrTests.cs",
       "source_location": "L33",
       "id": "taskaddmrtests_taskaddmrtests_addmr_whenmrtomasterandtargetisnotmaster_setsstatemrtorelease",
-      "community": 9,
+      "community": 8,
       "norm_label": ".addmr_whenmrtomasterandtargetisnotmaster_setsstatemrtorelease()"
     },
     {
@@ -3572,7 +3572,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/Data/TaskAddMrTests.cs",
       "source_location": "L46",
       "id": "taskaddmrtests_taskaddmrtests_addmr_whenmrtorelease_stateunchanged",
-      "community": 9,
+      "community": 8,
       "norm_label": ".addmr_whenmrtorelease_stateunchanged()"
     },
     {
@@ -3581,7 +3581,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/Data/TaskAddMrTests.cs",
       "source_location": "L59",
       "id": "taskaddmrtests_taskaddmrtests_addmr_whenindev_stateunchanged",
-      "community": 9,
+      "community": 8,
       "norm_label": ".addmr_whenindev_stateunchanged()"
     },
     {
@@ -3590,7 +3590,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/Data/TaskAddMrTests.cs",
       "source_location": "L72",
       "id": "taskaddmrtests_taskaddmrtests_addmr_whenmrtomasterandtargetismaster_stateunchanged",
-      "community": 9,
+      "community": 8,
       "norm_label": ".addmr_whenmrtomasterandtargetismaster_stateunchanged()"
     },
     {
@@ -3599,7 +3599,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/Data/TaskAddMrTests.cs",
       "source_location": "L85",
       "id": "taskaddmrtests_taskaddmrtests_addmr_duplicateiid_isignored",
-      "community": 9,
+      "community": 8,
       "norm_label": ".addmr_duplicateiid_isignored()"
     },
     {
@@ -3608,7 +3608,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/Data/TaskAddMrTests.cs",
       "source_location": "L102",
       "id": "taskaddmrtests_taskaddmrtests_addmr_addsgitrepo_whenreponotpresent",
-      "community": 9,
+      "community": 8,
       "norm_label": ".addmr_addsgitrepo_whenreponotpresent()"
     },
     {
@@ -3617,7 +3617,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/Data/TaskAddMrTests.cs",
       "source_location": "L115",
       "id": "taskaddmrtests_taskaddmrtests_addmr_doesnotduplicategitrepo_whensameprojectid",
-      "community": 9,
+      "community": 8,
       "norm_label": ".addmr_doesnotduplicategitrepo_whensameprojectid()"
     },
     {
@@ -3626,7 +3626,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Tasks/Data/TaskAddMrTests.cs",
       "source_location": "L129",
       "id": "taskaddmrtests_taskaddmrtests_addmr_storesmrfields_correctly",
-      "community": 9,
+      "community": 8,
       "norm_label": ".addmr_storesmrfields_correctly()"
     },
     {
@@ -3842,7 +3842,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Projects/EventBasedProjectsProviderTests.cs",
       "source_location": "L238",
       "id": "eventbasedprojectsprovidertests_mockasyncstreamreader",
-      "community": 16,
+      "community": 15,
       "norm_label": "mockasyncstreamreader"
     },
     {
@@ -3851,7 +3851,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Projects/EventBasedProjectsProviderTests.cs",
       "source_location": "L244",
       "id": "eventbasedprojectsprovidertests_mockasyncstreamreader_movenext",
-      "community": 16,
+      "community": 15,
       "norm_label": ".movenext()"
     },
     {
@@ -3860,7 +3860,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/Projects/EventBasedProjectsProviderTests.cs",
       "source_location": "L249",
       "id": "eventbasedprojectsprovidertests_mockasyncstreamreader_dispose",
-      "community": 16,
+      "community": 15,
       "norm_label": ".dispose()"
     },
     {
@@ -3905,7 +3905,7 @@
       "source_file": "tests/OneMoreTaskTracker.Tasks.Tests/TestHelpers/FakeMrInfo.cs",
       "source_location": "L1",
       "id": "tests_onemoretasktracker_tasks_tests_testhelpers_fakemrinfo_cs",
-      "community": 88,
+      "community": 87,
       "norm_label": "fakemrinfo.cs"
     },
     {
@@ -4004,7 +4004,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/GitLabApiClientTests.cs",
       "source_location": "L8",
       "id": "gitlabapiclienttests_gitlabapiclienttests",
-      "community": 3,
+      "community": 4,
       "norm_label": "gitlabapiclienttests"
     },
     {
@@ -4013,7 +4013,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/GitLabApiClientTests.cs",
       "source_location": "L10",
       "id": "gitlabapiclienttests_gitlabapiclienttests_createclient",
-      "community": 3,
+      "community": 4,
       "norm_label": ".createclient()"
     },
     {
@@ -4022,7 +4022,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/GitLabApiClientTests.cs",
       "source_location": "L16",
       "id": "gitlabapiclienttests_gitlabapiclienttests_post_whensuccessandbodycontainsid_returnsoktrue",
-      "community": 3,
+      "community": 4,
       "norm_label": ".post_whensuccessandbodycontainsid_returnsoktrue()"
     },
     {
@@ -4031,7 +4031,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/GitLabApiClientTests.cs",
       "source_location": "L41",
       "id": "gitlabapiclienttests_gitlabapiclienttests_post_whensuccessbutbodylacksid_returnsokfalse",
-      "community": 3,
+      "community": 4,
       "norm_label": ".post_whensuccessbutbodylacksid_returnsokfalse()"
     },
     {
@@ -4040,7 +4040,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/GitLabApiClientTests.cs",
       "source_location": "L65",
       "id": "gitlabapiclienttests_gitlabapiclienttests_post_whenfailurestatus_returnsokfalse",
-      "community": 3,
+      "community": 4,
       "norm_label": ".post_whenfailurestatus_returnsokfalse()"
     },
     {
@@ -4049,7 +4049,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/GitLabApiClientTests.cs",
       "source_location": "L83",
       "id": "gitlabapiclienttests_gitlabapiclienttests_put_whensuccess_returnssuccessresult",
-      "community": 3,
+      "community": 4,
       "norm_label": ".put_whensuccess_returnssuccessresult()"
     },
     {
@@ -4058,7 +4058,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/GitLabApiClientTests.cs",
       "source_location": "L108",
       "id": "gitlabapiclienttests_gitlabapiclienttests_put_whenfailure_returnserrorresult",
-      "community": 3,
+      "community": 4,
       "norm_label": ".put_whenfailure_returnserrorresult()"
     },
     {
@@ -4067,7 +4067,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/GitLabApiClientTests.cs",
       "source_location": "L127",
       "id": "gitlabapiclienttests_gitlabapiclienttests_post_withcontent_sendsformurlencodedcontent",
-      "community": 3,
+      "community": 4,
       "norm_label": ".post_withcontent_sendsformurlencodedcontent()"
     },
     {
@@ -4103,7 +4103,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/TestHelpers/QueueAsyncStreamReader.cs",
       "source_location": "L1",
       "id": "tests_onemoretasktracker_gitlab_proxy_tests_testhelpers_queueasyncstreamreader_cs",
-      "community": 16,
+      "community": 15,
       "norm_label": "queueasyncstreamreader.cs"
     },
     {
@@ -4112,7 +4112,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/TestHelpers/QueueAsyncStreamReader.cs",
       "source_location": "L5",
       "id": "queueasyncstreamreader_queueasyncstreamreader",
-      "community": 16,
+      "community": 15,
       "norm_label": "queueasyncstreamreader"
     },
     {
@@ -4121,7 +4121,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/TestHelpers/QueueAsyncStreamReader.cs",
       "source_location": "L11",
       "id": "queueasyncstreamreader_queueasyncstreamreader_movenext",
-      "community": 16,
+      "community": 15,
       "norm_label": ".movenext()"
     },
     {
@@ -4130,7 +4130,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/TestHelpers/QueueAsyncStreamReader.cs",
       "source_location": "L20",
       "id": "queueasyncstreamreader_queueasyncstreamreader_dispose",
-      "community": 16,
+      "community": 15,
       "norm_label": ".dispose()"
     },
     {
@@ -4175,7 +4175,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateBranchHandlerTests.cs",
       "source_location": "L12",
       "id": "createbranchhandlertests_createbranchhandlertests",
-      "community": 7,
+      "community": 6,
       "norm_label": "createbranchhandlertests"
     },
     {
@@ -4184,7 +4184,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateBranchHandlerTests.cs",
       "source_location": "L14",
       "id": "createbranchhandlertests_createbranchhandlertests_create_withsuccessfulpost_returnssuccessstatus",
-      "community": 7,
+      "community": 6,
       "norm_label": ".create_withsuccessfulpost_returnssuccessstatus()"
     },
     {
@@ -4193,7 +4193,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateBranchHandlerTests.cs",
       "source_location": "L46",
       "id": "createbranchhandlertests_createbranchhandlertests_create_withfailedpost_returnsfailstatus",
-      "community": 7,
+      "community": 6,
       "norm_label": ".create_withfailedpost_returnsfailstatus()"
     },
     {
@@ -4202,7 +4202,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateBranchHandlerTests.cs",
       "source_location": "L78",
       "id": "createbranchhandlertests_createbranchhandlertests_create_withmultiplerequests_processesallrequests",
-      "community": 7,
+      "community": 6,
       "norm_label": ".create_withmultiplerequests_processesallrequests()"
     },
     {
@@ -4211,7 +4211,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateBranchHandlerTests.cs",
       "source_location": "L110",
       "id": "createbranchhandlertests_createbranchhandlertests_create_withmixedsuccessandfailure_returnscorrectstatuses",
-      "community": 7,
+      "community": 6,
       "norm_label": ".create_withmixedsuccessandfailure_returnscorrectstatuses()"
     },
     {
@@ -4220,7 +4220,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateBranchHandlerTests.cs",
       "source_location": "L149",
       "id": "createbranchhandlertests_createbranchhandlertests_create_withemptystream_producesnoresponses",
-      "community": 7,
+      "community": 6,
       "norm_label": ".create_withemptystream_producesnoresponses()"
     },
     {
@@ -4229,7 +4229,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateBranchHandlerTests.cs",
       "source_location": "L171",
       "id": "createbranchhandlertests_createbranchhandlertests_create_buildscorrecturi",
-      "community": 7,
+      "community": 6,
       "norm_label": ".create_buildscorrecturi()"
     },
     {
@@ -4238,7 +4238,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateBranchHandlerTests.cs",
       "source_location": "L209",
       "id": "createbranchhandlertests_createbranchhandlertests_create_withspecialcharactersinbranchname_encodesproperly",
-      "community": 7,
+      "community": 6,
       "norm_label": ".create_withspecialcharactersinbranchname_encodesproperly()"
     },
     {
@@ -4247,7 +4247,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateBranchHandlerTests.cs",
       "source_location": "L245",
       "id": "createbranchhandlertests_createbranchhandlertests_create_passescancellationtoken",
-      "community": 7,
+      "community": 6,
       "norm_label": ".create_passescancellationtoken()"
     },
     {
@@ -4445,7 +4445,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/FindEventsHandlerTests.cs",
       "source_location": "L19",
       "id": "findeventshandlertests_testserverstreamwriter_writeasync",
-      "community": 8,
+      "community": 7,
       "norm_label": ".writeasync()"
     },
     {
@@ -4535,7 +4535,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateMrExtensionTests.cs",
       "source_location": "L8",
       "id": "createmrextensiontests_createmrextensiontests",
-      "community": 8,
+      "community": 7,
       "norm_label": "createmrextensiontests"
     },
     {
@@ -4544,7 +4544,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateMrExtensionTests.cs",
       "source_location": "L10",
       "id": "createmrextensiontests_createmrextensiontests_uri_hascorrectprojectpath",
-      "community": 8,
+      "community": 7,
       "norm_label": ".uri_hascorrectprojectpath()"
     },
     {
@@ -4553,7 +4553,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateMrExtensionTests.cs",
       "source_location": "L24",
       "id": "createmrextensiontests_createmrextensiontests_topostcontent_withmastertarget_usesreleaselabel",
-      "community": 8,
+      "community": 7,
       "norm_label": ".topostcontent_withmastertarget_usesreleaselabel()"
     },
     {
@@ -4562,7 +4562,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateMrExtensionTests.cs",
       "source_location": "L43",
       "id": "createmrextensiontests_createmrextensiontests_topostcontent_withnonmastertarget_usesdeveloplabel",
-      "community": 8,
+      "community": 7,
       "norm_label": ".topostcontent_withnonmastertarget_usesdeveloplabel()"
     },
     {
@@ -4571,7 +4571,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateMrExtensionTests.cs",
       "source_location": "L62",
       "id": "createmrextensiontests_createmrextensiontests_topostcontent_defaultsremovesourcebranchandsquashtotrue",
-      "community": 8,
+      "community": 7,
       "norm_label": ".topostcontent_defaultsremovesourcebranchandsquashtotrue()"
     },
     {
@@ -4580,7 +4580,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateMrExtensionTests.cs",
       "source_location": "L85",
       "id": "createmrextensiontests_createmrextensiontests_topostcontent_withcustomflags_respectsfalsevalues",
-      "community": 8,
+      "community": 7,
       "norm_label": ".topostcontent_withcustomflags_respectsfalsevalues()"
     },
     {
@@ -4598,7 +4598,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/MergeMrServiceTests.cs",
       "source_location": "L13",
       "id": "mergemrservicetests_mergemrservicetests",
-      "community": 13,
+      "community": 12,
       "norm_label": "mergemrservicetests"
     },
     {
@@ -4607,7 +4607,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/MergeMrServiceTests.cs",
       "source_location": "L15",
       "id": "mergemrservicetests_mergemrservicetests_merge_withsuccessfulput_returnsmergemrstatussuccess",
-      "community": 13,
+      "community": 12,
       "norm_label": ".merge_withsuccessfulput_returnsmergemrstatussuccess()"
     },
     {
@@ -4616,7 +4616,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/MergeMrServiceTests.cs",
       "source_location": "L44",
       "id": "mergemrservicetests_mergemrservicetests_merge_withfailedput_returnsmergemrstatusfail",
-      "community": 13,
+      "community": 12,
       "norm_label": ".merge_withfailedput_returnsmergemrstatusfail()"
     },
     {
@@ -4625,7 +4625,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/MergeMrServiceTests.cs",
       "source_location": "L74",
       "id": "mergemrservicetests_mergemrservicetests_merge_withnulldto_returnsmergemrstatusfail",
-      "community": 13,
+      "community": 12,
       "norm_label": ".merge_withnulldto_returnsmergemrstatusfail()"
     },
     {
@@ -4634,7 +4634,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/MergeMrServiceTests.cs",
       "source_location": "L104",
       "id": "mergemrservicetests_mergemrservicetests_merge_withidzero_returnsmergemrstatusfail",
-      "community": 13,
+      "community": 12,
       "norm_label": ".merge_withidzero_returnsmergemrstatusfail()"
     },
     {
@@ -4643,7 +4643,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/MergeMrServiceTests.cs",
       "source_location": "L132",
       "id": "mergemrservicetests_mergemrservicetests_merge_withmultiplerequests_processesallrequests",
-      "community": 13,
+      "community": 12,
       "norm_label": ".merge_withmultiplerequests_processesallrequests()"
     },
     {
@@ -4652,7 +4652,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/MergeMrServiceTests.cs",
       "source_location": "L166",
       "id": "mergemrservicetests_mergemrservicetests_merge_withmixedresultsandfailures_returnscorrectstatuses",
-      "community": 13,
+      "community": 12,
       "norm_label": ".merge_withmixedresultsandfailures_returnscorrectstatuses()"
     },
     {
@@ -4661,7 +4661,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/MergeMrServiceTests.cs",
       "source_location": "L215",
       "id": "mergemrservicetests_mergemrservicetests_merge_withemptystream_producesnoresponses",
-      "community": 13,
+      "community": 12,
       "norm_label": ".merge_withemptystream_producesnoresponses()"
     },
     {
@@ -4670,7 +4670,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/MergeMrServiceTests.cs",
       "source_location": "L237",
       "id": "mergemrservicetests_mergemrservicetests_merge_buildscorrecturi",
-      "community": 13,
+      "community": 12,
       "norm_label": ".merge_buildscorrecturi()"
     },
     {
@@ -4679,7 +4679,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/MergeMrServiceTests.cs",
       "source_location": "L270",
       "id": "mergemrservicetests_mergemrservicetests_merge_withdifferentprojectsandmrs_buildscorrecturis",
-      "community": 13,
+      "community": 12,
       "norm_label": ".merge_withdifferentprojectsandmrs_buildscorrecturis()"
     },
     {
@@ -4688,7 +4688,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/MergeMrServiceTests.cs",
       "source_location": "L311",
       "id": "mergemrservicetests_mergemrservicetests_merge_preservesreferencesinsuccessfulmerge",
-      "community": 13,
+      "community": 12,
       "norm_label": ".merge_preservesreferencesinsuccessfulmerge()"
     },
     {
@@ -4769,7 +4769,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateMrHandlerTests.cs",
       "source_location": "L12",
       "id": "createmrhandlertests_createmrhandlertests",
-      "community": 7,
+      "community": 6,
       "norm_label": "createmrhandlertests"
     },
     {
@@ -4778,7 +4778,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateMrHandlerTests.cs",
       "source_location": "L14",
       "id": "createmrhandlertests_createmrhandlertests_nonecontext",
-      "community": 7,
+      "community": 6,
       "norm_label": ".nonecontext()"
     },
     {
@@ -4787,7 +4787,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateMrHandlerTests.cs",
       "source_location": "L21",
       "id": "createmrhandlertests_createmrhandlertests_create_withsuccessfulpost_returnssuccessstatus",
-      "community": 7,
+      "community": 6,
       "norm_label": ".create_withsuccessfulpost_returnssuccessstatus()"
     },
     {
@@ -4796,7 +4796,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateMrHandlerTests.cs",
       "source_location": "L41",
       "id": "createmrhandlertests_createmrhandlertests_create_withfailedpost_returnsfailstatus",
-      "community": 7,
+      "community": 6,
       "norm_label": ".create_withfailedpost_returnsfailstatus()"
     },
     {
@@ -4805,7 +4805,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateMrHandlerTests.cs",
       "source_location": "L61",
       "id": "createmrhandlertests_createmrhandlertests_create_passesrequesturiandpostcontenttoapiclient",
-      "community": 7,
+      "community": 6,
       "norm_label": ".create_passesrequesturiandpostcontenttoapiclient()"
     },
     {
@@ -4814,7 +4814,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateMrHandlerTests.cs",
       "source_location": "L88",
       "id": "createmrhandlertests_createmrhandlertests_create_processesmultiplerequests_inorder",
-      "community": 7,
+      "community": 6,
       "norm_label": ".create_processesmultiplerequests_inorder()"
     },
     {
@@ -4823,7 +4823,7 @@
       "source_file": "tests/OneMoreTaskTracker.GitLab.Proxy.Tests/Services/CreateMrHandlerTests.cs",
       "source_location": "L109",
       "id": "createmrhandlertests_createmrhandlertests_create_withnorequests_writesnoresponses",
-      "community": 7,
+      "community": 6,
       "norm_label": ".create_withnorequests_writesnoresponses()"
     },
     {
@@ -4832,7 +4832,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Program.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_tasks_program_cs",
-      "community": 89,
+      "community": 88,
       "norm_label": "program.cs"
     },
     {
@@ -4841,7 +4841,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/MergeRequests/MergeRequestInfo.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_tasks_mergerequests_mergerequestinfo_cs",
-      "community": 90,
+      "community": 89,
       "norm_label": "mergerequestinfo.cs"
     },
     {
@@ -4850,7 +4850,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/MergeRequests/MrDtoExtension.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_tasks_mergerequests_mrdtoextension_cs",
-      "community": 42,
+      "community": 41,
       "norm_label": "mrdtoextension.cs"
     },
     {
@@ -4859,7 +4859,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/MergeRequests/MrDtoExtension.cs",
       "source_location": "L5",
       "id": "mrdtoextension_mrdto",
-      "community": 42,
+      "community": 41,
       "norm_label": "mrdto"
     },
     {
@@ -4868,7 +4868,7 @@
       "source_file": "",
       "source_location": "",
       "id": "imrinfo",
-      "community": 42,
+      "community": 41,
       "norm_label": "imrinfo"
     },
     {
@@ -4877,7 +4877,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/MergeRequests/MrsProvider.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_tasks_mergerequests_mrsprovider_cs",
-      "community": 35,
+      "community": 34,
       "norm_label": "mrsprovider.cs"
     },
     {
@@ -4886,7 +4886,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/MergeRequests/MrsProvider.cs",
       "source_location": "L6",
       "id": "mrsprovider_mrsprovider",
-      "community": 35,
+      "community": 34,
       "norm_label": "mrsprovider"
     },
     {
@@ -4895,7 +4895,7 @@
       "source_file": "",
       "source_location": "",
       "id": "imrsprovider",
-      "community": 35,
+      "community": 34,
       "norm_label": "imrsprovider"
     },
     {
@@ -4904,7 +4904,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/MergeRequests/MrsProvider.cs",
       "source_location": "L8",
       "id": "mrsprovider_mrsprovider_find",
-      "community": 35,
+      "community": 34,
       "norm_label": ".find()"
     },
     {
@@ -4913,7 +4913,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/MergeRequests/IMrsProvider.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_tasks_mergerequests_imrsprovider_cs",
-      "community": 43,
+      "community": 42,
       "norm_label": "imrsprovider.cs"
     },
     {
@@ -4922,7 +4922,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/MergeRequests/IMrsProvider.cs",
       "source_location": "L3",
       "id": "imrsprovider_imrsprovider",
-      "community": 43,
+      "community": 42,
       "norm_label": "imrsprovider"
     },
     {
@@ -4931,7 +4931,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/MergeRequests/IMrsProvider.cs",
       "source_location": "L5",
       "id": "imrsprovider_imrsprovider_find",
-      "community": 43,
+      "community": 42,
       "norm_label": ".find()"
     },
     {
@@ -4940,7 +4940,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/MergeRequests/IMrInfo.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_tasks_mergerequests_imrinfo_cs",
-      "community": 59,
+      "community": 58,
       "norm_label": "imrinfo.cs"
     },
     {
@@ -4949,7 +4949,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/MergeRequests/IMrInfo.cs",
       "source_location": "L3",
       "id": "imrinfo_imrinfo",
-      "community": 59,
+      "community": 58,
       "norm_label": "imrinfo"
     },
     {
@@ -5003,7 +5003,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Migrations/20260402163545_InitialCreate.Designer.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_tasks_migrations_20260402163545_initialcreate_designer_cs",
-      "community": 36,
+      "community": 35,
       "norm_label": "20260402163545_initialcreate.designer.cs"
     },
     {
@@ -5012,7 +5012,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Migrations/20260402163545_InitialCreate.Designer.cs",
       "source_location": "L11",
       "id": "20260402163545_initialcreate_designer_onemoretasktracker_tasks_migrations",
-      "community": 36,
+      "community": 35,
       "norm_label": "onemoretasktracker.tasks.migrations"
     },
     {
@@ -5021,7 +5021,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Migrations/20260402163545_InitialCreate.Designer.cs",
       "source_location": "L13",
       "id": "20260402163545_initialcreate_designer_initialcreate",
-      "community": 36,
+      "community": 35,
       "norm_label": "initialcreate"
     },
     {
@@ -5030,7 +5030,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Migrations/20260402163545_InitialCreate.Designer.cs",
       "source_location": "L18",
       "id": "20260402163545_initialcreate_designer_initialcreate_buildtargetmodel",
-      "community": 36,
+      "community": 35,
       "norm_label": ".buildtargetmodel()"
     },
     {
@@ -5039,7 +5039,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Migrations/20260402163545_InitialCreate.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_tasks_migrations_20260402163545_initialcreate_cs",
-      "community": 14,
+      "community": 13,
       "norm_label": "20260402163545_initialcreate.cs"
     },
     {
@@ -5048,7 +5048,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Migrations/20260402163545_InitialCreate.cs",
       "source_location": "L6",
       "id": "20260402163545_initialcreate_onemoretasktracker_tasks_migrations",
-      "community": 14,
+      "community": 13,
       "norm_label": "onemoretasktracker.tasks.migrations"
     },
     {
@@ -5057,7 +5057,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Migrations/20260402163545_InitialCreate.cs",
       "source_location": "L9",
       "id": "20260402163545_initialcreate_initialcreate",
-      "community": 14,
+      "community": 13,
       "norm_label": "initialcreate"
     },
     {
@@ -5066,7 +5066,7 @@
       "source_file": "",
       "source_location": "",
       "id": "migration",
-      "community": 14,
+      "community": 13,
       "norm_label": "migration"
     },
     {
@@ -5075,7 +5075,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Migrations/20260402163545_InitialCreate.cs",
       "source_location": "L12",
       "id": "20260402163545_initialcreate_initialcreate_up",
-      "community": 14,
+      "community": 13,
       "norm_label": ".up()"
     },
     {
@@ -5084,7 +5084,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Migrations/20260402163545_InitialCreate.cs",
       "source_location": "L97",
       "id": "20260402163545_initialcreate_initialcreate_down",
-      "community": 14,
+      "community": 13,
       "norm_label": ".down()"
     },
     {
@@ -5093,7 +5093,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Tasks/Roles.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_tasks_tasks_roles_cs",
-      "community": 12,
+      "community": 11,
       "norm_label": "roles.cs"
     },
     {
@@ -5102,7 +5102,7 @@
       "source_file": "OneMoreTaskTracker.Api/Auth/Roles.cs",
       "source_location": "L3",
       "id": "roles_roles",
-      "community": 12,
+      "community": 11,
       "norm_label": "roles"
     },
     {
@@ -5111,7 +5111,7 @@
       "source_file": "OneMoreTaskTracker.Api/Auth/Roles.cs",
       "source_location": "L13",
       "id": "roles_roles_isvalid",
-      "community": 12,
+      "community": 11,
       "norm_label": ".isvalid()"
     },
     {
@@ -5147,7 +5147,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Tasks/AssigneeSummary/GetAssigneeTaskSummaryHandler.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_tasks_tasks_assigneesummary_getassigneetasksummaryhandler_cs",
-      "community": 19,
+      "community": 18,
       "norm_label": "getassigneetasksummaryhandler.cs"
     },
     {
@@ -5156,7 +5156,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Tasks/AssigneeSummary/GetAssigneeTaskSummaryHandler.cs",
       "source_location": "L10",
       "id": "getassigneetasksummaryhandler_getassigneetasksummaryhandler",
-      "community": 19,
+      "community": 18,
       "norm_label": "getassigneetasksummaryhandler"
     },
     {
@@ -5165,7 +5165,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Tasks/AssigneeSummary/GetAssigneeTaskSummaryHandler.cs",
       "source_location": "L12",
       "id": "getassigneetasksummaryhandler_getassigneetasksummaryhandler_batchgetassigneetasksummary",
-      "community": 19,
+      "community": 18,
       "norm_label": ".batchgetassigneetasksummary()"
     },
     {
@@ -5201,7 +5201,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Tasks/Data/Task.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_tasks_tasks_data_task_cs",
-      "community": 9,
+      "community": 8,
       "norm_label": "task.cs"
     },
     {
@@ -5210,7 +5210,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Tasks/Data/Task.cs",
       "source_location": "L6",
       "id": "task_task",
-      "community": 9,
+      "community": 8,
       "norm_label": "task"
     },
     {
@@ -5219,7 +5219,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Tasks/Data/Task.cs",
       "source_location": "L15",
       "id": "task_task_addmr",
-      "community": 9,
+      "community": 8,
       "norm_label": ".addmr()"
     },
     {
@@ -5228,7 +5228,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Tasks/Data/Task.cs",
       "source_location": "L42",
       "id": "task_task_addproject",
-      "community": 9,
+      "community": 8,
       "norm_label": ".addproject()"
     },
     {
@@ -5237,7 +5237,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Tasks/Data/Task.cs",
       "source_location": "L55",
       "id": "task_task_setstatefortesting",
-      "community": 19,
+      "community": 18,
       "norm_label": ".setstatefortesting()"
     },
     {
@@ -5246,7 +5246,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Tasks/Data/MergeRequest.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_tasks_tasks_data_mergerequest_cs",
-      "community": 91,
+      "community": 90,
       "norm_label": "mergerequest.cs"
     },
     {
@@ -5255,7 +5255,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Tasks/Data/GitRepo.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_tasks_tasks_data_gitrepo_cs",
-      "community": 92,
+      "community": 91,
       "norm_label": "gitrepo.cs"
     },
     {
@@ -5300,7 +5300,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Tasks/Create/CreateTaskHandler.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_tasks_tasks_create_createtaskhandler_cs",
-      "community": 9,
+      "community": 8,
       "norm_label": "createtaskhandler.cs"
     },
     {
@@ -5309,7 +5309,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Tasks/Create/CreateTaskHandler.cs",
       "source_location": "L11",
       "id": "createtaskhandler_createtaskhandler",
-      "community": 9,
+      "community": 8,
       "norm_label": "createtaskhandler"
     },
     {
@@ -5318,7 +5318,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Tasks/Create/CreateTaskHandler.cs",
       "source_location": "L16",
       "id": "createtaskhandler_createtaskhandler_create",
-      "community": 9,
+      "community": 8,
       "norm_label": ".create()"
     },
     {
@@ -5327,7 +5327,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Projects/EventBasedProjectsProvider.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_tasks_projects_eventbasedprojectsprovider_cs",
-      "community": 34,
+      "community": 1,
       "norm_label": "eventbasedprojectsprovider.cs"
     },
     {
@@ -5336,7 +5336,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Projects/EventBasedProjectsProvider.cs",
       "source_location": "L8",
       "id": "eventbasedprojectsprovider_eventbasedprojectsprovider",
-      "community": 34,
+      "community": 1,
       "norm_label": "eventbasedprojectsprovider"
     },
     {
@@ -5345,7 +5345,7 @@
       "source_file": "",
       "source_location": "",
       "id": "iprojectsprovider",
-      "community": 34,
+      "community": 1,
       "norm_label": "iprojectsprovider"
     },
     {
@@ -5354,7 +5354,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Projects/EventBasedProjectsProvider.cs",
       "source_location": "L13",
       "id": "eventbasedprojectsprovider_eventbasedprojectsprovider_get",
-      "community": 34,
+      "community": 1,
       "norm_label": ".get()"
     },
     {
@@ -5363,7 +5363,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Projects/IProjectsProvider.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_tasks_projects_iprojectsprovider_cs",
-      "community": 44,
+      "community": 43,
       "norm_label": "iprojectsprovider.cs"
     },
     {
@@ -5372,7 +5372,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Projects/IProjectsProvider.cs",
       "source_location": "L6",
       "id": "iprojectsprovider_iprojectsprovider",
-      "community": 44,
+      "community": 43,
       "norm_label": "iprojectsprovider"
     },
     {
@@ -5381,7 +5381,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Projects/IProjectsProvider.cs",
       "source_location": "L8",
       "id": "iprojectsprovider_iprojectsprovider_get",
-      "community": 44,
+      "community": 43,
       "norm_label": ".get()"
     },
     {
@@ -5390,7 +5390,7 @@
       "source_file": "OneMoreTaskTracker.Tasks/Projects/Project.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_tasks_projects_project_cs",
-      "community": 93,
+      "community": 92,
       "norm_label": "project.cs"
     },
     {
@@ -5453,7 +5453,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/GitLabApiClient.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_gitlab_proxy_gitlabapiclient_cs",
-      "community": 7,
+      "community": 6,
       "norm_label": "gitlabapiclient.cs"
     },
     {
@@ -5462,7 +5462,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/GitLabApiClient.cs",
       "source_location": "L5",
       "id": "gitlabapiclient_gitlabapiclient",
-      "community": 7,
+      "community": 6,
       "norm_label": "gitlabapiclient"
     },
     {
@@ -5471,7 +5471,7 @@
       "source_file": "",
       "source_location": "",
       "id": "igitlabapiclient",
-      "community": 7,
+      "community": 6,
       "norm_label": "igitlabapiclient"
     },
     {
@@ -5480,7 +5480,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/GitLabApiClient.cs",
       "source_location": "L13",
       "id": "gitlabapiclient_gitlabapiclient_getone",
-      "community": 7,
+      "community": 6,
       "norm_label": ".getone()"
     },
     {
@@ -5489,7 +5489,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/GitLabApiClient.cs",
       "source_location": "L16",
       "id": "gitlabapiclient_gitlabapiclient_getmany",
-      "community": 7,
+      "community": 6,
       "norm_label": ".getmany()"
     },
     {
@@ -5498,7 +5498,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/GitLabApiClient.cs",
       "source_location": "L19",
       "id": "gitlabapiclient_gitlabapiclient_post",
-      "community": 7,
+      "community": 6,
       "norm_label": ".post()"
     },
     {
@@ -5507,7 +5507,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/GitLabApiClient.cs",
       "source_location": "L35",
       "id": "gitlabapiclient_gitlabapiclient_put",
-      "community": 7,
+      "community": 6,
       "norm_label": ".put()"
     },
     {
@@ -5516,7 +5516,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/GitLabApiClient.cs",
       "source_location": "L44",
       "id": "gitlabapiclient_gitlabapiclient_dispose",
-      "community": 7,
+      "community": 6,
       "norm_label": ".dispose()"
     },
     {
@@ -5525,7 +5525,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Result.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_gitlab_proxy_result_cs",
-      "community": 94,
+      "community": 93,
       "norm_label": "result.cs"
     },
     {
@@ -5534,7 +5534,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Program.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_gitlab_proxy_program_cs",
-      "community": 95,
+      "community": 94,
       "norm_label": "program.cs"
     },
     {
@@ -5543,7 +5543,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/CreateMrHandler.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_gitlab_proxy_services_createmrhandler_cs",
-      "community": 8,
+      "community": 7,
       "norm_label": "createmrhandler.cs"
     },
     {
@@ -5552,7 +5552,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/CreateMrHandler.cs",
       "source_location": "L6",
       "id": "createmrhandler_createmrhandler",
-      "community": 8,
+      "community": 7,
       "norm_label": "createmrhandler"
     },
     {
@@ -5561,7 +5561,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/CreateMrHandler.cs",
       "source_location": "L8",
       "id": "createmrhandler_createmrhandler_create",
-      "community": 8,
+      "community": 7,
       "norm_label": ".create()"
     },
     {
@@ -5570,7 +5570,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/CreateMrHandler.cs",
       "source_location": "L27",
       "id": "createmrhandler_createmrhandler_logmrforprojectnamehasbeencreated",
-      "community": 8,
+      "community": 7,
       "norm_label": ".logmrforprojectnamehasbeencreated()"
     },
     {
@@ -5579,7 +5579,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/CreateMrHandler.cs",
       "source_location": "L30",
       "id": "createmrhandler_createmrhandler_logmrforprojectnamehasnotbeencreated",
-      "community": 8,
+      "community": 7,
       "norm_label": ".logmrforprojectnamehasnotbeencreated()"
     },
     {
@@ -5588,7 +5588,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/CreateMrHandler.cs",
       "source_location": "L37",
       "id": "createmrhandler_createmrextension",
-      "community": 8,
+      "community": 7,
       "norm_label": "createmrextension"
     },
     {
@@ -5597,7 +5597,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/CreateMrHandler.cs",
       "source_location": "L42",
       "id": "createmrhandler_createmrextension_topostcontent",
-      "community": 8,
+      "community": 7,
       "norm_label": ".topostcontent()"
     },
     {
@@ -5606,7 +5606,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/CreateBranchHandler.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_gitlab_proxy_services_createbranchhandler_cs",
-      "community": 7,
+      "community": 6,
       "norm_label": "createbranchhandler.cs"
     },
     {
@@ -5615,7 +5615,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/CreateBranchHandler.cs",
       "source_location": "L6",
       "id": "createbranchhandler_createbranchhandler",
-      "community": 7,
+      "community": 6,
       "norm_label": "createbranchhandler"
     },
     {
@@ -5624,7 +5624,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/CreateBranchHandler.cs",
       "source_location": "L9",
       "id": "createbranchhandler_createbranchhandler_create",
-      "community": 7,
+      "community": 6,
       "norm_label": ".create()"
     },
     {
@@ -5633,7 +5633,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/CreateBranchHandler.cs",
       "source_location": "L25",
       "id": "createbranchhandler_createbranchhandler_logfailedtocreateabranchresponse",
-      "community": 7,
+      "community": 6,
       "norm_label": ".logfailedtocreateabranchresponse()"
     },
     {
@@ -5642,7 +5642,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/CreateBranchHandler.cs",
       "source_location": "L33",
       "id": "createbranchhandler_branchesextension",
-      "community": 7,
+      "community": 6,
       "norm_label": "branchesextension"
     },
     {
@@ -5651,7 +5651,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/FindEventsHandler.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_gitlab_proxy_services_findeventshandler_cs",
-      "community": 8,
+      "community": 7,
       "norm_label": "findeventshandler.cs"
     },
     {
@@ -5660,7 +5660,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/FindEventsHandler.cs",
       "source_location": "L6",
       "id": "findeventshandler_findeventshandler",
-      "community": 8,
+      "community": 7,
       "norm_label": "findeventshandler"
     },
     {
@@ -5669,7 +5669,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/FindEventsHandler.cs",
       "source_location": "L8",
       "id": "findeventshandler_findeventshandler_find",
-      "community": 8,
+      "community": 7,
       "norm_label": ".find()"
     },
     {
@@ -5678,7 +5678,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/FindEventsHandler.cs",
       "source_location": "L34",
       "id": "findeventshandler_eventsextension",
-      "community": 8,
+      "community": 7,
       "norm_label": "eventsextension"
     },
     {
@@ -5687,7 +5687,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/MergeMrService.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_gitlab_proxy_services_mergemrservice_cs",
-      "community": 13,
+      "community": 12,
       "norm_label": "mergemrservice.cs"
     },
     {
@@ -5696,7 +5696,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/MergeMrService.cs",
       "source_location": "L6",
       "id": "mergemrservice_mergemrservice",
-      "community": 13,
+      "community": 12,
       "norm_label": "mergemrservice"
     },
     {
@@ -5705,7 +5705,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/MergeMrService.cs",
       "source_location": "L8",
       "id": "mergemrservice_mergemrservice_merge",
-      "community": 13,
+      "community": 12,
       "norm_label": ".merge()"
     },
     {
@@ -5714,7 +5714,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/MergeMrService.cs",
       "source_location": "L27",
       "id": "mergemrservice_mergemrservice_logmrforreferencehasbeenmerged",
-      "community": 13,
+      "community": 12,
       "norm_label": ".logmrforreferencehasbeenmerged()"
     },
     {
@@ -5723,7 +5723,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/MergeMrService.cs",
       "source_location": "L30",
       "id": "mergemrservice_mergemrservice_logmrforprojectidhasnotbeenmerged",
-      "community": 13,
+      "community": 12,
       "norm_label": ".logmrforprojectidhasnotbeenmerged()"
     },
     {
@@ -5732,7 +5732,7 @@
       "source_file": "OneMoreTaskTracker.GitLab.Proxy/Services/MergeMrService.cs",
       "source_location": "L38",
       "id": "mergemrservice_mergemrextensions",
-      "community": 13,
+      "community": 12,
       "norm_label": "mergemrextensions"
     },
     {
@@ -5813,7 +5813,7 @@
       "source_file": "OneMoreTaskTracker.Users/UserServiceHandler.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_users_userservicehandler_cs",
-      "community": 5,
+      "community": 3,
       "norm_label": "userservicehandler.cs"
     },
     {
@@ -5822,7 +5822,7 @@
       "source_file": "OneMoreTaskTracker.Users/UserServiceHandler.cs",
       "source_location": "L12",
       "id": "userservicehandler_userservicehandler",
-      "community": 5,
+      "community": 3,
       "norm_label": "userservicehandler"
     },
     {
@@ -5831,7 +5831,7 @@
       "source_file": "OneMoreTaskTracker.Users/UserServiceHandler.cs",
       "source_location": "L17",
       "id": "userservicehandler_userservicehandler_register",
-      "community": 5,
+      "community": 3,
       "norm_label": ".register()"
     },
     {
@@ -5840,7 +5840,7 @@
       "source_file": "OneMoreTaskTracker.Users/UserServiceHandler.cs",
       "source_location": "L76",
       "id": "userservicehandler_userservicehandler_authenticate",
-      "community": 5,
+      "community": 3,
       "norm_label": ".authenticate()"
     },
     {
@@ -5849,7 +5849,7 @@
       "source_file": "OneMoreTaskTracker.Users/UserServiceHandler.cs",
       "source_location": "L100",
       "id": "userservicehandler_userservicehandler_getteammemberids",
-      "community": 5,
+      "community": 3,
       "norm_label": ".getteammemberids()"
     },
     {
@@ -5858,7 +5858,7 @@
       "source_file": "OneMoreTaskTracker.Users/UserServiceHandler.cs",
       "source_location": "L113",
       "id": "userservicehandler_userservicehandler_getteamroster",
-      "community": 5,
+      "community": 3,
       "norm_label": ".getteamroster()"
     },
     {
@@ -5867,7 +5867,7 @@
       "source_file": "OneMoreTaskTracker.Users/UserServiceHandler.cs",
       "source_location": "L150",
       "id": "userservicehandler_userservicehandler_deleteuser",
-      "community": 5,
+      "community": 3,
       "norm_label": ".deleteuser()"
     },
     {
@@ -5876,7 +5876,7 @@
       "source_file": "OneMoreTaskTracker.Users/UserServiceHandler.cs",
       "source_location": "L169",
       "id": "userservicehandler_userservicehandler_isvalidemail",
-      "community": 5,
+      "community": 3,
       "norm_label": ".isvalidemail()"
     },
     {
@@ -5885,7 +5885,7 @@
       "source_file": "OneMoreTaskTracker.Users/Program.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_users_program_cs",
-      "community": 96,
+      "community": 95,
       "norm_label": "program.cs"
     },
     {
@@ -5894,7 +5894,7 @@
       "source_file": "OneMoreTaskTracker.Users/Migrations/20260402163547_InitialCreate.Designer.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_users_migrations_20260402163547_initialcreate_designer_cs",
-      "community": 37,
+      "community": 36,
       "norm_label": "20260402163547_initialcreate.designer.cs"
     },
     {
@@ -5903,7 +5903,7 @@
       "source_file": "OneMoreTaskTracker.Users/Migrations/20260402163547_InitialCreate.Designer.cs",
       "source_location": "L11",
       "id": "20260402163547_initialcreate_designer_onemoretasktracker_users_migrations",
-      "community": 37,
+      "community": 36,
       "norm_label": "onemoretasktracker.users.migrations"
     },
     {
@@ -5912,7 +5912,7 @@
       "source_file": "OneMoreTaskTracker.Users/Migrations/20260402163547_InitialCreate.Designer.cs",
       "source_location": "L13",
       "id": "20260402163547_initialcreate_designer_initialcreate",
-      "community": 37,
+      "community": 36,
       "norm_label": "initialcreate"
     },
     {
@@ -5921,7 +5921,7 @@
       "source_file": "OneMoreTaskTracker.Users/Migrations/20260402163547_InitialCreate.Designer.cs",
       "source_location": "L18",
       "id": "20260402163547_initialcreate_designer_initialcreate_buildtargetmodel",
-      "community": 37,
+      "community": 36,
       "norm_label": ".buildtargetmodel()"
     },
     {
@@ -5930,7 +5930,7 @@
       "source_file": "OneMoreTaskTracker.Users/Migrations/20260402163547_InitialCreate.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_users_migrations_20260402163547_initialcreate_cs",
-      "community": 14,
+      "community": 13,
       "norm_label": "20260402163547_initialcreate.cs"
     },
     {
@@ -5939,7 +5939,7 @@
       "source_file": "OneMoreTaskTracker.Users/Migrations/20260402163547_InitialCreate.cs",
       "source_location": "L6",
       "id": "20260402163547_initialcreate_onemoretasktracker_users_migrations",
-      "community": 14,
+      "community": 13,
       "norm_label": "onemoretasktracker.users.migrations"
     },
     {
@@ -5948,7 +5948,7 @@
       "source_file": "OneMoreTaskTracker.Users/Migrations/20260402163547_InitialCreate.cs",
       "source_location": "L9",
       "id": "20260402163547_initialcreate_initialcreate",
-      "community": 14,
+      "community": 13,
       "norm_label": "initialcreate"
     },
     {
@@ -5957,7 +5957,7 @@
       "source_file": "OneMoreTaskTracker.Users/Migrations/20260402163547_InitialCreate.cs",
       "source_location": "L12",
       "id": "20260402163547_initialcreate_initialcreate_up",
-      "community": 14,
+      "community": 13,
       "norm_label": ".up()"
     },
     {
@@ -5966,7 +5966,7 @@
       "source_file": "OneMoreTaskTracker.Users/Migrations/20260402163547_InitialCreate.cs",
       "source_location": "L56",
       "id": "20260402163547_initialcreate_initialcreate_down",
-      "community": 14,
+      "community": 13,
       "norm_label": ".down()"
     },
     {
@@ -5975,7 +5975,7 @@
       "source_file": "OneMoreTaskTracker.Users/Migrations/20260418155000_SplitDeveloperRole.Designer.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_users_migrations_20260418155000_splitdeveloperrole_designer_cs",
-      "community": 38,
+      "community": 37,
       "norm_label": "20260418155000_splitdeveloperrole.designer.cs"
     },
     {
@@ -5984,7 +5984,7 @@
       "source_file": "OneMoreTaskTracker.Users/Migrations/20260418155000_SplitDeveloperRole.Designer.cs",
       "source_location": "L11",
       "id": "20260418155000_splitdeveloperrole_designer_onemoretasktracker_users_migrations",
-      "community": 38,
+      "community": 37,
       "norm_label": "onemoretasktracker.users.migrations"
     },
     {
@@ -5993,7 +5993,7 @@
       "source_file": "OneMoreTaskTracker.Users/Migrations/20260418155000_SplitDeveloperRole.Designer.cs",
       "source_location": "L13",
       "id": "20260418155000_splitdeveloperrole_designer_splitdeveloperrole",
-      "community": 38,
+      "community": 37,
       "norm_label": "splitdeveloperrole"
     },
     {
@@ -6002,7 +6002,7 @@
       "source_file": "OneMoreTaskTracker.Users/Migrations/20260418155000_SplitDeveloperRole.Designer.cs",
       "source_location": "L18",
       "id": "20260418155000_splitdeveloperrole_designer_splitdeveloperrole_buildtargetmodel",
-      "community": 38,
+      "community": 37,
       "norm_label": ".buildtargetmodel()"
     },
     {
@@ -6047,7 +6047,7 @@
       "source_file": "OneMoreTaskTracker.Users/Migrations/20260418155000_SplitDeveloperRole.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_users_migrations_20260418155000_splitdeveloperrole_cs",
-      "community": 14,
+      "community": 13,
       "norm_label": "20260418155000_splitdeveloperrole.cs"
     },
     {
@@ -6056,7 +6056,7 @@
       "source_file": "OneMoreTaskTracker.Users/Migrations/20260418155000_SplitDeveloperRole.cs",
       "source_location": "L5",
       "id": "20260418155000_splitdeveloperrole_onemoretasktracker_users_migrations",
-      "community": 14,
+      "community": 13,
       "norm_label": "onemoretasktracker.users.migrations"
     },
     {
@@ -6065,7 +6065,7 @@
       "source_file": "OneMoreTaskTracker.Users/Migrations/20260418155000_SplitDeveloperRole.cs",
       "source_location": "L8",
       "id": "20260418155000_splitdeveloperrole_splitdeveloperrole",
-      "community": 14,
+      "community": 13,
       "norm_label": "splitdeveloperrole"
     },
     {
@@ -6074,7 +6074,7 @@
       "source_file": "OneMoreTaskTracker.Users/Migrations/20260418155000_SplitDeveloperRole.cs",
       "source_location": "L11",
       "id": "20260418155000_splitdeveloperrole_splitdeveloperrole_up",
-      "community": 14,
+      "community": 13,
       "norm_label": ".up()"
     },
     {
@@ -6083,7 +6083,7 @@
       "source_file": "OneMoreTaskTracker.Users/Migrations/20260418155000_SplitDeveloperRole.cs",
       "source_location": "L18",
       "id": "20260418155000_splitdeveloperrole_splitdeveloperrole_down",
-      "community": 14,
+      "community": 13,
       "norm_label": ".down()"
     },
     {
@@ -6092,7 +6092,7 @@
       "source_file": "OneMoreTaskTracker.Users/Data/User.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_users_data_user_cs",
-      "community": 60,
+      "community": 59,
       "norm_label": "user.cs"
     },
     {
@@ -6101,7 +6101,7 @@
       "source_file": "OneMoreTaskTracker.Users/Data/User.cs",
       "source_location": "L3",
       "id": "user_user",
-      "community": 60,
+      "community": 59,
       "norm_label": "user"
     },
     {
@@ -6137,7 +6137,7 @@
       "source_file": "OneMoreTaskTracker.Users/Services/Roles.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_users_services_roles_cs",
-      "community": 12,
+      "community": 11,
       "norm_label": "roles.cs"
     },
     {
@@ -6146,7 +6146,7 @@
       "source_file": "OneMoreTaskTracker.Api/Program.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_api_program_cs",
-      "community": 61,
+      "community": 60,
       "norm_label": "program.cs"
     },
     {
@@ -6155,7 +6155,7 @@
       "source_file": "OneMoreTaskTracker.Api/Program.cs",
       "source_location": "L96",
       "id": "program_program",
-      "community": 61,
+      "community": 60,
       "norm_label": "program"
     },
     {
@@ -6164,7 +6164,7 @@
       "source_file": "OneMoreTaskTracker.Api/Middleware/GrpcExceptionMiddleware.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_api_middleware_grpcexceptionmiddleware_cs",
-      "community": 8,
+      "community": 7,
       "norm_label": "grpcexceptionmiddleware.cs"
     },
     {
@@ -6173,7 +6173,7 @@
       "source_file": "OneMoreTaskTracker.Api/Middleware/GrpcExceptionMiddleware.cs",
       "source_location": "L6",
       "id": "grpcexceptionmiddleware_grpcexceptionmiddleware",
-      "community": 8,
+      "community": 7,
       "norm_label": "grpcexceptionmiddleware"
     },
     {
@@ -6182,7 +6182,7 @@
       "source_file": "OneMoreTaskTracker.Api/Middleware/GrpcExceptionMiddleware.cs",
       "source_location": "L10",
       "id": "grpcexceptionmiddleware_grpcexceptionmiddleware_invokeasync",
-      "community": 8,
+      "community": 7,
       "norm_label": ".invokeasync()"
     },
     {
@@ -6191,7 +6191,7 @@
       "source_file": "OneMoreTaskTracker.Api/Auth/ClaimsPrincipalExtensions.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_api_auth_claimsprincipalextensions_cs",
-      "community": 62,
+      "community": 61,
       "norm_label": "claimsprincipalextensions.cs"
     },
     {
@@ -6200,7 +6200,7 @@
       "source_file": "OneMoreTaskTracker.Api/Auth/ClaimsPrincipalExtensions.cs",
       "source_location": "L6",
       "id": "claimsprincipalextensions_claimsprincipalextensions",
-      "community": 62,
+      "community": 61,
       "norm_label": "claimsprincipalextensions"
     },
     {
@@ -6209,7 +6209,7 @@
       "source_file": "OneMoreTaskTracker.Api/Auth/JwtOptions.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_api_auth_jwtoptions_cs",
-      "community": 63,
+      "community": 62,
       "norm_label": "jwtoptions.cs"
     },
     {
@@ -6218,7 +6218,7 @@
       "source_file": "OneMoreTaskTracker.Api/Auth/JwtOptions.cs",
       "source_location": "L3",
       "id": "jwtoptions_jwtoptions",
-      "community": 63,
+      "community": 62,
       "norm_label": "jwtoptions"
     },
     {
@@ -6227,7 +6227,7 @@
       "source_file": "OneMoreTaskTracker.Api/Auth/Roles.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_api_auth_roles_cs",
-      "community": 12,
+      "community": 11,
       "norm_label": "roles.cs"
     },
     {
@@ -6236,7 +6236,7 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/TeamController.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_api_controllers_teamcontroller_cs",
-      "community": 6,
+      "community": 9,
       "norm_label": "teamcontroller.cs"
     },
     {
@@ -6245,7 +6245,7 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/TeamController.cs",
       "source_location": "L12",
       "id": "teamcontroller_teamcontroller",
-      "community": 6,
+      "community": 9,
       "norm_label": "teamcontroller"
     },
     {
@@ -6254,7 +6254,7 @@
       "source_file": "",
       "source_location": "",
       "id": "controllerbase",
-      "community": 6,
+      "community": 9,
       "norm_label": "controllerbase"
     },
     {
@@ -6263,7 +6263,7 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/TeamController.cs",
       "source_location": "L19",
       "id": "teamcontroller_teamcontroller_getroster",
-      "community": 6,
+      "community": 9,
       "norm_label": ".getroster()"
     },
     {
@@ -6272,7 +6272,7 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/TeamController.cs",
       "source_location": "L92",
       "id": "teamcontroller_teamcontroller_removemember",
-      "community": 6,
+      "community": 9,
       "norm_label": ".removemember()"
     },
     {
@@ -6281,7 +6281,7 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/TeamController.cs",
       "source_location": "L112",
       "id": "teamcontroller_teamcontroller_invitemember",
-      "community": 6,
+      "community": 9,
       "norm_label": ".invitemember()"
     },
     {
@@ -6290,7 +6290,7 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/TeamController.cs",
       "source_location": "L160",
       "id": "teamcontroller_teamcontroller_extractdisplayname",
-      "community": 6,
+      "community": 9,
       "norm_label": ".extractdisplayname()"
     },
     {
@@ -6299,7 +6299,7 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/TasksController.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_api_controllers_taskscontroller_cs",
-      "community": 5,
+      "community": 9,
       "norm_label": "taskscontroller.cs"
     },
     {
@@ -6308,7 +6308,7 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/TasksController.cs",
       "source_location": "L16",
       "id": "taskscontroller_taskscontroller",
-      "community": 5,
+      "community": 9,
       "norm_label": "taskscontroller"
     },
     {
@@ -6317,7 +6317,7 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/TasksController.cs",
       "source_location": "L27",
       "id": "taskscontroller_taskscontroller_gettasks",
-      "community": 5,
+      "community": 9,
       "norm_label": ".gettasks()"
     },
     {
@@ -6326,7 +6326,7 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/TasksController.cs",
       "source_location": "L46",
       "id": "taskscontroller_taskscontroller_gettask",
-      "community": 5,
+      "community": 9,
       "norm_label": ".gettask()"
     },
     {
@@ -6335,7 +6335,7 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/TasksController.cs",
       "source_location": "L70",
       "id": "taskscontroller_taskscontroller_defaultfirstpushdate",
-      "community": 5,
+      "community": 9,
       "norm_label": ".defaultfirstpushdate()"
     },
     {
@@ -6344,7 +6344,7 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/TasksController.cs",
       "source_location": "L73",
       "id": "taskscontroller_taskscontroller_createtask",
-      "community": 5,
+      "community": 9,
       "norm_label": ".createtask()"
     },
     {
@@ -6353,7 +6353,7 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/TasksController.cs",
       "source_location": "L97",
       "id": "taskscontroller_taskscontroller_movetask",
-      "community": 5,
+      "community": 9,
       "norm_label": ".movetask()"
     },
     {
@@ -6362,7 +6362,7 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/TasksController.cs",
       "source_location": "L121",
       "id": "taskscontroller_taskscontroller_getteammemberids",
-      "community": 5,
+      "community": 9,
       "norm_label": ".getteammemberids()"
     },
     {
@@ -6371,7 +6371,7 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/TasksController.cs",
       "source_location": "L130",
       "id": "taskscontroller_taskscontroller_mapstate",
-      "community": 5,
+      "community": 9,
       "norm_label": ".mapstate()"
     },
     {
@@ -6380,7 +6380,7 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/TasksController.cs",
       "source_location": "L144",
       "id": "taskscontroller_taskscontroller_logandreturnunknown",
-      "community": 5,
+      "community": 9,
       "norm_label": ".logandreturnunknown()"
     },
     {
@@ -6389,7 +6389,7 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/AuthController.cs",
       "source_location": "L1",
       "id": "onemoretasktracker_api_controllers_authcontroller_cs",
-      "community": 6,
+      "community": 3,
       "norm_label": "authcontroller.cs"
     },
     {
@@ -6398,7 +6398,7 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/AuthController.cs",
       "source_location": "L8",
       "id": "authcontroller_authcontroller",
-      "community": 6,
+      "community": 3,
       "norm_label": "authcontroller"
     },
     {
@@ -6407,7 +6407,7 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/AuthController.cs",
       "source_location": "L14",
       "id": "authcontroller_authcontroller_register",
-      "community": 6,
+      "community": 3,
       "norm_label": ".register()"
     },
     {
@@ -6416,8 +6416,17 @@
       "source_file": "OneMoreTaskTracker.Api/Controllers/AuthController.cs",
       "source_location": "L31",
       "id": "authcontroller_authcontroller_login",
-      "community": 6,
+      "community": 3,
       "norm_label": ".login()"
+    },
+    {
+      "label": ".ToNullableManagerId()",
+      "file_type": "code",
+      "source_file": "OneMoreTaskTracker.Api/Controllers/AuthController.cs",
+      "source_location": "L50",
+      "id": "authcontroller_authcontroller_tonullablemanagerid",
+      "community": 3,
+      "norm_label": ".tonullablemanagerid()"
     },
     {
       "label": "OneMoreTaskTracker System",
@@ -6766,7 +6775,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 20,
+      "community": 19,
       "norm_label": "todo: move frontend token from localstorage to httponly cookie",
       "id": "todo_xss_token_storage"
     },
@@ -7130,7 +7139,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 20,
+      "community": 19,
       "norm_label": "frontend react application",
       "id": "frontend_react_app"
     },
@@ -7143,7 +7152,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 20,
+      "community": 19,
       "norm_label": "react 19 with typescript",
       "id": "react_19_frontend"
     },
@@ -7156,7 +7165,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 20,
+      "community": 19,
       "norm_label": "zod runtime schema validation",
       "id": "zod_validation"
     },
@@ -7169,7 +7178,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 20,
+      "community": 19,
       "norm_label": "react context for authentication state",
       "id": "auth_context_provider"
     },
@@ -7182,7 +7191,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 20,
+      "community": 19,
       "norm_label": "vite build tool for react",
       "id": "vite_react_build"
     },
@@ -7195,7 +7204,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 20,
+      "community": 19,
       "norm_label": "taskpage react component",
       "id": "task_page_feature"
     },
@@ -7208,7 +7217,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 20,
+      "community": 19,
       "norm_label": "taskdetailpage react component",
       "id": "task_detail_page_feature"
     },
@@ -7221,7 +7230,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 20,
+      "community": 19,
       "norm_label": "loginpage react component",
       "id": "login_page_feature"
     },
@@ -7234,7 +7243,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 20,
+      "community": 19,
       "norm_label": "registerpage react component",
       "id": "register_page_feature"
     },
@@ -7247,7 +7256,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 20,
+      "community": 19,
       "norm_label": "usetaskdetail custom hook",
       "id": "use_task_detail_hook"
     },
@@ -7260,7 +7269,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 20,
+      "community": 19,
       "norm_label": "appheader shared component",
       "id": "app_header_component"
     },
@@ -7273,7 +7282,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 20,
+      "community": 19,
       "norm_label": "errorboundary react component",
       "id": "error_boundary_component"
     },
@@ -7286,7 +7295,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 45,
+      "community": 44,
       "norm_label": "vite logo svg asset",
       "id": "vite_logo_asset"
     },
@@ -7299,7 +7308,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 45,
+      "community": 44,
       "norm_label": "cyan to purple linear gradient",
       "id": "vite_icon_gradient_cyan_purple"
     },
@@ -7312,7 +7321,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 45,
+      "community": 44,
       "norm_label": "yellow to orange linear gradient",
       "id": "vite_icon_gradient_yellow_orange"
     },
@@ -7335,7 +7344,7 @@
       "source": "EXTRACTED",
       "file": "docs/CODEMAPS/INDEX.md",
       "description": "Core state machine: NOT_STARTED \u2192 IN_DEV \u2192 MR_TO_RELEASE \u2192 IN_TEST \u2192 MR_TO_MASTER \u2192 COMPLETED",
-      "community": 10,
+      "community": 20,
       "norm_label": "task state lifecycle",
       "id": "Task_State_Machine"
     },
@@ -7345,7 +7354,7 @@
       "source": "EXTRACTED",
       "file": "docs/CODEMAPS/INDEX.md",
       "description": "One class per use-case design pattern (e.g. CreateTaskHandler, FindMrHandler)",
-      "community": 10,
+      "community": 20,
       "norm_label": "handler pattern architecture",
       "id": "Handler_Pattern"
     },
@@ -7355,7 +7364,7 @@
       "source": "EXTRACTED",
       "file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerIntegrationTests.cs",
       "description": "Integration tests for TasksController with mocked gRPC services, JWT auth, and role-based access control (Developer, Manager)",
-      "community": 10,
+      "community": 0,
       "norm_label": "taskscontrollerintegrationtests",
       "id": "TasksControllerIntegrationTests.cs"
     },
@@ -7365,7 +7374,7 @@
       "source": "INFERRED",
       "file": "OneMoreTaskTracker.Api",
       "description": "REST API controller for task management operations",
-      "community": 10,
+      "community": 20,
       "norm_label": "taskscontroller",
       "id": "TasksController"
     },
@@ -7375,7 +7384,7 @@
       "source": "EXTRACTED",
       "file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerIntegrationTests.cs",
       "description": "gRPC service mocked in integration tests for task creation",
-      "community": 10,
+      "community": 20,
       "norm_label": "taskcreator (grpc service)",
       "id": "TaskCreator_gRPC_Service"
     },
@@ -7385,7 +7394,7 @@
       "source": "EXTRACTED",
       "file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerIntegrationTests.cs",
       "description": "gRPC streaming service for listing tasks",
-      "community": 10,
+      "community": 20,
       "norm_label": "tasklister (grpc service)",
       "id": "TaskLister_gRPC_Service"
     },
@@ -7395,7 +7404,7 @@
       "source": "EXTRACTED",
       "file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerIntegrationTests.cs",
       "description": "gRPC service for retrieving individual task details",
-      "community": 10,
+      "community": 20,
       "norm_label": "taskgetter (grpc service)",
       "id": "TaskGetter_gRPC_Service"
     },
@@ -7405,7 +7414,7 @@
       "source": "EXTRACTED",
       "file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerIntegrationTests.cs",
       "description": "gRPC service for moving tasks between states",
-      "community": 10,
+      "community": 20,
       "norm_label": "taskmover (grpc service)",
       "id": "TaskMover_gRPC_Service"
     },
@@ -7415,7 +7424,7 @@
       "source": "EXTRACTED",
       "file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerIntegrationTests.cs",
       "description": "gRPC service for user authentication and authorization",
-      "community": 10,
+      "community": 0,
       "norm_label": "userservice (grpc)",
       "id": "UserService_gRPC"
     },
@@ -7425,7 +7434,7 @@
       "source": "EXTRACTED",
       "file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerIntegrationTests.cs",
       "description": "Bearer token authentication mechanism enforced in API tests",
-      "community": 10,
+      "community": 0,
       "norm_label": "jwt authentication",
       "id": "JWT_Authentication"
     },
@@ -7435,7 +7444,7 @@
       "source": "EXTRACTED",
       "file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerIntegrationTests.cs",
       "description": "Authorization with Developer and Manager roles tested in integration tests",
-      "community": 10,
+      "community": 0,
       "norm_label": "role-based access control (rbac)",
       "id": "Role_Based_Access_Control"
     },
@@ -7685,7 +7694,7 @@
       "source": "EXTRACTED",
       "file": "docs/CODEMAPS/INDEX.md",
       "description": "Central documentation hub for OneMoreTaskTracker architecture with navigation tables and quick references",
-      "community": 10,
+      "community": 20,
       "norm_label": "codemaps navigation hub",
       "id": "CODEMAPS_INDEX.md"
     },
@@ -7695,7 +7704,7 @@
       "source": "EXTRACTED",
       "file": "docs/CODEMAPS/INDEX.md",
       "description": "High-level system architecture documentation",
-      "community": 10,
+      "community": 20,
       "norm_label": "architecture.md codemap",
       "id": "Architecture_Codemap"
     },
@@ -7705,7 +7714,7 @@
       "source": "EXTRACTED",
       "file": "docs/CODEMAPS/INDEX.md",
       "description": "Backend services and business logic documentation",
-      "community": 10,
+      "community": 20,
       "norm_label": "backend.md codemap",
       "id": "Backend_Codemap"
     },
@@ -7715,7 +7724,7 @@
       "source": "EXTRACTED",
       "file": "docs/CODEMAPS/INDEX.md",
       "description": "React frontend and UI component documentation",
-      "community": 10,
+      "community": 20,
       "norm_label": "frontend.md codemap",
       "id": "Frontend_Codemap"
     },
@@ -7725,7 +7734,7 @@
       "source": "EXTRACTED",
       "file": "docs/CODEMAPS/INDEX.md",
       "description": "Data models and persistence layer documentation",
-      "community": 10,
+      "community": 20,
       "norm_label": "data.md codemap",
       "id": "Data_Codemap"
     },
@@ -7735,7 +7744,7 @@
       "source": "EXTRACTED",
       "file": "docs/CODEMAPS/INDEX.md",
       "description": "Project dependencies and external service integration documentation",
-      "community": 10,
+      "community": 20,
       "norm_label": "dependencies.md codemap",
       "id": "Dependencies_Codemap"
     },
@@ -7775,7 +7784,7 @@
       "source": "EXTRACTED",
       "file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerIntegrationTests.cs",
       "description": "ASP.NET Core testing utility for creating in-memory test hosts with dependency injection",
-      "community": 10,
+      "community": 0,
       "norm_label": "webapplicationfactory",
       "id": "WebApplicationFactory"
     },
@@ -7785,7 +7794,7 @@
       "source": "EXTRACTED",
       "file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerIntegrationTests.cs",
       "description": "Custom adapter converting IAsyncEnumerable to IAsyncStreamReader for gRPC mock compatibility",
-      "community": 10,
+      "community": 0,
       "norm_label": "asyncenumerableadapter",
       "id": "AsyncEnumerableAdapter"
     },
@@ -7835,7 +7844,7 @@
       "source": "INFERRED",
       "file": "OneMoreTaskTracker.Domain",
       "description": "Object mapping library for converting between proto DTOs and domain models",
-      "community": 97,
+      "community": 96,
       "norm_label": "mapster object mapping",
       "id": "Mapster_Mapping"
     }
@@ -10773,19 +10782,7 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/ProgramDiTests.cs",
-      "source_location": "L1",
-      "weight": 1.0,
-      "_src": "tests_onemoretasktracker_api_tests_infra_programditests_cs",
-      "_tgt": "FluentAssertions",
-      "source": "tests_onemoretasktracker_api_tests_infra_programditests_cs",
-      "target": "FluentAssertions",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "confidence": "EXTRACTED",
-      "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/ProgramDiTests.cs",
-      "source_location": "L9",
+      "source_location": "L8",
       "weight": 1.0,
       "_src": "tests_onemoretasktracker_api_tests_infra_programditests_cs",
       "_tgt": "xUnit",
@@ -10797,7 +10794,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/ProgramDiTests.cs",
-      "source_location": "L21",
+      "source_location": "L16",
       "weight": 1.0,
       "_src": "tests_onemoretasktracker_api_tests_infra_programditests_cs",
       "_tgt": "programditests_programditests",
@@ -10809,7 +10806,7 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/ProgramDiTests.cs",
-      "source_location": "L21",
+      "source_location": "L16",
       "weight": 1.0,
       "_src": "programditests_programditests",
       "_tgt": "iclassfixture",
@@ -10821,7 +10818,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/ProgramDiTests.cs",
-      "source_location": "L30",
+      "source_location": "L19",
       "weight": 1.0,
       "_src": "programditests_programditests",
       "_tgt": "programditests_programditests_program_configuresallgrpcclients_successfullyresolvable",
@@ -10968,8 +10965,8 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs",
       "source_location": "L103",
       "weight": 1.0,
-      "_src": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_getroster_asdeveloperwithmanagerclaim_returns200withmanagerroster",
-      "_tgt": "grpctesthelpers_grpctesthelpers_unarycall",
+      "_src": "grpctesthelpers_grpctesthelpers_unarycall",
+      "_tgt": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_getroster_asdeveloperwithmanagerclaim_returns200withmanagerroster",
       "source": "grpctesthelpers_grpctesthelpers_unarycall",
       "target": "teamcontrollerintegrationtests_teamcontrollerintegrationtests_getroster_asdeveloperwithmanagerclaim_returns200withmanagerroster"
     },
@@ -11148,8 +11145,8 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L314",
       "weight": 1.0,
-      "_src": "authcontrollerintegrationtests_authcontrollerintegrationtests_register_withmanageruser_includesmanageridclaimintoken",
-      "_tgt": "grpctesthelpers_grpctesthelpers_unarycall",
+      "_src": "grpctesthelpers_grpctesthelpers_unarycall",
+      "_tgt": "authcontrollerintegrationtests_authcontrollerintegrationtests_register_withmanageruser_includesmanageridclaimintoken",
       "source": "grpctesthelpers_grpctesthelpers_unarycall",
       "target": "authcontrollerintegrationtests_authcontrollerintegrationtests_register_withmanageruser_includesmanageridclaimintoken"
     },
@@ -11160,8 +11157,8 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L345",
       "weight": 1.0,
-      "_src": "authcontrollerintegrationtests_authcontrollerintegrationtests_register_withoutmanager_doesnotincludemanageridclaimintoken",
-      "_tgt": "grpctesthelpers_grpctesthelpers_unarycall",
+      "_src": "grpctesthelpers_grpctesthelpers_unarycall",
+      "_tgt": "authcontrollerintegrationtests_authcontrollerintegrationtests_register_withoutmanager_doesnotincludemanageridclaimintoken",
       "source": "grpctesthelpers_grpctesthelpers_unarycall",
       "target": "authcontrollerintegrationtests_authcontrollerintegrationtests_register_withoutmanager_doesnotincludemanageridclaimintoken"
     },
@@ -11172,8 +11169,8 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L375",
       "weight": 1.0,
-      "_src": "authcontrollerintegrationtests_authcontrollerintegrationtests_login_withmanageruser_includesmanageridclaimintoken",
-      "_tgt": "grpctesthelpers_grpctesthelpers_unarycall",
+      "_src": "grpctesthelpers_grpctesthelpers_unarycall",
+      "_tgt": "authcontrollerintegrationtests_authcontrollerintegrationtests_login_withmanageruser_includesmanageridclaimintoken",
       "source": "grpctesthelpers_grpctesthelpers_unarycall",
       "target": "authcontrollerintegrationtests_authcontrollerintegrationtests_login_withmanageruser_includesmanageridclaimintoken"
     },
@@ -11184,8 +11181,8 @@
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs",
       "source_location": "L407",
       "weight": 1.0,
-      "_src": "authcontrollerintegrationtests_authcontrollerintegrationtests_login_withoutmanager_doesnotincludemanageridclaimintoken",
-      "_tgt": "grpctesthelpers_grpctesthelpers_unarycall",
+      "_src": "grpctesthelpers_grpctesthelpers_unarycall",
+      "_tgt": "authcontrollerintegrationtests_authcontrollerintegrationtests_login_withoutmanager_doesnotincludemanageridclaimintoken",
       "source": "grpctesthelpers_grpctesthelpers_unarycall",
       "target": "authcontrollerintegrationtests_authcontrollerintegrationtests_login_withoutmanager_doesnotincludemanageridclaimintoken"
     },
@@ -11409,7 +11406,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/ProductionWiringWebApplicationFactory.cs",
-      "source_location": "L14",
+      "source_location": "L10",
       "weight": 1.0,
       "_src": "tests_onemoretasktracker_api_tests_infra_productionwiringwebapplicationfactory_cs",
       "_tgt": "productionwiringwebapplicationfactory_productionwiringwebapplicationfactory",
@@ -11421,7 +11418,7 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/ProductionWiringWebApplicationFactory.cs",
-      "source_location": "L14",
+      "source_location": "L10",
       "weight": 1.0,
       "_src": "productionwiringwebapplicationfactory_productionwiringwebapplicationfactory",
       "_tgt": "webapplicationfactory",
@@ -11433,7 +11430,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "tests/OneMoreTaskTracker.Api.Tests/Infra/ProductionWiringWebApplicationFactory.cs",
-      "source_location": "L16",
+      "source_location": "L12",
       "weight": 1.0,
       "_src": "productionwiringwebapplicationfactory_productionwiringwebapplicationfactory",
       "_tgt": "productionwiringwebapplicationfactory_productionwiringwebapplicationfactory_configurewebhost",
@@ -21087,6 +21084,42 @@
       "_tgt": "authcontroller_authcontroller_login",
       "source": "authcontroller_authcontroller",
       "target": "authcontroller_authcontroller_login",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "OneMoreTaskTracker.Api/Controllers/AuthController.cs",
+      "source_location": "L50",
+      "weight": 1.0,
+      "_src": "authcontroller_authcontroller",
+      "_tgt": "authcontroller_authcontroller_tonullablemanagerid",
+      "source": "authcontroller_authcontroller",
+      "target": "authcontroller_authcontroller_tonullablemanagerid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "OneMoreTaskTracker.Api/Controllers/AuthController.cs",
+      "source_location": "L27",
+      "weight": 1.0,
+      "_src": "authcontroller_authcontroller_register",
+      "_tgt": "authcontroller_authcontroller_tonullablemanagerid",
+      "source": "authcontroller_authcontroller_register",
+      "target": "authcontroller_authcontroller_tonullablemanagerid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "OneMoreTaskTracker.Api/Controllers/AuthController.cs",
+      "source_location": "L46",
+      "weight": 1.0,
+      "_src": "authcontroller_authcontroller_login",
+      "_tgt": "authcontroller_authcontroller_tonullablemanagerid",
+      "source": "authcontroller_authcontroller_login",
+      "target": "authcontroller_authcontroller_tonullablemanagerid",
       "confidence_score": 1.0
     },
     {
