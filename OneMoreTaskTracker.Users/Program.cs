@@ -20,7 +20,13 @@ if (builder.Environment.IsDevelopment())
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
-    scope.ServiceProvider.GetRequiredService<UsersDbContext>().Database.Migrate();
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<UsersDbContext>();
+    dbContext.Database.Migrate();
+
+    if (app.Environment.IsDevelopment())
+        await DevDataSeeder.SeedAsync(dbContext);
+}
 
 if (app.Environment.IsDevelopment())
     app.MapGrpcReflectionService();
