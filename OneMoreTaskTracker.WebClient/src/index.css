@@ -1,12 +1,13 @@
 /* Global style entry — imports run in declared order.
  * Layer 1: design tokens and typography (foundational).
  * Layer 2: element resets.
- * Layer 3: shared primitives (button, field, card, role-badge).
+ * Layer 3: shared primitives (shell, button, field, card, role-badge).
  * Component styles are colocated and imported from their TSX files. */
 
 @import './styles/tokens.css';
 @import './styles/typography.css';
 @import './styles/reset.css';
+@import './styles/primitives/shell.css';
 @import './styles/primitives/button.css';
 @import './styles/primitives/field.css';
 @import './styles/primitives/card.css';

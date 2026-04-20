@@ -60,9 +60,9 @@
 }
 
 .row-menu__item--danger {
-  color: var(--error);
+  color: var(--danger);
 }
 
 .row-menu__item--danger:hover {
-  background-color: color-mix(in oklch, var(--error) 10%, var(--bg));
+  background-color: color-mix(in oklch, var(--danger) 10%, var(--bg));
 }

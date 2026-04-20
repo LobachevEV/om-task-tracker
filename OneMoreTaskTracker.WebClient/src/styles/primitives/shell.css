@@ -1,0 +1,9 @@
+/* Full-viewport page chrome — used by every routed page shell. Imported globally via index.css. */
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+}

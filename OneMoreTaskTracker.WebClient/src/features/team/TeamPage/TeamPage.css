@@ -78,10 +78,10 @@
 /* Error banner */
 .team-error-banner {
   padding: 1rem;
-  background-color: color-mix(in oklch, var(--error) 15%, var(--surface));
-  border: 1px solid color-mix(in oklch, var(--error) 40%, transparent);
+  background-color: color-mix(in oklch, var(--danger) 15%, var(--surface));
+  border: 1px solid color-mix(in oklch, var(--danger) 40%, transparent);
   border-radius: 0.5rem;
-  color: var(--error);
+  color: var(--danger);
   font-size: 0.9rem;
 }
 
@@ -224,6 +224,6 @@
 }
 
 .team-page__error p {
-  color: var(--error);
+  color: var(--danger);
   margin: 0 0 1rem;
 }

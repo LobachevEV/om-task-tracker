@@ -1,13 +1,5 @@
 /* TaskPage — list view, task form, task rows. */
 
-.app-shell {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg);
-  color: var(--text);
-}
-
 .app-main {
   max-width: 960px;
   width: 100%;
