@@ -4,13 +4,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace OneMoreTaskTracker.Api.Tests.Infra;
 
-/// <summary>
-/// Factory that exercises production DI wiring without mocking gRPC clients.
-/// Used solely to verify that all gRPC client registrations in Program.cs
-/// are actually resolvable from the container. Tests should not mock clients;
-/// the factories used by behavior tests (ApiWebApplicationFactory, TasksControllerWebApplicationFactory)
-/// handle mocking for isolation.
-/// </summary>
+// Boots Program.cs's real DI graph without stub replacements so ProgramDiTests
+// can detect missing AddGrpcClient<T> registrations. Behavior tests keep using
+// the mocking factories instead.
 public sealed class ProductionWiringWebApplicationFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
