@@ -1,0 +1,104 @@
+/* Design-system Button. All variants share the .ds-button base — layout, gap,
+ * size rules, and loading state live here; the primary/secondary *surfaces*
+ * (fill, border, shadow) are provided by primitives/button.css via the legacy
+ * .primary-button / .secondary-button classes, which compose with this base. */
+
+.ds-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.ds-button__leading,
+.ds-button__trailing {
+  display: inline-flex;
+  align-items: center;
+}
+
+.ds-button--sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  min-height: 32px;
+}
+
+/* --md is the baseline; primitives/button.css supplies default padding. */
+
+.ds-button--lg {
+  padding: 0.85rem 1.6rem;
+  font-size: 0.95rem;
+  min-height: 52px;
+}
+
+.ds-button--block {
+  width: 100%;
+}
+
+.ds-button--loading {
+  position: relative;
+  color: transparent;
+}
+
+.ds-button--loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 1em;
+  height: 1em;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  color: var(--accent-ink);
+  animation: ds-button-spin 650ms linear infinite;
+}
+
+@keyframes ds-button-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---- Ghost — low-emphasis, used inline in dense data tables ---- */
+.ds-button--ghost {
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.ds-button--ghost:hover {
+  background: color-mix(in oklch, var(--border) 25%, transparent);
+  color: var(--text);
+}
+
+.ds-button--ghost:active {
+  background: color-mix(in oklch, var(--border) 40%, transparent);
+}
+
+/* ---- Danger — destructive actions (delete, remove, force close) ---- */
+.ds-button--danger {
+  background: color-mix(in oklch, var(--danger) 18%, transparent);
+  color: var(--danger);
+  border-color: color-mix(in oklch, var(--danger) 40%, transparent);
+}
+
+.ds-button--danger:hover {
+  background: color-mix(in oklch, var(--danger) 28%, transparent);
+  border-color: color-mix(in oklch, var(--danger) 60%, transparent);
+}
+
+.ds-button--danger:active {
+  background: color-mix(in oklch, var(--danger) 40%, transparent);
+}
+
+.ds-button--ghost:disabled,
+.ds-button--danger:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

@@ -81,7 +81,7 @@ export function RegisterPage() {
                 autoComplete="new-password"
               />
               {passwordTooShort && (
-                <span className="field__hint">{t('register.minLengthHint', { count: MIN_PASSWORD_LENGTH })}</span>
+                <span className="field__hint field__hint--error">{t('register.minLengthHint', { count: MIN_PASSWORD_LENGTH })}</span>
               )}
             </label>
             <label className="field">
@@ -95,7 +95,7 @@ export function RegisterPage() {
                 autoComplete="new-password"
               />
               {passwordsMismatch && (
-                <span className="field__hint">{t('register.passwordsMismatch')}</span>
+                <span className="field__hint field__hint--error">{t('register.passwordsMismatch')}</span>
               )}
             </label>
             <button

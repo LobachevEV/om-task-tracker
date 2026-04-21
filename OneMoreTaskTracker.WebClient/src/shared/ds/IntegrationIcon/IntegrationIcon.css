@@ -1,0 +1,74 @@
+/* Compact 16×16 integration marker with a 6×6 status dot in the top-right.
+ * Used inline on task rows to encode "whose court is the ball in". */
+
+.ds-integration-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  overflow: visible;
+  vertical-align: middle;
+}
+
+.ds-integration-icon--button {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.ds-integration-icon--button:hover {
+  transform: scale(1.12);
+}
+
+.ds-integration-icon--button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.ds-integration-icon__glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 3px;
+  font-family: var(--font-display);
+  font-variation-settings: 'wdth' 90, 'wght' 600;
+  font-size: 9px;
+  line-height: 1;
+  color: var(--text);
+  background: var(--elevated);
+  border: 1px solid var(--border);
+}
+
+/* Integration-specific tints — grounded in the neutral surface, subtle so the
+ * status dot remains the dominant signal. */
+.ds-integration-icon__glyph--gitlab {
+  color: oklch(0.80 0.12 40);
+  border-color: color-mix(in oklch, oklch(0.80 0.12 40) 30%, var(--border));
+}
+.ds-integration-icon__glyph--github {
+  color: var(--text);
+}
+.ds-integration-icon__glyph--jira {
+  color: oklch(0.75 0.12 250);
+  border-color: color-mix(in oklch, oklch(0.75 0.12 250) 30%, var(--border));
+}
+.ds-integration-icon__glyph--confluence {
+  color: oklch(0.78 0.10 240);
+  border-color: color-mix(in oklch, oklch(0.78 0.10 240) 30%, var(--border));
+}
+.ds-integration-icon__glyph--slack {
+  color: oklch(0.78 0.10 340);
+  border-color: color-mix(in oklch, oklch(0.78 0.10 340) 30%, var(--border));
+}
+
+.ds-integration-icon__dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+}

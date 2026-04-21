@@ -1,0 +1,27 @@
+/* Integration status micro-indicator. Per impeccable spec:
+ *   blocked/waiting → amber  (--warning)
+ *   passed/clear    → green  (--success)
+ *   failed/error    → red    (--danger) */
+
+.ds-status-dot {
+  display: inline-block;
+  border-radius: 999px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--bg) 60%, transparent);
+}
+
+.ds-status-dot--blocked {
+  background: var(--warning);
+}
+
+.ds-status-dot--passed {
+  background: var(--success);
+}
+
+.ds-status-dot--failed {
+  background: var(--danger);
+}
+
+.ds-status-dot--neutral {
+  background: var(--text-dim);
+}

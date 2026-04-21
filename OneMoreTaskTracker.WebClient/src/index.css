@@ -6,6 +6,7 @@
 
 @import './styles/tokens.css';
 @import './styles/typography.css';
+@import './styles/theme.css';
 @import './styles/reset.css';
 @import './styles/primitives/shell.css';
 @import './styles/primitives/button.css';
@@ -13,4 +14,5 @@
 @import './styles/primitives/card.css';
 @import './styles/primitives/avatar.css';
 @import './styles/primitives/role-badge.css';
+@import './styles/primitives/dialog.css';
 @import './styles/primitives/a11y.css';

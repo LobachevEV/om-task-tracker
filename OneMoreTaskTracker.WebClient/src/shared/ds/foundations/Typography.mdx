@@ -1,0 +1,55 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Foundations/Typography" />
+
+# Typography
+
+**Cyrillic-first.** The UI is Russian. Every face was chosen for first-class Cyrillic support, not bolted on.
+
+## Families
+
+<div style={{ display: 'grid', gap: 24, margin: '20px 0' }}>
+  <div style={{ background: 'var(--surface)', padding: 20, borderRadius: 12, border: '1px solid var(--border)' }}>
+    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6, fontFamily: 'var(--font-mono)' }}>
+      --font-display — Geologica
+    </div>
+    <div style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontVariationSettings: "'wdth' 78, 'wght' 500", lineHeight: 1.1 }}>
+      Конвейер релизов. Команда из 40 инженеров.
+    </div>
+    <div style={{ fontSize: 12, color: 'var(--text-dim)', marginTop: 8 }}>
+      Display / headings. Condensed (wdth 75–85) for Gantt bars.
+    </div>
+  </div>
+
+  <div style={{ background: 'var(--surface)', padding: 20, borderRadius: 12, border: '1px solid var(--border)' }}>
+    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6, fontFamily: 'var(--font-mono)' }}>
+      --font-sans — Onest
+    </div>
+    <div style={{ fontFamily: 'var(--font-sans)', fontSize: 16, lineHeight: 1.5 }}>
+      Body UI. Clean, engineered, not friendly-startup. Tabular numerals are enabled globally: <span style={{ fontFeatureSettings: "'tnum'" }}>0 1 2 3 4 5 6 7 8 9</span>. Critical for aligning task IDs and counts in dense tables.
+    </div>
+  </div>
+
+  <div style={{ background: 'var(--surface)', padding: 20, borderRadius: 12, border: '1px solid var(--border)' }}>
+    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6, fontFamily: 'var(--font-mono)' }}>
+      --font-mono — Geist Mono
+    </div>
+    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 14 }}>
+      PROJ-1234 · feature/release-pipeline · ⌘K
+    </div>
+    <div style={{ fontSize: 12, color: 'var(--text-dim)', marginTop: 8 }}>
+      IDs, branch names, keyboard shortcuts — visually distinct from prose.
+    </div>
+  </div>
+</div>
+
+## Scale
+
+<div style={{ display: 'flex', flexDirection: 'column', gap: 12, margin: '20px 0', background: 'var(--surface)', padding: 20, borderRadius: 12, border: '1px solid var(--border)' }}>
+  <h1 style={{ margin: 0 }}>h1 — Релизный конвейер</h1>
+  <h2 style={{ margin: 0 }}>h2 — Активные задачи</h2>
+  <h3 style={{ margin: 0 }}>h3 — Блокеры</h3>
+  <p style={{ margin: 0 }}>Body — Текущий спринт содержит 47 задач, из которых 12 находятся на ревью.</p>
+  <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: 14 }}>Muted — вспомогательный текст, подписи, метаданные.</p>
+  <code className="mono" style={{ fontSize: 13 }}>Mono — PROJ-1234 · feature/deploy-hotfix</code>
+</div>

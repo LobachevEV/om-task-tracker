@@ -1,0 +1,42 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Foundations/Overview" />
+
+# OneMoreTaskTracker Design System
+
+**Structured. Automated. Transparent.**
+
+The precision instrument for release-pipeline command centers. Calm confidence, not startup cheerfulness. Dark by default — developers, engineers, and QA work at night.
+
+---
+
+## Principles
+
+1. **Status at a glance.** Integration blockers (Confluence, Git, Jira, Slack) are visible inline. No drilling in to see whose court the ball is in.
+2. **Data density over decoration.** Every visual element encodes information. Spacing conveys hierarchy, color encodes state, size conveys importance.
+3. **Calm precision.** Extraordinary complexity handled quietly. When something moves, it means something changed.
+4. **Keyboard-first fluency.** Tab stops, shortcuts, and command palette are first-class.
+5. **Scalable clarity.** The interface holds up at 500+ tasks.
+
+## Architecture
+
+```
+src/styles/
+├── tokens.css        → OKLCH color + spacing tokens (single source of truth)
+├── typography.css    → Geologica / Onest / Geist Mono
+├── theme.css         → Tailwind v4 @theme bridge — aliases tokens to utilities
+├── reset.css
+└── primitives/       → CSS classes (.primary-button, .card, .field, …)
+
+src/shared/ds/
+├── Button/, Field/, Card/, Badge/, Avatar/, …
+└── index.ts          → Single import surface: `import { Button } from '@/shared/ds'`
+```
+
+**Rule:** Components wrap CSS classes. Tokens live in `tokens.css` once. Tailwind and JSX both read from the same OKLCH values.
+
+## References
+
+**We aspire to:** Linear (speed, keyboard-first), Vercel (functional, respects time), Datadog (information density), Notion (structured).
+
+**We avoid:** Jira menu sprawl, MS Project bloat, Trello informality, anything with confetti.

@@ -1,0 +1,44 @@
+/* Tailwind v4 entrypoint + theme bridge.
+ *
+ * Exposes the project's OKLCH tokens (defined in tokens.css) as Tailwind
+ * utilities — edit colors in tokens.css; this file only *aliases* them into
+ * Tailwind's theme so utilities like `bg-surface text-muted border-border`
+ * resolve against the same source of truth.
+ *
+ * Only tokens with a concrete near-term consumer are aliased here. Add more
+ * (radii, state palette, motion) when the first JSX callsite demands them —
+ * until then, primitives/*.css and raw `var(--…)` are the canonical API.
+ */
+
+@import 'tailwindcss';
+
+/* Opt out of Tailwind's default dark-mode strategy — the app is dark by
+ * default via tokens. Use the `light` class to opt a subtree into the
+ * high-contrast light variant (reports / print). */
+@custom-variant light (&:where(.light, .light *));
+
+@theme {
+  /* ---- Colors ---- */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-elevated: var(--elevated);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-dim: var(--text-dim);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-ink: var(--accent-ink);
+
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+
+  /* ---- Fonts ---- */
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+}

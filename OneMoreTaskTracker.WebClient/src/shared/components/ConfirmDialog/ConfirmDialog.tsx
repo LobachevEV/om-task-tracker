@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useKeyboardShortcut } from '../../hooks/useKeyboardShortcut';
-import './ConfirmDialog.css';
 
 interface ConfirmDialogProps {
   title: string;

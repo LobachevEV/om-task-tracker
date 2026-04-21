@@ -1,3 +1,5 @@
+/* Dialog primitive — shared shell for ConfirmDialog, DS Dialog, and future modals. */
+
 .dialog-overlay {
   position: fixed;
   inset: 0;

@@ -1,0 +1,44 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Foundations/Spacing" />
+
+# Spacing & Motion
+
+## Radii
+
+<div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', margin: '16px 0' }}>
+  {[
+    { token: '--radius-xs', px: 4 },
+    { token: '--radius-sm', px: 6 },
+    { token: '--radius-md', px: 10 },
+    { token: '--radius-lg', px: 12 },
+    { token: '--radius-xl', px: 16 },
+    { token: '--radius-pill', px: 999 },
+  ].map(({ token, px }) => (
+    <div key={token} style={{ textAlign: 'center', fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+      <div style={{ width: 72, height: 72, background: 'var(--elevated)', border: '1px solid var(--border)', borderRadius: px === 999 ? 999 : px, marginBottom: 6 }} />
+      {token}
+    </div>
+  ))}
+</div>
+
+## Motion
+
+The system uses exactly two durations — no custom one-offs.
+
+- `--transition-fast` = **120ms** — hover/active, feedback
+- `--transition-base` = **160ms** — layout changes, state changes
+
+> When something moves, it means something changed.
+> Motion carries meaning; decoration does not.
+
+## Elevation
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 16, margin: '16px 0' }}>
+  <div style={{ background: 'var(--surface)', padding: 20, borderRadius: 12, boxShadow: 'var(--shadow-sm)', textAlign: 'center', fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+    --shadow-sm<div style={{ fontSize: 10, marginTop: 6 }}>Cards, inputs</div>
+  </div>
+  <div style={{ background: 'var(--elevated)', padding: 20, borderRadius: 12, boxShadow: 'var(--shadow-lg)', textAlign: 'center', fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+    --shadow-lg<div style={{ fontSize: 10, marginTop: 6 }}>Popovers, modals</div>
+  </div>
+</div>
