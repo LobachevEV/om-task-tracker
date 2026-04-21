@@ -1,5 +1,11 @@
 /* Auth pages (Login + Register) shared styles. */
 
+.auth-lang-switcher {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem 1rem 0;
+}
+
 .login-main {
   flex: 1;
   display: flex;

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { register as apiRegister } from '../../../shared/api/authApi';
+import { LanguageSwitcher } from '../../../shared/components/LanguageSwitcher';
 import { useAuth } from '../AuthContext';
 import '../AuthPages.css';
 
@@ -53,6 +54,9 @@ export function RegisterPage() {
 
   return (
     <div className="app-shell">
+      <div className="auth-lang-switcher">
+        <LanguageSwitcher />
+      </div>
       <main className="login-main">
         <section className="card login-card">
           <h2 className="login-card__title">One More Task Tracker</h2>

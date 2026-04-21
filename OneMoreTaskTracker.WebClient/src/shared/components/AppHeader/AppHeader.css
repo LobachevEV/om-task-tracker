@@ -71,38 +71,6 @@
   color: var(--text-muted);
 }
 
-.language-switcher {
-  display: inline-flex;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.language-switcher__btn {
-  padding: 0.25rem 0.6rem;
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.language-switcher__btn + .language-switcher__btn {
-  border-left: 1px solid var(--border);
-}
-
-.language-switcher__btn:hover {
-  color: var(--text);
-}
-
-.language-switcher__btn--active {
-  background: var(--accent);
-  color: var(--accent-contrast, #000);
-}
-
 @media (min-width: 768px) {
   .app-header {
     padding: 1.25rem 1.75rem;

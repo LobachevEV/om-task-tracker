@@ -237,4 +237,10 @@ describe('RegisterPage', () => {
     expect(loginLink).toBeInTheDocument();
     expect(loginLink).toHaveAttribute('href', '/login');
   });
+
+  it('mounts the shared language switcher for unauthenticated users', () => {
+    renderPage();
+
+    expect(screen.getByRole('group', { name: /язык|language/i })).toBeInTheDocument();
+  });
 });

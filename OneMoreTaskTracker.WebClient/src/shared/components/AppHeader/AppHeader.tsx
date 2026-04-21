@@ -3,11 +3,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../features/auth/AuthContext';
 import { ROLE_BADGE_CLASS } from '../../auth/roles';
-import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../../i18n/config';
+import { LanguageSwitcher } from '../LanguageSwitcher';
 import './AppHeader.css';
 
 export function AppHeader() {
-  const { t, i18n } = useTranslation('header');
+  const { t } = useTranslation('header');
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -17,9 +17,10 @@ export function AppHeader() {
     navigate('/login', { replace: true });
   }, [logout, navigate]);
 
+  if (!user) return null;
+
   const isTasksActive = location.pathname === '/' || location.pathname.startsWith('/tasks');
   const isTeamActive = location.pathname === '/team';
-  const currentLang = (i18n.resolvedLanguage ?? i18n.language ?? 'ru') as SupportedLanguage;
 
   return (
     <header className="app-header">
@@ -45,31 +46,11 @@ export function AppHeader() {
           </nav>
         </div>
         <div className="app-header__user">
-          <div className="language-switcher" role="group" aria-label={t('language.switchTo')}>
-            {SUPPORTED_LANGUAGES.map((lang) => (
-              <button
-                key={lang}
-                type="button"
-                className={`language-switcher__btn ${
-                  currentLang === lang ? 'language-switcher__btn--active' : ''
-                }`}
-                aria-pressed={currentLang === lang}
-                onClick={() => {
-                  if (currentLang !== lang) {
-                    void i18n.changeLanguage(lang);
-                  }
-                }}
-              >
-                {lang.toUpperCase()}
-              </button>
-            ))}
-          </div>
-          <span className="app-header__email">{user?.email}</span>
-          {user && (
-            <span className={`role-badge ${ROLE_BADGE_CLASS[user.role]}`}>
-              {user.role}
-            </span>
-          )}
+          <LanguageSwitcher />
+          <span className="app-header__email">{user.email}</span>
+          <span className={`role-badge ${ROLE_BADGE_CLASS[user.role]}`}>
+            {user.role}
+          </span>
           <button className="primary-button" type="button" onClick={handleLogout}>
             {t('logout')}
           </button>
