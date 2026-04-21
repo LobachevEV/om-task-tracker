@@ -31,4 +31,8 @@ publish/
 .specs/
 .design/
 
-graphify-out/cache/
+# Knowledge graph — generated locally by graphify hooks on every commit
+# and branch switch. Tracking these 92+ files produced 12MB of diff per
+# commit and unavoidable merge conflicts on graph.json / GRAPH_REPORT.md
+# across branches. Regenerate with `graphify update .` on fresh clones.
+graphify-out/
