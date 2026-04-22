@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthContext';
 import { Spinner, Button } from '../../shared/ds';
-import type { UserRole } from '../../shared/auth/auth';
+import { isUserRole, type UserRole } from '../../shared/auth/roles';
 import type { FeatureSummary, MiniTeamMember } from '../../shared/types/feature';
 import type { TeamRosterMember } from '../../shared/api/teamApi';
 import { FeatureDrawer } from './FeatureDrawer';
@@ -21,19 +21,17 @@ import './GanttPage.css';
 const PLACEHOLDER_ROLE: MiniTeamMember['role'] = 'FrontendDeveloper';
 
 function toMiniMember(row: TeamRosterMember): MiniTeamMember {
-  const role = (['Manager', 'FrontendDeveloper', 'BackendDeveloper', 'Qa'] as const).includes(
-    row.role as MiniTeamMember['role'],
-  )
-    ? (row.role as MiniTeamMember['role'])
-    : PLACEHOLDER_ROLE;
   return {
     userId: row.userId,
     email: row.email,
     displayName: row.displayName,
-    role,
+    role: isUserRole(row.role) ? row.role : PLACEHOLDER_ROLE,
   };
 }
 
+// Synthetic stand-in when a feature references a user that is no longer in the
+// roster (e.g. removed manager/dev). email is intentionally non-deliverable —
+// it is only ever rendered, never sent.
 function placeholderMember(userId: number): MiniTeamMember {
   return {
     userId,
@@ -114,16 +112,6 @@ export function GanttPageInternal({
     [rosterById],
   );
 
-  const miniTeamFor = useCallback(
-    (_feature: FeatureSummary, lead: MiniTeamMember): MiniTeamMember[] => {
-      // Task-assignee resolution requires task.userId which is only available on FeatureDetail
-      // (lazy). For the summary view we show the lead as the sole known member; mini-team fills
-      // in once the drawer/lazy fetch lands (degradation documented in DESIGN_NOTES).
-      return [lead];
-    },
-    [],
-  );
-
   const handleCreated = useCallback(
     (id: number) => {
       setCreateOpen(false);
@@ -135,9 +123,7 @@ export function GanttPageInternal({
 
   const hasAnyFeatures = layout.lanes.length + layout.unscheduled.length > 0;
 
-  const pageStyle: CSSProperties = {
-    ['--day-count' as string]: String(ZOOM_DAYS[state.zoom]),
-  };
+  const pageStyle = { '--day-count': String(ZOOM_DAYS[state.zoom]) } as CSSProperties;
 
   return (
     <main className="gantt-page" style={pageStyle}>
@@ -196,7 +182,9 @@ export function GanttPageInternal({
           <div className="gantt-page__lanes" role="list">
             {layout.lanes.map((lane: GanttLane) => {
               const lead = resolveMember(lane.feature.leadUserId);
-              const miniTeam = miniTeamFor(lane.feature, lead);
+              // Summary view knows only the lead; task-assignee resolution requires
+              // FeatureDetail (lazy), so the mini-team fills in once the drawer opens.
+              const miniTeam = [lead];
               return (
                 <GanttFeatureRow
                   key={lane.feature.id}

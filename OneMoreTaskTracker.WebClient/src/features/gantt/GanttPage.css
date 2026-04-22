@@ -3,7 +3,9 @@
   --day-count: 14;
   display: flex;
   flex-direction: column;
-  min-block-size: calc(100vh - var(--app-header-height, 56px));
+  /* Definite block-size (not just min-) so flex children with
+     `min-block-size: 0` can actually shrink and scroll internally. */
+  block-size: calc(100vh - var(--app-header-height, 56px));
   background: var(--bg);
   color: var(--text);
 }
