@@ -26,6 +26,9 @@ interface HarnessProps {
   loading?: boolean;
   error?: Error | null;
   onRetry?: () => void;
+  rosterError?: Error | null;
+  rosterLoading?: boolean;
+  onRosterRetry?: () => void;
 }
 
 function Harness({
@@ -34,6 +37,9 @@ function Harness({
   loading = false,
   error = null,
   onRetry = () => {},
+  rosterError = null,
+  rosterLoading = false,
+  onRosterRetry = () => {},
 }: HarnessProps) {
   const state = useGanttPageState(role);
   return (
@@ -41,8 +47,9 @@ function Harness({
       role={role}
       features={features}
       roster={ROSTER}
-      rosterLoading={false}
-      rosterError={null}
+      rosterLoading={rosterLoading}
+      rosterError={rosterError}
+      onRosterRetry={onRosterRetry}
       loading={loading}
       error={error}
       onRetry={onRetry}
@@ -144,5 +151,18 @@ describe('GanttPageInternal', () => {
     const retry = within(alert).getByRole('button');
     fireEvent.click(retry);
     expect(onRetry).toHaveBeenCalled();
+  });
+
+  it('roster warning banner includes a retry button that calls onRosterRetry', () => {
+    const onRosterRetry = vi.fn();
+    renderHarness({
+      role: 'Manager',
+      rosterError: new Error('roster down'),
+      onRosterRetry,
+      features: [],
+    });
+    const warning = screen.getByRole('alert', { name: /team/i });
+    fireEvent.click(within(warning).getByRole('button'));
+    expect(onRosterRetry).toHaveBeenCalledTimes(1);
   });
 });

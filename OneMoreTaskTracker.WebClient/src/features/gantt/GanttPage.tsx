@@ -49,6 +49,7 @@ export interface GanttPageInternalProps {
   roster: MiniTeamMember[];
   rosterLoading: boolean;
   rosterError: Error | null;
+  onRosterRetry: () => void;
   loading: boolean;
   error: Error | null;
   onRetry: () => void;
@@ -88,8 +89,9 @@ export function GanttPageInternal({
   role,
   features,
   roster,
-  rosterLoading: _rosterLoading,
+  rosterLoading,
   rosterError,
+  onRosterRetry,
   loading,
   error,
   onRetry,
@@ -151,8 +153,24 @@ export function GanttPageInternal({
       />
 
       {rosterError ? (
-        <div className="gantt-page__warning" role="alert">
-          {t('row.team')}: {t('failed')}
+        <div
+          className="gantt-page__warning"
+          role="alert"
+          aria-label={t('row.team')}
+        >
+          <span className="gantt-page__warning-message">
+            {t('row.team')}: {t('failed')}
+          </span>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            className="gantt-page__warning-retry"
+            onClick={onRosterRetry}
+            loading={rosterLoading}
+          >
+            {t('retry')}
+          </Button>
         </div>
       ) : null}
 
@@ -244,6 +262,7 @@ export function GanttPage() {
       roster={rosterMembers}
       rosterLoading={roster.loading}
       rosterError={roster.error}
+      onRosterRetry={roster.refetch}
       loading={features.loading}
       error={features.error}
       onRetry={features.refetch}

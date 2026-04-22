@@ -67,5 +67,18 @@ export function useTeamRoster(options: UseTeamRosterOptions = {}): UseTeamRoster
     };
   }, [fetcher, refetchToken]);
 
+  // When the tab regains focus after an error, retry automatically. The
+  // `!loading` guard prevents a burst of focus events during a slow retry
+  // from cancelling their own in-flight request (refetch nulls the cache
+  // and inflight promise on every call).
+  useEffect(() => {
+    if (!error) return;
+    const onFocus = () => {
+      if (!loading) refetch();
+    };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [error, loading, refetch]);
+
   return { data, loading, error, refetch };
 }

@@ -1,14 +1,15 @@
 .gantt-page {
   --gantt-gutter-width: 280px;
   --day-count: 14;
-  display: grid;
-  grid-template-rows: auto 1fr;
+  display: flex;
+  flex-direction: column;
   min-block-size: calc(100vh - var(--app-header-height, 56px));
   background: var(--bg);
   color: var(--text);
 }
 
 .gantt-page__centered {
+  flex: 1 1 auto;
   display: grid;
   place-items: center;
   padding: var(--space-10, 40px) var(--space-6, 24px);
@@ -20,14 +21,32 @@
 }
 
 .gantt-page__warning {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 12px);
   padding: 8px var(--space-6, 24px);
-  background: color-mix(in oklch, var(--warning, #f1a400) 18%, transparent);
+  background: color-mix(in oklch, var(--warning) 18%, transparent);
   color: var(--text);
   font-size: 13px;
   border-block-end: 1px solid var(--border-soft, var(--border-strong));
 }
 
+.gantt-page__warning-message {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.gantt-page__warning-retry {
+  flex: 0 0 auto;
+}
+
 .gantt-page__timeline-wrap {
+  flex: 1 1 auto;
+  /* Flex items default to `min-block-size: auto` (content-height), which
+     suppresses `overflow: auto` on the child. Force shrink-to-fit so the
+     internal scroll container works inside a flex column parent. */
+  min-block-size: 0;
   overflow-x: auto;
   overflow-y: auto;
   display: flex;
