@@ -33,9 +33,9 @@ public sealed class GetAssigneeTaskSummaryHandlerTests
     public async System.Threading.Tasks.Task BatchGetAssigneeTaskSummary_ReturnsOneSummaryPerInputId_IncludingZeroTaskAssignees()
     {
         var db = CreateDb();
-        var task1 = new Task { JiraId = "TASK-1", UserId = 1 };
+        var task1 = new Task { JiraId = "TASK-1", UserId = 1, FeatureId = 1 };
         task1.SetStateForTesting((int)TaskState.InDev);
-        var task2 = new Task { JiraId = "TASK-2", UserId = 1 };
+        var task2 = new Task { JiraId = "TASK-2", UserId = 1, FeatureId = 1 };
         task2.SetStateForTesting((int)TaskState.InDev);
         db.Tasks.AddRange(task1, task2);
         await db.SaveChangesAsync();
@@ -66,15 +66,15 @@ public sealed class GetAssigneeTaskSummaryHandlerTests
     public async System.Threading.Tasks.Task BatchGetAssigneeTaskSummary_CorrectlyBucketsByState()
     {
         var db = CreateDb();
-        var t1 = new Task { JiraId = "TASK-1", UserId = 1 };
+        var t1 = new Task { JiraId = "TASK-1", UserId = 1, FeatureId = 1 };
         t1.SetStateForTesting((int)TaskState.InDev);
-        var t2 = new Task { JiraId = "TASK-2", UserId = 1 };
+        var t2 = new Task { JiraId = "TASK-2", UserId = 1, FeatureId = 1 };
         t2.SetStateForTesting((int)TaskState.MrToRelease);
-        var t3 = new Task { JiraId = "TASK-3", UserId = 1 };
+        var t3 = new Task { JiraId = "TASK-3", UserId = 1, FeatureId = 1 };
         t3.SetStateForTesting((int)TaskState.InTest);
-        var t4 = new Task { JiraId = "TASK-4", UserId = 1 };
+        var t4 = new Task { JiraId = "TASK-4", UserId = 1, FeatureId = 1 };
         t4.SetStateForTesting((int)TaskState.MrToMaster);
-        var t5 = new Task { JiraId = "TASK-5", UserId = 1 };
+        var t5 = new Task { JiraId = "TASK-5", UserId = 1, FeatureId = 1 };
         t5.SetStateForTesting((int)TaskState.Completed);
         db.Tasks.AddRange(t1, t2, t3, t4, t5);
         await db.SaveChangesAsync();
@@ -104,9 +104,9 @@ public sealed class GetAssigneeTaskSummaryHandlerTests
         // should be updated to verify last_activity_at is correctly populated.
         var db = CreateDb();
 
-        var t1 = new Task { JiraId = "TASK-1", UserId = 1 };
+        var t1 = new Task { JiraId = "TASK-1", UserId = 1, FeatureId = 1 };
         t1.SetStateForTesting((int)TaskState.InDev);
-        var t2 = new Task { JiraId = "TASK-2", UserId = 1 };
+        var t2 = new Task { JiraId = "TASK-2", UserId = 1, FeatureId = 1 };
         t2.SetStateForTesting((int)TaskState.Completed);
         db.Tasks.AddRange(t1, t2);
         await db.SaveChangesAsync();
@@ -144,11 +144,11 @@ public sealed class GetAssigneeTaskSummaryHandlerTests
     public async System.Threading.Tasks.Task BatchGetAssigneeTaskSummary_IssuedAsSingleGroupedQuery()
     {
         var db = CreateDb();
-        var t1 = new Task { JiraId = "TASK-1", UserId = 1 };
+        var t1 = new Task { JiraId = "TASK-1", UserId = 1, FeatureId = 1 };
         t1.SetStateForTesting((int)TaskState.InDev);
-        var t2 = new Task { JiraId = "TASK-2", UserId = 2 };
+        var t2 = new Task { JiraId = "TASK-2", UserId = 2, FeatureId = 1 };
         t2.SetStateForTesting((int)TaskState.InTest);
-        var t3 = new Task { JiraId = "TASK-3", UserId = 3 };
+        var t3 = new Task { JiraId = "TASK-3", UserId = 3, FeatureId = 1 };
         t3.SetStateForTesting((int)TaskState.Completed);
         db.Tasks.AddRange(t1, t2, t3);
         await db.SaveChangesAsync();

@@ -18,9 +18,9 @@ public sealed class ListTasksHandlerTests
     {
         var db = CreateDb();
         db.Tasks.AddRange(
-            new Task { JiraId = "TASK-1", UserId = 1 },
-            new Task { JiraId = "TASK-2", UserId = 1 },
-            new Task { JiraId = "TASK-3", UserId = 2 }
+            new Task { JiraId = "TASK-1", UserId = 1, FeatureId = 1 },
+            new Task { JiraId = "TASK-2", UserId = 1, FeatureId = 1 },
+            new Task { JiraId = "TASK-3", UserId = 2, FeatureId = 1 }
         );
         await db.SaveChangesAsync();
 
@@ -40,10 +40,10 @@ public sealed class ListTasksHandlerTests
     {
         var db = CreateDb();
         db.Tasks.AddRange(
-            new Task { JiraId = "TASK-1", UserId = 1 },
-            new Task { JiraId = "TASK-2", UserId = 2 },
-            new Task { JiraId = "TASK-3", UserId = 3 },
-            new Task { JiraId = "TASK-4", UserId = 4 }
+            new Task { JiraId = "TASK-1", UserId = 1, FeatureId = 1 },
+            new Task { JiraId = "TASK-2", UserId = 2, FeatureId = 1 },
+            new Task { JiraId = "TASK-3", UserId = 3, FeatureId = 1 },
+            new Task { JiraId = "TASK-4", UserId = 4, FeatureId = 1 }
         );
         await db.SaveChangesAsync();
 
@@ -68,8 +68,8 @@ public sealed class ListTasksHandlerTests
     {
         var db = CreateDb();
         db.Tasks.AddRange(
-            new Task { JiraId = "TASK-1", UserId = 1 },
-            new Task { JiraId = "TASK-2", UserId = 2 }
+            new Task { JiraId = "TASK-1", UserId = 1, FeatureId = 1 },
+            new Task { JiraId = "TASK-2", UserId = 2, FeatureId = 1 }
         );
         await db.SaveChangesAsync();
 
@@ -88,9 +88,9 @@ public sealed class ListTasksHandlerTests
     {
         var db = CreateDb();
         db.Tasks.AddRange(
-            new Task { JiraId = "TASK-1", UserId = 1 },
-            new Task { JiraId = "TASK-2", UserId = 1 },
-            new Task { JiraId = "TASK-3", UserId = 1 }
+            new Task { JiraId = "TASK-1", UserId = 1, FeatureId = 1 },
+            new Task { JiraId = "TASK-2", UserId = 1, FeatureId = 1 },
+            new Task { JiraId = "TASK-3", UserId = 1, FeatureId = 1 }
         );
         await db.SaveChangesAsync();
 
@@ -110,7 +110,7 @@ public sealed class ListTasksHandlerTests
     {
         var db = CreateDb();
         var tasks = Enumerable.Range(1, 501)
-            .Select(i => new Task { JiraId = $"TASK-{i}", UserId = 1 })
+            .Select(i => new Task { JiraId = $"TASK-{i}", UserId = 1, FeatureId = 1 })
             .ToList();
         db.Tasks.AddRange(tasks);
         await db.SaveChangesAsync();

@@ -8,6 +8,7 @@ public class Task
     public int Id { get; init; }
     public required string JiraId { get; init; }
     public int UserId { get; init; }
+    public required int FeatureId { get; init; }
     public int State { get; private set; } = (int)TaskState.NotStarted;
     public List<MergeRequest> MergeRequests { get; init; } = [];
     public List<GitRepo> GitRepos { get; init; } = [];

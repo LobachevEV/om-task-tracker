@@ -11,5 +11,7 @@ public class TasksDbContext(DbContextOptions<TasksDbContext> options) : DbContex
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("tasks");
+
+        modelBuilder.Entity<Task>(e => e.HasIndex(t => t.FeatureId));
     }
 }

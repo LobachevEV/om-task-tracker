@@ -21,7 +21,7 @@ public sealed class TasksControllerCreateTaskTests(TasksControllerWebApplication
     public async Task CreateTask_WithoutAuthentication_Returns401()
     {
         var client = Factory.CreateClient();
-        var response = await client.PostAsync("/api/tasks", JsonBody(new { jiraId = "JIRA-NEW" }));
+        var response = await client.PostAsync("/api/tasks", JsonBody(new { jiraId = "JIRA-NEW", featureId = 1 }));
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);
     }
 
@@ -37,7 +37,7 @@ public sealed class TasksControllerCreateTaskTests(TasksControllerWebApplication
                 Task = new CreateTaskDto { Id = 1, JiraTaskId = "JIRA-NEW", State = TaskState.NotStarted }
             }));
 
-        var response = await client.PostAsync("/api/tasks", JsonBody(new { jiraId = "JIRA-NEW" }));
+        var response = await client.PostAsync("/api/tasks", JsonBody(new { jiraId = "JIRA-NEW", featureId = 1 }));
 
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
         var respContent = await response.Content.ReadAsStringAsync();
@@ -52,7 +52,7 @@ public sealed class TasksControllerCreateTaskTests(TasksControllerWebApplication
     {
         var client = ClientWithToken(TokenForDeveloper(userId: 10));
 
-        var response = await client.PostAsync("/api/tasks", JsonBody(new { jiraId }));
+        var response = await client.PostAsync("/api/tasks", JsonBody(new { jiraId, featureId = 1 }));
 
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);
     }
@@ -66,7 +66,7 @@ public sealed class TasksControllerCreateTaskTests(TasksControllerWebApplication
             .Create(Arg.Any<CreateTaskRequest>(), Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
             .Returns(GrpcTestHelpers.EmptyStreamingCall<CreateTaskResponse>());
 
-        var response = await client.PostAsync("/api/tasks", JsonBody(new { jiraId = "JIRA-FAIL" }));
+        var response = await client.PostAsync("/api/tasks", JsonBody(new { jiraId = "JIRA-FAIL", featureId = 1 }));
 
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.InternalServerError);
     }

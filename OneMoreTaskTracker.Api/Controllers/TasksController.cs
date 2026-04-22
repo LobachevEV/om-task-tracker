@@ -81,7 +81,8 @@ public class TasksController(
         {
             JiraTaskId = payload.JiraId,
             UserId = User.GetUserId(),
-            StartDate = Timestamp.FromDateTime(startDate)
+            StartDate = Timestamp.FromDateTime(startDate),
+            FeatureId = payload.FeatureId
         }, cancellationToken: cancellationToken);
 
         CreateTaskDto? lastTask = null;
@@ -150,6 +151,7 @@ public class TasksController(
 
 public record CreateTaskPayload(
     [Required][MinLength(1)][MaxLength(50)] string JiraId,
+    [Range(1, int.MaxValue)] int FeatureId,
     DateTime? StartDate = null);
 public record TaskResponse(int Id, string JiraId, string State, int UserId);
 public record ProjectResponse(int Id, string Name);

@@ -18,10 +18,14 @@ public class CreateTaskHandler(
         IServerStreamWriter<CreateTaskResponse> responseStream,
         ServerCallContext context)
     {
+        if (request.FeatureId <= 0)
+            throw new RpcException(new Status(StatusCode.InvalidArgument, "feature_id is required"));
+
         var task = new Task
         {
             JiraId = request.JiraTaskId,
-            UserId = request.UserId
+            UserId = request.UserId,
+            FeatureId = request.FeatureId
         };
 
         await tasksDbContext.Tasks.AddAsync(task, context.CancellationToken);

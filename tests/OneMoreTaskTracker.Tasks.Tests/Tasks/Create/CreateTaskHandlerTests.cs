@@ -30,7 +30,7 @@ public sealed class CreateTaskHandlerTests
             .Returns(ToAsyncEnumerable(Array.Empty<ProjectDto>()));
 
         var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
-        var request = new CreateTaskRequest { JiraTaskId = "TASK-123", UserId = 42 };
+        var request = new CreateTaskRequest { JiraTaskId = "TASK-123", UserId = 42, FeatureId = 1 };
         var writer = new FakeServerStreamWriter<CreateTaskResponse>();
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
@@ -41,6 +41,7 @@ public sealed class CreateTaskHandlerTests
         savedTask.Should().NotBeNull();
         savedTask!.JiraId.Should().Be("TASK-123");
         savedTask.UserId.Should().Be(42);
+        savedTask.FeatureId.Should().Be(1);
     }
 
     [Fact]
@@ -56,7 +57,7 @@ public sealed class CreateTaskHandlerTests
             .Returns(ToAsyncEnumerable(Array.Empty<ProjectDto>()));
 
         var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
-        var request = new CreateTaskRequest { JiraTaskId = "TASK-456", UserId = 1 };
+        var request = new CreateTaskRequest { JiraTaskId = "TASK-456", UserId = 1, FeatureId = 1 };
         var writer = new FakeServerStreamWriter<CreateTaskResponse>();
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
@@ -85,7 +86,7 @@ public sealed class CreateTaskHandlerTests
             .Returns(ToAsyncEnumerable(Array.Empty<ProjectDto>()));
 
         var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
-        var request = new CreateTaskRequest { JiraTaskId = "TASK-789", UserId = 1 };
+        var request = new CreateTaskRequest { JiraTaskId = "TASK-789", UserId = 1, FeatureId = 1 };
         var writer = new FakeServerStreamWriter<CreateTaskResponse>();
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
@@ -112,7 +113,7 @@ public sealed class CreateTaskHandlerTests
             .Returns(ToAsyncEnumerable(Array.Empty<ProjectDto>()));
 
         var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
-        var request = new CreateTaskRequest { JiraTaskId = "TASK-999", UserId = 1 };
+        var request = new CreateTaskRequest { JiraTaskId = "TASK-999", UserId = 1, FeatureId = 1 };
         var writer = new FakeServerStreamWriter<CreateTaskResponse>();
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
@@ -140,7 +141,7 @@ public sealed class CreateTaskHandlerTests
             .Returns(ToAsyncEnumerable(projects));
 
         var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
-        var request = new CreateTaskRequest { JiraTaskId = "TASK-111", UserId = 1 };
+        var request = new CreateTaskRequest { JiraTaskId = "TASK-111", UserId = 1, FeatureId = 1 };
         var writer = new FakeServerStreamWriter<CreateTaskResponse>();
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
@@ -164,7 +165,7 @@ public sealed class CreateTaskHandlerTests
             .Returns(ToAsyncEnumerable(Array.Empty<ProjectDto>()));
 
         var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
-        var request = new CreateTaskRequest { JiraTaskId = "TASK-222", UserId = 1 };
+        var request = new CreateTaskRequest { JiraTaskId = "TASK-222", UserId = 1, FeatureId = 1 };
         var writer = new FakeServerStreamWriter<CreateTaskResponse>();
         var ctx = Substitute.For<ServerCallContext>();
         ctx.CancellationToken.Returns(CancellationToken.None);
@@ -173,6 +174,24 @@ public sealed class CreateTaskHandlerTests
 
         writer.Written.Should().HaveCount(1);
         writer.Written[0].Task.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task Create_WhenFeatureIdIsZero_ThrowsInvalidArgument()
+    {
+        var db = CreateDb();
+        var mrsProvider = Substitute.For<IMrsProvider>();
+        var projectsProvider = Substitute.For<IProjectsProvider>();
+
+        var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
+        var request = new CreateTaskRequest { JiraTaskId = "TASK-000", UserId = 1, FeatureId = 0 };
+        var writer = new FakeServerStreamWriter<CreateTaskResponse>();
+        var ctx = Substitute.For<ServerCallContext>();
+        ctx.CancellationToken.Returns(CancellationToken.None);
+
+        var ex = await Assert.ThrowsAsync<RpcException>(() => handler.Create(request, writer, ctx));
+        ex.StatusCode.Should().Be(StatusCode.InvalidArgument);
+        ex.Status.Detail.Should().Contain("feature_id");
     }
 
     private static TasksDbContext CreateDb() =>
