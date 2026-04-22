@@ -6,10 +6,12 @@
   <Project Path="OneMoreTaskTracker.Tasks/OneMoreTaskTracker.Tasks.csproj" Type="C#" />
   <Project Path="OneMoreTaskTracker.Api/OneMoreTaskTracker.Api.csproj" Type="C#" />
   <Project Path="OneMoreTaskTracker.Users/OneMoreTaskTracker.Users.csproj" Type="C#" />
+  <Project Path="OneMoreTaskTracker.Features/OneMoreTaskTracker.Features.csproj" Type="C#" />
   <Folder Name="/tests/">
     <Project Path="tests/OneMoreTaskTracker.Tasks.Tests/OneMoreTaskTracker.Tasks.Tests.csproj" Type="C#" />
     <Project Path="tests/OneMoreTaskTracker.Users.Tests/OneMoreTaskTracker.Users.Tests.csproj" Type="C#" />
     <Project Path="tests/OneMoreTaskTracker.GitLab.Proxy.Tests/OneMoreTaskTracker.GitLab.Proxy.Tests.csproj" Type="C#" />
     <Project Path="tests/OneMoreTaskTracker.Api.Tests/OneMoreTaskTracker.Api.Tests.csproj" Type="C#" />
+    <Project Path="tests/OneMoreTaskTracker.Features.Tests/OneMoreTaskTracker.Features.Tests.csproj" Type="C#" />
   </Folder>
 </Solution>
