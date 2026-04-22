@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchTaskDetail } from '../api/tasksApi';
 import type { TaskDetail } from '../types/task';
+import { useRefetchOnFocus } from './useRefetchOnFocus';
 
 interface UseTaskDetailResult {
   task: TaskDetail | null;
@@ -39,6 +40,8 @@ export function useTaskDetail(jiraId: string): UseTaskDetailResult {
   }, [jiraId, tick]);
 
   const refetch = () => setTick((n) => n + 1);
+
+  useRefetchOnFocus(error != null, refetch, loading);
 
   return { task, loading, error, refetch };
 }

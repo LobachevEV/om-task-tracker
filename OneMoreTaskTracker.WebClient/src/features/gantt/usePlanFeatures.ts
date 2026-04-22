@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as planApi from '../../shared/api/planApi';
 import type { FeatureScope, FeatureState, FeatureSummary } from '../../shared/types/feature';
+import { useRefetchOnFocus } from '../../shared/hooks/useRefetchOnFocus';
 
 export interface UsePlanFeaturesParams {
   scope?: FeatureScope;
@@ -85,6 +86,8 @@ export function usePlanFeatures(params: UsePlanFeaturesParams): UsePlanFeaturesR
       cancelled = true;
     };
   }, [key, scope, state, fetcher, refetchToken]);
+
+  useRefetchOnFocus(error != null, refetch, loading);
 
   return { data, loading, error, refetch };
 }
