@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useReducer } from 'react';
 import * as teamApi from '../../shared/api/teamApi';
 import type { TeamRosterMember } from '../../shared/api/teamApi';
 import { useRefetchOnFocus } from '../../shared/hooks/useRefetchOnFocus';
@@ -31,42 +31,79 @@ export function __resetTeamRosterCache(): void {
   rosterStore.inflight = null;
 }
 
+/**
+ * Discriminated async state: invalid combinations (e.g. loading + error)
+ * are unrepresentable. `fetchId` increments on every refetch so the
+ * effect can re-run without a separate token useState.
+ */
+type RosterState =
+  | { status: 'loading'; data: TeamRosterMember[] | null; fetchId: number }
+  | { status: 'success'; data: TeamRosterMember[]; fetchId: number }
+  | { status: 'error'; data: TeamRosterMember[] | null; error: Error; fetchId: number };
+
+type RosterAction =
+  | { type: 'fetch.start' }
+  | { type: 'fetch.success'; data: TeamRosterMember[] }
+  | { type: 'fetch.error'; error: Error };
+
+function rosterReducer(state: RosterState, action: RosterAction): RosterState {
+  switch (action.type) {
+    case 'fetch.start':
+      return { status: 'loading', data: state.data, fetchId: state.fetchId + 1 };
+    case 'fetch.success':
+      return { status: 'success', data: action.data, fetchId: state.fetchId };
+    case 'fetch.error':
+      return {
+        status: 'error',
+        data: state.data,
+        error: action.error,
+        fetchId: state.fetchId,
+      };
+  }
+}
+
+function initialState(): RosterState {
+  return rosterStore.data
+    ? { status: 'success', data: rosterStore.data, fetchId: 0 }
+    : { status: 'loading', data: null, fetchId: 0 };
+}
+
 export function useTeamRoster(options: UseTeamRosterOptions = {}): UseTeamRosterResult {
   const { fetcher = teamApi.getRoster } = options;
-  const [data, setData] = useState<TeamRosterMember[] | null>(() => rosterStore.data);
-  const [loading, setLoading] = useState<boolean>(() => rosterStore.data == null);
-  const [error, setError] = useState<Error | null>(null);
-  const [refetchToken, setRefetchToken] = useState(0);
+  const [state, dispatch] = useReducer(rosterReducer, undefined, initialState);
 
   const refetch = useCallback(() => {
     rosterStore.data = null;
     rosterStore.inflight = null;
-    setRefetchToken((n) => n + 1);
+    dispatch({ type: 'fetch.start' });
   }, []);
 
   useEffect(() => {
-    if (rosterStore.data) {
-      setData(rosterStore.data);
-      setLoading(false);
-      setError(null);
+    // Cache hit — local state already initialised from the store, nothing to do.
+    if (rosterStore.data && state.status === 'success' && state.data === rosterStore.data) {
       return;
     }
+    // Cache hit after a remount where local state is out of date.
+    if (rosterStore.data) {
+      dispatch({ type: 'fetch.success', data: rosterStore.data });
+      return;
+    }
+
     let cancelled = false;
-    setLoading(true);
-    setError(null);
     const promise = rosterStore.inflight ?? fetcher();
     rosterStore.inflight = promise;
     promise
       .then((rows) => {
         if (cancelled) return;
         rosterStore.data = rows;
-        setData(rows);
-        setLoading(false);
+        dispatch({ type: 'fetch.success', data: rows });
       })
       .catch((err: unknown) => {
         if (cancelled) return;
-        setError(err instanceof Error ? err : new Error(String(err)));
-        setLoading(false);
+        dispatch({
+          type: 'fetch.error',
+          error: err instanceof Error ? err : new Error(String(err)),
+        });
       })
       .finally(() => {
         if (rosterStore.inflight === promise) rosterStore.inflight = null;
@@ -74,11 +111,19 @@ export function useTeamRoster(options: UseTeamRosterOptions = {}): UseTeamRoster
     return () => {
       cancelled = true;
     };
-  }, [fetcher, refetchToken]);
+    // `state.status`/`state.data` are read for the cache-hit short circuit only;
+    // the effect re-runs when fetchId changes (refetch) or fetcher swaps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetcher, state.fetchId]);
 
   // Auto-recover from a stale error banner when the tab regains focus —
   // covers "services were down at page load, now they're back."
-  useRefetchOnFocus(error != null, refetch, loading);
+  useRefetchOnFocus(state.status === 'error', refetch, state.status === 'loading');
 
-  return { data, loading, error, refetch };
+  return {
+    data: state.data,
+    loading: state.status === 'loading',
+    error: state.status === 'error' ? state.error : null,
+    refetch,
+  };
 }
