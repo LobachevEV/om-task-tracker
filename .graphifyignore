@@ -24,3 +24,21 @@ node_modules/
 *.g.cs
 *.AssemblyInfo.cs
 *.GlobalUsings.g.cs
+
+# Frontend build / test output (WebClient)
+storybook-static/
+coverage/
+dist/
+build/
+playwright-report/
+test-results/
+.next/
+.turbo/
+.cache/
+
+# Lock files and package manifests that graphify's defaults may still index
+# (dotnet restore artifacts aren't caught by node defaults)
+*.lock.json
+
+# Transient graphify support artifacts (never want these in the corpus)
+graphify-out/cache/
