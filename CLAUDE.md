@@ -17,6 +17,7 @@ A distributed system for managing GitLab merge requests and tasks.
 |-----------------------------------|----------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
 | `OneMoreTaskTracker.Users`        | Identity, auth, team membership              | `users` schema; user records; role taxonomy (`Manager`, `FrontendDeveloper`, `BackendDeveloper`, `Qa`)                                   |
 | `OneMoreTaskTracker.Tasks`        | Task lifecycle + assignee aggregates         | `tasks` schema; state machine (`NOT_STARTED → IN_DEV → MR_TO_RELEASE → IN_TEST → MR_TO_MASTER → COMPLETED`); per-assignee task summaries |
+| `OneMoreTaskTracker.Features`     | Feature identity + lifecycle + planning dates | `features` schema; feature records; feature-state taxonomy (`CsApproving → Development → Testing → EthalonTesting → LiveRelease`)       |
 | `OneMoreTaskTracker.GitLab.Proxy` | Anti-corruption layer around GitLab REST API | outbound GitLab API translation; no persistent state                                                                                     |
 | `OneMoreTaskTracker.Api`          | REST gateway / BFF                           | JWT issuance + validation; cross-service composition; upstream-error → HTTP mapping (`GrpcExceptionMiddleware`)                          |
 | `OneMoreTaskTracker.WebClient`    | React 19 SPA                                 | client-facing DTOs; no direct knowledge of sibling-service contracts                                                                     |
@@ -40,6 +41,7 @@ A distributed system for managing GitLab merge requests and tasks.
 
 ```
 OneMoreTaskTracker.Api/              # REST API gateway — JWT auth, controllers, middleware → gRPC services
+OneMoreTaskTracker.Features/         # Feature planning gRPC service + PostgreSQL (features schema, port 5110)
 OneMoreTaskTracker.GitLab.Proxy/     # gRPC proxy service → GitLab REST API (port 5176)
 OneMoreTaskTracker.Tasks/            # Task management gRPC service + PostgreSQL (port 5102)
 OneMoreTaskTracker.Users/            # User management gRPC service + PostgreSQL (auth, roles)
@@ -63,6 +65,7 @@ dotnet build
 
 # Run individual services
 dotnet run --project OneMoreTaskTracker.Api
+dotnet run --project OneMoreTaskTracker.Features
 dotnet run --project OneMoreTaskTracker.GitLab.Proxy
 dotnet run --project OneMoreTaskTracker.Tasks
 dotnet run --project OneMoreTaskTracker.Users
@@ -82,13 +85,14 @@ npm test          # vitest
 
 ## Architecture
 
-- **OneMoreTaskTracker.Api** — REST API gateway. Handles JWT authentication, role-based authorization, and forwards requests to gRPC services. Contains `AuthController`, `TasksController`, and `GrpcExceptionMiddleware` that maps gRPC status codes to HTTP.
+- **OneMoreTaskTracker.Api** — REST API gateway. Handles JWT authentication, role-based authorization, and forwards requests to gRPC services. Contains `AuthController`, `TasksController`, `PlanController`, and `GrpcExceptionMiddleware` that maps gRPC status codes to HTTP.
 - **OneMoreTaskTracker.Users** — gRPC service for user management and authentication (login, register, role lookup). Owns `Users` PostgreSQL database. BCrypt work factor 12.
 - **OneMoreTaskTracker.Tasks** — gRPC service managing task lifecycle (`NOT_STARTED → IN_DEV → MR_TO_RELEASE → IN_TEST → MR_TO_MASTER → COMPLETED`), backed by `Tasks` PostgreSQL database. Uses event-based projects provider and MRs provider that call GitLab Proxy.
+- **OneMoreTaskTracker.Features** — gRPC service owning the feature aggregate and its lifecycle (`CsApproving → Development → Testing → EthalonTesting → LiveRelease`). `Task.FeatureId` is an opaque cross-context FK owned by `OneMoreTaskTracker.Tasks`; composition of "a feature plus its tasks plus its mini-team" is done by `OneMoreTaskTracker.Api.Controllers.PlanController`.
 - **OneMoreTaskTracker.GitLab.Proxy** — gRPC proxy that translates gRPC calls into GitLab REST API requests; streams results back with `IAsyncEnumerable<T>`.
 - **OneMoreTaskTracker.WebClient** — React 19 SPA. Auth context with JWT stored client-side, `ProtectedRoute`, error boundary, Zod schema validation on API responses.
 
-Request flow: Browser → `OneMoreTaskTracker.Api` (REST, JWT) → gRPC → (`Users` | `Tasks` → `GitLab.Proxy` → GitLab).
+Request flow: Browser → `OneMoreTaskTracker.Api` (REST, JWT) → gRPC → (`Users` | `Tasks` | `Features` → `GitLab.Proxy` → GitLab).
 
 ## Key Configuration
 
