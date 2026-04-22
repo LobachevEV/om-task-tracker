@@ -1,6 +1,8 @@
 using FluentAssertions;
 using Grpc.Core;
+using Microsoft.EntityFrameworkCore;
 using OneMoreTaskTracker.Features.Features.Create;
+using OneMoreTaskTracker.Features.Features.Data;
 using OneMoreTaskTracker.Features.Features.Get;
 using OneMoreTaskTracker.Features.Features.List;
 using OneMoreTaskTracker.Features.Features.Update;
@@ -12,58 +14,60 @@ using Xunit;
 
 namespace OneMoreTaskTracker.Features.Tests;
 
-// Locks in that each of the four feature handlers is wired to its generated
-// gRPC base class and that the stubbed RPC returns Unimplemented. Handlers are
-// constructed directly (no WebApplicationFactory) because the Features service's
-// startup path calls Database.Migrate() against Postgres, which would force a
-// live DB dependency into an otherwise hermetic contract test. Specs 03/04 will
-// replace the Unimplemented throws with real bodies, at which point these
-// assertions will flip to NotImplementedException on the test side and should
-// be updated accordingly.
+// Originally locked in that each of the four feature handlers returned Unimplemented
+// (spec 02). Specs 03/04 replaced the Unimplemented throws with real bodies, so these
+// tests now assert the minimal observable contract that the handlers are wired to
+// their generated gRPC base classes by exercising a trivial error path.
 public sealed class HandlerRegistrationTests
 {
+    public HandlerRegistrationTests() => FeatureMappingConfig.Register();
+
+    private static FeaturesDbContext NewDb() => new(
+        new DbContextOptionsBuilder<FeaturesDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options);
+
     [Fact]
-    public async Task CreateFeatureHandler_Throws_Unimplemented()
+    public async Task CreateFeatureHandler_RejectsMissingTitle()
     {
-        var handler = new CreateFeatureHandler();
+        var handler = new CreateFeatureHandler(NewDb());
 
         var act = () => handler.Create(new CreateFeatureRequest(), TestServerCallContext.Create());
 
         var ex = await act.Should().ThrowAsync<RpcException>();
-        ex.Which.StatusCode.Should().Be(StatusCode.Unimplemented);
+        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
     }
 
     [Fact]
-    public async Task UpdateFeatureHandler_Throws_Unimplemented()
+    public async Task UpdateFeatureHandler_ReturnsNotFoundForUnknownId()
     {
-        var handler = new UpdateFeatureHandler();
+        var handler = new UpdateFeatureHandler(NewDb());
 
-        var act = () => handler.Update(new UpdateFeatureRequest(), TestServerCallContext.Create());
+        var act = () => handler.Update(new UpdateFeatureRequest { Id = 999, Title = "x" }, TestServerCallContext.Create());
 
         var ex = await act.Should().ThrowAsync<RpcException>();
-        ex.Which.StatusCode.Should().Be(StatusCode.Unimplemented);
+        ex.Which.StatusCode.Should().Be(StatusCode.NotFound);
     }
 
     [Fact]
-    public async Task ListFeaturesHandler_Throws_Unimplemented()
+    public async Task ListFeaturesHandler_ReturnsEmptyCollectionByDefault()
     {
-        var handler = new ListFeaturesHandler();
+        var handler = new ListFeaturesHandler(NewDb());
 
-        var act = () => handler.List(new ListFeaturesRequest(), TestServerCallContext.Create());
+        var response = await handler.List(new ListFeaturesRequest(), TestServerCallContext.Create());
 
-        var ex = await act.Should().ThrowAsync<RpcException>();
-        ex.Which.StatusCode.Should().Be(StatusCode.Unimplemented);
+        response.Features.Should().BeEmpty();
     }
 
     [Fact]
-    public async Task GetFeatureHandler_Throws_Unimplemented()
+    public async Task GetFeatureHandler_RejectsMissingId()
     {
-        var handler = new GetFeatureHandler();
+        var handler = new GetFeatureHandler(NewDb());
 
         var act = () => handler.Get(new GetFeatureRequest(), TestServerCallContext.Create());
 
         var ex = await act.Should().ThrowAsync<RpcException>();
-        ex.Which.StatusCode.Should().Be(StatusCode.Unimplemented);
+        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
     }
 }
 

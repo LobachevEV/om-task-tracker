@@ -13,6 +13,7 @@ builder.Configuration
     .AddEnvironmentVariables();
 
 builder.Services.AddGrpc();
+FeatureMappingConfig.Register();
 builder.Services.AddDbContextPool<FeaturesDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("FeaturesContext")));
 
