@@ -1,9 +1,41 @@
-import type { Preview } from '@storybook/react-vite';
+import { createElement, useEffect } from 'react';
+import { I18nextProvider } from 'react-i18next';
+import type { Decorator, Preview } from '@storybook/react-vite';
 
+import i18n from '../src/i18n/config';
 import '../src/index.css';
 import './fonts.css';
 
+const withI18n: Decorator = (Story, context) => {
+  const locale = (context.globals.locale as string | undefined) ?? 'ru';
+  useEffect(() => {
+    if (i18n.language !== locale) {
+      void i18n.changeLanguage(locale);
+    }
+  }, [locale]);
+  useEffect(() => {
+    document.documentElement.dataset.theme = 'dark';
+  }, []);
+  return createElement(I18nextProvider, { i18n }, createElement(Story));
+};
+
 const preview: Preview = {
+  decorators: [withI18n],
+  globalTypes: {
+    locale: {
+      description: 'i18n locale',
+      defaultValue: 'ru',
+      toolbar: {
+        title: 'Locale',
+        icon: 'globe',
+        items: [
+          { value: 'ru', title: 'Русский', right: '🇷🇺' },
+          { value: 'en', title: 'English', right: '🇬🇧' },
+        ],
+        dynamicTitle: true,
+      },
+    },
+  },
   parameters: {
     layout: 'centered',
     backgrounds: {
@@ -32,6 +64,7 @@ const preview: Preview = {
           'Primitives',
           ['Button', 'TextField', 'Card', 'Badge', 'Avatar', 'Kbd', 'StatusDot', 'IntegrationIcon', 'Dialog'],
           'Patterns',
+          'Plan',
         ],
       },
     },

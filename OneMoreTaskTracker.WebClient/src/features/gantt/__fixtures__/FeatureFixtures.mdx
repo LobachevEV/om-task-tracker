@@ -1,0 +1,56 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+import {
+  FIXTURE_TODAY,
+  OVERDUE_FEATURE,
+  SHIPPED_FEATURE,
+  SOLO_FEATURE,
+  MINI_TEAM_FEATURE,
+  UNSCHEDULED_FEATURE,
+  MINI_TEAM_FEATURE_DETAIL,
+} from './FeatureFixtures';
+
+<Meta title="Plan/Foundations/Fixtures" />
+
+# Plan fixtures
+
+All Gantt / Plan stories import from `FeatureFixtures.ts`. **Never** use `new Date()` or
+`Date.now()` in stories — time is deterministic here.
+
+`FIXTURE_TODAY = "{FIXTURE_TODAY}"` is the only reference point. Any "overdue" or
+"shipped" framing derives from this literal, not the real clock. If a story needs a
+variant not covered below, add it to the fixture file and import it — do **not**
+inline ids or dates at the story callsite.
+
+## `FeatureSummary` fixtures
+
+| Export | `id` | `state` | `plannedStart` | `plannedEnd` | `taskCount` |
+| --- | --- | --- | --- | --- | --- |
+| `OVERDUE_FEATURE` | {OVERDUE_FEATURE.id} | `{OVERDUE_FEATURE.state}` | `{OVERDUE_FEATURE.plannedStart}` | `{OVERDUE_FEATURE.plannedEnd}` | {OVERDUE_FEATURE.taskCount} |
+| `SHIPPED_FEATURE` | {SHIPPED_FEATURE.id} | `{SHIPPED_FEATURE.state}` | `{SHIPPED_FEATURE.plannedStart}` | `{SHIPPED_FEATURE.plannedEnd}` | {SHIPPED_FEATURE.taskCount} |
+| `SOLO_FEATURE` | {SOLO_FEATURE.id} | `{SOLO_FEATURE.state}` | `{SOLO_FEATURE.plannedStart}` | `{SOLO_FEATURE.plannedEnd}` | {SOLO_FEATURE.taskCount} |
+| `MINI_TEAM_FEATURE` | {MINI_TEAM_FEATURE.id} | `{MINI_TEAM_FEATURE.state}` | `{MINI_TEAM_FEATURE.plannedStart}` | `{MINI_TEAM_FEATURE.plannedEnd}` | {MINI_TEAM_FEATURE.taskCount} |
+| `UNSCHEDULED_FEATURE` | {UNSCHEDULED_FEATURE.id} | `{UNSCHEDULED_FEATURE.state}` | {UNSCHEDULED_FEATURE.plannedStart === null ? 'null' : UNSCHEDULED_FEATURE.plannedStart} | {UNSCHEDULED_FEATURE.plannedEnd === null ? 'null' : UNSCHEDULED_FEATURE.plannedEnd} | {UNSCHEDULED_FEATURE.taskCount} |
+
+`ALL_FEATURES` re-exports these in order: `OVERDUE, SHIPPED, SOLO, MINI_TEAM, UNSCHEDULED`.
+
+## `FeatureDetail` fixture
+
+`MINI_TEAM_FEATURE_DETAIL` hangs off `MINI_TEAM_FEATURE` and adds 5 `AttachedTask`
+rows distributed across `be`, `fe`, `qa`:
+
+| Task `id` | `jiraId` | `state` | `userId` |
+| --- | --- | --- | --- |
+{MINI_TEAM_FEATURE_DETAIL.tasks.map((t) => (
+  `| ${t.id} | \`${t.jiraId}\` | \`${t.state}\` | ${t.userId} |`
+)).join('\n')}
+
+`lead` is `be` (`BackendDeveloper`). `miniTeam` is `[be, fe, qa]`.
+
+## State → token mapping
+
+See `features/gantt/stateConfig.ts` for the authoritative `FeatureState → --state-*`
+table. Tokens themselves are documented under
+[Foundations / Colors](./?path=/docs/foundations-colors--docs) and declared in
+`src/styles/tokens.css`. No new tokens are introduced by the Plan feature — every
+bar segment resolves to an existing `--state-*` value.
