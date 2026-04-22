@@ -146,9 +146,9 @@ describe('moveTask', () => {
 });
 
 describe('createTask', () => {
-  it('sends POST to /api/tasks with payload', async () => {
+  it('sends POST to /api/tasks with payload including featureId', async () => {
     setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'FrontendDeveloper' });
-    const payload: CreateTaskPayload = { jiraId: 'PROJ-NEW' };
+    const payload: CreateTaskPayload = { jiraId: 'PROJ-NEW', featureId: 7 };
     const responseData = { id: 10, jiraId: 'PROJ-NEW', state: 'NotStarted', userId: 1 };
     mockFetch.mockResolvedValueOnce(makeResponse(200, responseData));
 
@@ -162,11 +162,15 @@ describe('createTask', () => {
         body: JSON.stringify(payload),
       }),
     );
+    const callArgs = mockFetch.mock.calls[0];
+    const body = JSON.parse(callArgs[1].body as string) as Record<string, unknown>;
+    expect(body.featureId).toBe(7);
+    expect(body.jiraId).toBe('PROJ-NEW');
   });
 
   it('includes auth header in create request', async () => {
     setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'FrontendDeveloper' });
-    const payload: CreateTaskPayload = { jiraId: 'PROJ-NEW' };
+    const payload: CreateTaskPayload = { jiraId: 'PROJ-NEW', featureId: 7 };
     const responseData = { id: 10, jiraId: 'PROJ-NEW', state: 'NotStarted', userId: 1 };
     mockFetch.mockResolvedValueOnce(makeResponse(200, responseData));
 
@@ -182,7 +186,7 @@ describe('createTask', () => {
 
   it('returns parsed created task', async () => {
     setAuth({ token: 'test-token', userId: 1, email: 'user@example.com', role: 'FrontendDeveloper' });
-    const payload: CreateTaskPayload = { jiraId: 'PROJ-NEW' };
+    const payload: CreateTaskPayload = { jiraId: 'PROJ-NEW', featureId: 7 };
     const responseData = { id: 10, jiraId: 'PROJ-NEW', state: 'NotStarted', userId: 1 };
     mockFetch.mockResolvedValueOnce(makeResponse(200, responseData));
 
@@ -190,5 +194,11 @@ describe('createTask', () => {
 
     expect(result.id).toBe(10);
     expect(result.jiraId).toBe('PROJ-NEW');
+  });
+
+  it('rejects the old payload shape at compile time (spec 06 §310)', () => {
+    // @ts-expect-error CreateTaskPayload now requires featureId.
+    const legacy: CreateTaskPayload = { jiraId: 'PROJ-NEW' };
+    expect(legacy.jiraId).toBe('PROJ-NEW');
   });
 });

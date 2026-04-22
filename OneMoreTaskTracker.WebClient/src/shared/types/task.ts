@@ -39,4 +39,5 @@ export interface MoveTaskResult {
 
 export interface CreateTaskPayload {
   jiraId: string;
+  featureId: number;
 }

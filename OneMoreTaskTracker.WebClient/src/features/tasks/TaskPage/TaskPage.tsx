@@ -102,15 +102,22 @@ export function TaskPage() {
     },
   ]);
 
+  // TODO: spec 06 §306 — replace with feature selection (specs 11 / 12) or
+  // pick the current user's most recent lead feature via listFeatures({ scope: 'mine' }).
+  // Until that UI ships, we have no feature context here, so the Add button is
+  // disabled with a tooltip (see i18n key `tasks:new.disabledNoFeature`).
+  const inferredFeatureId: number | null = null;
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     const jiraId = newJiraId.trim();
     if (!jiraId) return;
+    if (inferredFeatureId === null) return;
 
     try {
       setError(null);
       setSubmitting(true);
-      const created = await createTask({ jiraId });
+      const created = await createTask({ jiraId, featureId: inferredFeatureId });
       setTasks((prev) => [created, ...prev]);
       setNewJiraId('');
     } catch (err) {
@@ -137,7 +144,12 @@ export function TaskPage() {
                 ref={newTaskInputRef}
               />
             </label>
-            <button className="primary-button" type="submit" disabled={!newJiraId.trim() || submitting}>
+            <button
+              className="primary-button"
+              type="submit"
+              disabled={!newJiraId.trim() || submitting || inferredFeatureId === null}
+              title={inferredFeatureId === null ? t('new.disabledNoFeature') : undefined}
+            >
               {t('new.submit')}
             </button>
           </form>
