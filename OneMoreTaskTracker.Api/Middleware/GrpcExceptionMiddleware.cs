@@ -20,6 +20,7 @@ public class GrpcExceptionMiddleware(RequestDelegate next, ILogger<GrpcException
             var (statusCode, message) = ex.StatusCode switch
             {
                 StatusCode.InvalidArgument => (400, "Invalid request data"),
+                StatusCode.FailedPrecondition => (422, "Precondition failed"),
                 StatusCode.NotFound => (404, "Resource not found"),
                 StatusCode.AlreadyExists => (409, "Resource already exists"),
                 StatusCode.Unauthenticated => (401, "Authentication required"),

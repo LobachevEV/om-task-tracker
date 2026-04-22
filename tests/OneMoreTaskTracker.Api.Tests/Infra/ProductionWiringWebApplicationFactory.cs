@@ -21,6 +21,7 @@ public sealed class ProductionWiringWebApplicationFactory : WebApplicationFactor
                 ["Jwt:ExpirationMinutes"] = TestJwtDefaults.ExpirationMinutes,
                 ["TasksService:Address"] = "http://localhost:5000",
                 ["UsersService:Address"] = "http://localhost:5000",
+                ["FeaturesService:Address"] = "http://localhost:5000",
                 ["Cors:AllowedOrigins:0"] = "http://localhost:3000"
             });
         });

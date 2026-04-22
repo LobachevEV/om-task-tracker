@@ -63,6 +63,56 @@
       <CompileOutputs>True</CompileOutputs>
       <Generator>MSBuild:Compile</Generator>
     </Protobuf>
+    <Protobuf Include="..\OneMoreTaskTracker.Tasks\Protos\AttachTaskCommand\attach_task_command_handler.proto">
+      <GrpcServices>Client</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>..\OneMoreTaskTracker.Tasks\Protos</ProtoRoot>
+      <CompileOutputs>True</CompileOutputs>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
+  </ItemGroup>
+  <ItemGroup>
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\feature_state.proto">
+      <GrpcServices>None</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
+      <CompileOutputs>True</CompileOutputs>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\CreateFeatureCommand\create_feature_command_handler.proto">
+      <GrpcServices>Client</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
+      <CompileOutputs>True</CompileOutputs>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\UpdateFeatureCommand\update_feature_command_handler.proto">
+      <GrpcServices>Client</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
+      <CompileOutputs>True</CompileOutputs>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\ListFeaturesQuery\list_features_query_handler.proto">
+      <GrpcServices>Client</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
+      <CompileOutputs>True</CompileOutputs>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\GetFeatureQuery\get_feature_query_handler.proto">
+      <GrpcServices>Client</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
+      <CompileOutputs>True</CompileOutputs>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
   </ItemGroup>
   <ItemGroup>
     <Protobuf Include="..\OneMoreTaskTracker.Users\Protos\user_service.proto">

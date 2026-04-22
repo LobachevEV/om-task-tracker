@@ -4,7 +4,12 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
+using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
+using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
+using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
 using OneMoreTaskTracker.Proto.Tasks;
+using OneMoreTaskTracker.Proto.Tasks.AttachTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.CreateTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.GetTaskQuery;
 using OneMoreTaskTracker.Proto.Tasks.ListTasksQuery;
@@ -29,6 +34,7 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
                 ["Jwt:ExpirationMinutes"] = TestJwtDefaults.ExpirationMinutes,
                 ["TasksService:Address"] = "http://localhost:5000",
                 ["UsersService:Address"] = "http://localhost:5000",
+                ["FeaturesService:Address"] = "http://localhost:5000",
                 ["Cors:AllowedOrigins:0"] = "http://localhost:3000"
             });
         });
@@ -40,7 +46,12 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
                 d.ServiceType == typeof(TaskCreator.TaskCreatorClient) ||
                 d.ServiceType == typeof(TaskLister.TaskListerClient) ||
                 d.ServiceType == typeof(TaskGetter.TaskGetterClient) ||
-                d.ServiceType == typeof(TaskMover.TaskMoverClient)
+                d.ServiceType == typeof(TaskMover.TaskMoverClient) ||
+                d.ServiceType == typeof(TaskFeatureLinker.TaskFeatureLinkerClient) ||
+                d.ServiceType == typeof(FeatureCreator.FeatureCreatorClient) ||
+                d.ServiceType == typeof(FeatureUpdater.FeatureUpdaterClient) ||
+                d.ServiceType == typeof(FeaturesLister.FeaturesListerClient) ||
+                d.ServiceType == typeof(FeatureGetter.FeatureGetterClient)
             ).ToList();
 
             foreach (var descriptor in descriptors)
@@ -51,6 +62,11 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
             services.AddSingleton(Substitute.For<TaskLister.TaskListerClient>());
             services.AddSingleton(Substitute.For<TaskGetter.TaskGetterClient>());
             services.AddSingleton(Substitute.For<TaskMover.TaskMoverClient>());
+            services.AddSingleton(Substitute.For<TaskFeatureLinker.TaskFeatureLinkerClient>());
+            services.AddSingleton(Substitute.For<FeatureCreator.FeatureCreatorClient>());
+            services.AddSingleton(Substitute.For<FeatureUpdater.FeatureUpdaterClient>());
+            services.AddSingleton(Substitute.For<FeaturesLister.FeaturesListerClient>());
+            services.AddSingleton(Substitute.For<FeatureGetter.FeatureGetterClient>());
         });
     }
 }

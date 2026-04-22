@@ -3,7 +3,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using OneMoreTaskTracker.Api.Auth;
 using OneMoreTaskTracker.Api.Middleware;
+using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
+using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
+using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
+using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
 using OneMoreTaskTracker.Proto.Tasks;
+using OneMoreTaskTracker.Proto.Tasks.AttachTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.CreateTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.GetTaskQuery;
 using OneMoreTaskTracker.Proto.Tasks.ListTasksQuery;
@@ -64,6 +69,9 @@ var tasksServiceAddress = builder.Configuration["TasksService:Address"]
 var usersServiceAddress = builder.Configuration["UsersService:Address"]
     ?? throw new InvalidOperationException("UsersService:Address is not configured");
 
+var featuresServiceAddress = builder.Configuration["FeaturesService:Address"]
+    ?? throw new InvalidOperationException("FeaturesService:Address is not configured");
+
 builder.Services
     .AddGrpcClient<TaskCreator.TaskCreatorClient>(o => o.Address = new Uri(tasksServiceAddress));
 
@@ -81,6 +89,21 @@ builder.Services
 
 builder.Services
     .AddGrpcClient<UserService.UserServiceClient>(o => o.Address = new Uri(usersServiceAddress));
+
+builder.Services
+    .AddGrpcClient<FeatureCreator.FeatureCreatorClient>(o => o.Address = new Uri(featuresServiceAddress));
+
+builder.Services
+    .AddGrpcClient<FeatureUpdater.FeatureUpdaterClient>(o => o.Address = new Uri(featuresServiceAddress));
+
+builder.Services
+    .AddGrpcClient<FeaturesLister.FeaturesListerClient>(o => o.Address = new Uri(featuresServiceAddress));
+
+builder.Services
+    .AddGrpcClient<FeatureGetter.FeatureGetterClient>(o => o.Address = new Uri(featuresServiceAddress));
+
+builder.Services
+    .AddGrpcClient<TaskFeatureLinker.TaskFeatureLinkerClient>(o => o.Address = new Uri(tasksServiceAddress));
 
 var app = builder.Build();
 

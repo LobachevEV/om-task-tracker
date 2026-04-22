@@ -1,5 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
+using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
+using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
+using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
+using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
 using OneMoreTaskTracker.Proto.Tasks;
+using OneMoreTaskTracker.Proto.Tasks.AttachTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.CreateTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.GetTaskQuery;
 using OneMoreTaskTracker.Proto.Tasks.ListTasksQuery;
@@ -28,5 +33,10 @@ public sealed class ProgramDiTests(ProductionWiringWebApplicationFactory factory
         provider.GetRequiredService<TaskMover.TaskMoverClient>();
         provider.GetRequiredService<TaskAggregateQuery.TaskAggregateQueryClient>();
         provider.GetRequiredService<UserService.UserServiceClient>();
+        provider.GetRequiredService<TaskFeatureLinker.TaskFeatureLinkerClient>();
+        provider.GetRequiredService<FeatureCreator.FeatureCreatorClient>();
+        provider.GetRequiredService<FeatureUpdater.FeatureUpdaterClient>();
+        provider.GetRequiredService<FeaturesLister.FeaturesListerClient>();
+        provider.GetRequiredService<FeatureGetter.FeatureGetterClient>();
     }
 }

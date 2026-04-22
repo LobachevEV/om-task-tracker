@@ -8,7 +8,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using NSubstitute;
 using OneMoreTaskTracker.Api.Auth;
+using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
+using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
+using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
+using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
 using OneMoreTaskTracker.Proto.Tasks;
+using OneMoreTaskTracker.Proto.Tasks.AttachTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.CreateTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.GetTaskQuery;
 using OneMoreTaskTracker.Proto.Tasks.TaskAggregateQuery;
@@ -37,6 +42,21 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
     public TaskAggregateQuery.TaskAggregateQueryClient MockTaskAggregateQuery { get; } =
         Substitute.For<TaskAggregateQuery.TaskAggregateQueryClient>();
 
+    public TaskFeatureLinker.TaskFeatureLinkerClient MockTaskFeatureLinker { get; } =
+        Substitute.For<TaskFeatureLinker.TaskFeatureLinkerClient>();
+
+    public FeatureCreator.FeatureCreatorClient MockFeatureCreator { get; } =
+        Substitute.For<FeatureCreator.FeatureCreatorClient>();
+
+    public FeatureUpdater.FeatureUpdaterClient MockFeatureUpdater { get; } =
+        Substitute.For<FeatureUpdater.FeatureUpdaterClient>();
+
+    public FeaturesLister.FeaturesListerClient MockFeaturesLister { get; } =
+        Substitute.For<FeaturesLister.FeaturesListerClient>();
+
+    public FeatureGetter.FeatureGetterClient MockFeatureGetter { get; } =
+        Substitute.For<FeatureGetter.FeatureGetterClient>();
+
     public string GenerateToken(int userId, string email, string role, int? managerId = null)
     {
         using var scope = Services.CreateScope();
@@ -56,6 +76,7 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
                 ["Jwt:ExpirationMinutes"] = TestJwtDefaults.ExpirationMinutes,
                 ["TasksService:Address"] = "http://localhost:5000",
                 ["UsersService:Address"] = "http://localhost:5000",
+                ["FeaturesService:Address"] = "http://localhost:5000",
                 ["Cors:AllowedOrigins:0"] = "http://localhost:3000"
             });
         });
@@ -68,7 +89,12 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
                 d.ServiceType == typeof(TaskLister.TaskListerClient) ||
                 d.ServiceType == typeof(TaskGetter.TaskGetterClient) ||
                 d.ServiceType == typeof(TaskMover.TaskMoverClient) ||
-                d.ServiceType == typeof(TaskAggregateQuery.TaskAggregateQueryClient)
+                d.ServiceType == typeof(TaskAggregateQuery.TaskAggregateQueryClient) ||
+                d.ServiceType == typeof(TaskFeatureLinker.TaskFeatureLinkerClient) ||
+                d.ServiceType == typeof(FeatureCreator.FeatureCreatorClient) ||
+                d.ServiceType == typeof(FeatureUpdater.FeatureUpdaterClient) ||
+                d.ServiceType == typeof(FeaturesLister.FeaturesListerClient) ||
+                d.ServiceType == typeof(FeatureGetter.FeatureGetterClient)
             ).ToList();
 
             foreach (var descriptor in descriptors)
@@ -80,6 +106,11 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
             services.AddSingleton(MockTaskGetter);
             services.AddSingleton(MockTaskMover);
             services.AddSingleton(MockTaskAggregateQuery);
+            services.AddSingleton(MockTaskFeatureLinker);
+            services.AddSingleton(MockFeatureCreator);
+            services.AddSingleton(MockFeatureUpdater);
+            services.AddSingleton(MockFeaturesLister);
+            services.AddSingleton(MockFeatureGetter);
 
             services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
             {
