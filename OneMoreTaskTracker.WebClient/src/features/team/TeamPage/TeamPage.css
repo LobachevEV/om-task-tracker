@@ -75,26 +75,6 @@
   color: var(--text-muted);
 }
 
-/* Error banner */
-.team-error-banner {
-  padding: 1rem;
-  background-color: color-mix(in oklch, var(--danger) 15%, var(--surface));
-  border: 1px solid color-mix(in oklch, var(--danger) 40%, transparent);
-  border-radius: 0.5rem;
-  color: var(--danger);
-  font-size: 0.9rem;
-}
-
-/* Read-only note banner */
-.team-readonly-note {
-  padding: 1rem;
-  background-color: color-mix(in oklch, var(--text-muted) 10%, var(--surface));
-  border: 1px solid color-mix(in oklch, var(--text-muted) 25%, transparent);
-  border-radius: 0.5rem;
-  color: var(--text);
-  font-size: 0.9rem;
-}
-
 /* Password toast */
 .team-toast {
   display: flex;
@@ -215,15 +195,3 @@
   }
 }
 
-/* Error state */
-.team-page__error {
-  padding: 2rem;
-  text-align: center;
-  background-color: var(--surface);
-  border-radius: 0.5rem;
-}
-
-.team-page__error p {
-  color: var(--danger);
-  margin: 0 0 1rem;
-}

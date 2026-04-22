@@ -196,15 +196,6 @@
   gap: 8px;
 }
 
-.feature-drawer__error-banner {
-  background: color-mix(in oklch, var(--danger) 20%, var(--surface));
-  border: 1px solid var(--danger);
-  color: var(--text);
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 13px;
-}
-
 .feature-drawer__skeleton {
   height: 14px;
   border-radius: 4px;

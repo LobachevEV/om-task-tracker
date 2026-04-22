@@ -8,7 +8,15 @@ import {
   type FormEvent,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Avatar, Badge, Button, TextField, type AvatarTone, type BadgeTone } from '../../shared/ds';
+import {
+  Avatar,
+  Badge,
+  Button,
+  Callout,
+  TextField,
+  type AvatarTone,
+  type BadgeTone,
+} from '../../shared/ds';
 import * as planApi from '../../shared/api/planApi';
 import type {
   AttachedTask,
@@ -239,12 +247,16 @@ export function FeatureDrawer({
               <span className="feature-drawer__sr-only">{t('loading')}</span>
             </>
           ) : error ? (
-            <div className="feature-drawer__error-banner" role="alert">
-              <div style={{ marginBottom: 8 }}>{t('failed')}</div>
-              <Button variant="secondary" size="sm" onClick={refetch}>
-                {t('retry')}
-              </Button>
-            </div>
+            <Callout
+              tone="danger"
+              action={
+                <Button variant="secondary" size="sm" onClick={refetch}>
+                  {t('retry')}
+                </Button>
+              }
+            >
+              {t('failed')}
+            </Callout>
           ) : data ? (
             <>
               <div className="feature-drawer__meta">
@@ -382,9 +394,7 @@ export function FeatureDrawer({
                             ))}
                         </select>
                         {inlineError ? (
-                          <div className="feature-drawer__error-banner" role="alert">
-                            {inlineError}
-                          </div>
+                          <Callout tone="danger">{inlineError}</Callout>
                         ) : null}
                         <div className="feature-drawer__actions">
                           <Button

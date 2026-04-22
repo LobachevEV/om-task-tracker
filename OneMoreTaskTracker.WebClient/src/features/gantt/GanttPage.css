@@ -22,24 +22,7 @@
   text-align: center;
 }
 
-.gantt-page__warning {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  gap: var(--space-3, 12px);
-  padding: 8px var(--space-6, 24px);
-  background: color-mix(in oklch, var(--warning) 18%, transparent);
-  color: var(--text);
-  font-size: 13px;
-  border-block-end: 1px solid var(--border-soft, var(--border-strong));
-}
-
-.gantt-page__warning-message {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.gantt-page__warning-retry {
+.gantt-page > .ds-callout--banner {
   flex: 0 0 auto;
 }
 

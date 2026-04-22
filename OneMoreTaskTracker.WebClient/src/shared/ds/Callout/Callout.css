@@ -1,0 +1,59 @@
+/* Inline callout for short, persistent status messages. Two layouts:
+   - banner: full-bleed row (page-level warning/announcement strip)
+   - block:  bordered card, stacked action row (inline error in a panel) */
+
+.ds-callout {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.ds-callout__message {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.ds-callout__action {
+  flex: 0 0 auto;
+}
+
+/* Layout: banner — flex row, no radius/border, border on block-end only. */
+.ds-callout--banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 12px);
+  padding: 8px var(--space-6, 24px);
+  border-block-end: 1px solid var(--border-soft, var(--border-strong));
+}
+
+/* Layout: block — bordered card, action row below message. */
+.ds-callout--block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 8px);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+.ds-callout--block .ds-callout__message { flex: 0 0 auto; }
+
+/* Tones — mirror Badge tone palette so a warning callout reads as the same
+   "state" as a warning badge, etc. */
+.ds-callout--warning {
+  background: color-mix(in oklch, var(--warning) 18%, transparent);
+  border-color: color-mix(in oklch, var(--warning) 35%, transparent);
+}
+
+.ds-callout--danger {
+  background: color-mix(in oklch, var(--danger) 20%, var(--surface));
+  border-color: var(--danger);
+}
+
+.ds-callout--info {
+  background: color-mix(in oklch, var(--text-muted) 10%, var(--surface));
+  border-color: color-mix(in oklch, var(--text-muted) 25%, transparent);
+}
+
+.ds-callout--neutral {
+  background: var(--surface);
+  border-color: var(--border);
+}

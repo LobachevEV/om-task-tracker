@@ -10,6 +10,7 @@ import type { DeveloperRole } from '../InviteRow';
 import { Roster } from '../Roster';
 import { StateBarLegend } from '../StateBarLegend';
 import { ConfirmDialog } from '../../../shared/components/ConfirmDialog';
+import { Button, Callout } from '../../../shared/ds';
 import { sortRoster } from '../sort';
 import './TeamPage.css';
 
@@ -133,12 +134,22 @@ export default function TeamPage() {
       <div className="app-shell">
         <main className="team-main">
           <div className="team-page">
-            <div className="team-page__error">
-              <p>{loadError}</p>
-              <button onClick={() => { void loadRoster(); }} className="secondary-button">
-                {t('retry')}
-              </button>
-            </div>
+            <Callout
+              tone="danger"
+              action={
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    void loadRoster();
+                  }}
+                >
+                  {t('retry')}
+                </Button>
+              }
+            >
+              {loadError}
+            </Callout>
           </div>
         </main>
       </div>
@@ -183,11 +194,7 @@ export default function TeamPage() {
           />
         )}
 
-        {inviteError && (
-          <div className="team-error-banner">
-            {inviteError}
-          </div>
-        )}
+        {inviteError && <Callout tone="danger">{inviteError}</Callout>}
 
         {passwordToast && (
           <div className="team-toast" role="status" aria-live="polite" aria-atomic="true">
@@ -227,11 +234,7 @@ export default function TeamPage() {
           </div>
         )}
 
-        {isDev && (
-          <div className="team-readonly-note">
-            {t('readonly')}
-          </div>
-        )}
+        {isDev && <Callout tone="info">{t('readonly')}</Callout>}
 
         <StateBarLegend />
 
@@ -255,11 +258,7 @@ export default function TeamPage() {
           />
         )}
 
-        {removeError && (
-          <div className="team-error-banner">
-            {removeError}
-          </div>
-        )}
+        {removeError && <Callout tone="danger">{removeError}</Callout>}
 
         <ConfirmDialog
           isOpen={!!confirmRemoveUser}

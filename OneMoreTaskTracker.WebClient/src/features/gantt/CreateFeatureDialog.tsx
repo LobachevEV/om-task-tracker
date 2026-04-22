@@ -1,6 +1,6 @@
 import { useCallback, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Dialog, TextField } from '../../shared/ds';
+import { Button, Callout, Dialog, TextField } from '../../shared/ds';
 import * as planApi from '../../shared/api/planApi';
 import type { CreateFeaturePayload, FeatureSummary } from '../../shared/types/feature';
 
@@ -139,11 +139,7 @@ export function CreateFeatureDialog({
           />
         </div>
 
-        {error ? (
-          <div role="alert" className="feature-drawer__error-banner">
-            {error}
-          </div>
-        ) : null}
+        {error ? <Callout tone="danger">{error}</Callout> : null}
 
         <div className="feature-drawer__actions">
           <Button variant="secondary" type="button" onClick={handleCancel} disabled={submitting}>

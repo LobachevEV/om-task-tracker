@@ -18,7 +18,7 @@ export class TeamPageObject {
     this.rosterTable = page.locator('.roster-table');
     this.rosterRows = this.rosterTable.locator('tbody tr');
     this.searchInput = page.locator('input.team-search-input');
-    this.loadError = page.locator('.team-page__error');
+    this.loadError = page.locator('.ds-callout--danger').first();
   }
 
   async goto(): Promise<void> {

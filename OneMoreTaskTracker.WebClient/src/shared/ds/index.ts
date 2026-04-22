@@ -18,6 +18,9 @@ export type { CardProps, CardHeaderProps } from './Card/Card';
 export { Badge } from './Badge/Badge';
 export type { BadgeProps, BadgeTone } from './Badge/Badge';
 
+export { Callout } from './Callout/Callout';
+export type { CalloutProps, CalloutTone, CalloutLayout } from './Callout/Callout';
+
 export { Avatar } from './Avatar/Avatar';
 export type { AvatarProps, AvatarSize, AvatarTone } from './Avatar/Avatar';
 

@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthContext';
-import { Spinner, Button } from '../../shared/ds';
+import { Spinner, Button, Callout } from '../../shared/ds';
 import { isUserRole, type UserRole } from '../../shared/auth/roles';
 import type { FeatureSummary, MiniTeamMember } from '../../shared/types/feature';
 import type { TeamRosterMember } from '../../shared/api/teamApi';
@@ -139,25 +139,24 @@ export function GanttPageInternal({
       />
 
       {rosterError ? (
-        <div
-          className="gantt-page__warning"
-          role="alert"
+        <Callout
+          tone="warning"
+          layout="banner"
           aria-label={t('row.team')}
+          action={
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={onRosterRetry}
+              loading={rosterLoading}
+            >
+              {t('retry')}
+            </Button>
+          }
         >
-          <span className="gantt-page__warning-message">
-            {t('row.team')}: {t('failed')}
-          </span>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            className="gantt-page__warning-retry"
-            onClick={onRosterRetry}
-            loading={rosterLoading}
-          >
-            {t('retry')}
-          </Button>
-        </div>
+          {t('row.team')}: {t('failed')}
+        </Callout>
       ) : null}
 
       {loading ? (

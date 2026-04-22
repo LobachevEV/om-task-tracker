@@ -1,6 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, TextField } from '../../shared/ds';
+import { Button, Callout, TextField } from '../../shared/ds';
 import type {
   FeatureState,
   FeatureSummary,
@@ -149,11 +149,7 @@ export function FeatureEditForm({
         />
       </div>
 
-      {errorMessage ? (
-        <div role="alert" className="feature-drawer__error-banner">
-          {errorMessage}
-        </div>
-      ) : null}
+      {errorMessage ? <Callout tone="danger">{errorMessage}</Callout> : null}
 
       <div className="feature-drawer__actions">
         <Button variant="secondary" onClick={onCancel} type="button">
