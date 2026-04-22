@@ -112,4 +112,47 @@ public sealed class GrpcExceptionMiddlewareTests
 
         loggingCalls.Should().Contain("logged");
     }
+
+    [Fact]
+    public async Task InvokeAsync_LogIncludesRequestPathMethodAndStatusDetail()
+    {
+        var loggedMessages = new List<string>();
+        var logger = Substitute.For<ILogger<GrpcExceptionMiddleware>>();
+
+        logger.IsEnabled(Arg.Any<LogLevel>()).Returns(true);
+        logger
+            .When(l => l.Log(
+                Arg.Any<LogLevel>(),
+                Arg.Any<EventId>(),
+                Arg.Any<object>(),
+                Arg.Any<Exception>(),
+                Arg.Any<Func<object, Exception?, string>>()))
+            .Do(ci =>
+            {
+                // Microsoft.Extensions.Logging passes a concrete
+                // `FormattedLogValues` struct as state; calling ToString() on
+                // it renders the formatted message, which is enough to assert
+                // the operator-visible content.
+                var state = ci.ArgAt<object>(2);
+                loggedMessages.Add(state?.ToString() ?? string.Empty);
+            });
+
+        var context = new DefaultHttpContext();
+        context.Request.Method = "GET";
+        context.Request.Path = "/api/plan/features";
+        context.Request.QueryString = new QueryString("?scope=all");
+        context.Response.Body = new MemoryStream();
+
+        var ex = new RpcException(new Status(StatusCode.Unavailable, "connection refused"));
+        RequestDelegate next = _ => throw ex;
+
+        var middleware = new GrpcExceptionMiddleware(next, logger);
+        await middleware.InvokeAsync(context);
+
+        loggedMessages.Should().ContainSingle(m =>
+            m.Contains("GET") &&
+            m.Contains("/api/plan/features") &&
+            m.Contains("Unavailable") &&
+            m.Contains("connection refused"));
+    }
 }

@@ -15,7 +15,18 @@ public class GrpcExceptionMiddleware(RequestDelegate next, ILogger<GrpcException
         }
         catch (RpcException ex)
         {
-            logger.LogError(ex, "gRPC call failed with status {StatusCode}", ex.StatusCode);
+            // Include the incoming request path + the gRPC status detail so an
+            // operator can tell WHICH upstream call failed. Without this, a
+            // sibling service being down (e.g. Features at :5110) surfaces as
+            // an opaque 502 on the frontend and a generic log line that says
+            // nothing about which endpoint was being served.
+            logger.LogError(
+                ex,
+                "gRPC call failed with status {StatusCode} while serving {Method} {Path} (detail: {Detail})",
+                ex.StatusCode,
+                context.Request.Method,
+                context.Request.Path,
+                ex.Status.Detail);
 
             var (statusCode, message) = ex.StatusCode switch
             {
