@@ -1,0 +1,253 @@
+import { useCallback, useMemo, useState, type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '../auth/AuthContext';
+import { Spinner, Button } from '../../shared/ds';
+import type { UserRole } from '../../shared/auth/auth';
+import type { FeatureSummary, MiniTeamMember } from '../../shared/types/feature';
+import type { TeamRosterMember } from '../../shared/api/teamApi';
+import { FeatureDrawer } from './FeatureDrawer';
+import { GanttEmpty } from './GanttEmpty';
+import { GanttFeatureRow } from './GanttFeatureRow';
+import { GanttTimeline } from './GanttTimeline';
+import { GanttToolbar } from './GanttToolbar';
+import { CreateFeatureDialog } from './CreateFeatureDialog';
+import { usePlanFeatures } from './usePlanFeatures';
+import { useTeamRoster } from './useTeamRoster';
+import { useGanttLayout, type GanttLane } from './useGanttLayout';
+import { useGanttPageState, type GanttPageState } from './useGanttPageState';
+import { ZOOM_DAYS } from './ganttMath';
+import './GanttPage.css';
+
+const PLACEHOLDER_ROLE: MiniTeamMember['role'] = 'FrontendDeveloper';
+
+function toMiniMember(row: TeamRosterMember): MiniTeamMember {
+  const role = (['Manager', 'FrontendDeveloper', 'BackendDeveloper', 'Qa'] as const).includes(
+    row.role as MiniTeamMember['role'],
+  )
+    ? (row.role as MiniTeamMember['role'])
+    : PLACEHOLDER_ROLE;
+  return {
+    userId: row.userId,
+    email: row.email,
+    displayName: row.displayName,
+    role,
+  };
+}
+
+function placeholderMember(userId: number): MiniTeamMember {
+  return {
+    userId,
+    email: `user-${userId}@placeholder`,
+    displayName: `#${userId}`,
+    role: PLACEHOLDER_ROLE,
+  };
+}
+
+export interface GanttPageInternalProps {
+  role: UserRole;
+  features: FeatureSummary[];
+  roster: MiniTeamMember[];
+  rosterLoading: boolean;
+  rosterError: Error | null;
+  loading: boolean;
+  error: Error | null;
+  onRetry: () => void;
+  state: GanttPageState;
+}
+
+interface UnscheduledSectionProps {
+  features: FeatureSummary[];
+  onOpen: (id: number) => void;
+}
+
+function UnscheduledSection({ features, onOpen }: UnscheduledSectionProps) {
+  const { t } = useTranslation('gantt');
+  if (features.length === 0) return null;
+  return (
+    <section className="gantt-page__unscheduled" aria-label={t('row.unscheduled')}>
+      <h3 className="gantt-page__section-title">{t('row.unscheduled')}</h3>
+      <ul className="gantt-page__unscheduled-list">
+        {features.map((feature) => (
+          <li key={feature.id}>
+            <button
+              type="button"
+              className="gantt-page__unscheduled-item"
+              onClick={() => onOpen(feature.id)}
+            >
+              <span>{feature.title}</span>
+              <span className="gantt-page__unscheduled-state">{t(`state.${feature.state}`)}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+export function GanttPageInternal({
+  role,
+  features,
+  roster,
+  rosterLoading: _rosterLoading,
+  rosterError,
+  loading,
+  error,
+  onRetry,
+  state,
+}: GanttPageInternalProps) {
+  const { t } = useTranslation('gantt');
+  const [createOpen, setCreateOpen] = useState(false);
+
+  const layout = useGanttLayout({ features, today: state.today, zoom: state.zoom });
+  const isManager = role === 'Manager';
+
+  const rosterById = useMemo(() => {
+    const map = new Map<number, MiniTeamMember>();
+    for (const m of roster) map.set(m.userId, m);
+    return map;
+  }, [roster]);
+
+  const resolveMember = useCallback(
+    (userId: number): MiniTeamMember => rosterById.get(userId) ?? placeholderMember(userId),
+    [rosterById],
+  );
+
+  const miniTeamFor = useCallback(
+    (_feature: FeatureSummary, lead: MiniTeamMember): MiniTeamMember[] => {
+      // Task-assignee resolution requires task.userId which is only available on FeatureDetail
+      // (lazy). For the summary view we show the lead as the sole known member; mini-team fills
+      // in once the drawer/lazy fetch lands (degradation documented in DESIGN_NOTES).
+      return [lead];
+    },
+    [],
+  );
+
+  const handleCreated = useCallback(
+    (id: number) => {
+      setCreateOpen(false);
+      state.openFeature(id);
+      onRetry();
+    },
+    [state, onRetry],
+  );
+
+  const hasAnyFeatures = layout.lanes.length + layout.unscheduled.length > 0;
+
+  const pageStyle: CSSProperties = {
+    ['--day-count' as string]: String(ZOOM_DAYS[state.zoom]),
+  };
+
+  return (
+    <main className="gantt-page" style={pageStyle}>
+      <GanttToolbar
+        role={role}
+        zoom={state.zoom}
+        scope={state.scope}
+        stateFilter={state.stateFilter}
+        onZoomChange={state.setZoom}
+        onScopeChange={state.setScope}
+        onStateFilterChange={state.setStateFilter}
+        onNewFeature={isManager ? () => setCreateOpen(true) : undefined}
+      />
+
+      {rosterError ? (
+        <div className="gantt-page__warning" role="alert">
+          {t('row.team')}: {t('failed')}
+        </div>
+      ) : null}
+
+      {loading ? (
+        <div className="gantt-page__centered">
+          <Spinner label={t('loading')} />
+        </div>
+      ) : error ? (
+        <div className="gantt-page__centered gantt-page__error" role="alert">
+          <p>{t('failed')}</p>
+          <Button type="button" variant="primary" onClick={onRetry}>
+            {t('retry')}
+          </Button>
+        </div>
+      ) : !hasAnyFeatures ? (
+        <GanttEmpty
+          canCreate={isManager}
+          onCreate={isManager ? () => setCreateOpen(true) : undefined}
+        />
+      ) : (
+        <section className="gantt-page__timeline-wrap">
+          <GanttTimeline window={layout.window} zoom={state.zoom} todayPercent={layout.todayPercent} />
+          <div className="gantt-page__lanes" role="list">
+            {layout.lanes.map((lane: GanttLane) => {
+              const lead = resolveMember(lane.feature.leadUserId);
+              const miniTeam = miniTeamFor(lane.feature, lead);
+              return (
+                <GanttFeatureRow
+                  key={lane.feature.id}
+                  feature={lane.feature}
+                  bar={lane.bar}
+                  window={layout.window}
+                  today={state.today}
+                  lead={lead}
+                  miniTeam={miniTeam}
+                  isTasksRevealed={state.revealedFeatureId === lane.feature.id}
+                  onRevealTasks={(next) =>
+                    state.revealTasks(next ? lane.feature.id : null)
+                  }
+                  onOpen={() => state.openFeature(lane.feature.id)}
+                />
+              );
+            })}
+          </div>
+          <UnscheduledSection
+            features={layout.unscheduled}
+            onOpen={state.openFeature}
+          />
+        </section>
+      )}
+
+      <FeatureDrawer
+        featureId={state.selectedFeatureId}
+        onClose={state.closeFeature}
+        canEdit={isManager}
+      />
+
+      {isManager ? (
+        <CreateFeatureDialog
+          open={createOpen}
+          onClose={() => setCreateOpen(false)}
+          onCreated={(feature) => handleCreated(feature.id)}
+        />
+      ) : null}
+    </main>
+  );
+}
+
+export function GanttPage() {
+  const { user } = useAuth();
+  if (!user) return null;
+  const role = user.role;
+  const state = useGanttPageState(role);
+  const features = usePlanFeatures({
+    scope: state.scope,
+    state: state.stateFilter === 'all' ? undefined : state.stateFilter,
+  });
+  const roster = useTeamRoster();
+
+  const rosterMembers = useMemo<MiniTeamMember[]>(
+    () => (roster.data ?? []).map(toMiniMember),
+    [roster.data],
+  );
+
+  return (
+    <GanttPageInternal
+      role={role}
+      features={features.data ?? []}
+      roster={rosterMembers}
+      rosterLoading={roster.loading}
+      rosterError={roster.error}
+      loading={features.loading}
+      error={features.error}
+      onRetry={features.refetch}
+      state={state}
+    />
+  );
+}

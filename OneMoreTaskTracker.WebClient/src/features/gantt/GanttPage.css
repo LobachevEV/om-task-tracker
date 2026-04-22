@@ -1,0 +1,91 @@
+.gantt-page {
+  --gantt-gutter-width: 280px;
+  --day-count: 14;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-block-size: calc(100vh - var(--app-header-height, 56px));
+  background: var(--bg);
+  color: var(--text);
+}
+
+.gantt-page__centered {
+  display: grid;
+  place-items: center;
+  padding: var(--space-10, 40px) var(--space-6, 24px);
+  gap: var(--space-3, 12px);
+}
+
+.gantt-page__error {
+  text-align: center;
+}
+
+.gantt-page__warning {
+  padding: 8px var(--space-6, 24px);
+  background: color-mix(in oklch, var(--warning, #f1a400) 18%, transparent);
+  color: var(--text);
+  font-size: 13px;
+  border-block-end: 1px solid var(--border-soft, var(--border-strong));
+}
+
+.gantt-page__timeline-wrap {
+  overflow-x: auto;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 8px);
+  padding-block-end: var(--space-6, 24px);
+}
+
+.gantt-page__lanes {
+  display: flex;
+  flex-direction: column;
+}
+
+.gantt-page__unscheduled {
+  padding: var(--space-4, 16px) var(--space-6, 24px);
+  border-block-start: 1px dashed var(--border-soft, var(--border-strong));
+}
+
+.gantt-page__section-title {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-2, 8px);
+}
+
+.gantt-page__unscheduled-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gantt-page__unscheduled-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font: inherit;
+  cursor: pointer;
+  text-align: start;
+}
+
+.gantt-page__unscheduled-item:hover,
+.gantt-page__unscheduled-item:focus-visible {
+  background: var(--surface-2, color-mix(in oklch, var(--surface) 85%, var(--text)));
+  border-color: var(--border-strong);
+  outline: none;
+}
+
+.gantt-page__unscheduled-state {
+  color: var(--text-muted);
+  font-size: 12px;
+}

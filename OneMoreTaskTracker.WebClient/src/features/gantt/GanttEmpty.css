@@ -1,0 +1,38 @@
+.gantt-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3, 12px);
+  padding: var(--space-10, 40px) var(--space-6, 24px);
+  text-align: center;
+  color: var(--text);
+}
+
+.gantt-empty__icon {
+  inline-size: 64px;
+  block-size: 64px;
+  stroke: var(--text-muted);
+  stroke-width: 1.5;
+  fill: none;
+  opacity: 0.72;
+}
+
+.gantt-empty__icon rect {
+  stroke: var(--text-muted);
+  fill: color-mix(in oklch, var(--text-muted) 16%, transparent);
+}
+
+.gantt-empty__title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.gantt-empty__body {
+  max-inline-size: 46ch;
+  color: var(--text-muted);
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}

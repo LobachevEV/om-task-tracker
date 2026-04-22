@@ -19,8 +19,14 @@ export function AppHeader() {
 
   if (!user) return null;
 
-  const isTasksActive = location.pathname === '/' || location.pathname.startsWith('/tasks');
-  const isTeamActive = location.pathname === '/team';
+  const isManager = user.role === 'Manager';
+  const path = location.pathname;
+
+  const isPlanActive = path === '/plan' || path.startsWith('/plan/');
+  // Tasks link covers both `/tasks` and the bare `/` index (for developers/QA
+  // whose Home redirects to `/tasks`, either path should highlight the Tasks tab).
+  const isTasksActive = path === '/tasks' || path.startsWith('/tasks/') || path === '/';
+  const isTeamActive = path === '/team';
 
   return (
     <header className="app-header">
@@ -32,11 +38,19 @@ export function AppHeader() {
           </div>
           <nav className="app-header__nav">
             <a
-              href="/"
-              className={`app-header__nav-item ${isTasksActive ? 'app-header__nav-item--active' : ''}`}
+              href="/plan"
+              className={`app-header__nav-item ${isPlanActive ? 'app-header__nav-item--active' : ''}`}
             >
-              {t('nav.tasks')}
+              {t('nav.plan')}
             </a>
+            {!isManager ? (
+              <a
+                href="/tasks"
+                className={`app-header__nav-item ${isTasksActive ? 'app-header__nav-item--active' : ''}`}
+              >
+                {t('nav.tasks')}
+              </a>
+            ) : null}
             <a
               href="/team"
               className={`app-header__nav-item ${isTeamActive ? 'app-header__nav-item--active' : ''}`}

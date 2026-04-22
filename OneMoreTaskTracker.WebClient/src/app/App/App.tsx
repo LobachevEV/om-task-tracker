@@ -6,6 +6,8 @@ import {RegisterPage} from '../../features/auth/RegisterPage';
 import {TaskDetailPage} from '../../features/tasks/TaskDetailPage';
 import {TaskPage} from '../../features/tasks/TaskPage';
 import TeamPage from '../../features/team/TeamPage';
+import {GanttPage} from '../../features/gantt/GanttPage';
+import {HomeRoute} from '../HomeRoute';
 import {ErrorBoundary} from '../../shared/components/ErrorBoundary';
 import {AppHeader} from '../../shared/components/AppHeader';
 
@@ -22,6 +24,14 @@ function App() {
               path="/"
               element={
                 <ProtectedRoute>
+                  <HomeRoute/>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tasks"
+              element={
+                <ProtectedRoute>
                   <TaskPage/>
                 </ProtectedRoute>
               }
@@ -31,6 +41,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <TaskDetailPage/>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/plan"
+              element={
+                <ProtectedRoute>
+                  <GanttPage/>
                 </ProtectedRoute>
               }
             />
