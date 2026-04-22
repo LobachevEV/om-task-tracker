@@ -19,4 +19,35 @@
       <Link>.dockerignore</Link>
     </Content>
   </ItemGroup>
+  <ItemGroup>
+    <Protobuf Include="Protos\feature_state.proto">
+      <GrpcServices>Server</GrpcServices>
+      <ProtoRoot>Protos</ProtoRoot>
+      <Access>Public</Access>
+    </Protobuf>
+    <Protobuf Include="Protos\CreateFeatureCommand\create_feature_command_handler.proto">
+      <GrpcServices>Server</GrpcServices>
+      <Access>Public</Access>
+      <ProtoRoot>Protos</ProtoRoot>
+      <AdditionalImportDirs>Protos</AdditionalImportDirs>
+    </Protobuf>
+    <Protobuf Include="Protos\UpdateFeatureCommand\update_feature_command_handler.proto">
+      <GrpcServices>Server</GrpcServices>
+      <Access>Public</Access>
+      <ProtoRoot>Protos</ProtoRoot>
+      <AdditionalImportDirs>Protos</AdditionalImportDirs>
+    </Protobuf>
+    <Protobuf Include="Protos\ListFeaturesQuery\list_features_query_handler.proto">
+      <GrpcServices>Server</GrpcServices>
+      <Access>Public</Access>
+      <ProtoRoot>Protos</ProtoRoot>
+      <AdditionalImportDirs>Protos</AdditionalImportDirs>
+    </Protobuf>
+    <Protobuf Include="Protos\GetFeatureQuery\get_feature_query_handler.proto">
+      <GrpcServices>Server</GrpcServices>
+      <Access>Public</Access>
+      <ProtoRoot>Protos</ProtoRoot>
+      <AdditionalImportDirs>Protos</AdditionalImportDirs>
+    </Protobuf>
+  </ItemGroup>
 </Project>

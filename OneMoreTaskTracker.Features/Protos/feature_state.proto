@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "OneMoreTaskTracker.Proto.Features";
+package mr_helper.features;
+
+// Ordinals mirror the C# FeatureState enum (CsApproving = 0) to match the
+// Tasks service's task_state.proto style (see task_state.proto, which also
+// forgoes the proto3 *_UNSPECIFIED = 0 convention to share ordinals with
+// the C# enum). Spec 02 § "FeatureState proto enum ordinals" explicitly
+// tolerates this and directs us to replicate task_state.proto.
+enum FeatureState {
+  CS_APPROVING = 0;
+  DEVELOPMENT = 1;
+  TESTING = 2;
+  ETHALON_TESTING = 3;
+  LIVE_RELEASE = 4;
+}

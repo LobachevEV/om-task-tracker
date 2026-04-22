@@ -1,5 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using OneMoreTaskTracker.Features.Features.Create;
 using OneMoreTaskTracker.Features.Features.Data;
+using OneMoreTaskTracker.Features.Features.Get;
+using OneMoreTaskTracker.Features.Features.List;
+using OneMoreTaskTracker.Features.Features.Update;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,4 +27,11 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
     app.MapGrpcReflectionService();
 
+app.MapGrpcService<CreateFeatureHandler>();
+app.MapGrpcService<UpdateFeatureHandler>();
+app.MapGrpcService<ListFeaturesHandler>();
+app.MapGrpcService<GetFeatureHandler>();
+
 app.Run();
+
+public partial class Program { }

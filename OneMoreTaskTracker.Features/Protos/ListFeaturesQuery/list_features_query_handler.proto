@@ -1,0 +1,32 @@
+syntax = "proto3";
+import "feature_state.proto";
+
+option csharp_namespace = "OneMoreTaskTracker.Proto.Features.ListFeaturesQuery";
+package mr_helper.features;
+
+service FeaturesLister {
+  rpc List (ListFeaturesRequest) returns (ListFeaturesResponse);
+}
+
+message ListFeaturesRequest {
+  int32  manager_user_id = 1;
+  string window_start    = 2;
+  string window_end      = 3;
+}
+
+message ListFeaturesResponse {
+  repeated FeatureDto features = 1;
+}
+
+message FeatureDto {
+  int32        id               = 1;
+  string       title            = 2;
+  string       description      = 3;
+  FeatureState state            = 4;
+  string       planned_start    = 5;
+  string       planned_end      = 6;
+  int32        lead_user_id     = 7;
+  int32        manager_user_id  = 8;
+  string       created_at       = 9;
+  string       updated_at       = 10;
+}
