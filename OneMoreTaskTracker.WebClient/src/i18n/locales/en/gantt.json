@@ -61,7 +61,11 @@
     "attachTaskLabel": "Attach task (Jira ID)",
     "attachTaskSubmit": "Attach",
     "detach": "Detach",
-    "detachConfirm": "Detach {{jiraId}} from this feature?"
+    "detachConfirm": "Detach {{jiraId}} from this feature?",
+    "detachTarget": "Move to which feature?",
+    "validation": {
+      "titleRequired": "Title is required"
+    }
   },
   "create": {
     "title": "Create feature",

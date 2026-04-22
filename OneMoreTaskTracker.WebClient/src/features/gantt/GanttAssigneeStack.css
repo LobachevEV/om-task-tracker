@@ -1,0 +1,47 @@
+/* Overlapping avatar stack used in Gantt rows. */
+
+.gantt-assignee-stack {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gantt-assignee-stack__avatars {
+  display: inline-flex;
+  align-items: center;
+}
+
+.gantt-assignee-stack__avatars > *:not(:first-child) {
+  margin-inline-start: -8px;
+}
+
+.gantt-assignee-stack__avatars .avatar {
+  border: 2px solid var(--surface);
+  box-sizing: content-box;
+}
+
+.gantt-assignee-stack__overflow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.gantt-assignee-stack__solo-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.gantt-assignee-stack__placeholder {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--border-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-family: var(--font-mono);
+}

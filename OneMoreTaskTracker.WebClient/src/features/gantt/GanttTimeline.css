@@ -1,0 +1,71 @@
+/* Gantt timeline header — day ticks, week-start rules, today hairline. */
+
+.gantt-timeline {
+  --gantt-header-height: 56px;
+  position: relative;
+  height: var(--gantt-header-height);
+  display: grid;
+  grid-template-columns: repeat(var(--day-count, 7), 1fr);
+  border-bottom: 1px solid var(--border-strong);
+  user-select: none;
+}
+
+.gantt-timeline__day {
+  padding: 8px 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 2px;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gantt-timeline__day:first-child {
+  border-left: none;
+}
+
+.gantt-timeline__day--week-start {
+  border-left-color: var(--border-strong);
+  color: var(--text);
+}
+
+.gantt-timeline__day-label {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.gantt-timeline__day-sub {
+  color: var(--text-dim);
+  font-size: 10px;
+}
+
+.gantt-timeline__today {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--accent);
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--accent) 40%, transparent);
+  pointer-events: none;
+  transform: translateX(-0.5px);
+}
+
+.gantt-timeline__today-label {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--accent);
+  background: color-mix(in oklch, var(--bg) 80%, transparent);
+  padding: 1px 4px;
+  border-radius: 3px;
+  pointer-events: none;
+  white-space: nowrap;
+}

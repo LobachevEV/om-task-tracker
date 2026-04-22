@@ -69,7 +69,11 @@
     "attachTaskLabel": "Прикрепить задачу (Jira ID)",
     "attachTaskSubmit": "Прикрепить",
     "detach": "Открепить",
-    "detachConfirm": "Открепить {{jiraId}} от этой фичи?"
+    "detachConfirm": "Открепить {{jiraId}} от этой фичи?",
+    "detachTarget": "В какую фичу перенести?",
+    "validation": {
+      "titleRequired": "Укажите название"
+    }
   },
   "create": {
     "title": "Создать фичу",

@@ -1,0 +1,201 @@
+/* Single Gantt row: sticky gutter + absolutely-positioned bar. */
+
+.gantt-row {
+  --gantt-gutter-width: 280px;
+  display: grid;
+  grid-template-columns: var(--gantt-gutter-width) 1fr;
+  align-items: stretch;
+  min-height: 48px;
+  border-bottom: 1px solid var(--border);
+}
+
+.gantt-row:hover .gantt-row__bar,
+.gantt-row:focus-within .gantt-row__bar {
+  box-shadow: 0 0 0 1px var(--border-strong);
+}
+
+.gantt-row__gutter {
+  position: sticky;
+  inset-inline-start: 0;
+  padding: 8px 12px;
+  background: var(--surface);
+  z-index: 2;
+  border-inline-end: 1px solid var(--border);
+  display: grid;
+  gap: 4px;
+  align-content: center;
+}
+
+.gantt-row__title {
+  all: unset;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gantt-row__title:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.gantt-row__chevron {
+  font-size: 10px;
+  color: var(--text-muted);
+  transition: transform 120ms ease;
+}
+
+.gantt-row__chevron[data-open='true'] {
+  transform: rotate(90deg);
+}
+
+.gantt-row__lead {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.gantt-row__lane {
+  position: relative;
+  height: 100%;
+  padding-block: 10px;
+  overflow: hidden;
+}
+
+.gantt-row__lane--unscheduled {
+  display: flex;
+  align-items: center;
+  padding-inline: 12px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-style: italic;
+}
+
+.gantt-row__bar {
+  position: absolute;
+  top: 14px;
+  left: calc(var(--bar-left, 0) * 1%);
+  width: calc(var(--bar-width, 0) * 1%);
+  height: 24px;
+  border-radius: 4px;
+  background: var(--bar-color, var(--state-in-dev));
+  color: var(--text);
+  padding-inline: 8px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border-inline-start: 2px solid var(--bar-color, var(--state-in-dev));
+  transition: box-shadow 150ms ease;
+  cursor: pointer;
+}
+
+.gantt-row__bar--narrow {
+  color: transparent;
+}
+
+.gantt-row__bar--overdue {
+  text-decoration: underline solid 1.5px var(--state-danger, var(--danger));
+}
+
+.gantt-row__bar-label-outside {
+  position: absolute;
+  top: 14px;
+  left: calc((var(--bar-left, 0) + var(--bar-width, 0)) * 1% + 6px);
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.gantt-row__clamp {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text);
+  pointer-events: none;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.gantt-row__clamp--left {
+  left: 2px;
+}
+
+.gantt-row__clamp--right {
+  right: 2px;
+}
+
+.gantt-row__tasks {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 40px;
+  display: flex;
+  gap: 2px;
+  padding-inline: calc(var(--bar-left, 0) * 1%) 0;
+}
+
+.gantt-row__task-bar {
+  height: 8px;
+  min-width: 18px;
+  border-radius: 3px;
+  cursor: pointer;
+  outline: none;
+  border: 1px solid transparent;
+}
+
+.gantt-row__task-bar:focus-visible {
+  border-color: var(--accent);
+}
+
+.gantt-row__task-bar--not-started  { background: var(--state-not-started); }
+.gantt-row__task-bar--in-dev       { background: var(--state-in-dev); }
+.gantt-row__task-bar--mr-to-release{ background: var(--state-mr-release); }
+.gantt-row__task-bar--in-test      { background: var(--state-in-test); }
+.gantt-row__task-bar--mr-to-master { background: var(--state-mr-master); }
+.gantt-row__task-bar--completed    { background: var(--state-completed); }
+
+.gantt-row__task-skeleton {
+  position: absolute;
+  left: calc(var(--bar-left, 0) * 1%);
+  width: calc(var(--bar-width, 0) * 1%);
+  top: 40px;
+  height: 8px;
+  border-radius: 3px;
+  background: color-mix(in oklch, var(--surface) 60%, var(--border));
+  opacity: 0.6;
+  animation: gantt-row-skeleton 1.2s linear infinite;
+}
+
+@keyframes gantt-row-skeleton {
+  0% { opacity: 0.35; }
+  50% { opacity: 0.75; }
+  100% { opacity: 0.35; }
+}
+
+.gantt-row__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
