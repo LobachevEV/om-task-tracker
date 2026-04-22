@@ -9,6 +9,7 @@ using OneMoreTaskTracker.Tasks.Tasks.Create;
 using OneMoreTaskTracker.Tasks.Tasks.Data;
 using OneMoreTaskTracker.Tasks.Tasks.Get;
 using OneMoreTaskTracker.Tasks.Tasks.AssigneeSummary;
+using OneMoreTaskTracker.Tasks.Tasks.Attach;
 using OneMoreTaskTracker.Tasks.Tasks.List;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -78,6 +79,7 @@ app.MapGrpcService<GetTaskHandler>();
 app.MapGrpcService<CreateTaskHandler>();
 app.MapGrpcService<ListTasksHandler>();
 app.MapGrpcService<GetAssigneeTaskSummaryHandler>();
+app.MapGrpcService<AttachTaskToFeatureHandler>();
 
 app.Run();
 return;

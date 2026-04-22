@@ -11,7 +11,7 @@ public sealed class TaskAddProjectTests
     [Fact]
     public void AddProject_WhenNotStarted_SetsStateInDev()
     {
-        var task = new TaskEntity { Id = 1, JiraId = "TASK-1", FeatureId = 1 };
+        var task = new TaskEntity { Id = 1, JiraId = "TASK-1" }.WithFeature(1);
 
         task.AddProject(externalId: 100, name: "my-project");
 
@@ -21,7 +21,7 @@ public sealed class TaskAddProjectTests
     [Fact]
     public void AddProject_WhenInDev_StateUnchanged()
     {
-        var task = new TaskEntity { Id = 1, JiraId = "TASK-1", FeatureId = 1 };
+        var task = new TaskEntity { Id = 1, JiraId = "TASK-1" }.WithFeature(1);
         task.AddProject(50, "initial-project");
 
         task.AddProject(externalId: 100, name: "my-project");
@@ -32,7 +32,7 @@ public sealed class TaskAddProjectTests
     [Fact]
     public void AddProject_WhenMrToRelease_StateUnchanged()
     {
-        var task = new TaskEntity { Id = 1, JiraId = "TASK-1", FeatureId = 1 };
+        var task = new TaskEntity { Id = 1, JiraId = "TASK-1" }.WithFeature(1);
         task.AddMr(new FakeMrInfo(Iid: 5, TargetBranch: "release"));
 
         task.AddProject(externalId: 100, name: "my-project");
@@ -43,7 +43,7 @@ public sealed class TaskAddProjectTests
     [Fact]
     public void AddProject_WhenMrToMaster_StateUnchanged()
     {
-        var task = new TaskEntity { Id = 1, JiraId = "TASK-1", FeatureId = 1 };
+        var task = new TaskEntity { Id = 1, JiraId = "TASK-1" }.WithFeature(1);
         task.AddMr(new FakeMrInfo(Iid: 5, TargetBranch: "master"));
 
         task.AddProject(externalId: 100, name: "my-project");
@@ -54,7 +54,7 @@ public sealed class TaskAddProjectTests
     [Fact]
     public void AddProject_AddsGitRepo_WhenNotPresent()
     {
-        var task = new TaskEntity { Id = 1, JiraId = "TASK-1", FeatureId = 1 };
+        var task = new TaskEntity { Id = 1, JiraId = "TASK-1" }.WithFeature(1);
 
         task.AddProject(externalId: 100, name: "my-project");
 
@@ -66,7 +66,7 @@ public sealed class TaskAddProjectTests
     [Fact]
     public void AddProject_DoesNotDuplicateGitRepo_WhenSameExternalId()
     {
-        var task = new TaskEntity { Id = 1, JiraId = "TASK-1", FeatureId = 1 };
+        var task = new TaskEntity { Id = 1, JiraId = "TASK-1" }.WithFeature(1);
 
         task.AddProject(externalId: 100, name: "project-1");
         task.AddProject(externalId: 100, name: "project-2");
@@ -77,7 +77,7 @@ public sealed class TaskAddProjectTests
     [Fact]
     public void AddProject_StoresNameCorrectly()
     {
-        var task = new TaskEntity { Id = 1, JiraId = "TASK-1", FeatureId = 1 };
+        var task = new TaskEntity { Id = 1, JiraId = "TASK-1" }.WithFeature(1);
         var projectName = "awesome-repo";
 
         task.AddProject(externalId: 200, name: projectName);

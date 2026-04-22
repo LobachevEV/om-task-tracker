@@ -25,8 +25,8 @@ public class CreateTaskHandler(
         {
             JiraId = request.JiraTaskId,
             UserId = request.UserId,
-            FeatureId = request.FeatureId
         };
+        task.AttachToFeature(request.FeatureId);
 
         await tasksDbContext.Tasks.AddAsync(task, context.CancellationToken);
         await tasksDbContext.SaveChangesAsync(context.CancellationToken);

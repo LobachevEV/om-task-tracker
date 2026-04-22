@@ -1,0 +1,27 @@
+syntax = "proto3";
+import "task_state.proto";
+
+option csharp_namespace = "OneMoreTaskTracker.Proto.Tasks.AttachTaskCommand";
+package mr_helper.tasks;
+
+service TaskFeatureLinker {
+  rpc Attach (AttachTaskToFeatureRequest) returns (AttachTaskToFeatureResponse);
+  rpc Detach (DetachTaskFromFeatureRequest) returns (AttachTaskToFeatureResponse);
+}
+
+message AttachTaskToFeatureRequest {
+  string jira_task_id = 1;
+  int32  feature_id   = 2;
+}
+
+message DetachTaskFromFeatureRequest {
+  string jira_task_id = 1;
+  int32  reassign_to_feature_id = 2;
+}
+
+message AttachTaskToFeatureResponse {
+  int32     task_id     = 1;
+  string    jira_task_id = 2;
+  int32     feature_id  = 3;
+  TaskState state       = 4;
+}

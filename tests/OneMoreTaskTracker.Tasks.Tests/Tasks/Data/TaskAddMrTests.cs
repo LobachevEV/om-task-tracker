@@ -11,7 +11,7 @@ public sealed class TaskAddMrTests
     [Fact]
     public void AddMr_WhenNotStartedAndTargetIsMaster_SetsStateMrToMaster()
     {
-        var task = new TaskEntity { Id = 1, JiraId = "TASK-1", FeatureId = 1 };
+        var task = new TaskEntity { Id = 1, JiraId = "TASK-1" }.WithFeature(1);
         var mr = new FakeMrInfo(Iid: 10, TargetBranch: "master");
 
         task.AddMr(mr);
@@ -22,7 +22,7 @@ public sealed class TaskAddMrTests
     [Fact]
     public void AddMr_WhenNotStartedAndTargetIsNotMaster_SetsStateMrToRelease()
     {
-        var task = new TaskEntity { Id = 1, JiraId = "TASK-1", FeatureId = 1 };
+        var task = new TaskEntity { Id = 1, JiraId = "TASK-1" }.WithFeature(1);
         var mr = new FakeMrInfo(Iid: 10, TargetBranch: "release");
 
         task.AddMr(mr);
@@ -33,7 +33,7 @@ public sealed class TaskAddMrTests
     [Fact]
     public void AddMr_WhenMrToMasterAndTargetIsNotMaster_SetsStateMrToRelease()
     {
-        var task = new TaskEntity { Id = 1, JiraId = "TASK-1", FeatureId = 1 };
+        var task = new TaskEntity { Id = 1, JiraId = "TASK-1" }.WithFeature(1);
         task.AddMr(new FakeMrInfo(Iid: 5, TargetBranch: "master"));
 
         var mr = new FakeMrInfo(Iid: 10, TargetBranch: "release");
@@ -46,7 +46,7 @@ public sealed class TaskAddMrTests
     [Fact]
     public void AddMr_WhenMrToRelease_StateUnchanged()
     {
-        var task = new TaskEntity { Id = 1, JiraId = "TASK-1", FeatureId = 1 };
+        var task = new TaskEntity { Id = 1, JiraId = "TASK-1" }.WithFeature(1);
         task.AddMr(new FakeMrInfo(Iid: 5, TargetBranch: "release"));
 
         var mr = new FakeMrInfo(Iid: 10, TargetBranch: "master");
@@ -59,7 +59,7 @@ public sealed class TaskAddMrTests
     [Fact]
     public void AddMr_WhenInDev_StateUnchanged()
     {
-        var task = new TaskEntity { Id = 1, JiraId = "TASK-1", FeatureId = 1 };
+        var task = new TaskEntity { Id = 1, JiraId = "TASK-1" }.WithFeature(1);
         task.AddProject(100, "some-project");
 
         var mr = new FakeMrInfo(Iid: 10, TargetBranch: "master");
@@ -72,7 +72,7 @@ public sealed class TaskAddMrTests
     [Fact]
     public void AddMr_WhenMrToMasterAndTargetIsMaster_StateUnchanged()
     {
-        var task = new TaskEntity { Id = 1, JiraId = "TASK-1", FeatureId = 1 };
+        var task = new TaskEntity { Id = 1, JiraId = "TASK-1" }.WithFeature(1);
         task.AddMr(new FakeMrInfo(Iid: 10, TargetBranch: "master"));
 
         var mr = new FakeMrInfo(Iid: 20, TargetBranch: "master");
@@ -85,7 +85,7 @@ public sealed class TaskAddMrTests
     [Fact]
     public void AddMr_DuplicateIid_IsIgnored()
     {
-        var task = new TaskEntity { Id = 1, JiraId = "TASK-1", FeatureId = 1 };
+        var task = new TaskEntity { Id = 1, JiraId = "TASK-1" }.WithFeature(1);
         var mr1 = new FakeMrInfo(Iid: 10, TargetBranch: "master");
         var mr2 = new FakeMrInfo(Iid: 10, TargetBranch: "release");
 
@@ -102,7 +102,7 @@ public sealed class TaskAddMrTests
     [Fact]
     public void AddMr_AddsGitRepo_WhenRepoNotPresent()
     {
-        var task = new TaskEntity { Id = 1, JiraId = "TASK-1", FeatureId = 1 };
+        var task = new TaskEntity { Id = 1, JiraId = "TASK-1" }.WithFeature(1);
         var mr = new FakeMrInfo(Iid: 10, ProjectId: 42, ProjectName: "my-repo");
 
         task.AddMr(mr);
@@ -115,7 +115,7 @@ public sealed class TaskAddMrTests
     [Fact]
     public void AddMr_DoesNotDuplicateGitRepo_WhenSameProjectId()
     {
-        var task = new TaskEntity { Id = 1, JiraId = "TASK-1", FeatureId = 1 };
+        var task = new TaskEntity { Id = 1, JiraId = "TASK-1" }.WithFeature(1);
         var mr1 = new FakeMrInfo(Iid: 10, ProjectId: 42, ProjectName: "repo-1");
         var mr2 = new FakeMrInfo(Iid: 20, ProjectId: 42, ProjectName: "repo-2");
 
@@ -129,7 +129,7 @@ public sealed class TaskAddMrTests
     [Fact]
     public void AddMr_StoresMrFields_Correctly()
     {
-        var task = new TaskEntity { Id = 1, JiraId = "TASK-1", FeatureId = 1 };
+        var task = new TaskEntity { Id = 1, JiraId = "TASK-1" }.WithFeature(1);
         var labels = new[] { "bug", "feature" };
         var mr = new FakeMrInfo(
             Iid: 99,

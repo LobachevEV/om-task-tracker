@@ -8,7 +8,7 @@ public class Task
     public int Id { get; init; }
     public required string JiraId { get; init; }
     public int UserId { get; init; }
-    public required int FeatureId { get; init; }
+    public int FeatureId { get; private set; }
     public int State { get; private set; } = (int)TaskState.NotStarted;
     public List<MergeRequest> MergeRequests { get; init; } = [];
     public List<GitRepo> GitRepos { get; init; } = [];
@@ -56,5 +56,12 @@ public class Task
     public void SetStateForTesting(int state)
     {
         State = state;
+    }
+
+    public void AttachToFeature(int featureId)
+    {
+        if (featureId <= 0)
+            throw new ArgumentOutOfRangeException(nameof(featureId));
+        FeatureId = featureId;
     }
 }

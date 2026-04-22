@@ -75,6 +75,13 @@
       <Generator>MSBuild:Compile</Generator>
       <AdditionalImportDirs>Protos/Clients/MergeRequests</AdditionalImportDirs>
     </Protobuf>
+    <Protobuf Include="Protos\AttachTaskCommand\attach_task_command_handler.proto">
+      <GrpcServices>Server</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>Protos</ProtoRoot>
+      <AdditionalImportDirs>Protos</AdditionalImportDirs>
+    </Protobuf>
     <Protobuf Include="Protos\CreateTaskCommand\create_task_command_handler.proto">
       <GrpcServices>Server</GrpcServices>
       <Access>Public</Access>
