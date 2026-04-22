@@ -6,12 +6,14 @@ import ruHeader from './locales/ru/header.json';
 import ruAuth from './locales/ru/auth.json';
 import ruTasks from './locales/ru/tasks.json';
 import ruTeam from './locales/ru/team.json';
+import ruGantt from './locales/ru/gantt.json';
 
 import enCommon from './locales/en/common.json';
 import enHeader from './locales/en/header.json';
 import enAuth from './locales/en/auth.json';
 import enTasks from './locales/en/tasks.json';
 import enTeam from './locales/en/team.json';
+import enGantt from './locales/en/gantt.json';
 
 export const SUPPORTED_LANGUAGES = ['ru', 'en'] as const;
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
@@ -33,7 +35,7 @@ void i18n.use(initReactI18next).init({
   fallbackLng: 'ru',
   supportedLngs: SUPPORTED_LANGUAGES,
   defaultNS: 'common',
-  ns: ['common', 'header', 'auth', 'tasks', 'team'],
+  ns: ['common', 'header', 'auth', 'tasks', 'team', 'gantt'],
   resources: {
     ru: {
       common: ruCommon,
@@ -41,6 +43,7 @@ void i18n.use(initReactI18next).init({
       auth: ruAuth,
       tasks: ruTasks,
       team: ruTeam,
+      gantt: ruGantt,
     },
     en: {
       common: enCommon,
@@ -48,6 +51,7 @@ void i18n.use(initReactI18next).init({
       auth: enAuth,
       tasks: enTasks,
       team: enTeam,
+      gantt: enGantt,
     },
   },
   interpolation: {

@@ -3,7 +3,8 @@
   "listTitle": "Список задач",
   "new": {
     "jiraLabel": "Jira Task ID",
-    "submit": "Добавить"
+    "submit": "Добавить",
+    "disabledNoFeature": "Сначала создайте фичу"
   },
   "filter": {
     "ariaLabel": "Фильтр по статусу",

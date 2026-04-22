@@ -3,7 +3,8 @@
   "listTitle": "Tasks",
   "new": {
     "jiraLabel": "Jira Task ID",
-    "submit": "Add"
+    "submit": "Add",
+    "disabledNoFeature": "Create a feature first"
   },
   "filter": {
     "ariaLabel": "Filter by status",

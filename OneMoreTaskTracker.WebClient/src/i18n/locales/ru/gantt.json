@@ -1,0 +1,96 @@
+{
+  "title": "План",
+  "subtitle": "Фичи в работе в окне релиза.",
+  "toolbar": {
+    "zoomLabel": "Масштаб",
+    "zoom": {
+      "week": "Неделя",
+      "twoWeeks": "2 недели",
+      "month": "Месяц"
+    },
+    "scopeLabel": "Область",
+    "scope": {
+      "all": "Все фичи",
+      "mine": "Мои",
+      "active": "Только активные"
+    },
+    "newFeature": "Новая фича",
+    "revealTasks": "Показать задачи",
+    "hideTasks": "Скрыть задачи"
+  },
+  "meta": {
+    "featuresCount_one": "{{count}} фича",
+    "featuresCount_few": "{{count}} фичи",
+    "featuresCount_many": "{{count}} фич",
+    "featuresCount_other": "{{count}} фич",
+    "tasksCount_one": "{{count}} задача",
+    "tasksCount_few": "{{count}} задачи",
+    "tasksCount_many": "{{count}} задач",
+    "tasksCount_other": "{{count}} задач",
+    "soloOwner": "Один",
+    "miniTeam": "Мини-команда из {{count}}"
+  },
+  "legend": {
+    "states": "Жизненный цикл",
+    "today": "Сегодня",
+    "hint": "Наведите на строку, чтобы увидеть задачи."
+  },
+  "row": {
+    "progress": "Сделано {{done}} из {{total}} задач",
+    "lead": "Лид",
+    "team": "Команда",
+    "tasks": "Задачи фичи",
+    "dueIn_one": "До срока {{count}} день",
+    "dueIn_few": "До срока {{count}} дня",
+    "dueIn_many": "До срока {{count}} дней",
+    "dueIn_other": "До срока {{count}} дней",
+    "dueOverdue_one": "Просрочено на {{count}} день",
+    "dueOverdue_few": "Просрочено на {{count}} дня",
+    "dueOverdue_many": "Просрочено на {{count}} дней",
+    "dueOverdue_other": "Просрочено на {{count}} дней",
+    "dueToday": "Срок сегодня",
+    "unscheduled": "Без сроков"
+  },
+  "drawer": {
+    "title": "Фича",
+    "close": "Закрыть",
+    "edit": "Изменить",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "fields": {
+      "title": "Название",
+      "description": "Описание",
+      "state": "Состояние",
+      "plannedStart": "Плановое начало",
+      "plannedEnd": "Плановое окончание",
+      "lead": "Лид"
+    },
+    "tasksHeading": "Задачи",
+    "attachTaskLabel": "Прикрепить задачу (Jira ID)",
+    "attachTaskSubmit": "Прикрепить",
+    "detach": "Открепить",
+    "detachConfirm": "Открепить {{jiraId}} от этой фичи?"
+  },
+  "create": {
+    "title": "Создать фичу",
+    "submit": "Создать",
+    "cancel": "Отмена",
+    "titlePlaceholder": "Что за фича?",
+    "leadLabel": "Лид",
+    "leadSelf": "Вы ({{email}})"
+  },
+  "empty": {
+    "title": "В работе ничего нет.",
+    "body": "Под текущий фильтр фичи не попали. Расширьте фильтр или добавьте фичу в план."
+  },
+  "loading": "Загрузка плана…",
+  "failed": "Не удалось загрузить план.",
+  "retry": "Повторить",
+  "state": {
+    "CsApproving": "CS согласование",
+    "Development": "Разработка",
+    "Testing": "Тестирование",
+    "EthalonTesting": "Тестирование на эталоне",
+    "LiveRelease": "Релиз в прод"
+  }
+}

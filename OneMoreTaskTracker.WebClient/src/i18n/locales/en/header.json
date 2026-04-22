@@ -1,6 +1,7 @@
 {
   "subtitle": "Browse and create tasks by Jira ID",
   "nav": {
+    "plan": "Plan",
     "tasks": "Tasks",
     "team": "Team"
   },

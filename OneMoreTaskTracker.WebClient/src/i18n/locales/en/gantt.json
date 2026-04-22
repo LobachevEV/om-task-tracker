@@ -1,0 +1,88 @@
+{
+  "title": "Plan",
+  "subtitle": "Features in flight across the release window.",
+  "toolbar": {
+    "zoomLabel": "Zoom",
+    "zoom": {
+      "week": "Week",
+      "twoWeeks": "2 weeks",
+      "month": "Month"
+    },
+    "scopeLabel": "Scope",
+    "scope": {
+      "all": "All features",
+      "mine": "Mine",
+      "active": "Active only"
+    },
+    "newFeature": "New feature",
+    "revealTasks": "Reveal task sub-bars",
+    "hideTasks": "Collapse to features"
+  },
+  "meta": {
+    "featuresCount_one": "{{count}} feature",
+    "featuresCount_other": "{{count}} features",
+    "tasksCount_one": "{{count}} task",
+    "tasksCount_other": "{{count}} tasks",
+    "soloOwner": "Solo",
+    "miniTeam": "Mini-team of {{count}}"
+  },
+  "legend": {
+    "states": "Lifecycle",
+    "today": "Today",
+    "hint": "Hover a lane to reveal task-level bars."
+  },
+  "row": {
+    "progress": "{{done}} of {{total}} tasks shipped",
+    "lead": "Lead",
+    "team": "Team",
+    "tasks": "Tasks on this feature",
+    "dueIn_one": "Due in {{count}} day",
+    "dueIn_other": "Due in {{count}} days",
+    "dueOverdue_one": "Overdue {{count}} day",
+    "dueOverdue_other": "Overdue {{count}} days",
+    "dueToday": "Due today",
+    "unscheduled": "Unscheduled"
+  },
+  "drawer": {
+    "title": "Feature",
+    "close": "Close",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "fields": {
+      "title": "Title",
+      "description": "Description",
+      "state": "State",
+      "plannedStart": "Planned start",
+      "plannedEnd": "Planned end",
+      "lead": "Lead"
+    },
+    "tasksHeading": "Tasks",
+    "attachTaskLabel": "Attach task (Jira ID)",
+    "attachTaskSubmit": "Attach",
+    "detach": "Detach",
+    "detachConfirm": "Detach {{jiraId}} from this feature?"
+  },
+  "create": {
+    "title": "Create feature",
+    "submit": "Create",
+    "cancel": "Cancel",
+    "titlePlaceholder": "What is this feature?",
+    "leadLabel": "Lead",
+    "leadSelf": "You ({{email}})"
+  },
+  "empty": {
+    "title": "Nothing in flight.",
+    "body": "No features match this scope. Widen the filter or add a feature to the plan."
+  },
+  "loading": "Loading plan…",
+  "failed": "Could not load the plan.",
+  "retry": "Try again",
+  "state": {
+    "CsApproving": "CS approving",
+    "Development": "Development",
+    "Testing": "Testing",
+    "EthalonTesting": "Ethalon testing",
+    "LiveRelease": "Live release"
+  }
+}
