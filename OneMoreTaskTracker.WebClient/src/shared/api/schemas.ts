@@ -83,11 +83,13 @@ export const stagePlanSchema = z.object({
 });
 
 /**
- * Detail stage plan. Same as `stagePlanSchema` but carries an optional
- * resolved `performer` mini-member (null when unassigned or stale).
+ * Detail stage plan. Same as `stagePlanSchema` but carries a resolved
+ * `performer` mini-member. The field is required on the wire but may be
+ * null either because `performerUserId` is null OR because the referenced
+ * user is no longer on the manager's roster ("stale performer").
  */
 export const detailStagePlanSchema = stagePlanSchema.extend({
-  performer: miniTeamMemberSchema.nullable().optional(),
+  performer: miniTeamMemberSchema.nullable(),
 });
 
 export const featureSummarySchema = z.object({

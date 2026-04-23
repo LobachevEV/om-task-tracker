@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import type { FeatureState } from '../../shared/types/feature';
+import type { FeatureState, MiniTeamMember } from '../../shared/types/feature';
 import { FEATURE_STATE_CSS } from './stateConfig';
 import { StagePerformerCombobox } from './StagePerformerCombobox';
 import type { StageRowDraft, StageRowValidation } from './useStagePlanForm';
@@ -17,6 +17,12 @@ export interface StagePlanRowProps {
   readOnly: boolean;
   onChangeDate: (which: 'plannedStart' | 'plannedEnd', value: string) => void;
   onChangePerformer: (userId: number | null) => void;
+  /**
+   * Server-resolved performer from FeatureDetail. Lets the combobox
+   * differentiate "unassigned" (performerUserId null) from "stale" (id set
+   * but performer null because user is no longer on the roster).
+   */
+  performer?: MiniTeamMember | null;
 }
 
 function pad2(n: number): string {
@@ -33,6 +39,7 @@ export function StagePlanRow({
   readOnly,
   onChangeDate,
   onChangePerformer,
+  performer,
 }: StagePlanRowProps) {
   const { t } = useTranslation('gantt');
   const isActive = row.stage === activeState;
@@ -112,6 +119,7 @@ export function StagePlanRow({
           disabled={disabled}
           readOnly={readOnly}
           ariaLabel={performerAriaLabel}
+          performer={performer}
         />
       </div>
 

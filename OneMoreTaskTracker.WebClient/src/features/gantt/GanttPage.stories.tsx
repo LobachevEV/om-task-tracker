@@ -54,6 +54,7 @@ function PageHarness({
       roster={ROSTER}
       rosterLoading={false}
       rosterError={null}
+      onRosterRetry={() => {}}
       loading={loading}
       error={error}
       onRetry={() => {}}

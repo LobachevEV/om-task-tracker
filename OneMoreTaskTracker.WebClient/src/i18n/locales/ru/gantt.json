@@ -56,6 +56,8 @@
     "close": "Закрыть",
     "edit": "Изменить",
     "save": "Сохранить",
+    "saving": "Сохраняем…",
+    "saved": "Сохранено ✓",
     "cancel": "Отмена",
     "fields": {
       "title": "Название",
@@ -112,7 +114,12 @@
     "clearPerformer": "Очистить ответственного",
     "performerEmpty": "Никто из команды не совпадает с «{{query}}».",
     "performerRemoved": "{{name}} · удалён",
+    "performerRemovedUnknown": "удалён",
     "reassign": "Переназначить",
+    "rangeSummary_one": "{{start}} — {{end}} · {{count}} день",
+    "rangeSummary_few": "{{start}} — {{end}} · {{count}} дня",
+    "rangeSummary_many": "{{start}} — {{end}} · {{count}} дней",
+    "rangeSummary_other": "{{start}} — {{end}} · {{count}} дней",
     "validation": {
       "endBeforeStart": "Дата окончания должна быть не раньше даты начала.",
       "missingStart": "Укажите дату начала, чтобы завершить план этапа."

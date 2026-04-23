@@ -73,4 +73,72 @@ describe('StagePlanTable', () => {
     expect(screen.getByText(/Planned end|План\. окончание/)).toBeInTheDocument();
     expect(screen.getByText(/^Performer|Ответственный$/)).toBeInTheDocument();
   });
+
+  it('renders the range summary only when every row has both dates set', () => {
+    // Partial plan: no summary.
+    const partial = buildStagePlans({
+      CsApproving: { plannedStart: '2026-05-01', plannedEnd: '2026-05-05' },
+      Development: { plannedStart: '2026-05-05', plannedEnd: '2026-05-20' },
+    });
+    const { unmount } = render(
+      <StagePlanTable
+        initial={partial}
+        activeState="Development"
+        submitting={false}
+        readOnly={false}
+        form={renderHook(() => useStagePlanForm(partial)).result.current}
+        roster={ROSTER}
+      />,
+    );
+    expect(screen.queryByTestId('stage-plan-range-summary')).toBeNull();
+    unmount();
+
+    // Full plan: summary shows min→max · N days.
+    const full = buildStagePlans({
+      CsApproving:    { plannedStart: '2026-05-01', plannedEnd: '2026-05-05' },
+      Development:    { plannedStart: '2026-05-05', plannedEnd: '2026-05-20' },
+      Testing:        { plannedStart: '2026-05-20', plannedEnd: '2026-05-25' },
+      EthalonTesting: { plannedStart: '2026-05-25', plannedEnd: '2026-05-28' },
+      LiveRelease:    { plannedStart: '2026-05-29', plannedEnd: '2026-05-29' },
+    });
+    render(
+      <StagePlanTable
+        initial={full}
+        activeState="LiveRelease"
+        submitting={false}
+        readOnly={false}
+        form={renderHook(() => useStagePlanForm(full)).result.current}
+        roster={ROSTER}
+      />,
+    );
+    const summary = screen.getByTestId('stage-plan-range-summary');
+    // 2026-05-01 → 2026-05-29 inclusive = 29 days.
+    expect(summary).toHaveTextContent('2026-05-01');
+    expect(summary).toHaveTextContent('2026-05-29');
+    expect(summary).toHaveTextContent('29');
+  });
+
+  it('stale performer row (detail performer=null, performerUserId set) renders Reassign affordance', () => {
+    const stalePlans = buildStagePlans({
+      Development: { plannedStart: '2026-05-05', plannedEnd: '2026-05-20', performerUserId: 9999 },
+    });
+    // detailStagePlans mirrors the BE-resolved payload: performer=null because
+    // the referenced user is no longer on the manager's roster.
+    const detail = stalePlans.map((p) => ({ ...p, performer: null }));
+    render(
+      <StagePlanTable
+        initial={stalePlans}
+        detailStagePlans={detail}
+        activeState="Development"
+        submitting={false}
+        readOnly={false}
+        form={renderHook(() => useStagePlanForm(stalePlans)).result.current}
+        roster={ROSTER}
+      />,
+    );
+    expect(screen.getByTestId('stage-performer-stale')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /reassign|переназначить/i }),
+    ).toBeInTheDocument();
+  });
 });

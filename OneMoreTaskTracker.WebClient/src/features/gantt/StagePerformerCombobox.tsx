@@ -8,6 +8,7 @@ import {
   type KeyboardEvent,
 } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { MiniTeamMember } from '../../shared/types/feature';
 import type { TeamRosterMember } from '../../shared/api/teamApi';
 
 /**
@@ -23,6 +24,12 @@ import type { TeamRosterMember } from '../../shared/api/teamApi';
  *
  * Display contract: the dropdown renders `"Name · Role"`; the closed input
  * shows the display name alone so the column stays scannable.
+ *
+ * Stale performer (design-brief §5): when `value` is set but the performer is
+ * no longer on the roster (both the injected roster AND the resolved
+ * `performer` detail payload come back null) the combobox renders a neutral
+ * outline avatar + `"Name · removed"` copy + a `Reassign` link. This keeps
+ * historic context visible instead of silently collapsing to "unassigned".
  */
 export interface StagePerformerComboboxProps {
   value: number | null;
@@ -37,6 +44,12 @@ export interface StagePerformerComboboxProps {
   ariaLabel?: string;
   /** When true, renders a plain-text read-only cell (viewer role). */
   readOnly?: boolean;
+  /**
+   * Optional resolved performer mini-member from `FeatureDetail.stagePlans[i].performer`.
+   * Distinguishes "unassigned" (value=null && performer=null) from "stale"
+   * (value!=null && performer=null), per api-contract.md + brief §5.
+   */
+  performer?: MiniTeamMember | null;
 }
 
 function roleSuffix(role: string): string {
@@ -66,6 +79,7 @@ export function StagePerformerCombobox({
   disabled,
   ariaLabel,
   readOnly,
+  performer,
 }: StagePerformerComboboxProps) {
   const { t } = useTranslation('gantt');
   const listboxId = useId();
@@ -76,6 +90,14 @@ export function StagePerformerCombobox({
     () => (value == null ? null : roster.find((m) => m.userId === value) ?? null),
     [value, roster],
   );
+
+  // A non-null value that the roster cannot resolve is a "stale" reference.
+  // The referenced user is no longer on the manager's roster. If the detail
+  // payload still echoes a resolved `performer` (historic audit data) we
+  // surface their displayName in the removed copy; otherwise we fall back to
+  // the generic "removed" label.
+  const isStale = value != null && selected == null;
+  const stalePerformerName = isStale ? performer?.displayName ?? null : null;
 
   const [query, setQuery] = useState<string>(selected?.displayName ?? '');
   const [open, setOpen] = useState(false);
@@ -164,6 +186,18 @@ export function StagePerformerCombobox({
     inputRef.current?.focus();
   };
 
+  const handleReassign = () => {
+    // Clearing first keeps the form payload honest (no dangling stale id)
+    // and opens the combobox focused so the manager can pick a replacement
+    // without an extra click.
+    commit(null);
+    setOpen(true);
+    // Defer focus so the input exists post-commit render.
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
+  };
+
   if (readOnly) {
     return (
       <span className="stage-plan__performer stage-plan__performer--read-only">
@@ -172,12 +206,49 @@ export function StagePerformerCombobox({
             <span className="stage-plan__performer-name">{selected.displayName}</span>
             <span className="stage-plan__performer-role">{roleSuffix(selected.role)}</span>
           </>
+        ) : isStale ? (
+          <span
+            className="stage-plan__performer-stale"
+            data-testid="stage-performer-stale"
+          >
+            <span className="stage-plan__performer-stale-avatar" aria-hidden="true" />
+            <span className="stage-plan__performer-name stage-plan__performer-name--muted">
+              {stalePerformerName
+                ? t('stagePlan.performerRemoved', { name: stalePerformerName })
+                : t('stagePlan.performerRemovedUnknown', { defaultValue: 'removed' })}
+            </span>
+          </span>
         ) : (
           <span className="stage-plan__performer-unassigned">
             {t('stagePlan.unassigned', { defaultValue: 'Unassigned' })}
           </span>
         )}
       </span>
+    );
+  }
+
+  if (isStale) {
+    return (
+      <div
+        ref={rootRef}
+        className="stage-plan__combobox stage-plan__combobox--stale"
+        data-testid="stage-performer-stale"
+      >
+        <span className="stage-plan__performer-stale-avatar" aria-hidden="true" />
+        <span className="stage-plan__performer-name stage-plan__performer-name--muted">
+          {stalePerformerName
+            ? t('stagePlan.performerRemoved', { name: stalePerformerName })
+            : t('stagePlan.performerRemovedUnknown', { defaultValue: 'removed' })}
+        </span>
+        <button
+          type="button"
+          className="stage-plan__performer-reassign"
+          onClick={handleReassign}
+          disabled={disabled}
+        >
+          {t('stagePlan.reassign', { defaultValue: 'Reassign' })}
+        </button>
+      </div>
     );
   }
 

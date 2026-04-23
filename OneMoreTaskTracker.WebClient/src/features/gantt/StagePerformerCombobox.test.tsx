@@ -128,4 +128,80 @@ describe('StagePerformerCombobox', () => {
     expect(screen.queryByRole('combobox')).toBeNull();
     expect(screen.getByText('Fe Wong')).toBeInTheDocument();
   });
+
+  describe('stale performer (value set, neither roster nor detail resolves it)', () => {
+    it('renders "name · removed" + Reassign affordance when performer is null but value is set', () => {
+      render(
+        <StagePerformerCombobox
+          value={9999}
+          roster={roster}
+          onChange={vi.fn()}
+          performer={null}
+        />,
+      );
+      // Combobox input collapses into the stale display — no live combobox.
+      expect(screen.queryByRole('combobox')).toBeNull();
+      // Fallback "removed" copy is present (no previous name known here).
+      expect(screen.getByTestId('stage-performer-stale')).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /Reassign|Переназначить/ }),
+      ).toBeInTheDocument();
+    });
+
+    it('uses the stored displayName from the detail performer when the id resolves server-side but not locally', () => {
+      render(
+        <StagePerformerCombobox
+          value={9999}
+          roster={roster}
+          onChange={vi.fn()}
+          performer={{
+            userId: 9999,
+            email: 'eve@example.com',
+            displayName: 'Eve Qa',
+            role: 'Qa',
+          }}
+        />,
+      );
+      // The stale copy mentions the historic name so audit context survives.
+      expect(screen.getByText(/Eve Qa/)).toBeInTheDocument();
+      expect(screen.getByText(/removed|удалён/)).toBeInTheDocument();
+    });
+
+    it('Reassign clears the performer id', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      render(
+        <StagePerformerCombobox
+          value={9999}
+          roster={roster}
+          onChange={onChange}
+          performer={null}
+        />,
+      );
+      const reassign = screen.getByRole('button', { name: /Reassign|Переназначить/ });
+      await user.click(reassign);
+      expect(onChange).toHaveBeenCalledWith(null);
+    });
+
+    it('readOnly + stale renders muted "name · removed" without a Reassign button', () => {
+      render(
+        <StagePerformerCombobox
+          value={9999}
+          roster={roster}
+          onChange={vi.fn()}
+          performer={{
+            userId: 9999,
+            email: 'eve@example.com',
+            displayName: 'Eve Qa',
+            role: 'Qa',
+          }}
+          readOnly
+        />,
+      );
+      expect(screen.getByText(/Eve Qa/)).toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: /Reassign|Переназначить/ }),
+      ).toBeNull();
+    });
+  });
 });

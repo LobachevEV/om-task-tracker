@@ -284,6 +284,7 @@ export function FeatureDrawer({
               {editing ? (
                 <FeatureEditForm
                   initial={data.feature}
+                  detailStagePlans={data.stagePlans}
                   onSubmit={handleSubmitEdit}
                   onCancel={() => {
                     setEditing(false);

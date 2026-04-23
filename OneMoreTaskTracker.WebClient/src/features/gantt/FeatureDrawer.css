@@ -173,6 +173,15 @@
   gap: 12px;
 }
 
+/* While the save round-trip is in flight the inputs dim to 0.7 opacity per
+   design-brief §7 — the submit button keeps its own loading treatment. */
+.feature-drawer__form[data-saving='true'] .field__input,
+.feature-drawer__form[data-saving='true'] .feature-drawer__textarea,
+.feature-drawer__form[data-saving='true'] .stage-plan__date-input,
+.feature-drawer__form[data-saving='true'] .stage-plan__combobox-input {
+  opacity: 0.7;
+}
+
 .feature-drawer__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

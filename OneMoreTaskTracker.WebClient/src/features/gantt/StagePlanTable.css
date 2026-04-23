@@ -9,8 +9,29 @@
 }
 
 .stage-plan__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.stage-plan__header-text {
   display: grid;
   gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.stage-plan__range-summary {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+  padding-top: 2px;
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 .stage-plan__heading {
@@ -252,6 +273,65 @@
 
 .stage-plan__performer-name {
   font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.stage-plan__performer-name--muted {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-style: italic;
+}
+
+/* Stale performer — neutral outline avatar + muted "name · removed" copy. */
+.stage-plan__combobox--stale {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: color-mix(in oklch, var(--surface) 50%, transparent);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  min-width: 0;
+}
+
+.stage-plan__performer-stale-avatar {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px dashed var(--border-strong);
+  background: transparent;
+  flex: none;
+}
+
+.stage-plan__performer-reassign {
+  font: inherit;
+  font-size: 12px;
+  padding: 2px 6px;
+  color: var(--accent);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  border-radius: 4px;
+  flex: 0 0 auto;
+}
+
+.stage-plan__performer-reassign:hover:not(:disabled) {
+  background: color-mix(in oklch, var(--accent) 10%, transparent);
+}
+
+.stage-plan__performer-reassign:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.stage-plan__performer-reassign:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .stage-plan__performer-role {

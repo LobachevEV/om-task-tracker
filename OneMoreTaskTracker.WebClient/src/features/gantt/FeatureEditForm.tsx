@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Callout, TextField } from '../../shared/ds';
 import type {
@@ -17,6 +17,12 @@ export interface FeatureEditFormProps {
   onCancel: () => void;
   submitting: boolean;
   errorMessage?: string | null;
+  /**
+   * FeatureDetail.stagePlans — carries the resolved `performer` mini-member
+   * per stage so the combobox can distinguish "unassigned" from "stale".
+   * When omitted, the edit form falls back to `initial.stagePlans`.
+   */
+  detailStagePlans?: readonly FeatureStagePlan[];
 }
 
 interface EditableState {
@@ -65,18 +71,31 @@ function validate(current: EditableState): { ok: boolean; titleError?: string } 
   return { ok: true };
 }
 
+/** Duration (ms) the button stays in the "Saved ✓" confirmation state. */
+const SAVED_LATCH_MS = 800;
+
 export function FeatureEditForm({
   initial,
   onSubmit,
   onCancel,
   submitting,
   errorMessage,
+  detailStagePlans,
 }: FeatureEditFormProps) {
   const { t } = useTranslation('gantt');
   const [current, setCurrent] = useState<EditableState>(() => toEditable(initial));
 
   // The stage-plan draft lives inside the form so Save is one atomic op.
   const stageForm = useStagePlanForm(initial.stagePlans);
+
+  // Local "Saved ✓" latch shown for ~800ms after a successful round-trip.
+  const [saved, setSaved] = useState(false);
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+    };
+  }, []);
 
   const scalarPatch = useMemo(
     () => buildScalarPatch(initial, current),
@@ -97,12 +116,21 @@ export function FeatureEditForm({
   const dirty = Object.keys(patch).length > 0;
   const validation = useMemo(() => validate(current), [current]);
   const canSubmit =
-    dirty && validation.ok && !stageForm.hasHardError && !submitting;
+    dirty && validation.ok && !stageForm.hasHardError && !submitting && !saved;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!canSubmit) return;
-    await onSubmit(patch);
+    try {
+      await onSubmit(patch);
+      // Only latch the Saved ✓ confirmation on success. On failure the
+      // parent surfaces errorMessage and the button stays in idle "Save".
+      setSaved(true);
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+      savedTimerRef.current = setTimeout(() => setSaved(false), SAVED_LATCH_MS);
+    } catch {
+      // Parent owns error surfacing; nothing to do locally.
+    }
   };
 
   const titleErrorText =
@@ -110,14 +138,26 @@ export function FeatureEditForm({
       ? t('drawer.validation.titleRequired', { defaultValue: 'Title is required' })
       : null;
 
+  const saveLabel = saved
+    ? t('drawer.saved', { defaultValue: 'Saved ✓' })
+    : submitting
+      ? t('drawer.saving', { defaultValue: 'Saving…' })
+      : t('drawer.save');
+
   return (
-    <form className="feature-drawer__form" onSubmit={handleSubmit} noValidate>
+    <form
+      className="feature-drawer__form"
+      onSubmit={handleSubmit}
+      noValidate
+      data-saving={submitting ? 'true' : 'false'}
+    >
       <TextField
         label={t('drawer.fields.title')}
         value={current.title}
         onChange={(e) => setCurrent((s) => ({ ...s, title: e.target.value }))}
         error={titleErrorText ?? undefined}
         required
+        disabled={submitting}
       />
 
       <div className="feature-drawer__field">
@@ -129,6 +169,7 @@ export function FeatureEditForm({
           className="field__input feature-drawer__textarea"
           value={current.description}
           rows={4}
+          disabled={submitting}
           onChange={(e) => setCurrent((s) => ({ ...s, description: e.target.value }))}
         />
       </div>
@@ -141,6 +182,7 @@ export function FeatureEditForm({
           id="feature-drawer-state"
           className="field__input"
           value={current.state}
+          disabled={submitting}
           onChange={(e) =>
             setCurrent((s) => ({ ...s, state: e.target.value as FeatureState }))
           }
@@ -155,6 +197,7 @@ export function FeatureEditForm({
 
       <StagePlanTable
         initial={initial.stagePlans}
+        detailStagePlans={detailStagePlans}
         activeState={initial.state}
         submitting={submitting}
         readOnly={false}
@@ -164,11 +207,22 @@ export function FeatureEditForm({
       {errorMessage ? <Callout tone="danger">{errorMessage}</Callout> : null}
 
       <div className="feature-drawer__actions">
-        <Button variant="secondary" onClick={onCancel} type="button">
+        <Button
+          variant="secondary"
+          onClick={onCancel}
+          type="button"
+          disabled={submitting}
+        >
           {t('drawer.cancel')}
         </Button>
-        <Button variant="primary" type="submit" disabled={!canSubmit} loading={submitting}>
-          {t('drawer.save')}
+        <Button
+          variant="primary"
+          type="submit"
+          disabled={!canSubmit}
+          loading={submitting}
+          data-saved={saved ? 'true' : 'false'}
+        >
+          {saveLabel}
         </Button>
       </div>
     </form>

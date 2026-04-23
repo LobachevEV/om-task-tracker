@@ -48,6 +48,8 @@
     "close": "Close",
     "edit": "Edit",
     "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved ✓",
     "cancel": "Cancel",
     "fields": {
       "title": "Title",
@@ -104,7 +106,10 @@
     "clearPerformer": "Clear performer",
     "performerEmpty": "No teammate matches \"{{query}}\".",
     "performerRemoved": "{{name}} · removed",
+    "performerRemovedUnknown": "removed",
     "reassign": "Reassign",
+    "rangeSummary_one": "{{start}} — {{end}} · {{count}} day",
+    "rangeSummary_other": "{{start}} — {{end}} · {{count}} days",
     "validation": {
       "endBeforeStart": "End date must be on or after start date.",
       "missingStart": "Add a start date to complete this stage's plan."

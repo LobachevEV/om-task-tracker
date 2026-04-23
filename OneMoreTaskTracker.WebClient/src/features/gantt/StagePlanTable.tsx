@@ -27,6 +27,13 @@ export interface StagePlanTableProps {
    * the table without mounting the module-singleton cache.
    */
   roster?: readonly TeamRosterMember[];
+  /**
+   * Detail stage plans carrying the server-resolved `performer` mini-member.
+   * When provided, rows can distinguish "unassigned" from "stale performer"
+   * (performerUserId set but performer null). Defaults to `initial` if the
+   * caller already passed the detail payload.
+   */
+  detailStagePlans?: readonly FeatureStagePlan[];
 }
 
 /**
@@ -34,12 +41,36 @@ export interface StagePlanTableProps {
  * draft on every render and rendered below the table, one line per
  * adjacent pair whose dates are both filled in.
  */
+function diffInclusiveDays(startIso: string, endIso: string): number {
+  // Inclusive — 2026-05-01 → 2026-05-01 is a 1-day plan.
+  const ms = Date.parse(`${endIso}T00:00:00Z`) - Date.parse(`${startIso}T00:00:00Z`);
+  return Math.round(ms / (1000 * 60 * 60 * 24)) + 1;
+}
+
+function computeRangeSummary(
+  draft: readonly { plannedStart: string; plannedEnd: string }[],
+): { start: string; end: string; days: number } | null {
+  const starts: string[] = [];
+  const ends: string[] = [];
+  for (const row of draft) {
+    if (row.plannedStart === '' || row.plannedEnd === '') return null; // only when fully planned
+    starts.push(row.plannedStart);
+    ends.push(row.plannedEnd);
+  }
+  if (starts.length === 0) return null;
+  const start = starts.reduce((a, b) => (a < b ? a : b));
+  const end = ends.reduce((a, b) => (a > b ? a : b));
+  return { start, end, days: diffInclusiveDays(start, end) };
+}
+
 export function StagePlanTable({
   activeState,
   submitting,
   readOnly,
   form,
   roster: injectedRoster,
+  detailStagePlans,
+  initial,
 }: StagePlanTableProps) {
   const { t } = useTranslation('gantt');
   const rosterHook = useTeamRoster();
@@ -47,17 +78,44 @@ export function StagePlanTable({
 
   const disabled = submitting;
 
+  // Index resolved performers by stage — priority: explicit detail prop, else initial.
+  const performerByStage = useMemo(() => {
+    const source = detailStagePlans ?? initial;
+    const map = new Map<FeatureState, FeatureStagePlan['performer']>();
+    for (const row of source) {
+      map.set(row.stage, row.performer ?? null);
+    }
+    return map;
+  }, [detailStagePlans, initial]);
+
+  const rangeSummary = useMemo(() => computeRangeSummary(form.draft), [form.draft]);
+
   return (
     <section className="stage-plan" aria-labelledby="stage-plan-heading">
       <header className="stage-plan__header">
-        <h3 className="stage-plan__heading" id="stage-plan-heading">
-          {t('stagePlan.title', { defaultValue: 'Stage plan' })}
-        </h3>
-        <p className="stage-plan__subtitle">
-          {t('stagePlan.subtitle', {
-            defaultValue: 'Schedule each stage and assign its owner.',
-          })}
-        </p>
+        <div className="stage-plan__header-text">
+          <h3 className="stage-plan__heading" id="stage-plan-heading">
+            {t('stagePlan.title', { defaultValue: 'Stage plan' })}
+          </h3>
+          <p className="stage-plan__subtitle">
+            {t('stagePlan.subtitle', {
+              defaultValue: 'Schedule each stage and assign its owner.',
+            })}
+          </p>
+        </div>
+        {rangeSummary ? (
+          <span
+            className="stage-plan__range-summary"
+            data-testid="stage-plan-range-summary"
+          >
+            {t('stagePlan.rangeSummary', {
+              defaultValue: '{{start}} — {{end}} · {{count}} days',
+              start: rangeSummary.start,
+              end: rangeSummary.end,
+              count: rangeSummary.days,
+            })}
+          </span>
+        ) : null}
       </header>
 
       <div
@@ -92,6 +150,7 @@ export function StagePlanTable({
             readOnly={readOnly}
             onChangeDate={(which, value) => form.setDate(row.stage, which, value)}
             onChangePerformer={(userId) => form.setPerformer(row.stage, userId)}
+            performer={performerByStage.get(row.stage) ?? null}
           />
         ))}
       </div>
@@ -153,8 +212,15 @@ function ContinuityHintLine({ hints }: ContinuityHintLineProps) {
   }, [hints, t]);
 
   if (lines.length === 0) return null;
+  // aria-atomic='false' + 'additions text' means screen readers announce just
+  // the newly-added/changed line, not the full 4-line block every edit.
   return (
-    <ul className="stage-plan__continuity" aria-live="polite">
+    <ul
+      className="stage-plan__continuity"
+      aria-live="polite"
+      aria-atomic="false"
+      aria-relevant="additions text"
+    >
       {lines.map((line) => (
         <li
           key={line.key}

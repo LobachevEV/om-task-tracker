@@ -27,10 +27,11 @@ test.describe('@integration plan happy path', () => {
     await plan.openCreateFeatureDialog();
 
     const uniqueTitle = `E2E Feature ${Date.now()}`;
+    // plannedStart / plannedEnd are no longer part of create — per-stage
+    // planning moved those dates into the drawer's stage plan table. See
+    // api-contract.md §POST /api/plan/features.
     await plan.fillCreateFeatureForm({
       title: uniqueTitle,
-      plannedStart: '2026-05-01',
-      plannedEnd: '2026-05-15',
     });
     const createStatus = await plan.submitCreateFeature();
     test.skip(

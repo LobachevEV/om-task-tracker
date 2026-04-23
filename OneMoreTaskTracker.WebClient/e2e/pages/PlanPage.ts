@@ -61,10 +61,13 @@ export class PlanPage {
       .filter({ hasText: /create feature|создать фичу/i });
   }
 
+  /**
+   * Fills the create dialog. `plannedStart` / `plannedEnd` were removed from
+   * the create form when per-stage planning launched — those dates now live
+   * inside the per-stage planning table on the drawer's edit view.
+   */
   async fillCreateFeatureForm(values: {
     title: string;
-    plannedStart: string;
-    plannedEnd: string;
     description?: string;
   }): Promise<void> {
     const dialog = this.createFeatureDialog;
@@ -74,13 +77,66 @@ export class PlanPage {
       // t('gantt:drawer.fields.description') → "Description" / "Описание"
       await dialog.getByLabel(/^(?:description|описание)$/i).fill(values.description);
     }
-    // t('gantt:drawer.fields.plannedStart/End')
-    await dialog
-      .getByLabel(/planned start|плановое начало/i)
-      .fill(values.plannedStart);
-    await dialog
-      .getByLabel(/planned end|плановое окончание/i)
-      .fill(values.plannedEnd);
+  }
+
+  // --- Stage planning ----------------------------------------------------
+
+  /** The 5-row planning table inside the feature drawer's edit view. */
+  get stagePlanTable(): Locator {
+    return this.featureDrawer.locator('.stage-plan__table');
+  }
+
+  /** Individual stage rows within the plan table (excluding the head row). */
+  stagePlanRows(): Locator {
+    return this.stagePlanTable.locator(
+      '.stage-plan__row:not(.stage-plan__row--head)',
+    );
+  }
+
+  /** Range-summary chip shown in the section header once all rows are filled. */
+  get stagePlanRangeSummary(): Locator {
+    return this.featureDrawer.getByTestId('stage-plan-range-summary');
+  }
+
+  /** Reassign link rendered in any stage row whose performer is stale. */
+  get stagePerformerReassignLink(): Locator {
+    return this.featureDrawer.getByRole('button', {
+      name: /^(?:reassign|переназначить)$/i,
+    });
+  }
+
+  async enterEditMode(): Promise<void> {
+    await this.featureDrawer
+      .getByRole('button', { name: /^(?:edit|изменить)$/i })
+      .click();
+  }
+
+  async fillStagePlanRow(
+    rowIndex: number,
+    plannedStart: string,
+    plannedEnd: string,
+  ): Promise<void> {
+    const row = this.stagePlanRows().nth(rowIndex);
+    const dates = row.locator('input[type="date"]');
+    await dates.nth(0).fill(plannedStart);
+    await dates.nth(1).fill(plannedEnd);
+  }
+
+  /** Clicks Save and awaits the PATCH response status. */
+  async submitFeatureEdit(): Promise<number> {
+    const drawer = this.featureDrawer;
+    // t('gantt:drawer.save') → "Save" / "Сохранить" — match exactly to
+    // avoid the transitional "Saving…" / "Saved ✓" labels.
+    const submit = drawer.getByRole('button', { name: /^(?:save|сохранить)$/i });
+    const [response] = await Promise.all([
+      this.page.waitForResponse(
+        (r) =>
+          /\/api\/plan\/features\/\d+$/.test(r.url()) &&
+          r.request().method() === 'PATCH',
+      ),
+      submit.click(),
+    ]);
+    return response.status();
   }
 
   async submitCreateFeature(): Promise<number> {
