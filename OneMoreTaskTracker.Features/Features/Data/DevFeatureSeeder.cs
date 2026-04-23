@@ -4,10 +4,12 @@ namespace OneMoreTaskTracker.Features.Features.Data;
 
 public static class DevFeatureSeeder
 {
-    public const int SeededManagerUserId = 4;
+    // IDs mirror the insert order in OneMoreTaskTracker.Users/Data/DevDataSeeder.cs:
+    // manager(1), alice.frontend(2), bob.frontend(3), charlie.backend(4), dave.backend(5), eve.qa(6).
+    public const int SeededManagerUserId = 1;
 
-    private const int AliceFrontendUserId  = 5;
-    private const int CharlieBackendUserId = 7;
+    private const int AliceFrontendUserId  = 2;
+    private const int CharlieBackendUserId = 4;
 
     private static readonly SeedFeature[] Features =
     [
