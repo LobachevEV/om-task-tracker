@@ -96,5 +96,39 @@
     "Testing": "Тестирование",
     "EthalonTesting": "Тестирование на эталоне",
     "LiveRelease": "Релиз в прод"
+  },
+  "stagePlan": {
+    "title": "План этапов",
+    "subtitle": "Задайте сроки каждого этапа и назначьте ответственного.",
+    "tableAriaLabel": "Таблица плана этапов",
+    "columns": {
+      "stage": "Этап",
+      "plannedStart": "План. начало",
+      "plannedEnd": "План. окончание",
+      "performer": "Ответственный"
+    },
+    "performerLabel": "Ответственный",
+    "unassigned": "Не назначен",
+    "clearPerformer": "Очистить ответственного",
+    "performerEmpty": "Никто из команды не совпадает с «{{query}}».",
+    "performerRemoved": "{{name}} · удалён",
+    "reassign": "Переназначить",
+    "validation": {
+      "endBeforeStart": "Дата окончания должна быть не раньше даты начала.",
+      "missingStart": "Укажите дату начала, чтобы завершить план этапа."
+    },
+    "continuity": {
+      "aligned": "{{fromStage}} заканчивается {{fromDate}} · {{toStage}} начинается {{toDate}} — стык.",
+      "gap_one": "{{fromStage}} заканчивается {{fromDate}} · {{toStage}} начинается {{toDate}} — пауза {{days}} день.",
+      "gap_few": "{{fromStage}} заканчивается {{fromDate}} · {{toStage}} начинается {{toDate}} — пауза {{days}} дня.",
+      "gap_many": "{{fromStage}} заканчивается {{fromDate}} · {{toStage}} начинается {{toDate}} — пауза {{days}} дней.",
+      "gap_other": "{{fromStage}} заканчивается {{fromDate}} · {{toStage}} начинается {{toDate}} — пауза {{days}} дней.",
+      "gap": "{{fromStage}} заканчивается {{fromDate}} · {{toStage}} начинается {{toDate}} — пауза {{days}} дн.",
+      "overlap_one": "{{fromStage}} заканчивается {{fromDate}} · {{toStage}} начинается {{toDate}} — перекрытие {{days}} день.",
+      "overlap_few": "{{fromStage}} заканчивается {{fromDate}} · {{toStage}} начинается {{toDate}} — перекрытие {{days}} дня.",
+      "overlap_many": "{{fromStage}} заканчивается {{fromDate}} · {{toStage}} начинается {{toDate}} — перекрытие {{days}} дней.",
+      "overlap_other": "{{fromStage}} заканчивается {{fromDate}} · {{toStage}} начинается {{toDate}} — перекрытие {{days}} дней.",
+      "overlap": "{{fromStage}} заканчивается {{fromDate}} · {{toStage}} начинается {{toDate}} — перекрытие {{days}} дн."
+    }
   }
 }

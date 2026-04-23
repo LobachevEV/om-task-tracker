@@ -15,22 +15,23 @@ export interface CreateFeatureDialogProps {
 interface DraftState {
   title: string;
   description: string;
-  plannedStart: string;
-  plannedEnd: string;
 }
 
 const EMPTY_DRAFT: DraftState = {
   title: '',
   description: '',
-  plannedStart: '',
-  plannedEnd: '',
 };
 
+/**
+ * Build the CreateFeaturePayload from the dialog draft.
+ *
+ * Per api-contract.md v1, `POST /api/plan/features` does not accept
+ * `plannedStart` / `plannedEnd` anymore — stage plans materialize empty on
+ * create and are authored via PATCH (the per-stage table in FeatureEditForm).
+ */
 function buildPayload(draft: DraftState): CreateFeaturePayload {
   const payload: CreateFeaturePayload = { title: draft.title.trim() };
   if (draft.description.trim() !== '') payload.description = draft.description;
-  if (draft.plannedStart !== '') payload.plannedStart = draft.plannedStart;
-  if (draft.plannedEnd !== '') payload.plannedEnd = draft.plannedEnd;
   return payload;
 }
 
@@ -39,9 +40,6 @@ function validate(draft: DraftState): { ok: boolean; titleError?: string } {
   if (trimmed.length === 0) return { ok: false, titleError: 'empty' };
   if (trimmed.length > 200) return { ok: false, titleError: 'tooLong' };
   if (draft.description.length > 4000) return { ok: false };
-  if (draft.plannedStart !== '' && draft.plannedEnd !== '' && draft.plannedEnd < draft.plannedStart) {
-    return { ok: false };
-  }
   return { ok: true };
 }
 
@@ -121,21 +119,6 @@ export function CreateFeatureDialog({
             rows={4}
             value={draft.description}
             onChange={(e) => setDraft((s) => ({ ...s, description: e.target.value }))}
-          />
-        </div>
-
-        <div className="feature-drawer__grid">
-          <TextField
-            label={t('drawer.fields.plannedStart')}
-            type="date"
-            value={draft.plannedStart}
-            onChange={(e) => setDraft((s) => ({ ...s, plannedStart: e.target.value }))}
-          />
-          <TextField
-            label={t('drawer.fields.plannedEnd')}
-            type="date"
-            value={draft.plannedEnd}
-            onChange={(e) => setDraft((s) => ({ ...s, plannedEnd: e.target.value }))}
           />
         </div>
 

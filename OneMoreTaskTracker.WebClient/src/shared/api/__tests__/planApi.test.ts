@@ -14,6 +14,14 @@ import { makeResponse } from '../../../test/testUtils';
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
+const emptyStagePlans = [
+  { stage: 'CsApproving' as const,    plannedStart: null, plannedEnd: null, performerUserId: null },
+  { stage: 'Development' as const,    plannedStart: null, plannedEnd: null, performerUserId: null },
+  { stage: 'Testing' as const,        plannedStart: null, plannedEnd: null, performerUserId: null },
+  { stage: 'EthalonTesting' as const, plannedStart: null, plannedEnd: null, performerUserId: null },
+  { stage: 'LiveRelease' as const,    plannedStart: null, plannedEnd: null, performerUserId: null },
+];
+
 const sampleSummary = {
   id: 1,
   title: 'Feature A',
@@ -25,6 +33,7 @@ const sampleSummary = {
   managerUserId: 2,
   taskCount: 0,
   taskIds: [] as number[],
+  stagePlans: emptyStagePlans,
 };
 
 const sampleDetail = {
@@ -32,6 +41,7 @@ const sampleDetail = {
   tasks: [],
   lead: { userId: 1, email: 'lead@example.com', displayName: 'Lead', role: 'Manager' as const },
   miniTeam: [],
+  stagePlans: emptyStagePlans.map((p) => ({ ...p, performer: null })),
 };
 
 beforeEach(() => {

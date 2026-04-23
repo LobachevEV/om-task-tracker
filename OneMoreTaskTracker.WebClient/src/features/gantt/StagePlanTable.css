@@ -1,0 +1,339 @@
+/* Per-stage planning table — see design-brief.md §4. Five rows (stages) × four
+   columns (stage / start / end / performer) with the stage column acting as
+   structural spine. All colors come from tokens.css; no raw hex allowed. */
+
+.stage-plan {
+  display: grid;
+  gap: 12px;
+  container-type: inline-size;
+}
+
+.stage-plan__header {
+  display: grid;
+  gap: 2px;
+}
+
+.stage-plan__heading {
+  margin: 0;
+  font-family: var(--font-display, inherit);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.stage-plan__subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.stage-plan__table {
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--elevated);
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+}
+
+.stage-plan__row {
+  display: grid;
+  grid-template-columns: minmax(0, 36fr) minmax(0, 18fr) minmax(0, 18fr) minmax(0, 28fr);
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  position: relative;
+}
+
+.stage-plan__row:first-child {
+  border-top: none;
+}
+
+.stage-plan__row--head {
+  background: color-mix(in oklch, var(--surface) 60%, var(--elevated));
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding-block: 8px;
+}
+
+/* Active stage row — hairlines top+bottom in amber. Not a side stripe. */
+.stage-plan__row[data-active='true']:not(.stage-plan__row--head) {
+  border-top: 1px solid color-mix(in oklch, var(--accent) 55%, transparent);
+  border-bottom: 1px solid color-mix(in oklch, var(--accent) 55%, transparent);
+  background: color-mix(in oklch, var(--accent) 5%, var(--elevated));
+}
+
+.stage-plan__row[data-active='true']:not(.stage-plan__row--head) .stage-plan__dot {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--accent) 15%, transparent);
+}
+
+.stage-plan__cell {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 8px;
+}
+
+.stage-plan__cell--stage {
+  gap: 10px;
+}
+
+.stage-plan__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.stage-plan__index {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.stage-plan__stage-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stage-plan__date-input {
+  width: 100%;
+  padding: 6px 8px;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  line-height: 1.2;
+  color-scheme: dark;
+}
+
+.stage-plan__date-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+.stage-plan__date-input[data-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.stage-plan__date-input:disabled {
+  opacity: 0.7;
+}
+
+.stage-plan__date-read-only {
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.stage-plan__row[data-invalid='true'] .stage-plan__date-input {
+  border-color: var(--danger);
+}
+
+.stage-plan__row-error {
+  grid-column: 1 / -1;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--danger);
+  line-height: 1.4;
+}
+
+/* Combobox */
+.stage-plan__combobox {
+  position: relative;
+  width: 100%;
+}
+
+.stage-plan__combobox-input {
+  width: 100%;
+  padding: 6px 28px 6px 8px;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  line-height: 1.2;
+}
+
+.stage-plan__combobox-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.75;
+}
+
+.stage-plan__combobox-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+.stage-plan__combobox-input:disabled {
+  opacity: 0.7;
+}
+
+.stage-plan__combobox-clear {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.stage-plan__combobox-clear:hover {
+  color: var(--text);
+  background: color-mix(in oklch, var(--border) 60%, transparent);
+}
+
+.stage-plan__combobox-list {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(100% + 4px);
+  z-index: 10;
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  box-shadow: var(--shadow-lg);
+}
+
+.stage-plan__combobox-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+  color: var(--text);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.stage-plan__combobox-option[data-active='true'],
+.stage-plan__combobox-option[aria-selected='true'] {
+  background: color-mix(in oklch, var(--accent) 12%, transparent);
+}
+
+.stage-plan__combobox-empty {
+  padding: 6px 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.stage-plan__performer-name {
+  font-weight: 500;
+}
+
+.stage-plan__performer-role {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+.stage-plan__performer-sep {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.stage-plan__performer-unassigned {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 12px;
+}
+
+.stage-plan__performer--read-only {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+/* Continuity hints */
+.stage-plan__continuity {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.stage-plan__continuity-item {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.stage-plan__continuity-item[data-kind='overlap'] {
+  color: color-mix(in oklch, var(--accent) 70%, var(--text-muted));
+}
+
+/* Container queries — brief §4 responsive behaviour. */
+@container (max-width: 720px) {
+  .stage-plan__row {
+    grid-template-columns: minmax(0, 38fr) minmax(0, 22fr) minmax(0, 22fr) minmax(0, 18fr);
+  }
+
+  .stage-plan__performer-name {
+    display: none;
+  }
+
+  .stage-plan__performer-role {
+    display: inline;
+  }
+}
+
+@container (max-width: 560px) {
+  .stage-plan__row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      'stage stage'
+      'start end'
+      'performer performer';
+    gap: 6px 8px;
+  }
+
+  .stage-plan__row--head {
+    display: none;
+  }
+
+  .stage-plan__cell--stage     { grid-area: stage; }
+  .stage-plan__cell--date:nth-of-type(2) { grid-area: start; }
+  .stage-plan__cell--date:nth-of-type(3) { grid-area: end;   }
+  .stage-plan__cell--performer { grid-area: performer; }
+
+  .stage-plan__performer-name {
+    display: inline;
+  }
+}

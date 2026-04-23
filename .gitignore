@@ -36,3 +36,8 @@ publish/
 # commit and unavoidable merge conflicts on graph.json / GRAPH_REPORT.md
 # across branches. Regenerate with `graphify update .` on fresh clones.
 graphify-out/
+
+# GAN harness scratch dirs produced by the gan-feature-* agents.
+# Use a specific prefix — `gan*/` is too broad and matches `gantt/` in the
+# web client's feature tree.
+gan-harness-feature/

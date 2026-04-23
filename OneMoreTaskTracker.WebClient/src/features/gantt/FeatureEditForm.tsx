@@ -3,10 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { Button, Callout, TextField } from '../../shared/ds';
 import type {
   FeatureState,
+  FeatureStagePlan,
   FeatureSummary,
   UpdateFeaturePayload,
 } from '../../shared/types/feature';
 import { FEATURE_STATE_ENTRIES } from './stateConfig';
+import { StagePlanTable } from './StagePlanTable';
+import { fromDraft, useStagePlanForm } from './useStagePlanForm';
 
 export interface FeatureEditFormProps {
   initial: FeatureSummary;
@@ -20,8 +23,6 @@ interface EditableState {
   title: string;
   description: string;
   state: FeatureState;
-  plannedStart: string;
-  plannedEnd: string;
 }
 
 function toEditable(feature: FeatureSummary): EditableState {
@@ -29,28 +30,30 @@ function toEditable(feature: FeatureSummary): EditableState {
     title: feature.title,
     description: feature.description ?? '',
     state: feature.state,
-    plannedStart: feature.plannedStart ?? '',
-    plannedEnd: feature.plannedEnd ?? '',
   };
 }
 
-function normalizeDate(s: string): string | null {
-  return s.trim() === '' ? null : s;
+function stagePlansEqual(a: readonly FeatureStagePlan[], b: readonly FeatureStagePlan[]): boolean {
+  if (a.length !== b.length) return false;
+  // Compare by stage key to avoid order sensitivity.
+  const byStage = new Map(b.map((p) => [p.stage, p]));
+  for (const row of a) {
+    const other = byStage.get(row.stage);
+    if (!other) return false;
+    if (row.plannedStart !== other.plannedStart) return false;
+    if (row.plannedEnd !== other.plannedEnd) return false;
+    if (row.performerUserId !== other.performerUserId) return false;
+  }
+  return true;
 }
 
-function buildPatch(initial: FeatureSummary, current: EditableState): UpdateFeaturePayload {
+function buildScalarPatch(initial: FeatureSummary, current: EditableState): UpdateFeaturePayload {
   const patch: UpdateFeaturePayload = {};
   if (current.title !== initial.title) patch.title = current.title;
   if ((current.description || '') !== (initial.description ?? '')) {
     patch.description = current.description === '' ? null : current.description;
   }
   if (current.state !== initial.state) patch.state = current.state;
-  const plannedStart = normalizeDate(current.plannedStart);
-  const initialStart = initial.plannedStart ?? null;
-  if (plannedStart !== initialStart) patch.plannedStart = plannedStart;
-  const plannedEnd = normalizeDate(current.plannedEnd);
-  const initialEnd = initial.plannedEnd ?? null;
-  if (plannedEnd !== initialEnd) patch.plannedEnd = plannedEnd;
   return patch;
 }
 
@@ -59,9 +62,6 @@ function validate(current: EditableState): { ok: boolean; titleError?: string } 
   if (trimmed.length === 0) return { ok: false, titleError: 'empty' };
   if (trimmed.length > 200) return { ok: false, titleError: 'tooLong' };
   if (current.description.length > 4000) return { ok: false };
-  const start = normalizeDate(current.plannedStart);
-  const end = normalizeDate(current.plannedEnd);
-  if (start && end && end < start) return { ok: false };
   return { ok: true };
 }
 
@@ -75,10 +75,29 @@ export function FeatureEditForm({
   const { t } = useTranslation('gantt');
   const [current, setCurrent] = useState<EditableState>(() => toEditable(initial));
 
-  const patch = useMemo(() => buildPatch(initial, current), [initial, current]);
+  // The stage-plan draft lives inside the form so Save is one atomic op.
+  const stageForm = useStagePlanForm(initial.stagePlans);
+
+  const scalarPatch = useMemo(
+    () => buildScalarPatch(initial, current),
+    [initial, current],
+  );
+
+  const stagePlansPatch: FeatureStagePlan[] | undefined = useMemo(() => {
+    const candidate = fromDraft(stageForm.draft);
+    if (stagePlansEqual(candidate, initial.stagePlans)) return undefined;
+    return candidate;
+  }, [stageForm.draft, initial.stagePlans]);
+
+  const patch: UpdateFeaturePayload = useMemo(() => {
+    if (stagePlansPatch) return { ...scalarPatch, stagePlans: stagePlansPatch };
+    return scalarPatch;
+  }, [scalarPatch, stagePlansPatch]);
+
   const dirty = Object.keys(patch).length > 0;
   const validation = useMemo(() => validate(current), [current]);
-  const canSubmit = dirty && validation.ok && !submitting;
+  const canSubmit =
+    dirty && validation.ok && !stageForm.hasHardError && !submitting;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -134,20 +153,13 @@ export function FeatureEditForm({
         </select>
       </div>
 
-      <div className="feature-drawer__grid">
-        <TextField
-          label={t('drawer.fields.plannedStart')}
-          type="date"
-          value={current.plannedStart}
-          onChange={(e) => setCurrent((s) => ({ ...s, plannedStart: e.target.value }))}
-        />
-        <TextField
-          label={t('drawer.fields.plannedEnd')}
-          type="date"
-          value={current.plannedEnd}
-          onChange={(e) => setCurrent((s) => ({ ...s, plannedEnd: e.target.value }))}
-        />
-      </div>
+      <StagePlanTable
+        initial={initial.stagePlans}
+        activeState={initial.state}
+        submitting={submitting}
+        readOnly={false}
+        form={stageForm}
+      />
 
       {errorMessage ? <Callout tone="danger">{errorMessage}</Callout> : null}
 

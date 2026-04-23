@@ -88,5 +88,35 @@
     "Testing": "Testing",
     "EthalonTesting": "Ethalon testing",
     "LiveRelease": "Live release"
+  },
+  "stagePlan": {
+    "title": "Stage plan",
+    "subtitle": "Schedule each stage and assign its owner.",
+    "tableAriaLabel": "Stage plan table",
+    "columns": {
+      "stage": "Stage",
+      "plannedStart": "Planned start",
+      "plannedEnd": "Planned end",
+      "performer": "Performer"
+    },
+    "performerLabel": "Performer",
+    "unassigned": "Unassigned",
+    "clearPerformer": "Clear performer",
+    "performerEmpty": "No teammate matches \"{{query}}\".",
+    "performerRemoved": "{{name}} · removed",
+    "reassign": "Reassign",
+    "validation": {
+      "endBeforeStart": "End date must be on or after start date.",
+      "missingStart": "Add a start date to complete this stage's plan."
+    },
+    "continuity": {
+      "aligned": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}} — aligned.",
+      "gap_one": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}} — {{days}}-day gap.",
+      "gap_other": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}} — {{days}}-day gap.",
+      "gap": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}} — {{days}}-day gap.",
+      "overlap_one": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}} — {{days}}-day overlap.",
+      "overlap_other": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}} — {{days}}-day overlap.",
+      "overlap": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}} — {{days}}-day overlap."
+    }
   }
 }

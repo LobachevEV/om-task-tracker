@@ -64,6 +64,32 @@ const isoDateOrNull = z
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD')
   .nullable();
 
+const miniTeamMemberSchema = z.object({
+  userId: z.number().int().positive(),
+  email: z.string().email(),
+  displayName: z.string().min(1),
+  role: userRoleSchema,
+});
+
+/**
+ * List-row stage plan. Mirrors api-contract.md `StagePlan`.
+ * Performer is id-only; the detail endpoint augments with resolved `performer`.
+ */
+export const stagePlanSchema = z.object({
+  stage: featureStateSchema,
+  plannedStart: isoDateOrNull,
+  plannedEnd: isoDateOrNull,
+  performerUserId: z.number().int().positive().nullable(),
+});
+
+/**
+ * Detail stage plan. Same as `stagePlanSchema` but carries an optional
+ * resolved `performer` mini-member (null when unassigned or stale).
+ */
+export const detailStagePlanSchema = stagePlanSchema.extend({
+  performer: miniTeamMemberSchema.nullable().optional(),
+});
+
 export const featureSummarySchema = z.object({
   id: z.number().int().positive(),
   title: z.string().min(1),
@@ -78,16 +104,11 @@ export const featureSummarySchema = z.object({
   managerUserId: z.number().int().positive(),
   taskCount: z.number().int().nonnegative(),
   taskIds: z.array(z.number().int().positive()),
+  /** Always length 5 — see api-contract.md. */
+  stagePlans: z.array(stagePlanSchema).length(5),
 });
 
 export const featureSummaryListSchema = z.array(featureSummarySchema);
-
-const miniTeamMemberSchema = z.object({
-  userId: z.number().int().positive(),
-  email: z.string().email(),
-  displayName: z.string().min(1),
-  role: userRoleSchema,
-});
 
 const attachedTaskSchema = z.object({
   id: z.number().int().positive(),
@@ -101,4 +122,6 @@ export const featureDetailSchema = z.object({
   tasks: z.array(attachedTaskSchema),
   lead: miniTeamMemberSchema,
   miniTeam: z.array(miniTeamMemberSchema),
+  /** Always length 5 — see api-contract.md. */
+  stagePlans: z.array(detailStagePlanSchema).length(5),
 });
