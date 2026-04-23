@@ -164,11 +164,17 @@ export function GanttPageInternal({
           <Spinner label={t('loading')} />
         </div>
       ) : error ? (
-        <div className="gantt-page__centered gantt-page__error" role="alert">
-          <p>{t('failed')}</p>
-          <Button type="button" variant="primary" onClick={onRetry}>
-            {t('retry')}
-          </Button>
+        <div className="gantt-page__centered">
+          <Callout
+            tone="danger"
+            action={
+              <Button type="button" variant="primary" onClick={onRetry}>
+                {t('retry')}
+              </Button>
+            }
+          >
+            {t('failed')}
+          </Callout>
         </div>
       ) : !hasAnyFeatures ? (
         <GanttEmpty

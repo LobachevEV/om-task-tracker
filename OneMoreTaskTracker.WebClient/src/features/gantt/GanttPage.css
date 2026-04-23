@@ -18,10 +18,6 @@
   gap: var(--space-3, 12px);
 }
 
-.gantt-page__error {
-  text-align: center;
-}
-
 .gantt-page > .ds-callout--banner {
   flex: 0 0 auto;
 }
