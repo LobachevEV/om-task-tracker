@@ -182,6 +182,8 @@ public class PlanController(
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
+        var callerUserId = User.GetUserId();
+
         var request = new UpdateFeatureRequest
         {
             Id = id,
@@ -190,7 +192,11 @@ public class PlanController(
             PlannedStart = body.PlannedStart ?? string.Empty,
             PlannedEnd = body.PlannedEnd ?? string.Empty,
             LeadUserId = body.LeadUserId.GetValueOrDefault(),
-            State = ParseState(body.State)
+            State = ParseState(body.State),
+            // Propagate the authenticated caller id so the Features service can
+            // re-verify feature ownership (double-defense; see
+            // ~/.claude/rules/microservices/security.md).
+            CallerUserId = callerUserId,
         };
 
         // Stage plan boundary validation lives here — omitted means "do not
@@ -334,12 +340,25 @@ public class PlanController(
 
         if (performerUserId is int pid)
         {
-            performer = BuildMiniTeamMember(pid, roster);
-            if (!roster.ContainsKey(pid))
+            if (roster.TryGetValue(pid, out var member))
             {
-                // Stale ids are surfaced to FE as a placeholder member; we also
-                // log once per miss (matches the existing stale-lead log shape)
-                // so operators can audit performer drift without exposing PII.
+                performer = new MiniTeamMemberResponse(
+                    member.UserId,
+                    member.Email,
+                    ExtractDisplayName(member.Email),
+                    member.Role);
+            }
+            else
+            {
+                // Stale ids: the id stays on the wire (`performerUserId`) so the
+                // FE can still render the "Performer no longer on team" state,
+                // but we deliberately emit `performer: null` rather than an
+                // empty-string placeholder object. The FE's Zod schema requires
+                // `email.email()` and `displayName.min(1)`; an empty-string
+                // placeholder fails runtime validation. api-contract.md declares
+                // `performer` as `MiniTeamMember | null`, so null is the
+                // canonical "unresolved" shape.
+                // We still log once per miss so operators can audit performer drift.
                 logger.LogWarning(
                     "Stage performer {PerformerUserId} not on manager {ManagerUserId}'s roster (feature {FeatureId}, stage {Stage})",
                     pid,
@@ -504,10 +523,14 @@ public record StagePlanResponse(
     string? PlannedEnd,
     int? PerformerUserId);
 
-// Detail stage plan — resolved mini-member for the performer; null when
-// unassigned or when the stale id is no longer on the roster (a placeholder
-// MiniTeamMemberResponse with empty fields is emitted instead so the shape
-// is stable for the FE).
+// Detail stage plan — resolved mini-member for the performer.
+// Performer is null when:
+//   - the stage is unassigned (performerUserId is null), OR
+//   - the stored performer id is no longer on the manager's roster (stale).
+// In the stale case, `performerUserId` is still emitted on the wire so the FE
+// can render the "Performer no longer on team" state; the `performer` slot
+// itself is null to avoid emitting an empty-string placeholder that would fail
+// the FE's Zod `email()`/`min(1)` constraints.
 public record StagePlanDetailResponse(
     string Stage,
     string? PlannedStart,

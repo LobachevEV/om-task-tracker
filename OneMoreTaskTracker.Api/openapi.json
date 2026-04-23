@@ -193,14 +193,17 @@
       },
       "StagePlanDetail": {
         "type": "object",
-        "description": "Detail stage plan — resolved performer mini-member. `performer` is null when unassigned; when the stored id is no longer on the manager's roster a placeholder MiniTeamMember with empty email/displayName/role is emitted.",
+        "description": "Detail stage plan — resolved performer mini-member. `performer` is null when the stage is unassigned OR when the stored performer id is no longer on the manager's roster (stale). In the stale case `performerUserId` is still emitted so the FE can render the 'Performer no longer on team' state.",
         "required": ["stage", "plannedStart", "plannedEnd", "performerUserId", "performer"],
         "properties": {
           "stage": { "$ref": "#/components/schemas/FeatureState" },
           "plannedStart": { "type": "string", "format": "date", "nullable": true },
           "plannedEnd":   { "type": "string", "format": "date", "nullable": true },
           "performerUserId": { "type": "integer", "format": "int32", "nullable": true },
-          "performer": { "oneOf": [ { "$ref": "#/components/schemas/MiniTeamMember" }, { "type": "null" } ] }
+          "performer": {
+            "nullable": true,
+            "allOf": [ { "$ref": "#/components/schemas/MiniTeamMember" } ]
+          }
         }
       },
       "StagePlanPayload": {

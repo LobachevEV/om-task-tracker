@@ -19,6 +19,16 @@ public class UpdateFeatureHandler(FeaturesDbContext db) : FeatureUpdater.Feature
             .FirstOrDefaultAsync(f => f.Id == request.Id, context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, $"feature {request.Id} not found"));
 
+        // Double-defense: the gateway enforces `[Authorize(Roles = Roles.Manager)]`
+        // AND propagates the caller id here so the Features service independently
+        // verifies ownership. A Manager may only update their own features; any
+        // other caller (including a different Manager) gets PermissionDenied,
+        // which the gateway middleware maps to HTTP 403.
+        // (See ~/.claude/rules/microservices/security.md — "Authorization enforced
+        // at every service boundary".)
+        if (request.CallerUserId <= 0 || feature.ManagerUserId != request.CallerUserId)
+            throw new RpcException(new Status(StatusCode.PermissionDenied, "Not the feature owner"));
+
         if (string.IsNullOrWhiteSpace(request.Title))
             throw new RpcException(new Status(StatusCode.InvalidArgument, "title is required"));
 

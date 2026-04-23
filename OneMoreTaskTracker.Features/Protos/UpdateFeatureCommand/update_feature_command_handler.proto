@@ -20,6 +20,12 @@ message UpdateFeatureRequest {
   // Empty repeated = "do not touch stage plans" (partial update).
   // Non-empty = exactly 5 entries, one per FeatureState ordinal; upserted atomically.
   repeated     FeatureStagePlan stage_plans = 8;
+  // Authenticated caller's user id (propagated from the gateway JWT).
+  // Required at the service boundary so the Features service can re-verify
+  // that the caller owns the target feature (`feature.ManagerUserId`).
+  // 0 is an invalid value and yields PermissionDenied.
+  // Double-defense per ~/.claude/rules/microservices/security.md.
+  int32        caller_user_id  = 9;
 }
 
 message FeatureDto {

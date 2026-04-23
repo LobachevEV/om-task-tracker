@@ -26,11 +26,67 @@ public sealed class UpdateFeatureHandlerTests
         var handler = new UpdateFeatureHandler(NewDb());
 
         var act = () => handler.Update(
-            new UpdateFeatureRequest { Id = 999, Title = "X", State = ProtoFeatureState.Development },
+            new UpdateFeatureRequest { Id = 999, Title = "X", State = ProtoFeatureState.Development, CallerUserId = 1 },
             TestServerCallContext.Create());
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task Update_WhenCallerIsNotOwner_ThrowsPermissionDenied()
+    {
+        // Arrange
+        var db = NewDb();
+        var created = await new CreateFeatureHandler(db).Create(
+            new CreateFeatureRequest { Title = "Owned", ManagerUserId = 5 },
+            TestServerCallContext.Create());
+        var updater = new UpdateFeatureHandler(db);
+
+        // Act: a different Manager (user 6) tries to update feature owned by 5.
+        var act = () => updater.Update(
+            new UpdateFeatureRequest
+            {
+                Id           = created.Id,
+                Title        = "Pwned",
+                State        = ProtoFeatureState.Development,
+                CallerUserId = 6,
+            },
+            TestServerCallContext.Create());
+
+        // Assert: PermissionDenied (the gateway middleware maps this to HTTP 403).
+        var ex = await act.Should().ThrowAsync<RpcException>();
+        ex.Which.StatusCode.Should().Be(StatusCode.PermissionDenied);
+
+        // And the feature row must be untouched.
+        var stored = await db.Features.AsNoTracking().SingleAsync(f => f.Id == created.Id);
+        stored.Title.Should().Be("Owned");
+    }
+
+    [Fact]
+    public async Task Update_WhenCallerUserIdIsMissing_ThrowsPermissionDenied()
+    {
+        // Defensive: CallerUserId = 0 (proto3 default) must also be rejected.
+        // This guards against a gateway regression that forgets to populate the
+        // field — the Features service refuses unauthenticated mutation.
+        var db = NewDb();
+        var created = await new CreateFeatureHandler(db).Create(
+            new CreateFeatureRequest { Title = "Owned", ManagerUserId = 5 },
+            TestServerCallContext.Create());
+        var updater = new UpdateFeatureHandler(db);
+
+        var act = () => updater.Update(
+            new UpdateFeatureRequest
+            {
+                Id    = created.Id,
+                Title = "Pwned",
+                State = ProtoFeatureState.Development,
+                // CallerUserId omitted → defaults to 0.
+            },
+            TestServerCallContext.Create());
+
+        var ex = await act.Should().ThrowAsync<RpcException>();
+        ex.Which.StatusCode.Should().Be(StatusCode.PermissionDenied);
     }
 
     [Fact]
@@ -56,6 +112,7 @@ public sealed class UpdateFeatureHandlerTests
                 PlannedStart  = "2026-05-01",
                 PlannedEnd    = "2026-05-15",
                 LeadUserId    = 8,
+                CallerUserId  = 5, // matches ManagerUserId on the seeded feature
             },
             TestServerCallContext.Create());
 
@@ -85,9 +142,10 @@ public sealed class UpdateFeatureHandlerTests
         var act = () => updater.Update(
             new UpdateFeatureRequest
             {
-                Id    = created.Id,
-                Title = "X",
-                State = (ProtoFeatureState)99, // unknown enum value from the wire
+                Id           = created.Id,
+                Title        = "X",
+                State        = (ProtoFeatureState)99, // unknown enum value from the wire
+                CallerUserId = 1, // matches the seeded ManagerUserId
             },
             TestServerCallContext.Create());
 
@@ -106,12 +164,14 @@ public sealed class UpdateFeatureHandlerTests
 
         // UpdateFeatureRequest intentionally has no manager_user_id field (spec 02/03);
         // we verify the stored manager remains 42 after an update.
+        // CallerUserId must match the feature owner to pass the ownership gate.
         var updated = await updater.Update(
             new UpdateFeatureRequest
             {
-                Id    = created.Id,
-                Title = "X2",
-                State = ProtoFeatureState.Development,
+                Id           = created.Id,
+                Title        = "X2",
+                State        = ProtoFeatureState.Development,
+                CallerUserId = 42,
             },
             TestServerCallContext.Create());
 

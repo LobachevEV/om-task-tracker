@@ -175,15 +175,19 @@ public sealed class PlanControllerStagePlansTests(TasksControllerWebApplicationF
                 Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
             .Returns(GrpcTestHelpers.UnaryCall(FiveRowUpdateDto()));
 
+        // Cast every plannedStart/End to `string?` so the anonymous-type array
+        // infers string? uniformly — mixing `string` literals with
+        // `(string?)null` items otherwise trips CS8619 under
+        // `<Nullable>enable</Nullable>`.
         var body = new
         {
             stagePlans = new[]
             {
-                new { stage = "CsApproving",    plannedStart = "2026-05-01", plannedEnd = "2026-05-10", performerUserId = (int?)4 },
-                new { stage = "Development",    plannedStart = "2026-05-11", plannedEnd = "2026-06-01", performerUserId = (int?)2 },
-                new { stage = "Testing",        plannedStart = (string?)null, plannedEnd = (string?)null, performerUserId = (int?)null },
-                new { stage = "EthalonTesting", plannedStart = "2026-06-05", plannedEnd = "2026-06-10", performerUserId = (int?)6 },
-                new { stage = "LiveRelease",    plannedStart = "2026-06-12", plannedEnd = "2026-06-15", performerUserId = (int?)1 },
+                new { stage = "CsApproving",    plannedStart = (string?)"2026-05-01", plannedEnd = (string?)"2026-05-10", performerUserId = (int?)4 },
+                new { stage = "Development",    plannedStart = (string?)"2026-05-11", plannedEnd = (string?)"2026-06-01", performerUserId = (int?)2 },
+                new { stage = "Testing",        plannedStart = (string?)null,         plannedEnd = (string?)null,         performerUserId = (int?)null },
+                new { stage = "EthalonTesting", plannedStart = (string?)"2026-06-05", plannedEnd = (string?)"2026-06-10", performerUserId = (int?)6 },
+                new { stage = "LiveRelease",    plannedStart = (string?)"2026-06-12", plannedEnd = (string?)"2026-06-15", performerUserId = (int?)1 },
             }
         };
 
@@ -288,8 +292,16 @@ public sealed class PlanControllerStagePlansTests(TasksControllerWebApplicationF
     }
 
     [Fact]
-    public async Task GetFeature_StalePerformerId_EmitsPlaceholderMiniMember()
+    public async Task GetFeature_WhenStagePerformerIdIsStale_PerformerIsNull()
     {
+        // Regression for BE-001-02 / CT-001-01: when a stage's stored
+        // performerUserId is no longer on the roster, the detail response MUST
+        // emit `performer: null` rather than a placeholder MiniTeamMember with
+        // empty email/displayName/role. The FE's Zod schema requires
+        // `email.email()` and `displayName.min(1)`; empty-string placeholders
+        // fail runtime validation. The stale id itself stays on the wire via
+        // `performerUserId` so the FE can render the "Performer no longer on
+        // team" state.
         var client = ClientWithToken(ManagerToken(userId: 1));
         StubEmptyTasks();
 
@@ -331,8 +343,102 @@ public sealed class PlanControllerStagePlansTests(TasksControllerWebApplicationF
         var response = await client.GetAsync("/api/plan/features/42");
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var body = await response.Content.ReadAsStringAsync();
-        body.Should().Contain("\"performerUserId\":999", "stale id is preserved on the wire so FE can render the 'Performer no longer on team' state");
+        var bodyText = await response.Content.ReadAsStringAsync();
+        bodyText.Should().Contain("\"performerUserId\":999",
+            "stale id is preserved on the wire so FE can render the 'Performer no longer on team' state");
+
+        // Locate the stale stage's JSON object and assert `performer` is literally null.
+        using var doc = JsonDocument.Parse(bodyText);
+        var stagePlans = doc.RootElement.GetProperty("stagePlans");
+        stagePlans.GetArrayLength().Should().Be(5);
+
+        // performerUserId is `null` for the unassigned stages and `999` for the
+        // stale one — filter on kind first so `GetInt32` never hits a Null.
+        var staleStage = stagePlans.EnumerateArray()
+            .Single(sp =>
+            {
+                var pid = sp.GetProperty("performerUserId");
+                return pid.ValueKind == JsonValueKind.Number && pid.GetInt32() == 999;
+            });
+        staleStage.GetProperty("performer").ValueKind.Should().Be(JsonValueKind.Null,
+            "stale performer ids emit `performer: null` (never an empty-string placeholder object) so the FE's Zod email/displayName constraints pass");
+    }
+
+    [Fact]
+    public async Task UpdateFeature_WhenCallerDoesNotOwnFeature_Returns403()
+    {
+        // Regression for BE-001-01: a Manager who does NOT own the target
+        // feature must be rejected. The Features service enforces this by
+        // comparing `feature.ManagerUserId` against the propagated
+        // `CallerUserId` and raising `RpcException(PermissionDenied)`; the
+        // gateway middleware maps that to HTTP 403. We simulate the Features
+        // service's response via the mock and assert the gateway surfaces 403.
+        var client = ClientWithToken(ManagerToken(userId: 42));
+
+        UpdateFeatureRequest? captured = null;
+        _factory.MockFeatureUpdater
+            .UpdateAsync(Arg.Do<UpdateFeatureRequest>(r => captured = r),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(_ => throw new RpcException(new Status(StatusCode.PermissionDenied, "Not the feature owner")));
+
+        var response = await client.PatchAsync("/api/plan/features/1",
+            JsonBody(new { title = "Pwned" }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+
+        // And the gateway must have propagated the caller id so the Features
+        // service could perform the check — no id propagated means the check
+        // can't happen (and the request would fall through).
+        captured.Should().NotBeNull();
+        captured!.CallerUserId.Should().Be(42, "gateway must forward the authenticated caller id for the Features service to re-verify ownership");
+    }
+
+    [Fact]
+    public async Task UpdateFeature_ForwardsCallerUserIdFromJwt()
+    {
+        // Defensive coverage: even on the happy path, the caller id MUST be
+        // populated on the proto request so the Features service's ownership
+        // check has something to compare against.
+        const int callerId = 77;
+        var client = ClientWithToken(ManagerToken(userId: callerId));
+
+        UpdateFeatureRequest? captured = null;
+        _factory.MockFeatureUpdater
+            .UpdateAsync(Arg.Do<UpdateFeatureRequest>(r => captured = r),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(FiveRowUpdateDto(managerUserId: callerId, leadUserId: callerId)));
+
+        var response = await client.PatchAsync("/api/plan/features/1",
+            JsonBody(new { title = "Renamed" }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        captured.Should().NotBeNull();
+        captured!.CallerUserId.Should().Be(callerId);
+    }
+
+    [Fact]
+    public async Task UpdateFeature_StagePlansEmptyArray_Returns400()
+    {
+        // Regression for BE-001-03: an explicit empty array for `stagePlans`
+        // must be rejected with 400 per api-contract.md "Partial update
+        // semantics". Empty-array-as-clear is forbidden; clients must send all
+        // 5 rows with nulls to clarify intent.
+        var client = ClientWithToken(ManagerToken());
+
+        // Ensure the mock is not invoked — the gateway must reject before
+        // talking to the Features service.
+        _factory.MockFeatureUpdater
+            .UpdateAsync(Arg.Any<UpdateFeatureRequest>(),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(_ => throw new InvalidOperationException("Features service must not be called for an invalid empty-array body"));
+
+        var body = new
+        {
+            stagePlans = Array.Empty<object>(),
+        };
+
+        var response = await client.PatchAsync("/api/plan/features/1", JsonBody(body));
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]

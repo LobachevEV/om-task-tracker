@@ -94,9 +94,10 @@ public sealed class FeatureStagePlanHandlerTests
 
         var request = new UpdateFeatureRequest
         {
-            Id    = created.Id,
-            Title = "X",
-            State = ProtoFeatureState.Development,
+            Id           = created.Id,
+            Title        = "X",
+            State        = ProtoFeatureState.Development,
+            CallerUserId = 1,
             StagePlans =
             {
                 Plan(ProtoFeatureState.CsApproving,    "2026-05-01", "2026-05-10", 4),
@@ -131,9 +132,10 @@ public sealed class FeatureStagePlanHandlerTests
         await new UpdateFeatureHandler(db).Update(
             new UpdateFeatureRequest
             {
-                Id    = created.Id,
-                Title = "X",
-                State = ProtoFeatureState.Development,
+                Id           = created.Id,
+                Title        = "X",
+                State        = ProtoFeatureState.Development,
+                CallerUserId = 1,
                 StagePlans =
                 {
                     Plan(ProtoFeatureState.CsApproving,    "2026-05-01", "2026-05-10", 4),
@@ -147,9 +149,10 @@ public sealed class FeatureStagePlanHandlerTests
         var updated = await new UpdateFeatureHandler(db).Update(
             new UpdateFeatureRequest
             {
-                Id    = created.Id,
-                Title = "Renamed",
-                State = ProtoFeatureState.Development,
+                Id           = created.Id,
+                Title        = "Renamed",
+                State        = ProtoFeatureState.Development,
+                CallerUserId = 1,
             },
             TestServerCallContext.Create());
 
@@ -168,9 +171,10 @@ public sealed class FeatureStagePlanHandlerTests
 
         var request = new UpdateFeatureRequest
         {
-            Id = created.Id,
-            Title = "X",
-            State = ProtoFeatureState.Development,
+            Id           = created.Id,
+            Title        = "X",
+            State        = ProtoFeatureState.Development,
+            CallerUserId = 1,
             StagePlans =
             {
                 Plan(ProtoFeatureState.CsApproving),
@@ -194,9 +198,10 @@ public sealed class FeatureStagePlanHandlerTests
 
         var request = new UpdateFeatureRequest
         {
-            Id = created.Id,
-            Title = "X",
-            State = ProtoFeatureState.Development,
+            Id           = created.Id,
+            Title        = "X",
+            State        = ProtoFeatureState.Development,
+            CallerUserId = 1,
             StagePlans =
             {
                 Plan(ProtoFeatureState.CsApproving),
@@ -222,9 +227,10 @@ public sealed class FeatureStagePlanHandlerTests
 
         var request = new UpdateFeatureRequest
         {
-            Id = created.Id,
-            Title = "X",
-            State = ProtoFeatureState.Development,
+            Id           = created.Id,
+            Title        = "X",
+            State        = ProtoFeatureState.Development,
+            CallerUserId = 1,
             StagePlans =
             {
                 Plan(ProtoFeatureState.CsApproving,    "2026-05-10", "2026-05-01"), // inverted
@@ -260,9 +266,10 @@ public sealed class FeatureStagePlanHandlerTests
         var updated = await updater.Update(
             new UpdateFeatureRequest
             {
-                Id = created.Id,
-                Title = "X",
-                State = ProtoFeatureState.Development,
+                Id           = created.Id,
+                Title        = "X",
+                State        = ProtoFeatureState.Development,
+                CallerUserId = 1,
                 StagePlans =
                 {
                     FiveEmpty()[0], FiveEmpty()[1], FiveEmpty()[2], FiveEmpty()[3], FiveEmpty()[4],
@@ -283,9 +290,10 @@ public sealed class FeatureStagePlanHandlerTests
 
         var request = new UpdateFeatureRequest
         {
-            Id = created.Id,
-            Title = "X",
-            State = ProtoFeatureState.Development,
+            Id           = created.Id,
+            Title        = "X",
+            State        = ProtoFeatureState.Development,
+            CallerUserId = 1,
             StagePlans =
             {
                 Plan(ProtoFeatureState.CsApproving,    performerUserId: -5),
