@@ -23,7 +23,13 @@ if (builder.Environment.IsDevelopment())
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
-    scope.ServiceProvider.GetRequiredService<FeaturesDbContext>().Database.Migrate();
+{
+    var featuresDb = scope.ServiceProvider.GetRequiredService<FeaturesDbContext>();
+    featuresDb.Database.Migrate();
+
+    if (app.Environment.IsDevelopment())
+        await DevFeatureSeeder.SeedAsync(featuresDb);
+}
 
 if (app.Environment.IsDevelopment())
     app.MapGrpcReflectionService();

@@ -7,7 +7,8 @@ End-to-end test suite for the WebClient. Drives the real UI (via `npm run dev`) 
 ```
 e2e/
 ├── fixtures/
-│   └── devSeed.ts         # Mirror of OneMoreTaskTracker.Users/Data/DevDataSeeder.cs
+│   ├── devSeed.ts         # Mirror of OneMoreTaskTracker.Users/Data/DevDataSeeder.cs
+│   └── devFeatureSeed.ts  # Mirror of OneMoreTaskTracker.Features/Features/Data/DevFeatureSeeder.cs
 ├── helpers/
 │   ├── auth.ts            # apiLogin / apiRegister / localStorage helpers
 │   └── backend.ts         # isBackendReachable() — lets specs skip cleanly when backend is down
