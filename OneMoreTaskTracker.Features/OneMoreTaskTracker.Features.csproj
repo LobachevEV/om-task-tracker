@@ -26,6 +26,11 @@
       <ProtoRoot>Protos</ProtoRoot>
       <Access>Public</Access>
     </Protobuf>
+    <Protobuf Include="Protos\feature_stage_plan.proto">
+      <GrpcServices>Server</GrpcServices>
+      <ProtoRoot>Protos</ProtoRoot>
+      <Access>Public</Access>
+    </Protobuf>
     <Protobuf Include="Protos\CreateFeatureCommand\create_feature_command_handler.proto">
       <GrpcServices>Server</GrpcServices>
       <Access>Public</Access>

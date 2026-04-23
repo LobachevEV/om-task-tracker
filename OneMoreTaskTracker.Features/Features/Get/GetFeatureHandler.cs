@@ -13,10 +13,17 @@ public class GetFeatureHandler(FeaturesDbContext db) : FeatureGetter.FeatureGett
         if (request.Id <= 0)
             throw new RpcException(new Status(StatusCode.InvalidArgument, "id is required"));
 
+        // Include stage plans (single LEFT JOIN) so every read path returns
+        // exactly 5 rows per feature without a second round-trip. Canonical
+        // ordering by Stage is applied inside the Mapster projection so the
+        // in-memory collection order cannot drift between providers.
         var feature = await db.Features.AsNoTracking()
+            .Include(f => f.StagePlans)
             .FirstOrDefaultAsync(f => f.Id == request.Id, context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, $"feature {request.Id} not found"));
 
-        return feature.Adapt<FeatureDto>();
+        var dto = feature.Adapt<FeatureDto>();
+        dto.StagePlans.Add(FeatureMappingConfig.BuildProtoStagePlans(feature));
+        return dto;
     }
 }

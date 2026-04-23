@@ -10,7 +10,12 @@ public class ListFeaturesHandler(FeaturesDbContext db) : FeaturesLister.Features
 {
     public override async Task<ListFeaturesResponse> List(ListFeaturesRequest request, ServerCallContext context)
     {
-        IQueryable<Feature> q = db.Features.AsNoTracking();
+        // Include stage plans once per query — EF Core expands this into a single
+        // LEFT JOIN with ~5x row fan-out, acceptable for iteration 1 (see
+        // backend-plan.md Performance Budget). If feature count grows past 1000
+        // this becomes a candidate for AsSplitQuery, not today.
+        IQueryable<Feature> q = db.Features.AsNoTracking()
+            .Include(f => f.StagePlans);
 
         if (request.ManagerUserId > 0)
             q = q.Where(f => f.ManagerUserId == request.ManagerUserId);
@@ -35,7 +40,11 @@ public class ListFeaturesHandler(FeaturesDbContext db) : FeaturesLister.Features
 
         var response = new ListFeaturesResponse();
         foreach (var row in rows)
-            response.Features.Add(row.Adapt<FeatureDto>());
+        {
+            var dto = row.Adapt<FeatureDto>();
+            dto.StagePlans.Add(FeatureMappingConfig.BuildProtoStagePlans(row));
+            response.Features.Add(dto);
+        }
         return response;
     }
 

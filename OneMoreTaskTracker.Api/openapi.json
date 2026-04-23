@@ -1,0 +1,315 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "OneMoreTaskTracker Plan API",
+    "version": "v1",
+    "description": "REST surface emitted by OneMoreTaskTracker.Api for the feature planning (Gantt) experience. Backed by gRPC into OneMoreTaskTracker.Features / .Tasks / .Users. All dates are ISO yyyy-MM-dd strings or null. Hand-rolled for iteration 1 of the feature-stage-planning feature (api-contract.md v1); Swashbuckle is a follow-up."
+  },
+  "servers": [
+    { "url": "http://localhost:5000", "description": "Local dev" }
+  ],
+  "security": [{ "bearerAuth": [] }],
+  "paths": {
+    "/api/plan/features": {
+      "get": {
+        "summary": "List features visible to the caller.",
+        "tags": ["plan"],
+        "parameters": [
+          { "name": "scope", "in": "query", "required": false, "schema": { "type": "string", "enum": ["mine", "all"] } },
+          { "name": "state", "in": "query", "required": false, "schema": { "$ref": "#/components/schemas/FeatureState" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/FeatureSummary" } }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "post": {
+        "summary": "Create a new feature (Manager only).",
+        "description": "Creates the feature and atomically materializes 5 empty stage plans (one per FeatureState ordinal). `managerUserId` is derived from the caller's JWT and MUST NOT be sent in the body.",
+        "tags": ["plan"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/CreateFeaturePayload" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/FeatureSummary" } }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+    "/api/plan/features/{id}": {
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } }
+      ],
+      "get": {
+        "summary": "Get a single feature with attached tasks, lead, mini-team, and resolved stage-plan performers.",
+        "tags": ["plan"],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/FeatureDetail" } }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "patch": {
+        "summary": "Update a feature (Manager only).",
+        "description": "All body fields are optional — omitted means unchanged. When `stagePlans` is present it MUST contain exactly 5 entries, one per FeatureState value, in any order. The server re-orders canonically. Omitted stagePlans leaves existing plans untouched. Empty array (`[]`) is rejected with 400. Derived `plannedStart` / `plannedEnd` on the feature are recomputed server-side as min/max over populated stage dates.",
+        "tags": ["plan"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UpdateFeaturePayload" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/FeatureSummary" } }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "502": { "$ref": "#/components/responses/BadGateway" }
+        }
+      }
+    },
+    "/api/plan/features/{id}/tasks/{jiraId}": {
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } },
+        { "name": "jiraId", "in": "path", "required": true, "schema": { "type": "string" } }
+      ],
+      "post": {
+        "summary": "Attach a task (by Jira id) to a feature (Manager only).",
+        "tags": ["plan"],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/FeatureSummary" } }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "summary": "Detach a task from a feature, reassigning it to another feature (Manager only).",
+        "tags": ["plan"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/DetachTaskBody" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/FeatureSummary" } }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "422": { "$ref": "#/components/responses/UnprocessableEntity" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid request data.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "Unauthorized": {
+        "description": "Authentication required.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "Forbidden": {
+        "description": "Permission denied.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "NotFound": {
+        "description": "Resource not found.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "UnprocessableEntity": {
+        "description": "Validation error.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "BadGateway": {
+        "description": "Upstream service temporarily unavailable.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": ["error"],
+        "properties": { "error": { "type": "string" } }
+      },
+      "FeatureState": {
+        "type": "string",
+        "enum": ["CsApproving", "Development", "Testing", "EthalonTesting", "LiveRelease"]
+      },
+      "StagePlan": {
+        "type": "object",
+        "description": "List-row stage plan — id-only performer.",
+        "required": ["stage", "plannedStart", "plannedEnd", "performerUserId"],
+        "properties": {
+          "stage": { "$ref": "#/components/schemas/FeatureState" },
+          "plannedStart": { "type": "string", "format": "date", "nullable": true },
+          "plannedEnd":   { "type": "string", "format": "date", "nullable": true },
+          "performerUserId": { "type": "integer", "format": "int32", "nullable": true }
+        }
+      },
+      "StagePlanDetail": {
+        "type": "object",
+        "description": "Detail stage plan — resolved performer mini-member. `performer` is null when unassigned; when the stored id is no longer on the manager's roster a placeholder MiniTeamMember with empty email/displayName/role is emitted.",
+        "required": ["stage", "plannedStart", "plannedEnd", "performerUserId", "performer"],
+        "properties": {
+          "stage": { "$ref": "#/components/schemas/FeatureState" },
+          "plannedStart": { "type": "string", "format": "date", "nullable": true },
+          "plannedEnd":   { "type": "string", "format": "date", "nullable": true },
+          "performerUserId": { "type": "integer", "format": "int32", "nullable": true },
+          "performer": { "oneOf": [ { "$ref": "#/components/schemas/MiniTeamMember" }, { "type": "null" } ] }
+        }
+      },
+      "StagePlanPayload": {
+        "type": "object",
+        "required": ["stage"],
+        "properties": {
+          "stage": { "$ref": "#/components/schemas/FeatureState" },
+          "plannedStart": { "type": "string", "format": "date", "nullable": true },
+          "plannedEnd":   { "type": "string", "format": "date", "nullable": true },
+          "performerUserId": { "type": "integer", "format": "int32", "nullable": true }
+        }
+      },
+      "MiniTeamMember": {
+        "type": "object",
+        "required": ["userId", "email", "displayName", "role"],
+        "properties": {
+          "userId":      { "type": "integer", "format": "int32" },
+          "email":       { "type": "string" },
+          "displayName": { "type": "string" },
+          "role":        { "type": "string" }
+        }
+      },
+      "AttachedTask": {
+        "type": "object",
+        "required": ["id", "jiraId", "state", "userId"],
+        "properties": {
+          "id":     { "type": "integer", "format": "int32" },
+          "jiraId": { "type": "string" },
+          "state":  { "type": "string" },
+          "userId": { "type": "integer", "format": "int32" }
+        }
+      },
+      "FeatureSummary": {
+        "type": "object",
+        "required": ["id","title","description","state","plannedStart","plannedEnd","leadUserId","managerUserId","taskCount","taskIds","stagePlans"],
+        "properties": {
+          "id":            { "type": "integer", "format": "int32" },
+          "title":         { "type": "string", "maxLength": 200 },
+          "description":   { "type": "string", "nullable": true, "maxLength": 4000 },
+          "state":         { "$ref": "#/components/schemas/FeatureState" },
+          "plannedStart":  { "type": "string", "format": "date", "nullable": true, "description": "Derived server-side as min(stagePlans[].plannedStart)." },
+          "plannedEnd":    { "type": "string", "format": "date", "nullable": true, "description": "Derived server-side as max(stagePlans[].plannedEnd)." },
+          "leadUserId":    { "type": "integer", "format": "int32" },
+          "managerUserId": { "type": "integer", "format": "int32" },
+          "taskCount":     { "type": "integer", "format": "int32" },
+          "taskIds":       { "type": "array", "items": { "type": "integer", "format": "int32" } },
+          "stagePlans": {
+            "type": "array",
+            "minItems": 5,
+            "maxItems": 5,
+            "items": { "$ref": "#/components/schemas/StagePlan" },
+            "description": "Always length 5, canonical FeatureState order. Performer is id-only on list rows."
+          }
+        }
+      },
+      "FeatureDetail": {
+        "type": "object",
+        "required": ["feature","tasks","lead","miniTeam","stagePlans"],
+        "properties": {
+          "feature":  { "$ref": "#/components/schemas/FeatureSummary" },
+          "tasks":    { "type": "array", "items": { "$ref": "#/components/schemas/AttachedTask" } },
+          "lead":     { "$ref": "#/components/schemas/MiniTeamMember" },
+          "miniTeam": { "type": "array", "items": { "$ref": "#/components/schemas/MiniTeamMember" }, "description": "Deduped union of task assignees, lead, and every populated stage-plan performer." },
+          "stagePlans": {
+            "type": "array",
+            "minItems": 5,
+            "maxItems": 5,
+            "items": { "$ref": "#/components/schemas/StagePlanDetail" },
+            "description": "Always length 5, canonical FeatureState order. Each entry carries a resolved performer mini-member."
+          }
+        }
+      },
+      "CreateFeaturePayload": {
+        "type": "object",
+        "required": ["title"],
+        "properties": {
+          "title":        { "type": "string", "maxLength": 200 },
+          "description":  { "type": "string", "nullable": true, "maxLength": 4000 },
+          "leadUserId":   { "type": "integer", "format": "int32", "nullable": true },
+          "plannedStart": { "type": "string", "format": "date", "nullable": true, "description": "Legacy feature-level date; prefer authoring per-stage plans via PATCH." },
+          "plannedEnd":   { "type": "string", "format": "date", "nullable": true, "description": "Legacy feature-level date; prefer authoring per-stage plans via PATCH." }
+        }
+      },
+      "UpdateFeaturePayload": {
+        "type": "object",
+        "description": "All fields optional. Omitted `stagePlans` means do-not-touch; when present MUST have exactly 5 entries with unique stage names.",
+        "properties": {
+          "title":         { "type": "string", "nullable": true, "maxLength": 200 },
+          "description":   { "type": "string", "nullable": true, "maxLength": 4000 },
+          "leadUserId":    { "type": "integer", "format": "int32", "nullable": true },
+          "plannedStart":  { "type": "string", "format": "date", "nullable": true },
+          "plannedEnd":    { "type": "string", "format": "date", "nullable": true },
+          "state":         { "$ref": "#/components/schemas/FeatureState" },
+          "stagePlans": {
+            "type": "array",
+            "nullable": true,
+            "minItems": 5,
+            "maxItems": 5,
+            "items": { "$ref": "#/components/schemas/StagePlanPayload" }
+          }
+        }
+      },
+      "DetachTaskBody": {
+        "type": "object",
+        "required": ["reassignToFeatureId"],
+        "properties": {
+          "reassignToFeatureId": { "type": "integer", "format": "int32", "minimum": 1 }
+        }
+      }
+    }
+  }
+}

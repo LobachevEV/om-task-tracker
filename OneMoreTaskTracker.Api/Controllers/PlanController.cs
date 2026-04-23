@@ -16,6 +16,7 @@ using CreateFeatureDto = OneMoreTaskTracker.Proto.Features.CreateFeatureCommand.
 using UpdateFeatureDto = OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand.FeatureDto;
 using ListFeatureDto = OneMoreTaskTracker.Proto.Features.ListFeaturesQuery.FeatureDto;
 using GetFeatureDto = OneMoreTaskTracker.Proto.Features.GetFeatureQuery.FeatureDto;
+using ProtoFeatureStagePlan = OneMoreTaskTracker.Proto.Features.FeatureStagePlan;
 
 namespace OneMoreTaskTracker.Api.Controllers;
 
@@ -32,6 +33,10 @@ public class PlanController(
     UserService.UserServiceClient userService,
     ILogger<PlanController> logger) : ControllerBase
 {
+    // Canonical set of stage names accepted on the wire; exposed here and in
+    // the openapi.json so FE + evaluator share the same vocabulary.
+    private const int ExpectedStageCount = 5;
+
     [HttpGet("features")]
     public async Task<ActionResult<IEnumerable<FeatureSummaryResponse>>> ListFeatures(
         [FromQuery] string? scope,
@@ -111,17 +116,32 @@ public class PlanController(
         _ = tasksResponse;
         var attachedTasks = new List<AttachedTaskResponse>();
 
+        // Load the feature manager's roster once — both the lead and every
+        // stage-plan performer resolve against the same dictionary.
         var roster = await LoadRosterForManager(feature.ManagerUserId, ct);
 
         var lead = BuildMiniTeamMember(feature.LeadUserId, roster);
-        var miniTeamIds = attachedTasks.Select(t => t.UserId).Distinct().ToList();
+        var detailStagePlans = feature.StagePlans
+            .Select(sp => BuildDetailStagePlan(sp, roster, feature.Id, feature.ManagerUserId))
+            .ToList();
+
+        // miniTeam is the deduped union of: attached-task assignees, the lead,
+        // and every populated stage-plan performer. Stale ids fall back to the
+        // same placeholder member used for stale leads (keeps FE rendering deterministic).
+        var miniTeamIds = new HashSet<int>();
+        foreach (var taskAssignee in attachedTasks)
+            if (taskAssignee.UserId > 0) miniTeamIds.Add(taskAssignee.UserId);
+        if (feature.LeadUserId > 0) miniTeamIds.Add(feature.LeadUserId);
+        foreach (var sp in feature.StagePlans)
+            if (sp.PerformerUserId > 0) miniTeamIds.Add(sp.PerformerUserId);
+
         var miniTeam = miniTeamIds
             .Select(uid => BuildMiniTeamMember(uid, roster))
             .ToList();
 
         var summary = MapSummary(feature, tasksByFeature: new Dictionary<int, List<int>>());
 
-        return Ok(new FeatureDetailResponse(summary, attachedTasks, lead, miniTeam));
+        return Ok(new FeatureDetailResponse(summary, attachedTasks, lead, miniTeam, detailStagePlans));
     }
 
     [HttpPost("features")]
@@ -172,6 +192,39 @@ public class PlanController(
             LeadUserId = body.LeadUserId.GetValueOrDefault(),
             State = ParseState(body.State)
         };
+
+        // Stage plan boundary validation lives here — omitted means "do not
+        // touch" (nothing added to request.StagePlans). Non-null MUST have
+        // exactly 5 entries with unique recognised stage names, matching
+        // api-contract.md "Partial update semantics".
+        if (body.StagePlans is not null)
+        {
+            if (body.StagePlans.Count != ExpectedStageCount)
+                return BadRequest(new { error = "Invalid request data" });
+
+            var seenStages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var sp in body.StagePlans)
+            {
+                if (string.IsNullOrEmpty(sp.Stage))
+                    return BadRequest(new { error = "Invalid request data" });
+
+                if (!TryParseStage(sp.Stage, out var protoStage))
+                    return BadRequest(new { error = "Invalid request data" });
+
+                if (!seenStages.Add(sp.Stage))
+                    return BadRequest(new { error = "Invalid request data" });
+
+                request.StagePlans.Add(new ProtoFeatureStagePlan
+                {
+                    Stage           = protoStage,
+                    PlannedStart    = sp.PlannedStart ?? string.Empty,
+                    PlannedEnd      = sp.PlannedEnd   ?? string.Empty,
+                    // performer_user_id on the wire = 0 means "unassigned"; we
+                    // coerce negative / zero inputs to 0 defensively.
+                    PerformerUserId = sp.PerformerUserId is { } p && p > 0 ? p : 0,
+                });
+            }
+        }
 
         var updated = await featureUpdater.UpdateAsync(request, cancellationToken: ct);
         return Ok(MapSummary(updated, new Dictionary<int, List<int>>()));
@@ -270,6 +323,47 @@ public class PlanController(
         return new MiniTeamMemberResponse(userId, string.Empty, string.Empty, string.Empty);
     }
 
+    private StagePlanDetailResponse BuildDetailStagePlan(
+        ProtoFeatureStagePlan sp,
+        IReadOnlyDictionary<int, TeamRosterMember> roster,
+        int featureId,
+        int managerUserId)
+    {
+        var performerUserId = sp.PerformerUserId > 0 ? (int?)sp.PerformerUserId : null;
+        MiniTeamMemberResponse? performer = null;
+
+        if (performerUserId is int pid)
+        {
+            performer = BuildMiniTeamMember(pid, roster);
+            if (!roster.ContainsKey(pid))
+            {
+                // Stale ids are surfaced to FE as a placeholder member; we also
+                // log once per miss (matches the existing stale-lead log shape)
+                // so operators can audit performer drift without exposing PII.
+                logger.LogWarning(
+                    "Stage performer {PerformerUserId} not on manager {ManagerUserId}'s roster (feature {FeatureId}, stage {Stage})",
+                    pid,
+                    managerUserId,
+                    featureId,
+                    sp.Stage);
+            }
+        }
+
+        return new StagePlanDetailResponse(
+            MapState(sp.Stage),
+            string.IsNullOrEmpty(sp.PlannedStart) ? null : sp.PlannedStart,
+            string.IsNullOrEmpty(sp.PlannedEnd) ? null : sp.PlannedEnd,
+            performerUserId,
+            performer);
+    }
+
+    private StagePlanResponse BuildStagePlan(ProtoFeatureStagePlan sp) =>
+        new(
+            MapState(sp.Stage),
+            string.IsNullOrEmpty(sp.PlannedStart) ? null : sp.PlannedStart,
+            string.IsNullOrEmpty(sp.PlannedEnd) ? null : sp.PlannedEnd,
+            sp.PerformerUserId > 0 ? (int?)sp.PerformerUserId : null);
+
     private static string ExtractDisplayName(string email)
     {
         if (string.IsNullOrEmpty(email))
@@ -282,22 +376,22 @@ public class PlanController(
     private FeatureSummaryResponse MapSummary(
         CreateFeatureDto f,
         IReadOnlyDictionary<int, List<int>> tasksByFeature) =>
-        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd, f.LeadUserId, f.ManagerUserId, tasksByFeature);
+        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd, f.LeadUserId, f.ManagerUserId, f.StagePlans, tasksByFeature);
 
     private FeatureSummaryResponse MapSummary(
         UpdateFeatureDto f,
         IReadOnlyDictionary<int, List<int>> tasksByFeature) =>
-        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd, f.LeadUserId, f.ManagerUserId, tasksByFeature);
+        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd, f.LeadUserId, f.ManagerUserId, f.StagePlans, tasksByFeature);
 
     private FeatureSummaryResponse MapSummary(
         ListFeatureDto f,
         IReadOnlyDictionary<int, List<int>> tasksByFeature) =>
-        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd, f.LeadUserId, f.ManagerUserId, tasksByFeature);
+        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd, f.LeadUserId, f.ManagerUserId, f.StagePlans, tasksByFeature);
 
     private FeatureSummaryResponse MapSummary(
         GetFeatureDto f,
         IReadOnlyDictionary<int, List<int>> tasksByFeature) =>
-        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd, f.LeadUserId, f.ManagerUserId, tasksByFeature);
+        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd, f.LeadUserId, f.ManagerUserId, f.StagePlans, tasksByFeature);
 
     private FeatureSummaryResponse BuildSummary(
         int id,
@@ -308,9 +402,11 @@ public class PlanController(
         string plannedEnd,
         int leadUserId,
         int managerUserId,
+        IEnumerable<ProtoFeatureStagePlan> stagePlans,
         IReadOnlyDictionary<int, List<int>> tasksByFeature)
     {
         var taskIds = tasksByFeature.TryGetValue(id, out var ids) ? (IReadOnlyList<int>)ids : Array.Empty<int>();
+        var plans = stagePlans.Select(BuildStagePlan).ToList();
         return new FeatureSummaryResponse(
             id,
             title,
@@ -321,7 +417,8 @@ public class PlanController(
             leadUserId,
             managerUserId,
             taskIds.Count,
-            taskIds);
+            taskIds,
+            plans);
     }
 
     private string MapState(FeatureState state) => state switch
@@ -355,6 +452,25 @@ public class PlanController(
             _ => FeatureState.CsApproving
         };
     }
+
+    // Strict stage-name parser used by UpdateFeature — unknown / blank names
+    // surface as a 400 (rejected at the controller boundary, before we hit the
+    // Features service). Unlike ParseState's lenient fallback, this intentionally
+    // returns false on unknown input so the caller can emit a BadRequest.
+    private static bool TryParseStage(string raw, out FeatureState stage)
+    {
+        switch (raw)
+        {
+            case "CsApproving":    stage = FeatureState.CsApproving;    return true;
+            case "Development":    stage = FeatureState.Development;    return true;
+            case "Testing":        stage = FeatureState.Testing;        return true;
+            case "EthalonTesting": stage = FeatureState.EthalonTesting; return true;
+            case "LiveRelease":    stage = FeatureState.LiveRelease;    return true;
+            default:
+                stage = default;
+                return false;
+        }
+    }
 }
 
 public record FeatureSummaryResponse(
@@ -367,17 +483,37 @@ public record FeatureSummaryResponse(
     int LeadUserId,
     int ManagerUserId,
     int TaskCount,
-    IReadOnlyList<int> TaskIds);
+    IReadOnlyList<int> TaskIds,
+    IReadOnlyList<StagePlanResponse> StagePlans);
 
 public record FeatureDetailResponse(
     FeatureSummaryResponse Feature,
     IReadOnlyList<AttachedTaskResponse> Tasks,
     MiniTeamMemberResponse Lead,
-    IReadOnlyList<MiniTeamMemberResponse> MiniTeam);
+    IReadOnlyList<MiniTeamMemberResponse> MiniTeam,
+    IReadOnlyList<StagePlanDetailResponse> StagePlans);
 
 public record AttachedTaskResponse(int Id, string JiraId, string State, int UserId);
 
 public record MiniTeamMemberResponse(int UserId, string Email, string DisplayName, string Role);
+
+// List-row stage plan — id-only performer. `null` planned_* dates when unset.
+public record StagePlanResponse(
+    string Stage,
+    string? PlannedStart,
+    string? PlannedEnd,
+    int? PerformerUserId);
+
+// Detail stage plan — resolved mini-member for the performer; null when
+// unassigned or when the stale id is no longer on the roster (a placeholder
+// MiniTeamMemberResponse with empty fields is emitted instead so the shape
+// is stable for the FE).
+public record StagePlanDetailResponse(
+    string Stage,
+    string? PlannedStart,
+    string? PlannedEnd,
+    int? PerformerUserId,
+    MiniTeamMemberResponse? Performer);
 
 public record CreateFeaturePayload(
     [Required][MaxLength(200)] string Title,
@@ -392,6 +528,15 @@ public record UpdateFeaturePayload(
     int? LeadUserId,
     string? PlannedStart,
     string? PlannedEnd,
-    string? State);
+    string? State,
+    // Omit (null) = do not touch stage plans.
+    // Present with Count != 5 or unknown / duplicate stages → 400.
+    IReadOnlyList<StagePlanPayload>? StagePlans);
+
+public record StagePlanPayload(
+    string Stage,
+    string? PlannedStart,
+    string? PlannedEnd,
+    int? PerformerUserId);
 
 public record DetachTaskBody([Required] int ReassignToFeatureId);
