@@ -15,36 +15,28 @@ public class UpdateFeatureHandler(FeaturesDbContext db) : FeatureUpdater.Feature
         // Include stage plans so StagePlanUpserter can mutate them in-place
         // inside the same tracked graph and SaveChanges emits one batched round-trip.
         var feature = await db.Features
-            .Include(f => f.StagePlans)
-            .FirstOrDefaultAsync(f => f.Id == request.Id, context.CancellationToken)
-            ?? throw new RpcException(new Status(StatusCode.NotFound, $"feature {request.Id} not found"));
+                          .Include(f => f.StagePlans)
+                          .FirstOrDefaultAsync(f => f.Id == request.Id, context.CancellationToken)
+                      ?? throw new RpcException(new Status(StatusCode.NotFound, $"feature {request.Id} not found"));
 
-        // Double-defense: the gateway enforces `[Authorize(Roles = Roles.Manager)]`
-        // AND propagates the caller id here so the Features service independently
-        // verifies ownership. A Manager may only update their own features; any
-        // other caller (including a different Manager) gets PermissionDenied,
-        // which the gateway middleware maps to HTTP 403.
-        // (See ~/.claude/rules/microservices/security.md — "Authorization enforced
-        // at every service boundary".)
+        // The Features service independently verifies ownership; the gateway's
+        // [Authorize] alone is insufficient (see microservices/security.md).
         if (request.CallerUserId <= 0 || feature.ManagerUserId != request.CallerUserId)
             throw new RpcException(new Status(StatusCode.PermissionDenied, "Not the feature owner"));
 
-        if (string.IsNullOrWhiteSpace(request.Title))
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "title is required"));
+        if (!string.IsNullOrWhiteSpace(request.Title))
+            feature.Title = request.Title.Trim();
 
-        feature.Title        = request.Title.Trim();
-        feature.Description  = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim();
-        feature.State        = ProtoStateToEntity(request.State);
-        feature.LeadUserId   = request.LeadUserId > 0 ? request.LeadUserId : feature.LeadUserId;
+        feature.Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim();
+        feature.State = ProtoStateToEntity(request.State);
+        feature.LeadUserId = request.LeadUserId > 0 ? request.LeadUserId : feature.LeadUserId;
         // manager_user_id is intentionally NOT mutated — ownership transfer is out of scope (spec 03 §170).
 
-        var hasStagePlans = request.StagePlans.Count > 0;
-        if (hasStagePlans)
+        var now = DateTime.UtcNow;
+        if (request.StagePlans.Count > 0)
         {
             var inputs = ParseStagePlans(request.StagePlans);
             FeatureValidation.ValidateStagePlans(inputs);
-
-            var now = DateTime.UtcNow;
             StagePlanUpserter.ApplyStagePlans(feature, inputs, now);
             StagePlanUpserter.RecomputeFeatureDates(feature);
         }
@@ -56,11 +48,11 @@ public class UpdateFeatureHandler(FeaturesDbContext db) : FeatureUpdater.Feature
             // but they are no longer authoritative — once any stage plan is
             // populated via a PATCH with stage_plans, derivation takes over.
             feature.PlannedStart = FeatureValidation.ParseOptionalDate(request.PlannedStart, "planned_start");
-            feature.PlannedEnd   = FeatureValidation.ParseOptionalDate(request.PlannedEnd,   "planned_end");
+            feature.PlannedEnd = FeatureValidation.ParseOptionalDate(request.PlannedEnd, "planned_end");
             FeatureValidation.ValidateDateOrder(feature.PlannedStart, feature.PlannedEnd);
         }
 
-        feature.UpdatedAt = DateTime.UtcNow;
+        feature.UpdatedAt = now;
 
         await db.SaveChangesAsync(context.CancellationToken);
 
@@ -79,9 +71,10 @@ public class UpdateFeatureHandler(FeaturesDbContext db) : FeatureUpdater.Feature
         foreach (var raw in raws)
         {
             var start = FeatureValidation.ParseOptionalDate(raw.PlannedStart, "stage_plans.planned_start");
-            var end   = FeatureValidation.ParseOptionalDate(raw.PlannedEnd,   "stage_plans.planned_end");
+            var end = FeatureValidation.ParseOptionalDate(raw.PlannedEnd, "stage_plans.planned_end");
             list.Add(new StagePlanInput(raw.Stage, start, end, raw.PerformerUserId));
         }
+
         return list;
     }
 
