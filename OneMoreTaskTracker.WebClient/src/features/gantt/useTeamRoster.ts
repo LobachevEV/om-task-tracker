@@ -79,11 +79,7 @@ export function useTeamRoster(options: UseTeamRosterOptions = {}): UseTeamRoster
   }, []);
 
   useEffect(() => {
-    // Cache hit — local state already initialised from the store, nothing to do.
-    if (rosterStore.data && state.status === 'success' && state.data === rosterStore.data) {
-      return;
-    }
-    // Cache hit after a remount where local state is out of date.
+    // Cache hit after a remount — sync reducer state without a network call.
     if (rosterStore.data) {
       dispatch({ type: 'fetch.success', data: rosterStore.data });
       return;
@@ -111,9 +107,6 @@ export function useTeamRoster(options: UseTeamRosterOptions = {}): UseTeamRoster
     return () => {
       cancelled = true;
     };
-    // `state.status`/`state.data` are read for the cache-hit short circuit only;
-    // the effect re-runs when fetchId changes (refetch) or fetcher swaps.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetcher, state.fetchId]);
 
   // Auto-recover from a stale error banner when the tab regains focus —
