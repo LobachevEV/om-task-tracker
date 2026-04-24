@@ -40,4 +40,8 @@ message FeatureDto {
   string       created_at         = 9;
   string       updated_at         = 10;
   repeated     FeatureStagePlan stage_plans = 11;
+  // Monotonically-increasing row version used for optimistic concurrency.
+  // Bumped by every feature- and stage-scoped PATCH (see api-contract.md
+  // § "Optimistic Concurrency"). Additive — legacy clients ignore this field.
+  int32        version            = 12;
 }

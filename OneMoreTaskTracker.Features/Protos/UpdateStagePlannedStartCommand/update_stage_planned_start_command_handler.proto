@@ -2,15 +2,21 @@ syntax = "proto3";
 import "feature_state.proto";
 import "feature_stage_plan.proto";
 
-option csharp_namespace = "OneMoreTaskTracker.Proto.Features.GetFeatureQuery";
+option csharp_namespace = "OneMoreTaskTracker.Proto.Features.UpdateStagePlannedStartCommand";
 package mr_helper.features;
 
-service FeatureGetter {
-  rpc Get (GetFeatureRequest) returns (FeatureDto);
+service StagePlannedStartUpdater {
+  rpc Update (UpdateStagePlannedStartRequest) returns (FeatureDto);
 }
 
-message GetFeatureRequest {
-  int32 id = 1;
+message UpdateStagePlannedStartRequest {
+  int32        feature_id             = 1;
+  FeatureState stage                  = 2;
+  // ISO yyyy-MM-dd string. "" = clear the plan (mirrors the existing
+  // FeatureStagePlan.planned_start empty-string = null convention).
+  string       planned_start          = 3;
+  int32        caller_user_id         = 4;
+  int32        expected_stage_version = 5;
 }
 
 message FeatureDto {

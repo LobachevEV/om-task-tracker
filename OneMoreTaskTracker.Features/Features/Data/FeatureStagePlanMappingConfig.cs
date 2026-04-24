@@ -18,6 +18,7 @@ public static class FeatureStagePlanMappingConfig
             .Map(d => d.Stage,           s => (ProtoFeatureState)s.Stage)
             .Map(d => d.PlannedStart,    s => s.PlannedStart == null ? string.Empty : s.PlannedStart.Value.ToString("yyyy-MM-dd"))
             .Map(d => d.PlannedEnd,      s => s.PlannedEnd   == null ? string.Empty : s.PlannedEnd.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.PerformerUserId, s => s.PerformerUserId);
+            .Map(d => d.PerformerUserId, s => s.PerformerUserId)
+            .Map(d => d.Version,         s => s.Version);
     }
 }

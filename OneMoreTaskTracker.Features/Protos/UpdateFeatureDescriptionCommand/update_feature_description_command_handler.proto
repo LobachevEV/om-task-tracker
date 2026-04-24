@@ -2,15 +2,20 @@ syntax = "proto3";
 import "feature_state.proto";
 import "feature_stage_plan.proto";
 
-option csharp_namespace = "OneMoreTaskTracker.Proto.Features.GetFeatureQuery";
+option csharp_namespace = "OneMoreTaskTracker.Proto.Features.UpdateFeatureDescriptionCommand";
 package mr_helper.features;
 
-service FeatureGetter {
-  rpc Get (GetFeatureRequest) returns (FeatureDto);
+service FeatureDescriptionUpdater {
+  rpc Update (UpdateFeatureDescriptionRequest) returns (FeatureDto);
 }
 
-message GetFeatureRequest {
-  int32 id = 1;
+message UpdateFeatureDescriptionRequest {
+  int32  id               = 1;
+  // Empty string "" is coerced to null server-side (matches the existing
+  // feature.Description nullable semantics).
+  string description      = 2;
+  int32  caller_user_id   = 3;
+  int32  expected_version = 4;
 }
 
 message FeatureDto {

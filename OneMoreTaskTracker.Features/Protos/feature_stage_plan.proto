@@ -18,4 +18,7 @@ message FeatureStagePlan {
   string       planned_start      = 2;
   string       planned_end        = 3;
   int32        performer_user_id  = 4;
+  // Per-stage optimistic-concurrency token (see api-contract.md
+  // § "Optimistic Concurrency"). Bumped by every stage-scoped PATCH.
+  int32        version            = 5;
 }

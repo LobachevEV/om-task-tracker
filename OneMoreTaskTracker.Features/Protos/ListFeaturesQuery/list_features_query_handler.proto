@@ -31,4 +31,5 @@ message FeatureDto {
   string       created_at         = 9;
   string       updated_at         = 10;
   repeated     FeatureStagePlan stage_plans = 11;
+  int32        version            = 12;
 }

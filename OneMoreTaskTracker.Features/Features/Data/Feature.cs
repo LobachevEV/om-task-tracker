@@ -23,4 +23,11 @@ public class Feature
     // exactly 5 rows per feature (materialized on create + guaranteed by the
     // composite unique index on (FeatureId, Stage)).
     public List<FeatureStagePlan> StagePlans { get; init; } = [];
+
+    // Monotonically-increasing row version used as an optimistic-concurrency
+    // token (see api-contract.md § "Optimistic Concurrency"). Bumped by every
+    // feature-scoped PATCH (title/description) and by every stage-scoped PATCH
+    // so the FE can detect "updated by someone else" and reconcile. EF Core's
+    // IsConcurrencyToken mapping lives in FeaturesDbContext.OnModelCreating.
+    public int Version { get; set; }
 }
