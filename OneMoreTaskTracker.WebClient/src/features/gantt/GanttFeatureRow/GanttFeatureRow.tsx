@@ -57,7 +57,6 @@ function computeFeatureDtr(feature: FeatureSummary, today: string): string {
 
 export function GanttFeatureRow({
   feature,
-  bar: _bar,
   stageBars,
   today,
   lead,

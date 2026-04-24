@@ -170,6 +170,43 @@ test.describe('gantt stage timeline (FE-only stubbed)', () => {
     await expect(current).toHaveCount(1);
     await expect(current).toHaveAttribute('data-testid', 'segment-Development');
     await expect(row.locator('[data-testid="feature-overdue-badge"]')).toHaveCount(0);
+
+    // UX-002-01: on Development-active (amber-on-amber) rows the active-stage
+    // marker must survive as three stacked signals:
+    //   (a) a centerline dot inside the segment,
+    //   (b) a 1px top+bottom hairline on the segment's border-block,
+    //   (c) a brightness delta vs. inactive siblings (full opacity on active,
+    //       dimmed on upcoming/completed — brief §4 "railway signal-block").
+    const activeSegment = current;
+    await expect(
+      activeSegment.locator('.gantt-seg-bar__active-dot'),
+    ).toHaveCount(1);
+    const activeStyles = await activeSegment.evaluate((el: Element) => {
+      const cs = window.getComputedStyle(el);
+      return {
+        borderTopWidth: cs.borderTopWidth,
+        borderBottomWidth: cs.borderBottomWidth,
+        borderTopStyle: cs.borderTopStyle,
+        borderBottomStyle: cs.borderBottomStyle,
+        opacity: cs.opacity,
+        boxShadow: cs.boxShadow,
+      };
+    });
+    expect(activeStyles.borderTopWidth).toBe('1px');
+    expect(activeStyles.borderBottomWidth).toBe('1px');
+    expect(activeStyles.borderTopStyle).toBe('solid');
+    expect(activeStyles.borderBottomStyle).toBe('solid');
+    // Active segment renders at full opacity; the inset inner rail is painted
+    // via `box-shadow: inset ...`, so the computed shadow must be non-none.
+    expect(activeStyles.opacity).toBe('1');
+    expect(activeStyles.boxShadow).not.toBe('none');
+
+    // Brightness delta check (presence, not pixel math): an inactive sibling
+    // segment's opacity is less than the active segment's opacity.
+    const upcomingOpacity = await row
+      .locator('[data-testid="segment-Testing"]')
+      .evaluate((el: Element) => window.getComputedStyle(el).opacity);
+    expect(Number(upcomingOpacity)).toBeLessThan(Number(activeStyles.opacity));
   });
 
   test('Flow 1 edge — overdue badge on F2 (Testing overdue)', async ({ page }) => {

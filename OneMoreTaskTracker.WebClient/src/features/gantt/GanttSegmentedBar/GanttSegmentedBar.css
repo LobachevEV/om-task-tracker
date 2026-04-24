@@ -65,19 +65,25 @@
   opacity: 0.8;
 }
 
-/* Active (current) stage — amber top+bottom hairlines + subtle amber wash on
- * the segment background. The wash uses --accent-dim (sanctioned token) so
- * the active segment reads as "fractionally brighter than its siblings"
- * per brief §4, not "indistinguishable." UX-001-04. */
+/* Active (current) stage — brief §4 "railway signal-block" treatment:
+ *  1. External 1px top+bottom amber hairlines on the segment's border-block
+ *     (NOT a left-stripe — BAN 1 respected).
+ *  2. Internal 1px top+bottom dark-amber-ink hairlines stacked inside the
+ *     segment via `box-shadow` insets. This inner rail survives even when
+ *     the segment's own color is amber (Development-active case, where
+ *     --accent and --state-in-dev are OKLCH-identical) because --accent-ink
+ *     is dark, not amber.
+ *  3. Full opacity (siblings dim to 0.85 / 0.6), so the active block reads
+ *     as the brightest segment in the row regardless of stage color.
+ * UX-002-01 (iter-003): reinstates the hairline + disambiguates on amber-on-amber. */
 .gantt-seg-bar__segment[data-active='true'] {
   border-top: 1px solid var(--accent);
   border-bottom: 1px solid var(--accent);
-  background: linear-gradient(
-      var(--accent-dim),
-      var(--accent-dim)
-    ),
-    var(--seg-color, var(--state-in-dev));
-  background-blend-mode: normal;
+  background: var(--seg-color, var(--state-in-dev));
+  opacity: 1;
+  box-shadow:
+    inset 0 1px 0 0 var(--accent-ink),
+    inset 0 -1px 0 0 var(--accent-ink);
 }
 
 /* Overdue segment — danger top+bottom hairlines on the same geometry. */
