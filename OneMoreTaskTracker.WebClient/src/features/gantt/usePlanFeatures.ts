@@ -15,6 +15,16 @@ export interface UsePlanFeaturesResult {
   loading: boolean;
   error: Error | null;
   refetch: () => void;
+  /**
+   * Replace a single row in the local feature list with the authoritative
+   * `FeatureSummary` returned from a per-field inline-edit PATCH. The
+   * module-level cache is updated in lockstep so a remount re-hydrates
+   * with the new value.
+   *
+   * No-op when the id is not present — inline edits never add / remove
+   * rows.
+   */
+  applyFeatureUpdate: (next: FeatureSummary) => void;
 }
 
 function cacheKey(params: { scope?: FeatureScope; state?: FeatureState }): string {
@@ -89,5 +99,31 @@ export function usePlanFeatures(params: UsePlanFeaturesParams): UsePlanFeaturesR
 
   useRefetchOnFocus(error != null, refetch, loading);
 
-  return { data, loading, error, refetch };
+  const applyFeatureUpdate = useCallback(
+    (next: FeatureSummary) => {
+      setData((prev) => {
+        if (!prev) return prev;
+        let changed = false;
+        const replaced = prev.map((row) => {
+          if (row.id !== next.id) return row;
+          changed = true;
+          return next;
+        });
+        if (!changed) return prev;
+        // Keep the module cache in sync so a remount doesn't re-hydrate
+        // with the stale row.
+        const cached = featuresCache.get(key);
+        if (cached) {
+          featuresCache.set(
+            key,
+            cached.map((row) => (row.id === next.id ? next : row)),
+          );
+        }
+        return replaced;
+      });
+    },
+    [key],
+  );
+
+  return { data, loading, error, refetch, applyFeatureUpdate };
 }

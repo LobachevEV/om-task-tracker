@@ -16,6 +16,7 @@ import { useTeamRoster } from '../useTeamRoster';
 import { useGanttLayout, type GanttLane } from '../useGanttLayout';
 import { useGanttPageState, type GanttPageState } from '../useGanttPageState';
 import { ZOOM_DAYS } from '../ganttMath';
+import { useOptimisticFeatureMutation } from '../InlineEditors';
 import './GanttPage.css';
 
 const PLACEHOLDER_ROLE: MiniTeamMember['role'] = 'FrontendDeveloper';
@@ -45,6 +46,13 @@ export interface GanttPageInternalProps {
   role: UserRole;
   features: FeatureSummary[];
   roster: MiniTeamMember[];
+  /**
+   * Raw roster rows kept around so the inline owner picker can send the
+   * full (email / role / manager flag) mini-member to the editor without
+   * a second mapping pass. The `roster` prop above is the display-facing
+   * subset.
+   */
+  rawRoster: readonly TeamRosterMember[];
   rosterLoading: boolean;
   rosterError: Error | null;
   onRosterRetry: () => void;
@@ -52,6 +60,11 @@ export interface GanttPageInternalProps {
   error: Error | null;
   onRetry: () => void;
   state: GanttPageState;
+  /**
+   * Patch a single feature row in place after an inline-edit PATCH.
+   * Supplied by `usePlanFeatures.applyFeatureUpdate`.
+   */
+  onFeatureUpdated: (next: FeatureSummary) => void;
 }
 
 interface UnscheduledSectionProps {
@@ -87,6 +100,7 @@ export function GanttPageInternal({
   role,
   features,
   roster,
+  rawRoster,
   rosterLoading,
   rosterError,
   onRosterRetry,
@@ -94,12 +108,14 @@ export function GanttPageInternal({
   error,
   onRetry,
   state,
+  onFeatureUpdated,
 }: GanttPageInternalProps) {
   const { t } = useTranslation('gantt');
   const [createOpen, setCreateOpen] = useState(false);
 
   const layout = useGanttLayout({ features, today: state.today, zoom: state.zoom });
   const isManager = role === 'Manager';
+  const mutations = useOptimisticFeatureMutation({ onApplied: onFeatureUpdated });
 
   const rosterById = useMemo(() => {
     const map = new Map<number, MiniTeamMember>();
@@ -224,6 +240,9 @@ export function GanttPageInternal({
                   resolvePerformer={(id) =>
                     id == null ? undefined : rosterById.get(id)
                   }
+                  canEdit={isManager}
+                  mutations={isManager ? mutations : undefined}
+                  roster={isManager ? rawRoster : undefined}
                 />
               );
             })}
@@ -273,6 +292,7 @@ export function GanttPage() {
       role={role}
       features={features.data ?? []}
       roster={rosterMembers}
+      rawRoster={roster.data ?? []}
       rosterLoading={roster.loading}
       rosterError={roster.error}
       onRosterRetry={roster.refetch}
@@ -280,6 +300,7 @@ export function GanttPage() {
       error={features.error}
       onRetry={features.refetch}
       state={state}
+      onFeatureUpdated={features.applyFeatureUpdate}
     />
   );
 }

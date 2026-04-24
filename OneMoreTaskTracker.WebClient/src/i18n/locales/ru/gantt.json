@@ -127,6 +127,24 @@
     "EthalonTesting": "Тестирование на эталоне",
     "LiveRelease": "Релиз в прод"
   },
+  "inlineEdit": {
+    "titleAria": "Название фичи: {{title}}",
+    "descriptionAria": "Описание фичи «{{title}}»",
+    "descriptionEmpty": "Добавить описание",
+    "ownerAria": "Ответственный за этап {{stage}} фичи «{{title}}»",
+    "plannedStartAria": "Плановое начало этапа {{stage}} фичи «{{title}}»",
+    "plannedEndAria": "Плановое окончание этапа {{stage}} фичи «{{title}}»",
+    "openStageDrawerAria": "Открыть ящик этапа {{stage}}",
+    "errors": {
+      "titleEmpty": "Название не может быть пустым",
+      "titleTooLong": "Название слишком длинное (до 200 символов)",
+      "invalidDate": "Укажите реальную дату релиза",
+      "endBeforeStart": "Дата окончания не раньше {{date}}",
+      "startAfterEnd": "Дата начала не позже {{date}}",
+      "conflict": "Кто-то уже обновил это поле; обновите страницу",
+      "network": "Не удалось сохранить. Повторить?"
+    }
+  },
   "stagePlan": {
     "title": "План этапов",
     "subtitle": "Задайте сроки каждого этапа и назначьте ответственного.",

@@ -47,6 +47,7 @@ function Harness({
       role={role}
       features={features}
       roster={ROSTER}
+      rawRoster={[]}
       rosterLoading={rosterLoading}
       rosterError={rosterError}
       onRosterRetry={onRosterRetry}
@@ -54,6 +55,7 @@ function Harness({
       error={error}
       onRetry={onRetry}
       state={state}
+      onFeatureUpdated={() => {}}
     />
   );
 }
@@ -86,8 +88,9 @@ describe('GanttPageInternal', () => {
   });
 
   it('renders the timeline + feature rows when features are present', () => {
-    renderHarness({ role: 'Manager' });
-    // Each scheduled feature yields a row with a title button
+    // Viewer role renders static title buttons — used to assert row presence
+    // without picking up on manager-only inline-edit input affordances.
+    renderHarness({ role: 'Qa' });
     const titles = screen
       .getAllByRole('button')
       .map((b) => b.textContent ?? '')
@@ -131,8 +134,10 @@ describe('GanttPageInternal', () => {
     expect(subRows).toHaveLength(5);
   });
 
-  it('clicking a row title opens the drawer (FeatureDrawer becomes mounted)', () => {
-    const { container } = renderHarness({ role: 'Manager' });
+  it('clicking a row title opens the drawer for non-manager viewers', () => {
+    // Managers now inline-edit the title; the drawer is opened via the
+    // stage-row trigger instead. Viewer roles keep the classic click path.
+    const { container } = renderHarness({ role: 'Qa' });
     const titleBtn = container.querySelector<HTMLButtonElement>('.gantt-row__title');
     expect(titleBtn).not.toBeNull();
     act(() => {

@@ -119,6 +119,24 @@
     "EthalonTesting": "Ethalon testing",
     "LiveRelease": "Live release"
   },
+  "inlineEdit": {
+    "titleAria": "Feature title: {{title}}",
+    "descriptionAria": "Description for feature \"{{title}}\"",
+    "descriptionEmpty": "Add a description",
+    "ownerAria": "Owner for {{stage}} stage of \"{{title}}\"",
+    "plannedStartAria": "Planned start for {{stage}} stage of \"{{title}}\"",
+    "plannedEndAria": "Planned end for {{stage}} stage of \"{{title}}\"",
+    "openStageDrawerAria": "Open drawer for {{stage}} stage",
+    "errors": {
+      "titleEmpty": "Title can't be empty",
+      "titleTooLong": "Title is too long (max 200 chars)",
+      "invalidDate": "Use a real release date",
+      "endBeforeStart": "End must be on or after {{date}}",
+      "startAfterEnd": "Start must be on or before {{date}}",
+      "conflict": "Someone else just updated this; reload to see latest",
+      "network": "Couldn't save. Retry?"
+    }
+  },
   "stagePlan": {
     "title": "Stage plan",
     "subtitle": "Schedule each stage and assign its owner.",

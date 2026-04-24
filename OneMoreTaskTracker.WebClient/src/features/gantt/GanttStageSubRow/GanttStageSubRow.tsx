@@ -1,10 +1,16 @@
 import { useTranslation } from 'react-i18next';
 import type { FeatureState, FeatureSummary, MiniTeamMember } from '../../../shared/types/feature';
+import type { TeamRosterMember } from '../../../shared/api/teamApi';
 import { Avatar, Badge } from '../../../shared/ds';
 import { FEATURE_STATE_CSS } from '../stateConfig';
 import type { StageBarGeometry } from '../ganttStageGeometry';
 import { daysBetween, parseIsoDate } from '../ganttMath';
 import { roleToSide } from '../roleToSide';
+import {
+  InlineDateCell,
+  InlineOwnerPicker,
+  type OptimisticFeatureMutations,
+} from '../InlineEditors';
 import './GanttStageSubRow.css';
 
 /**
@@ -35,6 +41,14 @@ export interface GanttStageSubRowProps {
   /** Index (0..4) in canonical order, for the `01…05` numeral. */
   index: number;
   onOpenStage: (stage: FeatureState) => void;
+  /**
+   * When true, render the inline owner picker and date editors. When false,
+   * the sub-row renders exactly as the read-only `gantt-feature-info`
+   * layout — no tab stops, no editor affordances. Fail-closed.
+   */
+  canEdit?: boolean;
+  mutations?: OptimisticFeatureMutations;
+  roster?: readonly TeamRosterMember[];
 }
 
 function avatarTone(role: MiniTeamMember['role']): 'manager' | 'frontend' | 'backend' | 'qa' {
@@ -88,6 +102,9 @@ export function GanttStageSubRow({
   resolvePerformer,
   index,
   onOpenStage,
+  canEdit = false,
+  mutations,
+  roster,
 }: GanttStageSubRowProps) {
   const { t, i18n } = useTranslation('gantt');
   const plan = feature.stagePlans.find((p) => p.stage === seg.stage) ?? null;
@@ -110,8 +127,28 @@ export function GanttStageSubRow({
   const shortStart = plan?.plannedStart ? formatShortDate(plan.plannedStart, locale) : '—';
   const shortEnd = plan?.plannedEnd ? formatShortDate(plan.plannedEnd, locale) : '—';
 
+  const inlineEnabled = canEdit && mutations != null;
+  const stageVersion = plan?.stageVersion ?? 0;
+
   let ownerNode;
-  if (!hasPerformerId) {
+  if (inlineEnabled && roster) {
+    ownerNode = (
+      <InlineOwnerPicker
+        value={plan?.performerUserId ?? null}
+        displayName={performer?.displayName ?? null}
+        roster={roster}
+        ariaLabel={t('inlineEdit.ownerAria', {
+          defaultValue: 'Owner for {{stage}} stage of "{{title}}"',
+          stage: stageName,
+          title: feature.title,
+        })}
+        testId={`stage-owner-editor-${feature.id}-${seg.stage}`}
+        onSave={async (next) => {
+          await mutations!.saveStageOwner(feature.id, seg.stage, next, stageVersion);
+        }}
+      />
+    );
+  } else if (!hasPerformerId) {
     ownerNode = <span className="gantt-stage-row__unassigned">{t('row.unassigned')}</span>;
   } else if (stale) {
     // Brief §7 microcopy: `<previous name> · removed` when the name is known,
@@ -144,57 +181,152 @@ export function GanttStageSubRow({
       data-overdue={seg.isOverdue ? 'true' : 'false'}
     >
       <div className="gantt-stage-row__gutter">
-        <button
-          type="button"
-          className="gantt-stage-row__trigger"
-          onClick={() => onOpenStage(seg.stage)}
-          aria-label={t('stageRow.aria', {
-            index: index + 1,
-            name: stageName,
-            owner: performer?.displayName ?? t('row.unassigned'),
-          })}
-        >
-          <span className="gantt-stage-row__numeral" aria-hidden="true">
-            {numeral}
-          </span>
-          <span
-            className="gantt-stage-row__dot"
-            style={{ background: `var(${FEATURE_STATE_CSS[seg.stage]})` }}
-            aria-hidden="true"
-          />
-          <span className="gantt-stage-row__stage-name">{stageName}</span>
-          <span className="gantt-stage-row__body">
-            <span className="gantt-stage-row__owner" data-testid="stage-owner">
-              {ownerNode}
-            </span>
-            {side != null && performer != null ? (
-              <Badge
-                tone={sideBadgeTone(side)}
-                className="gantt-stage-row__side"
-                data-testid="stage-side"
-              >
-                {t(`side.${side}`)}
-              </Badge>
-            ) : null}
-            <span className="gantt-stage-row__dates">
-              <span className="gantt-stage-row__date">{shortStart}</span>
-              <span className="gantt-stage-row__sep" aria-hidden="true">
-                {' – '}
-              </span>
-              <span className="gantt-stage-row__date">{shortEnd}</span>
-              <span className="gantt-stage-row__sep" aria-hidden="true">
-                {' · '}
+        {inlineEnabled ? (
+          <div
+            className="gantt-stage-row__trigger gantt-stage-row__trigger--inline"
+            role="group"
+            aria-label={t('stageRow.aria', {
+              index: index + 1,
+              name: stageName,
+              owner: performer?.displayName ?? t('row.unassigned'),
+            })}
+          >
+            <button
+              type="button"
+              className="gantt-stage-row__numeral-btn"
+              onClick={() => onOpenStage(seg.stage)}
+              aria-label={t('inlineEdit.openStageDrawerAria', {
+                defaultValue: 'Open drawer for {{stage}} stage',
+                stage: stageName,
+              })}
+            >
+              <span className="gantt-stage-row__numeral" aria-hidden="true">
+                {numeral}
               </span>
               <span
-                className="gantt-stage-row__dtr"
-                data-testid="stage-dtr"
-                data-overdue={seg.isOverdue ? 'true' : 'false'}
-              >
-                {dtr}
+                className="gantt-stage-row__dot"
+                style={{ background: `var(${FEATURE_STATE_CSS[seg.stage]})` }}
+                aria-hidden="true"
+              />
+              <span className="gantt-stage-row__stage-name">{stageName}</span>
+            </button>
+            <span className="gantt-stage-row__body">
+              <span className="gantt-stage-row__owner" data-testid="stage-owner">
+                {ownerNode}
+              </span>
+              {side != null && performer != null ? (
+                <Badge
+                  tone={sideBadgeTone(side)}
+                  className="gantt-stage-row__side"
+                  data-testid="stage-side"
+                >
+                  {t(`side.${side}`)}
+                </Badge>
+              ) : null}
+              <span className="gantt-stage-row__dates">
+                <InlineDateCell
+                  value={plan?.plannedStart ?? null}
+                  ariaLabel={t('inlineEdit.plannedStartAria', {
+                    defaultValue: 'Planned start for {{stage}} stage of "{{title}}"',
+                    stage: stageName,
+                    title: feature.title,
+                  })}
+                  testId={`stage-planned-start-${feature.id}-${seg.stage}`}
+                  onSave={async (next) => {
+                    await mutations!.saveStagePlannedStart(
+                      feature.id,
+                      seg.stage,
+                      next,
+                      stageVersion,
+                    );
+                  }}
+                />
+                <span className="gantt-stage-row__sep" aria-hidden="true">
+                  {' – '}
+                </span>
+                <InlineDateCell
+                  value={plan?.plannedEnd ?? null}
+                  ariaLabel={t('inlineEdit.plannedEndAria', {
+                    defaultValue: 'Planned end for {{stage}} stage of "{{title}}"',
+                    stage: stageName,
+                    title: feature.title,
+                  })}
+                  testId={`stage-planned-end-${feature.id}-${seg.stage}`}
+                  onSave={async (next) => {
+                    await mutations!.saveStagePlannedEnd(
+                      feature.id,
+                      seg.stage,
+                      next,
+                      stageVersion,
+                    );
+                  }}
+                />
+                <span className="gantt-stage-row__sep" aria-hidden="true">
+                  {' · '}
+                </span>
+                <span
+                  className="gantt-stage-row__dtr"
+                  data-testid="stage-dtr"
+                  data-overdue={seg.isOverdue ? 'true' : 'false'}
+                >
+                  {dtr}
+                </span>
               </span>
             </span>
-          </span>
-        </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="gantt-stage-row__trigger"
+            onClick={() => onOpenStage(seg.stage)}
+            aria-label={t('stageRow.aria', {
+              index: index + 1,
+              name: stageName,
+              owner: performer?.displayName ?? t('row.unassigned'),
+            })}
+          >
+            <span className="gantt-stage-row__numeral" aria-hidden="true">
+              {numeral}
+            </span>
+            <span
+              className="gantt-stage-row__dot"
+              style={{ background: `var(${FEATURE_STATE_CSS[seg.stage]})` }}
+              aria-hidden="true"
+            />
+            <span className="gantt-stage-row__stage-name">{stageName}</span>
+            <span className="gantt-stage-row__body">
+              <span className="gantt-stage-row__owner" data-testid="stage-owner">
+                {ownerNode}
+              </span>
+              {side != null && performer != null ? (
+                <Badge
+                  tone={sideBadgeTone(side)}
+                  className="gantt-stage-row__side"
+                  data-testid="stage-side"
+                >
+                  {t(`side.${side}`)}
+                </Badge>
+              ) : null}
+              <span className="gantt-stage-row__dates">
+                <span className="gantt-stage-row__date">{shortStart}</span>
+                <span className="gantt-stage-row__sep" aria-hidden="true">
+                  {' – '}
+                </span>
+                <span className="gantt-stage-row__date">{shortEnd}</span>
+                <span className="gantt-stage-row__sep" aria-hidden="true">
+                  {' · '}
+                </span>
+                <span
+                  className="gantt-stage-row__dtr"
+                  data-testid="stage-dtr"
+                  data-overdue={seg.isOverdue ? 'true' : 'false'}
+                >
+                  {dtr}
+                </span>
+              </span>
+            </span>
+          </button>
+        )}
       </div>
       <div className="gantt-stage-row__lane">
         {seg.bar || seg.ghost ? (

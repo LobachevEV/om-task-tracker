@@ -1,0 +1,215 @@
+/*
+ * Inline-editor primitives for the Gantt (gantt-inline-edit-feature iter 1).
+ *
+ * Colors MUST come from /src/styles/tokens.css — no OKLCH literals here.
+ * This file carries only structural rules; Phase B adds the dotted hover
+ * underline, focus hairline, accept flash, and chevron glyphs.
+ */
+
+.inline-cell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+.inline-cell--read {
+  color: var(--text);
+}
+
+.inline-cell__input {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-block;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  padding-block: 2px;
+  padding-inline: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  border-radius: 2px;
+  border-block-end: 1px solid transparent;
+  cursor: text;
+}
+
+.inline-cell__input:hover,
+.inline-cell[data-status='idle'] .inline-cell__input:hover {
+  border-block-end: 1px dotted var(--border);
+}
+
+.inline-cell__input:focus-visible,
+.inline-cell[data-status='editing'] .inline-cell__input {
+  outline: none;
+  border-block-end: 1px solid var(--accent);
+}
+
+.inline-cell[data-status='pending'] .inline-cell__input {
+  border-block-end: 1px dashed var(--border);
+}
+
+.inline-cell[data-status='error'] .inline-cell__input {
+  border-block-end: 1px solid var(--danger);
+}
+
+.inline-cell__input--date {
+  font-variant-numeric: tabular-nums;
+  inline-size: 11ch;
+}
+
+.inline-cell__input--owner {
+  cursor: default;
+}
+
+.inline-cell__clear {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 16px;
+  block-size: 16px;
+  margin-inline-start: 2px;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 2px;
+}
+.inline-cell__clear:hover {
+  color: var(--text);
+}
+
+.inline-cell__error {
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-start: 0;
+  margin-block-start: 2px;
+  color: var(--danger);
+  font-size: 11px;
+  line-height: 1.2;
+  white-space: nowrap;
+  max-inline-size: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.inline-cell__listbox {
+  position: absolute;
+  inset-block-start: calc(100% + 2px);
+  inset-inline-start: 0;
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  min-inline-size: 180px;
+  max-block-size: 240px;
+  overflow-y: auto;
+  background: var(--elevated);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-popover);
+}
+
+.inline-cell__listbox-option {
+  padding: 4px 8px;
+  display: inline-flex;
+  gap: 6px;
+  inline-size: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.inline-cell__listbox-option[data-active='true'] {
+  background: var(--accent-dim);
+}
+
+.inline-cell__listbox-option[aria-selected='true'] {
+  font-weight: 600;
+}
+
+.inline-cell__listbox-empty {
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.inline-cell__listbox-sep {
+  color: var(--text-dim);
+}
+
+.inline-cell__listbox-role {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------- Inline description editor ------------- */
+
+.inline-description {
+  display: block;
+  inline-size: 100%;
+  padding: 6px 12px;
+  background: var(--surface);
+  border-block-end: 1px solid var(--border);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.inline-description--collapsed {
+  all: unset;
+  box-sizing: border-box;
+  display: block;
+  inline-size: 100%;
+  padding: 6px 12px;
+  border-block-end: 1px solid var(--border);
+  color: var(--text);
+  cursor: text;
+  font-size: 12px;
+  text-align: start;
+}
+
+.inline-description--collapsed:hover {
+  background: var(--elevated);
+}
+
+.inline-description--collapsed[data-empty] .inline-description__preview {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.inline-description__preview {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-inline-size: 100%;
+}
+
+.inline-description--expanded {
+  padding: 8px 12px;
+}
+
+.inline-description__textarea {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-block-size: 240px;
+  min-block-size: 64px;
+  resize: vertical;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 6px 8px;
+  font: inherit;
+}
+
+.inline-description__textarea:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.inline-description[data-status='error'] .inline-description__textarea {
+  border-color: var(--danger);
+}

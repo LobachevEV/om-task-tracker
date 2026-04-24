@@ -60,6 +60,22 @@
   border-radius: 2px;
 }
 
+.gantt-stage-row__trigger--inline {
+  cursor: default;
+}
+
+.gantt-stage-row__numeral-btn {
+  all: unset;
+  cursor: pointer;
+  display: contents;
+}
+
+.gantt-stage-row__numeral-btn:focus-visible .gantt-stage-row__stage-name {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 .gantt-stage-row__numeral {
   grid-column: 1 / 2;
   grid-row: 1 / 2;

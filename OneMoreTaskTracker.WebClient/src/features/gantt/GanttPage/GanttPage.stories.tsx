@@ -52,6 +52,7 @@ function PageHarness({
       role={role}
       features={features}
       roster={ROSTER}
+      rawRoster={[]}
       rosterLoading={false}
       rosterError={null}
       onRosterRetry={() => {}}
@@ -59,6 +60,7 @@ function PageHarness({
       error={error}
       onRetry={() => {}}
       state={state}
+      onFeatureUpdated={() => {}}
     />
   );
 }

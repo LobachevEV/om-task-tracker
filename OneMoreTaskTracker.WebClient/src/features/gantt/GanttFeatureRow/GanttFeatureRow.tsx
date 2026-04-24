@@ -5,6 +5,7 @@ import type {
   FeatureSummary,
   MiniTeamMember,
 } from '../../../shared/types/feature';
+import type { TeamRosterMember } from '../../../shared/api/teamApi';
 import { GanttAssigneeStack } from '../GanttAssigneeStack';
 import type { BarGeometry, DateWindow } from '../ganttMath';
 import { daysBetween } from '../ganttMath';
@@ -13,6 +14,11 @@ import { featureIsOverdue, plannedStageCount } from '../ganttStageGeometry';
 import { GanttSegmentedBar } from '../GanttSegmentedBar';
 import { GanttStageSubRow } from '../GanttStageSubRow';
 import type { GanttLaneVariant } from '../useGanttLayout';
+import {
+  InlineDescriptionEditor,
+  InlineTextCell,
+  type OptimisticFeatureMutations,
+} from '../InlineEditors';
 import './GanttFeatureRow.css';
 
 export interface GanttFeatureRowProps {
@@ -43,6 +49,15 @@ export interface GanttFeatureRowProps {
    * the bare "removed" microcopy — never `#<id>`.
    */
   removedPerformerNames?: ReadonlyMap<number, string>;
+  /**
+   * True when the signed-in user may edit this feature (manager + owner).
+   * Gates the inline editors; non-managers see the existing read-only row.
+   */
+  canEdit?: boolean;
+  /** Wired by GanttPage — the five per-field PATCH callers. */
+  mutations?: OptimisticFeatureMutations;
+  /** Roster used by the stage-owner picker inside expanded sub-rows. */
+  roster?: readonly TeamRosterMember[];
 }
 
 function computeFeatureDtr(feature: FeatureSummary, today: string): string {
@@ -68,6 +83,9 @@ export function GanttFeatureRow({
   onOpenStage,
   resolvePerformer,
   removedPerformerNames,
+  canEdit = false,
+  mutations,
+  roster,
 }: GanttFeatureRowProps) {
   const { t } = useTranslation('gantt');
 
@@ -89,6 +107,8 @@ export function GanttFeatureRow({
       onToggleExpand();
     }
   };
+
+  const inlineEnabled = canEdit && mutations != null;
 
   return (
     <>
@@ -114,15 +134,44 @@ export function GanttFeatureRow({
             >
               {expanded ? '▾' : '▸'}
             </button>
-            <button
-              type="button"
-              className="gantt-row__title"
-              aria-label={ariaLabel}
-              onClick={() => onOpen(feature.id)}
-              onKeyDown={handleTitleKeyDown}
-            >
-              <span>{feature.title}</span>
-            </button>
+            {inlineEnabled ? (
+              <InlineTextCell
+                value={feature.title}
+                ariaLabel={t('inlineEdit.titleAria', {
+                  defaultValue: 'Feature title: {{title}}',
+                  title: feature.title,
+                })}
+                className="gantt-row__title-editor"
+                testId={`feature-title-editor-${feature.id}`}
+                validate={(next) => {
+                  const trimmed = next.trim();
+                  if (trimmed.length === 0) {
+                    return t('inlineEdit.errors.titleEmpty', {
+                      defaultValue: "Title can't be empty",
+                    });
+                  }
+                  if (trimmed.length > 200) {
+                    return t('inlineEdit.errors.titleTooLong', {
+                      defaultValue: 'Title is too long (max 200 chars)',
+                    });
+                  }
+                  return null;
+                }}
+                onSave={async (next) => {
+                  await mutations!.saveTitle(feature.id, next.trim(), feature.version);
+                }}
+              />
+            ) : (
+              <button
+                type="button"
+                className="gantt-row__title"
+                aria-label={ariaLabel}
+                onClick={() => onOpen(feature.id)}
+                onKeyDown={handleTitleKeyDown}
+              >
+                <span>{feature.title}</span>
+              </button>
+            )}
           </div>
           <div className="gantt-row__lead">
             {t('row.lead')}: {lead.displayName}
@@ -177,8 +226,22 @@ export function GanttFeatureRow({
         </div>
       </div>
 
-      {expanded
-        ? stageBars.map((seg, index) => (
+      {expanded ? (
+        <>
+          <InlineDescriptionEditor
+            value={feature.description}
+            readOnly={!inlineEnabled}
+            testId={`feature-description-${feature.id}`}
+            ariaLabel={t('inlineEdit.descriptionAria', {
+              defaultValue: 'Description for feature "{{title}}"',
+              title: feature.title,
+            })}
+            onSave={async (next) => {
+              if (!inlineEnabled) return;
+              await mutations!.saveDescription(feature.id, next, feature.version);
+            }}
+          />
+          {stageBars.map((seg, index) => (
             <GanttStageSubRow
               key={seg.stage}
               feature={feature}
@@ -195,9 +258,13 @@ export function GanttFeatureRow({
               }
               index={index}
               onOpenStage={onOpenStage}
+              canEdit={inlineEnabled}
+              mutations={mutations}
+              roster={roster}
             />
-          ))
-        : null}
+          ))}
+        </>
+      ) : null}
     </>
   );
 }
