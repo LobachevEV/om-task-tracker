@@ -186,4 +186,40 @@ public sealed class UpdateFeatureTitleHandlerTests
         var ex = await act2.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.AlreadyExists);
     }
+
+    [Fact]
+    public async Task Update_WithStaleIfMatch_StatusDetailCarriesConflictMarkerAndCurrentVersion()
+    {
+        // Contract: api-contract.md § "Error Envelope" — the Features service
+        // must encode the current version into Status.Detail using the
+        // ConflictDetail convention so the gateway middleware can surface
+        // `{ conflict: { kind: "version", currentVersion: n } }` on the 409.
+        using var db = NewDb();
+        var created = await new CreateFeatureHandler(db).Create(
+            new CreateFeatureRequest { Title = "Original", ManagerUserId = 1 },
+            TestServerCallContext.Create());
+
+        // First successful PATCH bumps Version from 0 to 1.
+        await Handler(db).Update(
+            new UpdateFeatureTitleRequest { Id = created.Id, Title = "First", CallerUserId = 1 },
+            TestServerCallContext.Create());
+
+        // Second PATCH with stale If-Match value must throw with conflict detail.
+        var act = () => Handler(db).Update(
+            new UpdateFeatureTitleRequest
+            {
+                Id = created.Id,
+                Title = "Second",
+                CallerUserId = 1,
+                ExpectedVersion = 99, // stale — actual is 1
+            },
+            TestServerCallContext.Create());
+
+        var ex = await act.Should().ThrowAsync<RpcException>();
+        ex.Which.StatusCode.Should().Be(StatusCode.AlreadyExists);
+        ex.Which.Status.Detail.Should().Contain("|conflict=");
+        ex.Which.Status.Detail.Should().Contain("\"currentVersion\":1");
+        ex.Which.Status.Detail.Should().Contain("\"kind\":\"version\"");
+        ex.Which.Status.Detail.Should().StartWith("Updated by someone else");
+    }
 }

@@ -7,6 +7,14 @@ public class GrpcExceptionMiddleware(RequestDelegate next, ILogger<GrpcException
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
+    // Handlers in the Features service encode extra conflict context after a
+    // pipe delimiter in Status.Detail so the gateway can surface it as the
+    // contract-declared `conflict` object (api-contract.md § "Error Envelope").
+    // Example detail payloads:
+    //   "Updated by someone else|conflict={\"kind\":\"version\",\"currentVersion\":3}"
+    //   "Stage order violation|conflict={\"kind\":\"overlap\",\"with\":\"Development\"}"
+    private const string ConflictMarker = "|conflict=";
+
     public async Task InvokeAsync(HttpContext context)
     {
         try
@@ -42,10 +50,57 @@ public class GrpcExceptionMiddleware(RequestDelegate next, ILogger<GrpcException
                 _ => (502, "Service error")
             };
 
+            var (publicMessage, conflict) = ExtractConflict(ex.Status.Detail, ex.StatusCode, message);
+
             context.Response.StatusCode = statusCode;
             context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(
-                JsonSerializer.Serialize(new { error = message }, JsonOptions));
+
+            object body = conflict is null
+                ? new { error = publicMessage }
+                : new { error = publicMessage, conflict };
+
+            await context.Response.WriteAsync(JsonSerializer.Serialize(body, JsonOptions));
+        }
+    }
+
+    // Returns (publicMessage, conflictObject?). The handler-provided detail
+    // is ONLY surfaced to the public body when the ConflictMarker is present
+    // (i.e. the handler explicitly opted into the extended envelope via
+    // ConflictDetail). For all other details we keep the generic mapping
+    // message so we never leak raw internal error text — microservices/
+    // security.md § "Error surface leaks".
+    private static (string publicMessage, object? conflict) ExtractConflict(
+        string detail, StatusCode code, string fallbackMessage)
+    {
+        if (string.IsNullOrEmpty(detail))
+            return (fallbackMessage, null);
+
+        var markerIndex = detail.IndexOf(ConflictMarker, StringComparison.Ordinal);
+        if (markerIndex < 0)
+            return (fallbackMessage, null);
+
+        var publicPart = detail[..markerIndex];
+        var jsonPart = detail[(markerIndex + ConflictMarker.Length)..];
+
+        var resolvedMessage = string.IsNullOrWhiteSpace(publicPart) ? fallbackMessage : publicPart;
+
+        // Only AlreadyExists (version conflict) and FailedPrecondition (stage
+        // overlap/order/rangeInvalid) carry a contract-declared conflict
+        // envelope. For other status codes a marker is a misuse — ignore it.
+        if (code != StatusCode.AlreadyExists && code != StatusCode.FailedPrecondition)
+            return (fallbackMessage, null);
+
+        try
+        {
+            var conflict = JsonSerializer.Deserialize<Dictionary<string, object?>>(jsonPart, JsonOptions);
+            return (resolvedMessage, conflict);
+        }
+        catch (JsonException)
+        {
+            // Malformed conflict JSON — keep the public message but drop the
+            // object rather than failing the whole response. Operators see the
+            // raw detail in the structured log line above.
+            return (resolvedMessage, null);
         }
     }
 }

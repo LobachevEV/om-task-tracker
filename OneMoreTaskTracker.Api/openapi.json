@@ -10,6 +10,28 @@
   ],
   "security": [{ "bearerAuth": [] }],
   "paths": {
+    "/api/auth/health": {
+      "get": {
+        "summary": "Liveness probe — returns {status:'ok'}.",
+        "description": "Anonymous, no upstream calls. Used by deployment + GAN harness (BE_HEALTH_URL).",
+        "tags": ["auth"],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["status"],
+                  "properties": { "status": { "type": "string", "enum": ["ok"] } }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/plan/features": {
       "get": {
         "summary": "List features visible to the caller.",
@@ -320,8 +342,8 @@
         "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
       },
       "Conflict": {
-        "description": "Version mismatch (concurrent edit detected). Body may include a conflict.currentVersion hint.",
-        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+        "description": "Version mismatch (concurrent edit detected). Body includes a `conflict` object with `kind:'version'` and the server's current `currentVersion` when the handler reports a concurrency conflict.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ConflictError" } } }
       }
     },
     "schemas": {
@@ -329,6 +351,24 @@
         "type": "object",
         "required": ["error"],
         "properties": { "error": { "type": "string" } }
+      },
+      "ConflictError": {
+        "type": "object",
+        "description": "Extended error envelope emitted on 409/422 when the handler reports a concurrency or stage-order conflict. Clients unaware of `conflict` fall back to the bare `error` string.",
+        "required": ["error"],
+        "properties": {
+          "error": { "type": "string", "description": "Public-facing message such as 'Updated by someone else' or 'Stage order violation'." },
+          "conflict": {
+            "type": "object",
+            "description": "Structured conflict context. Absent when the upstream did not supply one.",
+            "required": ["kind"],
+            "properties": {
+              "kind": { "type": "string", "enum": ["version", "overlap", "order", "rangeInvalid"] },
+              "currentVersion": { "type": "integer", "format": "int32", "description": "Server's current version (kind='version')." },
+              "with": { "$ref": "#/components/schemas/FeatureState" }
+            }
+          }
+        }
       },
       "FeatureState": {
         "type": "string",

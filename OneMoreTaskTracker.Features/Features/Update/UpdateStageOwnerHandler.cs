@@ -37,7 +37,7 @@ public sealed class UpdateStageOwnerHandler(
                    ?? throw new RpcException(new Status(StatusCode.NotFound, $"stage {request.Stage} not found"));
 
         if (request.ExpectedStageVersion > 0 && request.ExpectedStageVersion != plan.Version)
-            throw new RpcException(new Status(StatusCode.AlreadyExists, $"stage version {plan.Version}"));
+            throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(plan.Version)));
 
         // proto3 scalar default 0 = unassigned; negatives coerced defensively
         // (mirrors StagePlanUpserter.NormalizePerformer).
@@ -58,7 +58,8 @@ public sealed class UpdateStageOwnerHandler(
         }
         catch (DbUpdateConcurrencyException)
         {
-            throw new RpcException(new Status(StatusCode.AlreadyExists, "version mismatch"));
+            await db.Entry(plan).ReloadAsync(context.CancellationToken);
+            throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(plan.Version)));
         }
 
         logger.LogInformation(

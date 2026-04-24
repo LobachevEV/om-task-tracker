@@ -13,6 +13,7 @@ using OneMoreTaskTracker.Proto.Features.UpdateFeatureTitleCommand;
 using OneMoreTaskTracker.Proto.Features.UpdateStageOwnerCommand;
 using OneMoreTaskTracker.Proto.Features.UpdateStagePlannedEndCommand;
 using OneMoreTaskTracker.Proto.Features.UpdateStagePlannedStartCommand;
+using OneMoreTaskTracker.Proto.Users;
 using Xunit;
 using UpdateFeatureTitleDto = OneMoreTaskTracker.Proto.Features.UpdateFeatureTitleCommand.FeatureDto;
 using UpdateFeatureDescriptionDto = OneMoreTaskTracker.Proto.Features.UpdateFeatureDescriptionCommand.FeatureDto;
@@ -49,6 +50,40 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
 
     private string DevToken(int userId = 2) =>
         _factory.GenerateToken(userId, "dev@example.com", Roles.FrontendDeveloper);
+
+    // Roster stub used by UpdateStageOwner (gateway-side roster membership
+    // defense per api-contract.md §3). Returns a roster containing the
+    // manager + the listed teammate ids as simple members.
+    private void StubRoster(int managerUserId, params int[] teammateUserIds)
+    {
+        var response = new GetTeamRosterResponse
+        {
+            Members =
+            {
+                new TeamRosterMember
+                {
+                    UserId = managerUserId,
+                    Email = "manager@example.com",
+                    Role = Roles.Manager,
+                }
+            }
+        };
+        foreach (var userId in teammateUserIds)
+        {
+            response.Members.Add(new TeamRosterMember
+            {
+                UserId = userId,
+                Email = $"user{userId}@example.com",
+                Role = Roles.FrontendDeveloper,
+                ManagerId = managerUserId,
+            });
+        }
+
+        _factory.MockUserService
+            .GetTeamRosterAsync(Arg.Any<GetTeamRosterRequest>(),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(response));
+    }
 
     private static FeatureStagePlan ProtoPlan(FeatureState stage, int version = 0) =>
         new()
@@ -309,6 +344,7 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
     public async Task UpdateStageOwner_HappyPath_ForwardsProtoStageAndOwner()
     {
         var client = ClientWithToken(ManagerToken());
+        StubRoster(1, 42);
         UpdateStageOwnerRequest? captured = null;
         _factory.MockStageOwnerUpdater
             .UpdateAsync(Arg.Do<UpdateStageOwnerRequest>(r => captured = r),
@@ -420,6 +456,140 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
             JsonBody(new { stageOwnerUserId = 1 }));
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task UpdateStageOwner_IdNotOnRoster_Returns400WithRosterMessage()
+    {
+        // api-contract.md §3: positive stageOwnerUserId MUST be on the caller's
+        // roster. Gateway fails fast with "Pick a teammate from the list" and
+        // never reaches the Features service (closes the rogue-id attack).
+        var client = ClientWithToken(ManagerToken(userId: 1));
+        StubRoster(1, 2, 3);
+        // The substitute is shared across tests via IClassFixture; scope the
+        // "no call was made" assertion to this test's invocations only.
+        _factory.MockStageOwnerUpdater.ClearReceivedCalls();
+
+        var response = await client.PatchAsync("/api/plan/features/1/stages/Development/owner",
+            JsonBody(new { stageOwnerUserId = 999 }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().Contain("Pick a teammate from the list");
+
+        // Features service must NOT have been invoked for a failed roster check.
+        _factory.MockStageOwnerUpdater.DidNotReceive().UpdateAsync(
+            Arg.Any<UpdateStageOwnerRequest>(),
+            Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task UpdateStageOwner_IdOnRoster_CallsFeaturesService()
+    {
+        var client = ClientWithToken(ManagerToken(userId: 1));
+        StubRoster(1, 2, 3, 7);
+        UpdateStageOwnerRequest? captured = null;
+        _factory.MockStageOwnerUpdater
+            .UpdateAsync(Arg.Do<UpdateStageOwnerRequest>(r => captured = r),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new UpdateStageOwnerDto
+            {
+                Id = 1,
+                Title = "X",
+                Description = string.Empty,
+                State = FeatureState.Development,
+                PlannedStart = string.Empty,
+                PlannedEnd = string.Empty,
+                LeadUserId = 1,
+                ManagerUserId = 1,
+                CreatedAt = DateTime.UtcNow.ToString("O"),
+                UpdatedAt = DateTime.UtcNow.ToString("O"),
+                Version = 2,
+                StagePlans =
+                {
+                    ProtoPlan(FeatureState.CsApproving),
+                    new FeatureStagePlan { Stage = FeatureState.Development, PlannedStart = "", PlannedEnd = "", PerformerUserId = 7, Version = 1 },
+                    ProtoPlan(FeatureState.Testing),
+                    ProtoPlan(FeatureState.EthalonTesting),
+                    ProtoPlan(FeatureState.LiveRelease),
+                }
+            }));
+
+        var response = await client.PatchAsync("/api/plan/features/1/stages/Development/owner",
+            JsonBody(new { stageOwnerUserId = 7 }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        captured!.StageOwnerUserId.Should().Be(7);
+    }
+
+    [Fact]
+    public async Task UpdateStageOwner_NullOwner_SkipsRosterCheckAndClears()
+    {
+        // Clearing the assignment (null) MUST not require a roster call —
+        // there's nothing to verify. Stub the roster with zero teammates; the
+        // Features service still receives stageOwnerUserId=0.
+        var client = ClientWithToken(ManagerToken(userId: 1));
+        StubRoster(managerUserId: 1);
+        UpdateStageOwnerRequest? captured = null;
+        _factory.MockStageOwnerUpdater
+            .UpdateAsync(Arg.Do<UpdateStageOwnerRequest>(r => captured = r),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new UpdateStageOwnerDto
+            {
+                Id = 1,
+                Title = "X",
+                Description = string.Empty,
+                State = FeatureState.Development,
+                PlannedStart = string.Empty,
+                PlannedEnd = string.Empty,
+                LeadUserId = 1,
+                ManagerUserId = 1,
+                CreatedAt = DateTime.UtcNow.ToString("O"),
+                UpdatedAt = DateTime.UtcNow.ToString("O"),
+                Version = 2,
+                StagePlans =
+                {
+                    ProtoPlan(FeatureState.CsApproving),
+                    ProtoPlan(FeatureState.Development),
+                    ProtoPlan(FeatureState.Testing),
+                    ProtoPlan(FeatureState.EthalonTesting),
+                    ProtoPlan(FeatureState.LiveRelease),
+                }
+            }));
+
+        var response = await client.PatchAsync("/api/plan/features/1/stages/Development/owner",
+            JsonBody(new { stageOwnerUserId = (int?)null }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        captured!.StageOwnerUserId.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task UpdateStageOwner_UpstreamAlreadyExists_Returns409WithConflictBody()
+    {
+        // Extended error envelope (api-contract.md § "Error Envelope"): when
+        // the Features service reports a version conflict, the gateway surfaces
+        // 409 with both `error` and the structured `conflict.currentVersion`
+        // so the FE can decide between replay and hard-reload.
+        var client = ClientWithToken(ManagerToken(userId: 1));
+        StubRoster(1, 42);
+        _factory.MockStageOwnerUpdater
+            .UpdateAsync(Arg.Any<UpdateStageOwnerRequest>(),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(_ => throw new RpcException(new Status(
+                StatusCode.AlreadyExists,
+                "Updated by someone else|conflict={\"kind\":\"version\",\"currentVersion\":5}")));
+
+        var response = await client.PatchAsync("/api/plan/features/1/stages/Development/owner",
+            JsonBody(new { stageOwnerUserId = 42 }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        var body = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(body);
+        doc.RootElement.GetProperty("error").GetString().Should().Be("Updated by someone else");
+        var conflict = doc.RootElement.GetProperty("conflict");
+        conflict.GetProperty("kind").GetString().Should().Be("version");
+        conflict.GetProperty("currentVersion").GetInt32().Should().Be(5);
     }
 
     // -------- Stage Planned Start --------

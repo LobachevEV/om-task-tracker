@@ -46,7 +46,7 @@ public sealed class UpdateFeatureTitleHandler(
         // client sent an If-Match and it doesn't match. Missing header (0) falls
         // through to last-write-wins (api-contract.md § "Optimistic Concurrency").
         if (request.ExpectedVersion > 0 && request.ExpectedVersion != feature.Version)
-            throw new RpcException(new Status(StatusCode.AlreadyExists, $"feature version {feature.Version}"));
+            throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));
 
         var before = feature.Title;
         var versionBefore = feature.Version;
@@ -61,8 +61,11 @@ public sealed class UpdateFeatureTitleHandler(
         catch (DbUpdateConcurrencyException)
         {
             // Another writer bumped Version between our SELECT and UPDATE.
-            // Surface as AlreadyExists → HTTP 409 (gateway middleware).
-            throw new RpcException(new Status(StatusCode.AlreadyExists, "version mismatch"));
+            // Surface as AlreadyExists → HTTP 409 (gateway middleware). We
+            // re-read the freshly-committed version so the gateway can
+            // propagate conflict.currentVersion without guessing.
+            await db.Entry(feature).ReloadAsync(context.CancellationToken);
+            throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));
         }
 
         logger.LogInformation(

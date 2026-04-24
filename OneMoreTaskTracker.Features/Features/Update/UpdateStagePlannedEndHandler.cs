@@ -36,7 +36,7 @@ public sealed class UpdateStagePlannedEndHandler(
                    ?? throw new RpcException(new Status(StatusCode.NotFound, $"stage {request.Stage} not found"));
 
         if (request.ExpectedStageVersion > 0 && request.ExpectedStageVersion != plan.Version)
-            throw new RpcException(new Status(StatusCode.AlreadyExists, $"stage version {plan.Version}"));
+            throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(plan.Version)));
 
         FeatureValidation.ValidateDateOrder(plan.PlannedStart, parsed);
 
@@ -58,7 +58,8 @@ public sealed class UpdateStagePlannedEndHandler(
         }
         catch (DbUpdateConcurrencyException)
         {
-            throw new RpcException(new Status(StatusCode.AlreadyExists, "version mismatch"));
+            await db.Entry(plan).ReloadAsync(context.CancellationToken);
+            throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(plan.Version)));
         }
 
         logger.LogInformation(

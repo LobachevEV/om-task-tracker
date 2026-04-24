@@ -168,4 +168,44 @@ public sealed class UpdateStageOwnerHandlerTests
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.AlreadyExists);
     }
+
+    [Fact]
+    public async Task Update_StaleExpectedStageVersion_StatusDetailCarriesConflictMarker()
+    {
+        // Contract: stage-level concurrency conflicts encode currentVersion
+        // into Status.Detail (ConflictDetail.VersionMismatch) so the gateway
+        // can surface the extended `conflict` object.
+        var db = NewDb();
+        var created = await new CreateFeatureHandler(db).Create(
+            new CreateFeatureRequest { Title = "X", ManagerUserId = 1 },
+            TestServerCallContext.Create());
+
+        // First owner update bumps the Development plan's Version 0 → 1.
+        await Handler(db).Update(
+            new UpdateStageOwnerRequest
+            {
+                FeatureId = created.Id,
+                Stage = ProtoFeatureState.Development,
+                StageOwnerUserId = 1,
+                CallerUserId = 1,
+            },
+            TestServerCallContext.Create());
+
+        var act = () => Handler(db).Update(
+            new UpdateStageOwnerRequest
+            {
+                FeatureId = created.Id,
+                Stage = ProtoFeatureState.Development,
+                StageOwnerUserId = 2,
+                CallerUserId = 1,
+                ExpectedStageVersion = 99, // stale — actual is 1
+            },
+            TestServerCallContext.Create());
+
+        var ex = await act.Should().ThrowAsync<RpcException>();
+        ex.Which.StatusCode.Should().Be(StatusCode.AlreadyExists);
+        ex.Which.Status.Detail.Should().StartWith("Updated by someone else");
+        ex.Which.Status.Detail.Should().Contain("|conflict=");
+        ex.Which.Status.Detail.Should().Contain("\"currentVersion\":1");
+    }
 }

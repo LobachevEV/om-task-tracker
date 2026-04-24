@@ -307,14 +307,25 @@ public class PlanController(
         if (!PlanMapper.TryParseStage(stage, out var parsedStage))
             return BadRequest(new { error = "Invalid request data" });
 
-        // Reject unparseable owner ids; null clears, positive ids must be on
-        // the manager's roster (gateway-side roster validation per
-        // microservices/composition.md). Iter 1 accepts the id opaquely — full
-        // roster membership enforcement is Phase B (see backend-plan.md).
+        // Reject unparseable owner ids; null clears the assignment.
         if (body.StageOwnerUserId is { } ownerId && ownerId < 1)
             return BadRequest(new { error = "Invalid request data" });
 
         var callerUserId = User.GetUserId();
+
+        // Gateway-side roster membership check: api-contract.md §3 requires
+        // positive stageOwnerUserIds to be on the authenticated manager's
+        // roster. This closes the "typed-in rogue id" attack — FE pickers are
+        // sourced from the roster, so a non-member id can only come from a
+        // direct API caller. We compose cross-service here rather than
+        // east-west from the Features service (microservices/composition.md).
+        if (body.StageOwnerUserId is { } positiveOwnerId && positiveOwnerId >= 1)
+        {
+            var roster = await LoadRosterForManager(callerUserId, ct);
+            if (!roster.ContainsKey(positiveOwnerId))
+                return BadRequest(new { error = "Pick a teammate from the list" });
+        }
+
         var expectedStageVersion = ParseIfMatch(ifMatch);
 
         var dto = await stageOwnerUpdater.UpdateAsync(new UpdateStageOwnerRequest

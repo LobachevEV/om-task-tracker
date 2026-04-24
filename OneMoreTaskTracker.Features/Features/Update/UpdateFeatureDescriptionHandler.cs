@@ -39,7 +39,7 @@ public sealed class UpdateFeatureDescriptionHandler(
             throw new RpcException(new Status(StatusCode.PermissionDenied, "Not the feature owner"));
 
         if (request.ExpectedVersion > 0 && request.ExpectedVersion != feature.Version)
-            throw new RpcException(new Status(StatusCode.AlreadyExists, $"feature version {feature.Version}"));
+            throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));
 
         var versionBefore = feature.Version;
         var lenBefore = feature.Description?.Length ?? 0;
@@ -53,7 +53,8 @@ public sealed class UpdateFeatureDescriptionHandler(
         }
         catch (DbUpdateConcurrencyException)
         {
-            throw new RpcException(new Status(StatusCode.AlreadyExists, "version mismatch"));
+            await db.Entry(feature).ReloadAsync(context.CancellationToken);
+            throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));
         }
 
         // PII-safe log: length only, never the raw text (see backend-plan.md

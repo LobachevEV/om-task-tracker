@@ -423,4 +423,17 @@ public sealed class AuthControllerIntegrationTests(ApiWebApplicationFactory fact
         jwtToken.Should().NotBeNull();
         jwtToken!.Claims.Should().NotContain(c => c.Type == "manager_id");
     }
+
+    [Fact]
+    public async Task Health_Returns200AndOkStatus()
+    {
+        // Liveness probe used by the GAN harness evaluator. Anonymous + no
+        // upstream call; must stay 200 even when sibling services are down.
+        var response = await _client.GetAsync("/api/auth/health");
+
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
+        var json = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(json);
+        doc.RootElement.GetProperty("status").GetString().Should().Be("ok");
+    }
 }

@@ -114,6 +114,79 @@ public sealed class GrpcExceptionMiddlewareTests
     }
 
     [Fact]
+    public async Task InvokeAsync_AlreadyExistsWithConflictMarker_SurfacesConflictBody()
+    {
+        // Extended error envelope (api-contract.md § "Error Envelope"):
+        // AlreadyExists + "<message>|conflict=<json>" → 409
+        // { error: "<message>", conflict: <object> }.
+        var detail = "Updated by someone else|conflict={\"kind\":\"version\",\"currentVersion\":7}";
+        var ex = new RpcException(new Status(StatusCode.AlreadyExists, detail));
+
+        var context = await InvokeWithException(ex);
+        var body = await GetResponseBody(context);
+
+        context.Response.StatusCode.Should().Be(409);
+
+        using var doc = JsonDocument.Parse(body);
+        doc.RootElement.GetProperty("error").GetString().Should().Be("Updated by someone else");
+        var conflict = doc.RootElement.GetProperty("conflict");
+        conflict.GetProperty("kind").GetString().Should().Be("version");
+        conflict.GetProperty("currentVersion").GetInt32().Should().Be(7);
+    }
+
+    [Fact]
+    public async Task InvokeAsync_FailedPreconditionWithConflictMarker_SurfacesConflictBody()
+    {
+        var detail = "Stage order violation|conflict={\"kind\":\"overlap\",\"with\":\"Development\"}";
+        var ex = new RpcException(new Status(StatusCode.FailedPrecondition, detail));
+
+        var context = await InvokeWithException(ex);
+        var body = await GetResponseBody(context);
+
+        context.Response.StatusCode.Should().Be(422);
+
+        using var doc = JsonDocument.Parse(body);
+        doc.RootElement.GetProperty("error").GetString().Should().Be("Stage order violation");
+        var conflict = doc.RootElement.GetProperty("conflict");
+        conflict.GetProperty("kind").GetString().Should().Be("overlap");
+        conflict.GetProperty("with").GetString().Should().Be("Development");
+    }
+
+    [Fact]
+    public async Task InvokeAsync_AlreadyExistsWithoutMarker_KeepsGenericMessageAndOmitsConflict()
+    {
+        // Defensive: raw internal detail must NOT leak to the public body when
+        // no ConflictMarker is present — microservices/security.md §
+        // "Error surface leaks".
+        var ex = new RpcException(new Status(StatusCode.AlreadyExists, "EF internal error: row version 3"));
+
+        var context = await InvokeWithException(ex);
+        var body = await GetResponseBody(context);
+
+        context.Response.StatusCode.Should().Be(409);
+        using var doc = JsonDocument.Parse(body);
+        doc.RootElement.GetProperty("error").GetString().Should().Be("Resource already exists");
+        doc.RootElement.TryGetProperty("conflict", out _).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task InvokeAsync_ConflictMarkerOnNonConflictStatus_IsIgnored()
+    {
+        // Conflict envelope is only meaningful on AlreadyExists /
+        // FailedPrecondition; a stray marker on NotFound is misuse.
+        var detail = "Resource not found|conflict={\"kind\":\"version\",\"currentVersion\":1}";
+        var ex = new RpcException(new Status(StatusCode.NotFound, detail));
+
+        var context = await InvokeWithException(ex);
+        var body = await GetResponseBody(context);
+
+        context.Response.StatusCode.Should().Be(404);
+        using var doc = JsonDocument.Parse(body);
+        doc.RootElement.GetProperty("error").GetString().Should().Be("Resource not found");
+        doc.RootElement.TryGetProperty("conflict", out _).Should().BeFalse();
+    }
+
+    [Fact]
     public async Task InvokeAsync_LogIncludesRequestPathMethodAndStatusDetail()
     {
         var loggedMessages = new List<string>();
