@@ -3,9 +3,27 @@ import type { FeatureState, FeatureSummary, MiniTeamMember } from '../../../shar
 import { Avatar, Badge } from '../../../shared/ds';
 import { FEATURE_STATE_CSS } from '../stateConfig';
 import type { StageBarGeometry } from '../ganttStageGeometry';
-import { daysBetween } from '../ganttMath';
+import { daysBetween, parseIsoDate } from '../ganttMath';
 import { roleToSide } from '../roleToSide';
 import './GanttStageSubRow.css';
+
+/**
+ * Format an ISO yyyy-mm-dd as a short "Apr 17" label. Keeps the gutter under
+ * its 280px budget and matches brief §7 microcopy example. Uses the active
+ * i18n language (falls back to `en`). Returns the raw ISO on parse failure.
+ */
+function formatShortDate(iso: string, locale: string): string {
+  try {
+    const date = parseIsoDate(iso);
+    return new Intl.DateTimeFormat(locale, {
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'UTC',
+    }).format(date);
+  } catch {
+    return iso;
+  }
+}
 
 export interface GanttStageSubRowProps {
   feature: FeatureSummary;
@@ -71,7 +89,7 @@ export function GanttStageSubRow({
   index,
   onOpenStage,
 }: GanttStageSubRowProps) {
-  const { t } = useTranslation('gantt');
+  const { t, i18n } = useTranslation('gantt');
   const plan = feature.stagePlans.find((p) => p.stage === seg.stage) ?? null;
   const performer = resolvePerformer(plan?.performerUserId ?? null);
   const hasPerformerId = plan?.performerUserId != null;
@@ -88,18 +106,24 @@ export function GanttStageSubRow({
 
   const numeral = String(index + 1).padStart(2, '0');
   const stageName = t(`state.${seg.stage}`);
+  const locale = i18n.language || 'en';
+  const shortStart = plan?.plannedStart ? formatShortDate(plan.plannedStart, locale) : '—';
+  const shortEnd = plan?.plannedEnd ? formatShortDate(plan.plannedEnd, locale) : '—';
 
   let ownerNode;
   if (!hasPerformerId) {
     ownerNode = <span className="gantt-stage-row__unassigned">{t('row.unassigned')}</span>;
   } else if (stale) {
-    const displayName = removedPerformerName ?? `#${plan?.performerUserId ?? ''}`;
+    // Brief §7 microcopy: `<previous name> · removed` when the name is known,
+    // bare `removed` when it isn't. Never render the numeric id `#9999` in the
+    // user-facing view — that's a developer placeholder, not a UX string.
+    const removedCopy = removedPerformerName
+      ? t('stagePlan.performerRemoved', { name: removedPerformerName })
+      : t('stagePlan.performerRemovedUnknown', { defaultValue: t('row.removed') });
     ownerNode = (
       <>
         <span className="gantt-stage-row__avatar-placeholder" aria-hidden="true" />
-        <span className="gantt-stage-row__owner-text">
-          {displayName} · {t('row.removed')}
-        </span>
+        <span className="gantt-stage-row__owner-text">{removedCopy}</span>
       </>
     );
   } else if (performer) {
@@ -139,33 +163,35 @@ export function GanttStageSubRow({
             aria-hidden="true"
           />
           <span className="gantt-stage-row__stage-name">{stageName}</span>
-          <span className="gantt-stage-row__owner" data-testid="stage-owner">
-            {ownerNode}
-          </span>
-          {side != null && performer != null ? (
-            <Badge tone={sideBadgeTone(side)} className="gantt-stage-row__side" data-testid="stage-side">
-              {t(`side.${side}`)}
-            </Badge>
-          ) : null}
-          <span className="gantt-stage-row__dates">
-            <span className="gantt-stage-row__date">
-              {plan?.plannedStart ?? '—'}
+          <span className="gantt-stage-row__body">
+            <span className="gantt-stage-row__owner" data-testid="stage-owner">
+              {ownerNode}
             </span>
-            <span className="gantt-stage-row__sep" aria-hidden="true">
-              {' · '}
-            </span>
-            <span className="gantt-stage-row__date">
-              {plan?.plannedEnd ?? '—'}
-            </span>
-            <span className="gantt-stage-row__sep" aria-hidden="true">
-              {' · '}
-            </span>
-            <span
-              className="gantt-stage-row__dtr"
-              data-testid="stage-dtr"
-              data-overdue={seg.isOverdue ? 'true' : 'false'}
-            >
-              {dtr}
+            {side != null && performer != null ? (
+              <Badge
+                tone={sideBadgeTone(side)}
+                className="gantt-stage-row__side"
+                data-testid="stage-side"
+              >
+                {t(`side.${side}`)}
+              </Badge>
+            ) : null}
+            <span className="gantt-stage-row__dates">
+              <span className="gantt-stage-row__date">{shortStart}</span>
+              <span className="gantt-stage-row__sep" aria-hidden="true">
+                {' – '}
+              </span>
+              <span className="gantt-stage-row__date">{shortEnd}</span>
+              <span className="gantt-stage-row__sep" aria-hidden="true">
+                {' · '}
+              </span>
+              <span
+                className="gantt-stage-row__dtr"
+                data-testid="stage-dtr"
+                data-overdue={seg.isOverdue ? 'true' : 'false'}
+              >
+                {dtr}
+              </span>
             </span>
           </span>
         </button>

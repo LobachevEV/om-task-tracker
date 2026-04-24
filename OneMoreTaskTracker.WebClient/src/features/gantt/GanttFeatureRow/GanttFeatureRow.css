@@ -117,12 +117,8 @@
   overflow: hidden;
 }
 
-.gantt-row__lane--unscheduled {
-  display: flex;
-  align-items: center;
-  padding-inline: 12px;
+.gantt-row__no-plan-label {
   color: var(--text-muted);
-  font-size: 12px;
   font-style: italic;
 }
 

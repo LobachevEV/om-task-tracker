@@ -13,6 +13,12 @@ export interface GanttSegmentedBarProps {
   resolvePerformer: (userId: number | null | undefined) => MiniTeamMember | undefined;
   /** Click handler — opens the drawer at the given stage. */
   onOpenStage: (stage: FeatureState) => void;
+  /**
+   * Lane-level context: `noPlan` / `outOfWindow` render a ghost lane with the
+   * 'Not planned yet' label (or similar) instead of dim segments. Defaults to
+   * `planned` when the lane has bar geometry.
+   */
+  laneVariant?: 'planned' | 'noPlan' | 'outOfWindow';
 }
 
 interface SegmentLabelParams {
@@ -40,6 +46,7 @@ export function GanttSegmentedBar({
   today,
   resolvePerformer,
   onOpenStage,
+  laneVariant = 'planned',
 }: GanttSegmentedBarProps) {
   const { t } = useTranslation('gantt');
 
@@ -48,18 +55,22 @@ export function GanttSegmentedBar({
     () => stageBars.every((s) => s.status === 'ghost'),
     [stageBars],
   );
+  const isGhostLane = allGhost || laneVariant !== 'planned';
 
   return (
     <div
       className="gantt-seg-bar"
       data-testid="segmented-bar"
-      data-variant={allGhost ? 'ghost' : 'planned'}
+      data-variant={isGhostLane ? 'ghost' : 'planned'}
+      data-lane-variant={laneVariant}
       role="group"
       aria-label={t('segmentedBar.ariaLabel', { title: feature.title })}
     >
-      {allGhost ? (
+      {isGhostLane ? (
         <span className="gantt-seg-bar__empty-label" aria-hidden="true">
-          {t('row.notPlannedYet')}
+          {laneVariant === 'outOfWindow'
+            ? t('row.outOfWindow', { defaultValue: 'Outside this window' })
+            : t('row.notPlannedYet')}
         </span>
       ) : null}
       {stageBars.map((seg, index) => {

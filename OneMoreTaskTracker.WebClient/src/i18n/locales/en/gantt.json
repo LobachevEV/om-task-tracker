@@ -29,6 +29,7 @@
   "legend": {
     "states": "Lifecycle",
     "today": "Today",
+    "todayAt": "Today {{date}}",
     "hint": "Hover a lane to reveal task-level bars."
   },
   "row": {
@@ -48,7 +49,9 @@
     "overdue": "Overdue",
     "plannedCounter": "{{planned}}/{{total}} planned",
     "expandAria": "Expand stage timeline for {{title}}",
-    "collapseAria": "Collapse stage timeline for {{title}}"
+    "collapseAria": "Collapse stage timeline for {{title}}",
+    "rowAria": "{{title}}. Lead {{lead}}. State {{state}}.",
+    "outOfWindow": "Outside this window"
   },
   "segmentedBar": {
     "ariaLabel": "Stage timeline for {{title}}",

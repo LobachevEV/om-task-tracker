@@ -33,6 +33,7 @@
   "legend": {
     "states": "Жизненный цикл",
     "today": "Сегодня",
+    "todayAt": "Сегодня {{date}}",
     "hint": "Наведите на строку, чтобы увидеть задачи."
   },
   "row": {
@@ -56,7 +57,9 @@
     "overdue": "Просрочено",
     "plannedCounter": "{{planned}}/{{total}} запланировано",
     "expandAria": "Развернуть таймлайн этапов для {{title}}",
-    "collapseAria": "Свернуть таймлайн этапов для {{title}}"
+    "collapseAria": "Свернуть таймлайн этапов для {{title}}",
+    "rowAria": "{{title}}. Лид {{lead}}. Состояние {{state}}.",
+    "outOfWindow": "За пределами окна"
   },
   "segmentedBar": {
     "ariaLabel": "Таймлайн этапов фичи {{title}}",

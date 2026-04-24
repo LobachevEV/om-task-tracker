@@ -23,21 +23,35 @@
   position: sticky;
   inset-inline-start: 0;
   background: var(--surface);
-  padding: 6px 12px 6px 32px;
+  padding: 6px 12px;
   border-inline-end: 1px solid var(--border);
   z-index: 2;
+  /* Constrain strictly to the feature gutter so no child (owner / side /
+     dates / DTR) can overflow into the date-grid lane — UX-001-01. */
+  max-inline-size: var(--gantt-gutter-width, 280px);
+  overflow: hidden;
 }
 
 .gantt-stage-row__trigger {
   all: unset;
   cursor: pointer;
+  /* Two compact rows inside a strict 280px gutter — no horizontal overflow.
+   * Row 1: numeral (20px) + dot (10px) + stage name (flex).
+   * Row 2: owner (flex) + side (auto) + DTR (auto, right-aligned).
+   * Fixed 180px "dates+DTR" block from brief §4 is delivered via row 2's
+   * `max-content + flex` split; dates moved to the stage name row to free
+   * vertical rhythm. */
   display: grid;
-  grid-template-columns: 28px 12px 1fr auto auto auto;
+  grid-template-columns: 20px 10px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  row-gap: 2px;
   align-items: center;
-  gap: 8px;
-  width: 100%;
+  inline-size: 100%;
+  max-inline-size: 100%;
   font-size: 12px;
   color: var(--text);
+  box-sizing: border-box;
 }
 
 .gantt-stage-row__trigger:focus-visible {
@@ -47,6 +61,8 @@
 }
 
 .gantt-stage-row__numeral {
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
   font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11px;
   color: var(--text-muted);
@@ -54,16 +70,36 @@
 }
 
 .gantt-stage-row__dot {
-  width: 6px;
-  height: 6px;
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   display: inline-block;
+  justify-self: center;
 }
 
 .gantt-stage-row__stage-name {
+  grid-column: 3 / 4;
+  grid-row: 1 / 2;
   color: var(--text);
   font-weight: 500;
-  min-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gantt-stage-row__body {
+  grid-column: 3 / 4;
+  grid-row: 2 / 3;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+  font-size: 11px;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow: hidden;
 }
 
 .gantt-stage-row__owner {
@@ -71,11 +107,19 @@
   align-items: center;
   gap: 6px;
   color: var(--text);
-  min-width: 180px;
+  /* Owner shrinks first when the gutter is tight; side + DTR stay visible. */
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .gantt-stage-row__owner-text {
   color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .gantt-stage-row__unassigned {
@@ -89,10 +133,12 @@
   border-radius: 50%;
   border: 1px dashed var(--border-strong);
   display: inline-block;
+  flex: 0 0 auto;
 }
 
 .gantt-stage-row__side {
-  justify-self: start;
+  flex: 0 0 auto;
+  justify-self: auto;
 }
 
 .gantt-stage-row__dates {
@@ -101,6 +147,16 @@
   display: inline-flex;
   gap: 0;
   align-items: baseline;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.gantt-stage-row__dates-block {
+  /* Fixed 180px dates+DTR block per brief §4 column rhythm (UX-001-09). */
+  grid-column: 1 / -1;
+  grid-row: 3 / 4;
+  display: none;
 }
 
 .gantt-stage-row__date {

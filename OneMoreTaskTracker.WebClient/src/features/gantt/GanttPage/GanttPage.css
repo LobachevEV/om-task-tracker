@@ -37,8 +37,31 @@
 }
 
 .gantt-page__lanes {
+  position: relative;
   display: flex;
   flex-direction: column;
+}
+
+/*
+ * Today hairline — runs full-height through every feature row lane.
+ * Positioned in the same 1fr track as the lane bodies: left =
+ * gutter-width + (todayPercent% of the remaining lane column).
+ * `role="separator"` + `aria-label="Today {{date}}"` in the DOM.
+ */
+.gantt-page__today-hairline {
+  position: absolute;
+  /* Sit exactly on top of the lane column (right of the sticky gutter). */
+  inset-block: 0;
+  inline-size: 1px;
+  inset-inline-start: calc(
+    var(--gantt-gutter-width, 280px) +
+      (100% - var(--gantt-gutter-width, 280px)) * var(--today-percent, 0) / 100
+  );
+  background: var(--accent);
+  opacity: 0.55;
+  pointer-events: none;
+  /* Above the lane row borders but below the sticky gutter overlay (z=2). */
+  z-index: 1;
 }
 
 .gantt-page__unscheduled {

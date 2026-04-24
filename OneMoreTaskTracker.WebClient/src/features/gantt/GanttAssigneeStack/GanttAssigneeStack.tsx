@@ -1,4 +1,3 @@
-import { useTranslation } from 'react-i18next';
 import { Avatar, Badge, type AvatarTone } from '../../../shared/ds';
 import type { MiniTeamMember } from '../../../shared/types/feature';
 import './GanttAssigneeStack.css';
@@ -23,7 +22,6 @@ export function GanttAssigneeStack({
   'aria-label': ariaLabel,
   className,
 }: GanttAssigneeStackProps) {
-  const { t } = useTranslation('gantt');
   const rootClass = className ? `gantt-assignee-stack ${className}` : 'gantt-assignee-stack';
 
   if (members.length === 0) {
@@ -35,13 +33,20 @@ export function GanttAssigneeStack({
   }
 
   if (members.length === 1) {
+    // UX-001-06: the "Solo" chip was redundant with the 5/5 planned counter and
+    // the expanded view — every row showed it when a lead stood alone. Dropped
+    // in iteration 2 to reclaim gutter space for side + dates + DTR.
     const only = members[0];
     return (
       <div className={rootClass} role="group" aria-label={ariaLabel}>
         <div className="gantt-assignee-stack__avatars">
-          <Avatar name={only.displayName} size="sm" tone={ROLE_TO_TONE[only.role]} />
+          <Avatar
+            name={only.displayName}
+            size="sm"
+            tone={ROLE_TO_TONE[only.role]}
+            title={only.displayName}
+          />
         </div>
-        <span className="gantt-assignee-stack__solo-label">{t('meta.soloOwner')}</span>
       </div>
     );
   }

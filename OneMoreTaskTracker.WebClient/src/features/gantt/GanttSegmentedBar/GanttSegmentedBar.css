@@ -65,10 +65,19 @@
   opacity: 0.8;
 }
 
-/* Active (current) stage — amber top+bottom hairlines, never a left-stripe. */
+/* Active (current) stage — amber top+bottom hairlines + subtle amber wash on
+ * the segment background. The wash uses --accent-dim (sanctioned token) so
+ * the active segment reads as "fractionally brighter than its siblings"
+ * per brief §4, not "indistinguishable." UX-001-04. */
 .gantt-seg-bar__segment[data-active='true'] {
   border-top: 1px solid var(--accent);
   border-bottom: 1px solid var(--accent);
+  background: linear-gradient(
+      var(--accent-dim),
+      var(--accent-dim)
+    ),
+    var(--seg-color, var(--state-in-dev));
+  background-blend-mode: normal;
 }
 
 /* Overdue segment — danger top+bottom hairlines on the same geometry. */
@@ -81,8 +90,8 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   background: var(--accent);
   transform: translate(-50%, -50%);

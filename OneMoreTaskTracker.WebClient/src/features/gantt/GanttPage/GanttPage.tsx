@@ -185,6 +185,21 @@ export function GanttPageInternal({
         <section className="gantt-page__timeline-wrap">
           <GanttTimeline window={layout.window} zoom={state.zoom} todayPercent={layout.todayPercent} />
           <div className="gantt-page__lanes" role="list">
+            {layout.todayPercent != null ? (
+              <div
+                className="gantt-page__today-hairline"
+                role="separator"
+                aria-label={t('legend.todayAt', {
+                  defaultValue: 'Today {{date}}',
+                  date: state.today,
+                })}
+                style={
+                  {
+                    ['--today-percent' as string]: String(layout.todayPercent),
+                  } as CSSProperties
+                }
+              />
+            ) : null}
             {layout.lanes.map((lane: GanttLane) => {
               const lead = resolveMember(lane.feature.leadUserId);
               // Summary view knows only the lead; task-assignee resolution requires
@@ -201,6 +216,7 @@ export function GanttPageInternal({
                   today={state.today}
                   lead={lead}
                   miniTeam={miniTeam}
+                  variant={lane.variant}
                   expanded={expanded}
                   onToggleExpand={() => state.toggleFeatureExpanded(lane.feature.id)}
                   onOpen={() => state.openFeature(lane.feature.id)}

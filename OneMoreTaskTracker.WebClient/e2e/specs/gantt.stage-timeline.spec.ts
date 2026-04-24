@@ -75,6 +75,33 @@ async function seedManagerAuth(page: import('@playwright/test').Page) {
   void setLanguageInLocalStorage;
 }
 
+/**
+ * Inject the fixture's `today` as a stable Date override so that feature
+ * windows computed from `new Date()` land in a deterministic place relative
+ * to the fixture's planned dates. Without this, walking-clock drift
+ * silently hides features whose plans end before the real "today".
+ */
+async function pinFixtureToday(page: import('@playwright/test').Page, todayIso: string) {
+  await page.addInitScript((iso: string) => {
+    const pinned = Date.parse(`${iso}T12:00:00Z`);
+    const RealDate = Date;
+    class PinnedDate extends RealDate {
+      constructor(...args: unknown[]) {
+        if (args.length === 0) {
+          super(pinned);
+          return;
+        }
+        // @ts-expect-error — forwarding rest args to Date constructor
+        super(...args);
+      }
+      static now(): number {
+        return pinned;
+      }
+    }
+    (globalThis as unknown as { Date: typeof Date }).Date = PinnedDate as unknown as typeof Date;
+  }, todayIso);
+}
+
 async function stubApi(page: import('@playwright/test').Page, fixture: FixtureRoot) {
   await page.route('**/api/plan/features**', async (route: Route) => {
     const url = new URL(route.request().url());
@@ -114,7 +141,7 @@ async function stubApi(page: import('@playwright/test').Page, fixture: FixtureRo
     });
   });
 
-  await page.route('**/api/users/team', async (route: Route) => {
+  await page.route('**/api/team/members', async (route: Route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -125,12 +152,14 @@ async function stubApi(page: import('@playwright/test').Page, fixture: FixtureRo
 
 test.describe('gantt stage timeline (FE-only stubbed)', () => {
   test.beforeEach(async ({ page }) => {
+    const fixture = loadFixture();
+    await pinFixtureToday(page, fixture.today);
     await seedManagerAuth(page);
-    await stubApi(page, loadFixture());
+    await stubApi(page, fixture);
   });
 
   test('Flow 1 — collapsed row: status at a glance (F1)', async ({ page }) => {
-    await page.goto('/gantt');
+    await page.goto('/plan');
     await expect(page.locator('[data-testid="gantt-page"]')).toBeVisible();
 
     const row = page.locator('[data-testid="feature-row-101"]');
@@ -144,14 +173,14 @@ test.describe('gantt stage timeline (FE-only stubbed)', () => {
   });
 
   test('Flow 1 edge — overdue badge on F2 (Testing overdue)', async ({ page }) => {
-    await page.goto('/gantt');
+    await page.goto('/plan');
     await expect(page.locator('[data-testid="gantt-page"]')).toBeVisible();
     const row = page.locator('[data-testid="feature-row-102"]');
     await expect(row.locator('[data-testid="feature-overdue-badge"]')).toBeVisible();
   });
 
   test('Flow 1 edge — partial plan shows 2/5 planned (F3)', async ({ page }) => {
-    await page.goto('/gantt');
+    await page.goto('/plan');
     await expect(page.locator('[data-testid="gantt-page"]')).toBeVisible();
     const row = page.locator('[data-testid="feature-row-103"]');
     const counter = row.locator('[data-testid="feature-planned-counter"]');
@@ -159,7 +188,7 @@ test.describe('gantt stage timeline (FE-only stubbed)', () => {
   });
 
   test('Flow 1 edge — F5 LiveRelease renders DTR as check glyph', async ({ page }) => {
-    await page.goto('/gantt');
+    await page.goto('/plan');
     await expect(page.locator('[data-testid="gantt-page"]')).toBeVisible();
     const row = page.locator('[data-testid="feature-row-105"]');
     const dtr = row.locator('[data-testid="feature-dtr"]');
@@ -167,7 +196,7 @@ test.describe('gantt stage timeline (FE-only stubbed)', () => {
   });
 
   test('Flow 2 — expand reveals 5 stage sub-rows in canonical order', async ({ page }) => {
-    await page.goto('/gantt');
+    await page.goto('/plan');
     await expect(page.locator('[data-testid="gantt-page"]')).toBeVisible();
     const row = page.locator('[data-testid="feature-row-101"]');
     const caret = row.locator('[data-testid="expand-caret"]');
@@ -196,7 +225,7 @@ test.describe('gantt stage timeline (FE-only stubbed)', () => {
   });
 
   test('Flow 2 edge — F6 stale performer renders "removed" without throwing', async ({ page }) => {
-    await page.goto('/gantt');
+    await page.goto('/plan');
     await expect(page.locator('[data-testid="gantt-page"]')).toBeVisible();
     const row = page.locator('[data-testid="feature-row-106"]');
     await row.locator('[data-testid="expand-caret"]').click();
@@ -205,7 +234,7 @@ test.describe('gantt stage timeline (FE-only stubbed)', () => {
   });
 
   test('Flow 5 — F4 no-plan feature shows unassigned + em-dash DTR', async ({ page }) => {
-    await page.goto('/gantt');
+    await page.goto('/plan');
     await expect(page.locator('[data-testid="gantt-page"]')).toBeVisible();
     const row = page.locator('[data-testid="feature-row-104"]');
     await expect(row.locator('[data-testid="feature-dtr"]')).toHaveText('—');

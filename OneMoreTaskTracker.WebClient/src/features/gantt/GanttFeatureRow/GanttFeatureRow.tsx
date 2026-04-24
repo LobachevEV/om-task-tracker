@@ -12,6 +12,7 @@ import type { StageBarGeometry } from '../ganttStageGeometry';
 import { featureIsOverdue, plannedStageCount } from '../ganttStageGeometry';
 import { GanttSegmentedBar } from '../GanttSegmentedBar';
 import { GanttStageSubRow } from '../GanttStageSubRow';
+import type { GanttLaneVariant } from '../useGanttLayout';
 import './GanttFeatureRow.css';
 
 export interface GanttFeatureRowProps {
@@ -22,6 +23,12 @@ export interface GanttFeatureRowProps {
   today: string;
   lead: MiniTeamMember;
   miniTeam: MiniTeamMember[];
+  /**
+   * Why this lane renders the way it does. `planned` is the normal case;
+   * `noPlan` and `outOfWindow` render a ghost lane so the manager still sees
+   * the row and can triage from the info panel.
+   */
+  variant?: GanttLaneVariant;
   /** Inline expansion of the stage sub-rows (session-scoped). */
   expanded: boolean;
   onToggleExpand: () => void;
@@ -30,6 +37,12 @@ export interface GanttFeatureRowProps {
   onOpenStage: (stage: FeatureState) => void;
   /** Resolve a performer id against the cached roster for sub-row owner rendering. */
   resolvePerformer: (userId: number | null | undefined) => MiniTeamMember | undefined;
+  /**
+   * Known previous displayName for a stale performer id (e.g. `{ 9999: 'Ex Dev' }`).
+   * Supplied by the page-level roster cache; when absent the sub-row renders
+   * the bare "removed" microcopy — never `#<id>`.
+   */
+  removedPerformerNames?: ReadonlyMap<number, string>;
 }
 
 function computeFeatureDtr(feature: FeatureSummary, today: string): string {
@@ -44,16 +57,18 @@ function computeFeatureDtr(feature: FeatureSummary, today: string): string {
 
 export function GanttFeatureRow({
   feature,
-  bar,
+  bar: _bar,
   stageBars,
   today,
   lead,
   miniTeam,
+  variant = 'planned',
   expanded,
   onToggleExpand,
   onOpen,
   onOpenStage,
   resolvePerformer,
+  removedPerformerNames,
 }: GanttFeatureRowProps) {
   const { t } = useTranslation('gantt');
 
@@ -62,7 +77,12 @@ export function GanttFeatureRow({
   const dtr = useMemo(() => computeFeatureDtr(feature, today), [feature, today]);
   const totalStages = feature.stagePlans.length;
 
-  const ariaLabel = `${feature.title}. ${t('row.lead')}: ${lead.displayName}. ${t('row.team')}: ${miniTeam.length}`;
+  const ariaLabel = t('row.rowAria', {
+    title: feature.title,
+    lead: lead.displayName,
+    state: t(`state.${feature.state}`),
+    variant,
+  });
 
   const handleTitleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -71,17 +91,13 @@ export function GanttFeatureRow({
     }
   };
 
-  const showBar = bar != null;
-  const laneClass = showBar
-    ? 'gantt-row__lane'
-    : 'gantt-row__lane gantt-row__lane--unscheduled';
-
   return (
     <>
       <div
         className="gantt-row"
         data-feature-id={feature.id}
         data-testid={`feature-row-${feature.id}`}
+        data-variant={variant}
       >
         <div className="gantt-row__gutter" data-testid="feature-info-panel">
           <div className="gantt-row__title-line">
@@ -113,11 +129,15 @@ export function GanttFeatureRow({
             {t('row.lead')}: {lead.displayName}
           </div>
           <div className="gantt-row__meta">
-            <span className="gantt-row__dates">
-              {feature.plannedStart ?? '—'}
-              <span className="gantt-row__meta-sep">{' · '}</span>
-              {feature.plannedEnd ?? '—'}
-            </span>
+            {variant === 'noPlan' ? (
+              <span className="gantt-row__no-plan-label">{t('row.notPlannedYet')}</span>
+            ) : (
+              <span className="gantt-row__dates">
+                {feature.plannedStart ?? '—'}
+                <span className="gantt-row__meta-sep">{' · '}</span>
+                {feature.plannedEnd ?? '—'}
+              </span>
+            )}
             <span className="gantt-row__meta-sep">{'·'}</span>
             <span
               className="gantt-row__dtr"
@@ -146,18 +166,15 @@ export function GanttFeatureRow({
           <GanttAssigneeStack members={miniTeam} aria-label={t('row.team')} />
         </div>
 
-        <div className={laneClass}>
-          {!showBar ? (
-            <span>{t('row.unscheduled')}</span>
-          ) : (
-            <GanttSegmentedBar
-              feature={feature}
-              stageBars={stageBars}
-              today={today}
-              resolvePerformer={resolvePerformer}
-              onOpenStage={onOpenStage}
-            />
-          )}
+        <div className="gantt-row__lane" data-variant={variant}>
+          <GanttSegmentedBar
+            feature={feature}
+            stageBars={stageBars}
+            today={today}
+            resolvePerformer={resolvePerformer}
+            onOpenStage={onOpenStage}
+            laneVariant={variant}
+          />
         </div>
       </div>
 
@@ -169,6 +186,14 @@ export function GanttFeatureRow({
               seg={seg}
               today={today}
               resolvePerformer={resolvePerformer}
+              removedPerformerName={
+                (() => {
+                  const plan = feature.stagePlans.find((p) => p.stage === seg.stage);
+                  const id = plan?.performerUserId ?? null;
+                  if (id == null) return null;
+                  return removedPerformerNames?.get(id) ?? null;
+                })()
+              }
               index={index}
               onOpenStage={onOpenStage}
             />

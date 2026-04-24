@@ -20,7 +20,7 @@ describe('useGanttLayout', () => {
     expect(result.current.todayPercent).not.toBeNull();
   });
 
-  it('routes unscheduled features into `unscheduled` and places lanes separately', () => {
+  it('keeps unscheduled features as ghost lanes instead of hiding them', () => {
     const { result } = renderHook(() =>
       useGanttLayout({
         features: [UNSCHEDULED_FEATURE, SOLO_FEATURE],
@@ -28,18 +28,28 @@ describe('useGanttLayout', () => {
         zoom: 'month',
       }),
     );
-    expect(result.current.unscheduled).toEqual([UNSCHEDULED_FEATURE]);
-    expect(result.current.lanes).toHaveLength(1);
-    expect(result.current.lanes[0].feature.id).toBe(SOLO_FEATURE.id);
+    expect(result.current.unscheduled).toEqual([]);
+    expect(result.current.lanes).toHaveLength(2);
+    const ghostLane = result.current.lanes.find(
+      (l) => l.feature.id === UNSCHEDULED_FEATURE.id,
+    );
+    expect(ghostLane).toBeDefined();
+    expect(ghostLane!.variant).toBe('noPlan');
+    expect(ghostLane!.bar).toBeNull();
+    expect(ghostLane!.stageBars).toHaveLength(5);
+    const soloLane = result.current.lanes.find(
+      (l) => l.feature.id === SOLO_FEATURE.id,
+    );
+    expect(soloLane!.variant).toBe('planned');
+    expect(soloLane!.bar).not.toBeNull();
   });
 
-  it('conserves features across the split — lanes.length + unscheduled.length === features.length', () => {
+  it('every feature is kept visible — lanes.length === features.length', () => {
     const { result } = renderHook(() =>
       useGanttLayout({ features: ALL_FEATURES, today: FIXTURE_TODAY, zoom: 'twoWeeks' }),
     );
-    expect(result.current.lanes.length + result.current.unscheduled.length).toBe(
-      ALL_FEATURES.length,
-    );
+    expect(result.current.lanes.length).toBe(ALL_FEATURES.length);
+    expect(result.current.unscheduled).toEqual([]);
   });
 
   it('todayPercent is inside the window by construction (Monday-anchored)', () => {
@@ -53,6 +63,20 @@ describe('useGanttLayout', () => {
     expect(result.current.todayPercent).not.toBeNull();
     expect(result.current.todayPercent!).toBeGreaterThanOrEqual(0);
     expect(result.current.todayPercent!).toBeLessThan(100);
+  });
+
+  it('tags no-plan features with variant `noPlan` and bar=null', () => {
+    const { result } = renderHook(() =>
+      useGanttLayout({
+        features: [UNSCHEDULED_FEATURE],
+        today: FIXTURE_TODAY,
+        zoom: 'month',
+      }),
+    );
+    expect(result.current.lanes).toHaveLength(1);
+    expect(result.current.lanes[0].variant).toBe('noPlan');
+    expect(result.current.lanes[0].bar).toBeNull();
+    expect(result.current.lanes[0].stageBars).toHaveLength(5);
   });
 
   it('each lane exposes stageBars of length 5 in canonical order', () => {

@@ -258,4 +258,59 @@ describe('GanttFeatureRow', () => {
     );
     expect(screen.getByTestId('feature-dtr').textContent).toBe('—');
   });
+
+  it('stamps data-variant="noPlan" on the row wrapper for ghost lanes', () => {
+    render(
+      <GanttFeatureRow
+        feature={UNSCHEDULED_FEATURE}
+        bar={null}
+        stageBars={computeStageBars(windowMonth, UNSCHEDULED_FEATURE, FIXTURE_TODAY)}
+        window={windowMonth}
+        today={FIXTURE_TODAY}
+        lead={fe}
+        miniTeam={[fe]}
+        variant="noPlan"
+        expanded={false}
+        onToggleExpand={vi.fn()}
+        onOpen={vi.fn()}
+        onOpenStage={vi.fn()}
+        resolvePerformer={resolverFor([fe, be, qa, mg])}
+      />,
+    );
+    const row = screen.getByTestId(`feature-row-${UNSCHEDULED_FEATURE.id}`);
+    expect(row).toHaveAttribute('data-variant', 'noPlan');
+  });
+
+  it('never renders the numeric id placeholder for a stale performer', () => {
+    // F6-style fixture: a stagePlan references a performerUserId that the
+    // resolver does not know about. The row should render the bare "removed"
+    // copy — NOT `#9999`.
+    const fakeId = 9999;
+    const feature = {
+      ...MINI_TEAM_FEATURE,
+      stagePlans: MINI_TEAM_FEATURE.stagePlans.map((p) =>
+        p.stage === 'Development' ? { ...p, performerUserId: fakeId } : p,
+      ),
+    };
+    render(
+      <GanttFeatureRow
+        feature={feature}
+        bar={miniTeamBar}
+        stageBars={computeStageBars(windowMonth, feature, FIXTURE_TODAY)}
+        window={windowMonth}
+        today={FIXTURE_TODAY}
+        lead={fe}
+        miniTeam={[fe]}
+        expanded={true}
+        onToggleExpand={vi.fn()}
+        onOpen={vi.fn()}
+        onOpenStage={vi.fn()}
+        resolvePerformer={resolverFor([fe, be, qa, mg])}
+      />,
+    );
+    const devSub = screen.getByTestId(`stage-subrow-${feature.id}-Development`);
+    const owner = devSub.querySelector('[data-testid="stage-owner"]')!;
+    expect(owner.textContent).not.toContain(`#${fakeId}`);
+    expect(owner.textContent?.toLowerCase()).toContain('removed');
+  });
 });
