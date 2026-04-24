@@ -9,4 +9,7 @@ public record StagePlanDetailResponse(
     string? PlannedStart,
     string? PlannedEnd,
     int? PerformerUserId,
-    MiniTeamMemberResponse? Performer);
+    MiniTeamMemberResponse? Performer,
+    // Per-stage optimistic-concurrency token exposed on the detail surface so
+    // the inline editor's If-Match header can target stage rows independently.
+    int StageVersion);

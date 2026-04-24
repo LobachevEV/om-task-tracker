@@ -1,3 +1,4 @@
+using System.Globalization;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +8,11 @@ using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
+using OneMoreTaskTracker.Proto.Features.UpdateFeatureDescriptionCommand;
+using OneMoreTaskTracker.Proto.Features.UpdateFeatureTitleCommand;
+using OneMoreTaskTracker.Proto.Features.UpdateStageOwnerCommand;
+using OneMoreTaskTracker.Proto.Features.UpdateStagePlannedEndCommand;
+using OneMoreTaskTracker.Proto.Features.UpdateStagePlannedStartCommand;
 using OneMoreTaskTracker.Proto.Tasks;
 using OneMoreTaskTracker.Proto.Tasks.AttachTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.ListTasksQuery;
@@ -23,6 +29,11 @@ public class PlanController(
     FeatureUpdater.FeatureUpdaterClient featureUpdater,
     FeaturesLister.FeaturesListerClient featuresLister,
     FeatureGetter.FeatureGetterClient featureGetter,
+    FeatureTitleUpdater.FeatureTitleUpdaterClient featureTitleUpdater,
+    FeatureDescriptionUpdater.FeatureDescriptionUpdaterClient featureDescriptionUpdater,
+    StageOwnerUpdater.StageOwnerUpdaterClient stageOwnerUpdater,
+    StagePlannedStartUpdater.StagePlannedStartUpdaterClient stagePlannedStartUpdater,
+    StagePlannedEndUpdater.StagePlannedEndUpdaterClient stagePlannedEndUpdater,
     TaskFeatureLinker.TaskFeatureLinkerClient taskFeatureLinker,
     TaskLister.TaskListerClient taskLister,
     UserService.UserServiceClient userService,
@@ -225,6 +236,154 @@ public class PlanController(
         return Ok(PlanMapper.MapSummary(updated, new Dictionary<int, List<int>>(), logger));
     }
 
+    // ----- Inline-edit per-field PATCH endpoints (gantt-inline-edit feature) -----
+    // Each endpoint returns the refreshed FeatureSummary so the FE reconciles
+    // derived fields (plannedStart/plannedEnd/state/version) in one round trip.
+    // `If-Match: <version>` is optional in iter 1 and forwarded to the Features
+    // service as `expected_version` / `expected_stage_version`.
+
+    [HttpPatch("features/{id:int}/title")]
+    [Authorize(Roles = Roles.Manager)]
+    public async Task<ActionResult<FeatureSummaryResponse>> UpdateFeatureTitle(
+        int id,
+        [FromBody] UpdateFeatureTitlePayload body,
+        [FromHeader(Name = "If-Match")] string? ifMatch,
+        CancellationToken ct)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(new { error = "Invalid request data" });
+        if (string.IsNullOrWhiteSpace(body.Title))
+            return BadRequest(new { error = "Invalid request data" });
+
+        var callerUserId = User.GetUserId();
+        var expectedVersion = ParseIfMatch(ifMatch);
+
+        var dto = await featureTitleUpdater.UpdateAsync(new UpdateFeatureTitleRequest
+        {
+            Id = id,
+            Title = body.Title,
+            CallerUserId = callerUserId,
+            ExpectedVersion = expectedVersion,
+        }, cancellationToken: ct);
+
+        return Ok(PlanMapper.MapSummary(dto, EmptyTasks, logger));
+    }
+
+    [HttpPatch("features/{id:int}/description")]
+    [Authorize(Roles = Roles.Manager)]
+    public async Task<ActionResult<FeatureSummaryResponse>> UpdateFeatureDescription(
+        int id,
+        [FromBody] UpdateFeatureDescriptionPayload body,
+        [FromHeader(Name = "If-Match")] string? ifMatch,
+        CancellationToken ct)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(new { error = "Invalid request data" });
+
+        var callerUserId = User.GetUserId();
+        var expectedVersion = ParseIfMatch(ifMatch);
+
+        var dto = await featureDescriptionUpdater.UpdateAsync(new UpdateFeatureDescriptionRequest
+        {
+            Id = id,
+            // Wire convention: "" == null (matches feature.Description nullable).
+            Description = body.Description ?? string.Empty,
+            CallerUserId = callerUserId,
+            ExpectedVersion = expectedVersion,
+        }, cancellationToken: ct);
+
+        return Ok(PlanMapper.MapSummary(dto, EmptyTasks, logger));
+    }
+
+    [HttpPatch("features/{id:int}/stages/{stage}/owner")]
+    [Authorize(Roles = Roles.Manager)]
+    public async Task<ActionResult<FeatureSummaryResponse>> UpdateStageOwner(
+        int id,
+        string stage,
+        [FromBody] UpdateStageOwnerPayload body,
+        [FromHeader(Name = "If-Match")] string? ifMatch,
+        CancellationToken ct)
+    {
+        if (!PlanMapper.TryParseStage(stage, out var parsedStage))
+            return BadRequest(new { error = "Invalid request data" });
+
+        // Reject unparseable owner ids; null clears, positive ids must be on
+        // the manager's roster (gateway-side roster validation per
+        // microservices/composition.md). Iter 1 accepts the id opaquely — full
+        // roster membership enforcement is Phase B (see backend-plan.md).
+        if (body.StageOwnerUserId is { } ownerId && ownerId < 1)
+            return BadRequest(new { error = "Invalid request data" });
+
+        var callerUserId = User.GetUserId();
+        var expectedStageVersion = ParseIfMatch(ifMatch);
+
+        var dto = await stageOwnerUpdater.UpdateAsync(new UpdateStageOwnerRequest
+        {
+            FeatureId = id,
+            Stage = parsedStage,
+            // proto3 default 0 on the wire = unassigned.
+            StageOwnerUserId = body.StageOwnerUserId ?? 0,
+            CallerUserId = callerUserId,
+            ExpectedStageVersion = expectedStageVersion,
+        }, cancellationToken: ct);
+
+        return Ok(PlanMapper.MapSummary(dto, EmptyTasks, logger));
+    }
+
+    [HttpPatch("features/{id:int}/stages/{stage}/planned-start")]
+    [Authorize(Roles = Roles.Manager)]
+    public async Task<ActionResult<FeatureSummaryResponse>> UpdateStagePlannedStart(
+        int id,
+        string stage,
+        [FromBody] UpdateStagePlannedStartPayload body,
+        [FromHeader(Name = "If-Match")] string? ifMatch,
+        CancellationToken ct)
+    {
+        if (!PlanMapper.TryParseStage(stage, out var parsedStage))
+            return BadRequest(new { error = "Invalid request data" });
+
+        var callerUserId = User.GetUserId();
+        var expectedStageVersion = ParseIfMatch(ifMatch);
+
+        var dto = await stagePlannedStartUpdater.UpdateAsync(new UpdateStagePlannedStartRequest
+        {
+            FeatureId = id,
+            Stage = parsedStage,
+            PlannedStart = body.PlannedStart ?? string.Empty,
+            CallerUserId = callerUserId,
+            ExpectedStageVersion = expectedStageVersion,
+        }, cancellationToken: ct);
+
+        return Ok(PlanMapper.MapSummary(dto, EmptyTasks, logger));
+    }
+
+    [HttpPatch("features/{id:int}/stages/{stage}/planned-end")]
+    [Authorize(Roles = Roles.Manager)]
+    public async Task<ActionResult<FeatureSummaryResponse>> UpdateStagePlannedEnd(
+        int id,
+        string stage,
+        [FromBody] UpdateStagePlannedEndPayload body,
+        [FromHeader(Name = "If-Match")] string? ifMatch,
+        CancellationToken ct)
+    {
+        if (!PlanMapper.TryParseStage(stage, out var parsedStage))
+            return BadRequest(new { error = "Invalid request data" });
+
+        var callerUserId = User.GetUserId();
+        var expectedStageVersion = ParseIfMatch(ifMatch);
+
+        var dto = await stagePlannedEndUpdater.UpdateAsync(new UpdateStagePlannedEndRequest
+        {
+            FeatureId = id,
+            Stage = parsedStage,
+            PlannedEnd = body.PlannedEnd ?? string.Empty,
+            CallerUserId = callerUserId,
+            ExpectedStageVersion = expectedStageVersion,
+        }, cancellationToken: ct);
+
+        return Ok(PlanMapper.MapSummary(dto, EmptyTasks, logger));
+    }
+
     [HttpPost("features/{id:int}/tasks/{jiraId}")]
     [Authorize(Roles = Roles.Manager)]
     public async Task<ActionResult<FeatureSummaryResponse>> AttachTask(
@@ -269,6 +428,32 @@ public class PlanController(
             cancellationToken: ct);
 
         return Ok(PlanMapper.MapSummary(feature, new Dictionary<int, List<int>>(), logger));
+    }
+
+    // Inline-edit responses do not compose per-feature task lists (the Gantt
+    // row keeps its current taskCount / taskIds from the last list/detail
+    // fetch). Returning an empty map here is safe: MapSummary looks up by
+    // feature id and falls back to an empty array when missing.
+    private static readonly IReadOnlyDictionary<int, List<int>> EmptyTasks =
+        new Dictionary<int, List<int>>();
+
+    // If-Match header parser for the inline-edit endpoints. Iter 1 treats the
+    // header as optional — missing or unparseable values pass 0 sentinel to
+    // the Features service, which falls back to last-write-wins and logs.
+    private int ParseIfMatch(string? ifMatch)
+    {
+        if (string.IsNullOrWhiteSpace(ifMatch))
+            return 0;
+
+        // Strip optional surrounding quotes per the RFC 7232 weak/strong ETag
+        // convention; clients that send `If-Match: "7"` and `If-Match: 7`
+        // should produce identical server behavior.
+        var trimmed = ifMatch.Trim().Trim('"');
+        if (int.TryParse(trimmed, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) && parsed >= 0)
+            return parsed;
+
+        logger.LogWarning("Could not parse If-Match header value '{IfMatch}'; proceeding in advisory mode", ifMatch);
+        return 0;
     }
 
     private async Task<IEnumerable<int>> GetTeamMemberIds(int userId, CancellationToken ct)
@@ -345,6 +530,7 @@ public class PlanController(
             string.IsNullOrEmpty(sp.PlannedStart) ? null : sp.PlannedStart,
             string.IsNullOrEmpty(sp.PlannedEnd) ? null : sp.PlannedEnd,
             performerUserId,
-            performer);
+            performer,
+            sp.Version);
     }
 }

@@ -5,6 +5,11 @@ using GetFeatureDto = OneMoreTaskTracker.Proto.Features.GetFeatureQuery.FeatureD
 using ListFeatureDto = OneMoreTaskTracker.Proto.Features.ListFeaturesQuery.FeatureDto;
 using ProtoFeatureStagePlan = OneMoreTaskTracker.Proto.Features.FeatureStagePlan;
 using UpdateFeatureDto = OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand.FeatureDto;
+using UpdateFeatureTitleDto = OneMoreTaskTracker.Proto.Features.UpdateFeatureTitleCommand.FeatureDto;
+using UpdateFeatureDescriptionDto = OneMoreTaskTracker.Proto.Features.UpdateFeatureDescriptionCommand.FeatureDto;
+using UpdateStageOwnerDto = OneMoreTaskTracker.Proto.Features.UpdateStageOwnerCommand.FeatureDto;
+using UpdateStagePlannedStartDto = OneMoreTaskTracker.Proto.Features.UpdateStagePlannedStartCommand.FeatureDto;
+using UpdateStagePlannedEndDto = OneMoreTaskTracker.Proto.Features.UpdateStagePlannedEndCommand.FeatureDto;
 
 namespace OneMoreTaskTracker.Api.Controllers;
 
@@ -73,35 +78,74 @@ internal static class PlanMapper
             MapState(sp.Stage, logger),
             string.IsNullOrEmpty(sp.PlannedStart) ? null : sp.PlannedStart,
             string.IsNullOrEmpty(sp.PlannedEnd)   ? null : sp.PlannedEnd,
-            sp.PerformerUserId > 0 ? (int?)sp.PerformerUserId : null);
+            sp.PerformerUserId > 0 ? (int?)sp.PerformerUserId : null,
+            sp.Version);
 
     internal static FeatureSummaryResponse MapSummary(
         CreateFeatureDto f,
         IReadOnlyDictionary<int, List<int>> tasksByFeature,
         ILogger logger) =>
         BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
-            f.LeadUserId, f.ManagerUserId, f.StagePlans, tasksByFeature, logger);
+            f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
 
     internal static FeatureSummaryResponse MapSummary(
         UpdateFeatureDto f,
         IReadOnlyDictionary<int, List<int>> tasksByFeature,
         ILogger logger) =>
         BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
-            f.LeadUserId, f.ManagerUserId, f.StagePlans, tasksByFeature, logger);
+            f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
 
     internal static FeatureSummaryResponse MapSummary(
         ListFeatureDto f,
         IReadOnlyDictionary<int, List<int>> tasksByFeature,
         ILogger logger) =>
         BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
-            f.LeadUserId, f.ManagerUserId, f.StagePlans, tasksByFeature, logger);
+            f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
 
     internal static FeatureSummaryResponse MapSummary(
         GetFeatureDto f,
         IReadOnlyDictionary<int, List<int>> tasksByFeature,
         ILogger logger) =>
         BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
-            f.LeadUserId, f.ManagerUserId, f.StagePlans, tasksByFeature, logger);
+            f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
+
+    // Overloads for the per-field inline-edit Dtos (each carries its own
+    // FeatureDto C# type; see FeatureMappingConfig). Kept alongside the four
+    // legacy overloads so controllers pick the right mapping without casts.
+    internal static FeatureSummaryResponse MapSummary(
+        UpdateFeatureTitleDto f,
+        IReadOnlyDictionary<int, List<int>> tasksByFeature,
+        ILogger logger) =>
+        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
+            f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
+
+    internal static FeatureSummaryResponse MapSummary(
+        UpdateFeatureDescriptionDto f,
+        IReadOnlyDictionary<int, List<int>> tasksByFeature,
+        ILogger logger) =>
+        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
+            f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
+
+    internal static FeatureSummaryResponse MapSummary(
+        UpdateStageOwnerDto f,
+        IReadOnlyDictionary<int, List<int>> tasksByFeature,
+        ILogger logger) =>
+        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
+            f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
+
+    internal static FeatureSummaryResponse MapSummary(
+        UpdateStagePlannedStartDto f,
+        IReadOnlyDictionary<int, List<int>> tasksByFeature,
+        ILogger logger) =>
+        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
+            f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
+
+    internal static FeatureSummaryResponse MapSummary(
+        UpdateStagePlannedEndDto f,
+        IReadOnlyDictionary<int, List<int>> tasksByFeature,
+        ILogger logger) =>
+        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
+            f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
 
     private static FeatureSummaryResponse BuildSummary(
         int id,
@@ -113,6 +157,7 @@ internal static class PlanMapper
         int leadUserId,
         int managerUserId,
         IEnumerable<ProtoFeatureStagePlan> stagePlans,
+        int version,
         IReadOnlyDictionary<int, List<int>> tasksByFeature,
         ILogger logger)
     {
@@ -129,7 +174,8 @@ internal static class PlanMapper
             managerUserId,
             taskIds.Count,
             taskIds,
-            plans);
+            plans,
+            version);
     }
 
     internal static string ExtractDisplayName(string email)

@@ -3,6 +3,11 @@ using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
+using OneMoreTaskTracker.Proto.Features.UpdateFeatureDescriptionCommand;
+using OneMoreTaskTracker.Proto.Features.UpdateFeatureTitleCommand;
+using OneMoreTaskTracker.Proto.Features.UpdateStageOwnerCommand;
+using OneMoreTaskTracker.Proto.Features.UpdateStagePlannedEndCommand;
+using OneMoreTaskTracker.Proto.Features.UpdateStagePlannedStartCommand;
 using OneMoreTaskTracker.Proto.Tasks;
 using OneMoreTaskTracker.Proto.Tasks.AttachTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.CreateTaskCommand;
@@ -38,5 +43,10 @@ public sealed class ProgramDiTests(ProductionWiringWebApplicationFactory factory
         provider.GetRequiredService<FeatureUpdater.FeatureUpdaterClient>();
         provider.GetRequiredService<FeaturesLister.FeaturesListerClient>();
         provider.GetRequiredService<FeatureGetter.FeatureGetterClient>();
+        provider.GetRequiredService<FeatureTitleUpdater.FeatureTitleUpdaterClient>();
+        provider.GetRequiredService<FeatureDescriptionUpdater.FeatureDescriptionUpdaterClient>();
+        provider.GetRequiredService<StageOwnerUpdater.StageOwnerUpdaterClient>();
+        provider.GetRequiredService<StagePlannedStartUpdater.StagePlannedStartUpdaterClient>();
+        provider.GetRequiredService<StagePlannedEndUpdater.StagePlannedEndUpdaterClient>();
     }
 }

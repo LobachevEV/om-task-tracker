@@ -7,6 +7,11 @@ using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
+using OneMoreTaskTracker.Proto.Features.UpdateFeatureDescriptionCommand;
+using OneMoreTaskTracker.Proto.Features.UpdateFeatureTitleCommand;
+using OneMoreTaskTracker.Proto.Features.UpdateStageOwnerCommand;
+using OneMoreTaskTracker.Proto.Features.UpdateStagePlannedEndCommand;
+using OneMoreTaskTracker.Proto.Features.UpdateStagePlannedStartCommand;
 using OneMoreTaskTracker.Proto.Tasks;
 using OneMoreTaskTracker.Proto.Tasks.AttachTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.CreateTaskCommand;
@@ -104,6 +109,22 @@ builder.Services
 
 builder.Services
     .AddGrpcClient<TaskFeatureLinker.TaskFeatureLinkerClient>(o => o.Address = new Uri(tasksServiceAddress));
+
+// Per-field inline-edit clients for the Gantt inline-edit feature.
+builder.Services
+    .AddGrpcClient<FeatureTitleUpdater.FeatureTitleUpdaterClient>(o => o.Address = new Uri(featuresServiceAddress));
+
+builder.Services
+    .AddGrpcClient<FeatureDescriptionUpdater.FeatureDescriptionUpdaterClient>(o => o.Address = new Uri(featuresServiceAddress));
+
+builder.Services
+    .AddGrpcClient<StageOwnerUpdater.StageOwnerUpdaterClient>(o => o.Address = new Uri(featuresServiceAddress));
+
+builder.Services
+    .AddGrpcClient<StagePlannedStartUpdater.StagePlannedStartUpdaterClient>(o => o.Address = new Uri(featuresServiceAddress));
+
+builder.Services
+    .AddGrpcClient<StagePlannedEndUpdater.StagePlannedEndUpdaterClient>(o => o.Address = new Uri(featuresServiceAddress));
 
 var app = builder.Build();
 
