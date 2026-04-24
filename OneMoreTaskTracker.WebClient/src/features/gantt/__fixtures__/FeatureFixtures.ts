@@ -23,6 +23,7 @@ export function emptyStagePlans(): FeatureStagePlan[] {
     plannedStart: null,
     plannedEnd: null,
     performerUserId: null,
+    stageVersion: 0,
   }));
 }
 
@@ -41,6 +42,7 @@ export function buildStagePlans(
       plannedEnd: override.plannedEnd ?? null,
       performerUserId: override.performerUserId ?? null,
       performer: override.performer ?? null,
+      stageVersion: override.stageVersion ?? 0,
     };
   });
 }
@@ -73,6 +75,7 @@ export const SOLO_FEATURE: FeatureSummary = {
   taskCount: 2,
   taskIds: [501, 502],
   stagePlans: soloStagePlans,
+  version: 0,
 };
 
 export const MINI_TEAM_FEATURE: FeatureSummary = {
@@ -87,6 +90,7 @@ export const MINI_TEAM_FEATURE: FeatureSummary = {
   taskCount: 5,
   taskIds: [503, 504, 505, 506, 507],
   stagePlans: miniTeamStagePlans,
+  version: 0,
 };
 
 export const UNSCHEDULED_FEATURE: FeatureSummary = {
@@ -101,6 +105,7 @@ export const UNSCHEDULED_FEATURE: FeatureSummary = {
   taskCount: 0,
   taskIds: [],
   stagePlans: emptyStagePlans(),
+  version: 0,
 };
 
 export const OVERDUE_FEATURE: FeatureSummary = {
@@ -118,6 +123,7 @@ export const OVERDUE_FEATURE: FeatureSummary = {
     CsApproving: { plannedStart: '2026-03-01', plannedEnd: '2026-03-05', performerUserId: mg.userId },
     Development: { plannedStart: '2026-03-05', plannedEnd: '2026-04-10', performerUserId: be.userId },
   }),
+  version: 0,
 };
 
 export const SHIPPED_FEATURE: FeatureSummary = {
@@ -138,6 +144,7 @@ export const SHIPPED_FEATURE: FeatureSummary = {
     EthalonTesting: { plannedStart: '2026-04-15', plannedEnd: '2026-04-17', performerUserId: qa.userId },
     LiveRelease:    { plannedStart: '2026-04-18', plannedEnd: '2026-04-18', performerUserId: mg.userId },
   }),
+  version: 0,
 };
 
 export const ALL_FEATURES: FeatureSummary[] = [

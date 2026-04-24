@@ -34,6 +34,10 @@ export interface AttachedTask {
  * every response — backend materializes 5 rows per feature (see api-contract.md).
  *
  * `performer` is resolved only on detail reads; list rows carry the bare id.
+ *
+ * `stageVersion` (added v1 of the gantt-inline-edit-feature contract) is the
+ * per-stage optimistic-concurrency token — consumed by the inline editor's
+ * `If-Match` header for stage-scoped PATCHes.
  */
 export interface FeatureStagePlan {
   stage: FeatureState;
@@ -42,6 +46,8 @@ export interface FeatureStagePlan {
   performerUserId: number | null;
   /** Present only when returned as part of FeatureDetail. */
   performer?: MiniTeamMember | null;
+  /** Monotonically-increasing per-stage row version. */
+  stageVersion: number;
 }
 
 export interface FeatureSummary {
@@ -59,6 +65,11 @@ export interface FeatureSummary {
   taskIds: number[];
   /** Always length 5, canonical order. Performer is id-only on list rows. */
   stagePlans: FeatureStagePlan[];
+  /**
+   * Monotonically-increasing row version — used as the optimistic-concurrency
+   * token on `If-Match` headers for feature-scoped inline edits.
+   */
+  version: number;
 }
 
 export interface FeatureDetail {
@@ -86,6 +97,26 @@ export interface UpdateFeaturePayload {
   state?: FeatureState;
   /** Exactly 5 entries when provided (contract rule). Omit to leave plans untouched. */
   stagePlans?: FeatureStagePlan[];
+}
+
+/**
+ * Per-field inline-edit payloads (api-contract.md v1). Each mirrors exactly
+ * one `PATCH /api/plan/features/{id}/...` endpoint — keep names in lockstep.
+ */
+export interface UpdateFeatureTitlePayload {
+  title: string;
+}
+export interface UpdateFeatureDescriptionPayload {
+  description: string | null;
+}
+export interface UpdateStageOwnerPayload {
+  stageOwnerUserId: number | null;
+}
+export interface UpdateStagePlannedStartPayload {
+  plannedStart: string | null;
+}
+export interface UpdateStagePlannedEndPayload {
+  plannedEnd: string | null;
 }
 
 export type FeatureScope = 'all' | 'mine';

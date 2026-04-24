@@ -90,13 +90,22 @@ export function toDraft(plans: readonly FeatureStagePlan[]): StagePlanDraft {
   });
 }
 
-/** Inverse of `toDraft`: emit exactly 5 API-shaped entries. */
+/**
+ * Inverse of `toDraft`: emit exactly 5 API-shaped entries.
+ *
+ * `stageVersion` defaults to 0 here: the drawer's bulk stage-plan author
+ * path does not carry per-row concurrency tokens (it's still using the
+ * legacy `PATCH /api/plan/features/{id}` which accepts last-write-wins).
+ * The inline-edit path sends per-stage versions through the new PATCH
+ * endpoints instead.
+ */
 export function fromDraft(draft: StagePlanDraft): FeatureStagePlan[] {
   return draft.map((row) => ({
     stage: row.stage,
     plannedStart: row.plannedStart === '' ? null : row.plannedStart,
     plannedEnd: row.plannedEnd === '' ? null : row.plannedEnd,
     performerUserId: row.performerUserId,
+    stageVersion: 0,
   }));
 }
 

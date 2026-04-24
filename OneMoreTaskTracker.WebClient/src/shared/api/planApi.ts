@@ -11,7 +11,23 @@ import type {
   FeatureState,
   FeatureSummary,
   UpdateFeaturePayload,
+  UpdateFeatureDescriptionPayload,
+  UpdateFeatureTitlePayload,
+  UpdateStageOwnerPayload,
+  UpdateStagePlannedEndPayload,
+  UpdateStagePlannedStartPayload,
 } from '../types/feature';
+
+function jsonHeaders(ifMatch?: number): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...authHeaders(),
+  };
+  if (typeof ifMatch === 'number') {
+    headers['If-Match'] = String(ifMatch);
+  }
+  return headers;
+}
 
 export async function listFeatures(
   params: { scope?: FeatureScope; state?: FeatureState } = {},
@@ -85,6 +101,99 @@ export async function detachTask(
   return featureSummarySchema.parse(data);
 }
 
+/**
+ * Inline-edit per-field PATCH callers (api-contract.md v1).
+ *
+ * Each call mirrors exactly one endpoint under `/api/plan/features/{id}/…`.
+ * The response is always a refreshed `FeatureSummary` so the Gantt can
+ * reconcile derived fields (plannedStart/plannedEnd/state) in one hop.
+ *
+ * The optional `ifMatchVersion` parameter is forwarded as an `If-Match`
+ * header — required once the FE ships the concurrency UX (phase B of
+ * feature-plan.md); tolerated as missing in iter 1 per the contract.
+ */
+export async function updateFeatureTitle(
+  id: number,
+  payload: UpdateFeatureTitlePayload,
+  ifMatchVersion?: number,
+): Promise<FeatureSummary> {
+  const response = await fetch(`${API_BASE_URL}/api/plan/features/${id}/title`, {
+    method: 'PATCH',
+    headers: jsonHeaders(ifMatchVersion),
+    body: JSON.stringify(payload),
+  });
+  const data = await handleResponse<unknown>(response);
+  return featureSummarySchema.parse(data);
+}
+
+export async function updateFeatureDescription(
+  id: number,
+  payload: UpdateFeatureDescriptionPayload,
+  ifMatchVersion?: number,
+): Promise<FeatureSummary> {
+  const response = await fetch(`${API_BASE_URL}/api/plan/features/${id}/description`, {
+    method: 'PATCH',
+    headers: jsonHeaders(ifMatchVersion),
+    body: JSON.stringify(payload),
+  });
+  const data = await handleResponse<unknown>(response);
+  return featureSummarySchema.parse(data);
+}
+
+export async function updateStageOwner(
+  featureId: number,
+  stage: FeatureState,
+  payload: UpdateStageOwnerPayload,
+  ifMatchStageVersion?: number,
+): Promise<FeatureSummary> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/plan/features/${featureId}/stages/${stage}/owner`,
+    {
+      method: 'PATCH',
+      headers: jsonHeaders(ifMatchStageVersion),
+      body: JSON.stringify(payload),
+    },
+  );
+  const data = await handleResponse<unknown>(response);
+  return featureSummarySchema.parse(data);
+}
+
+export async function updateStagePlannedStart(
+  featureId: number,
+  stage: FeatureState,
+  payload: UpdateStagePlannedStartPayload,
+  ifMatchStageVersion?: number,
+): Promise<FeatureSummary> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/plan/features/${featureId}/stages/${stage}/planned-start`,
+    {
+      method: 'PATCH',
+      headers: jsonHeaders(ifMatchStageVersion),
+      body: JSON.stringify(payload),
+    },
+  );
+  const data = await handleResponse<unknown>(response);
+  return featureSummarySchema.parse(data);
+}
+
+export async function updateStagePlannedEnd(
+  featureId: number,
+  stage: FeatureState,
+  payload: UpdateStagePlannedEndPayload,
+  ifMatchStageVersion?: number,
+): Promise<FeatureSummary> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/plan/features/${featureId}/stages/${stage}/planned-end`,
+    {
+      method: 'PATCH',
+      headers: jsonHeaders(ifMatchStageVersion),
+      body: JSON.stringify(payload),
+    },
+  );
+  const data = await handleResponse<unknown>(response);
+  return featureSummarySchema.parse(data);
+}
+
 export type {
   CreateFeaturePayload,
   FeatureDetail,
@@ -92,4 +201,9 @@ export type {
   FeatureState,
   FeatureSummary,
   UpdateFeaturePayload,
+  UpdateFeatureDescriptionPayload,
+  UpdateFeatureTitlePayload,
+  UpdateStageOwnerPayload,
+  UpdateStagePlannedEndPayload,
+  UpdateStagePlannedStartPayload,
 } from '../types/feature';

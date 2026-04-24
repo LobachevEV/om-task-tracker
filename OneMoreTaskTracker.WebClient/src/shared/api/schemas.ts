@@ -74,12 +74,16 @@ const miniTeamMemberSchema = z.object({
 /**
  * List-row stage plan. Mirrors api-contract.md `StagePlan`.
  * Performer is id-only; the detail endpoint augments with resolved `performer`.
+ *
+ * `stageVersion` (v1 gantt-inline-edit contract) is the per-stage
+ * optimistic-concurrency token — required on every response.
  */
 export const stagePlanSchema = z.object({
   stage: featureStateSchema,
   plannedStart: isoDateOrNull,
   plannedEnd: isoDateOrNull,
   performerUserId: z.number().int().positive().nullable(),
+  stageVersion: z.number().int().nonnegative(),
 });
 
 /**
@@ -108,6 +112,34 @@ export const featureSummarySchema = z.object({
   taskIds: z.array(z.number().int().positive()),
   /** Always length 5 — see api-contract.md. */
   stagePlans: z.array(stagePlanSchema).length(5),
+  /** Feature-level optimistic-concurrency token. */
+  version: z.number().int().nonnegative(),
+});
+
+/**
+ * Per-field inline-edit request-body schemas. These are not used for the
+ * response (all five endpoints return a full `FeatureSummary`) — they exist
+ * so the inline editors can validate their outgoing payload shape ahead of
+ * the network call, mirroring the gateway's own validation.
+ */
+export const updateFeatureTitlePayloadSchema = z.object({
+  title: z.string().min(1).max(200),
+});
+
+export const updateFeatureDescriptionPayloadSchema = z.object({
+  description: z.string().max(4000).nullable(),
+});
+
+export const updateStageOwnerPayloadSchema = z.object({
+  stageOwnerUserId: z.number().int().positive().nullable(),
+});
+
+export const updateStagePlannedStartPayloadSchema = z.object({
+  plannedStart: isoDateOrNull,
+});
+
+export const updateStagePlannedEndPayloadSchema = z.object({
+  plannedEnd: isoDateOrNull,
 });
 
 export const featureSummaryListSchema = z.array(featureSummarySchema);

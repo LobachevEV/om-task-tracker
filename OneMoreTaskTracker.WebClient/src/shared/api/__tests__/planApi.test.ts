@@ -15,11 +15,11 @@ const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
 const emptyStagePlans = [
-  { stage: 'CsApproving' as const,    plannedStart: null, plannedEnd: null, performerUserId: null },
-  { stage: 'Development' as const,    plannedStart: null, plannedEnd: null, performerUserId: null },
-  { stage: 'Testing' as const,        plannedStart: null, plannedEnd: null, performerUserId: null },
-  { stage: 'EthalonTesting' as const, plannedStart: null, plannedEnd: null, performerUserId: null },
-  { stage: 'LiveRelease' as const,    plannedStart: null, plannedEnd: null, performerUserId: null },
+  { stage: 'CsApproving' as const,    plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
+  { stage: 'Development' as const,    plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
+  { stage: 'Testing' as const,        plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
+  { stage: 'EthalonTesting' as const, plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
+  { stage: 'LiveRelease' as const,    plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
 ];
 
 const sampleSummary = {
@@ -34,6 +34,7 @@ const sampleSummary = {
   taskCount: 0,
   taskIds: [] as number[],
   stagePlans: emptyStagePlans,
+  version: 0,
 };
 
 const sampleDetail = {

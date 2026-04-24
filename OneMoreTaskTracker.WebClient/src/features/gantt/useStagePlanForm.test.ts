@@ -14,6 +14,7 @@ function emptyPlans(): FeatureStagePlan[] {
     plannedStart: null,
     plannedEnd: null,
     performerUserId: null,
+    stageVersion: 0,
   }));
 }
 
@@ -31,7 +32,7 @@ describe('useStagePlanForm', () => {
 
   it('fromDraft maps empty strings to null and preserves ids', () => {
     const draft = toDraft([
-      { stage: 'Development', plannedStart: '2026-05-10', plannedEnd: '2026-05-20', performerUserId: 7 },
+      { stage: 'Development', plannedStart: '2026-05-10', plannedEnd: '2026-05-20', performerUserId: 7, stageVersion: 0 },
     ]);
     const out = fromDraft(draft);
     const dev = out.find((p) => p.stage === 'Development');
@@ -40,6 +41,7 @@ describe('useStagePlanForm', () => {
       plannedStart: '2026-05-10',
       plannedEnd: '2026-05-20',
       performerUserId: 7,
+      stageVersion: 0,
     });
     const cs = out.find((p) => p.stage === 'CsApproving');
     expect(cs).toEqual({
@@ -47,6 +49,7 @@ describe('useStagePlanForm', () => {
       plannedStart: null,
       plannedEnd: null,
       performerUserId: null,
+      stageVersion: 0,
     });
   });
 
@@ -122,7 +125,7 @@ describe('useStagePlanForm', () => {
     expect(result.current.dirty).toBe(true);
     act(() =>
       result.current.reset([
-        { stage: 'Development', plannedStart: '2026-05-10', plannedEnd: null, performerUserId: null },
+        { stage: 'Development', plannedStart: '2026-05-10', plannedEnd: null, performerUserId: null, stageVersion: 0 },
       ]),
     );
     expect(result.current.dirty).toBe(false);
