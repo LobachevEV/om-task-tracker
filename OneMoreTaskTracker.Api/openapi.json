@@ -96,6 +96,156 @@
         }
       }
     },
+    "/api/plan/features/{id}/title": {
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } },
+        { "name": "If-Match", "in": "header", "required": false, "description": "Optional optimistic-concurrency token; current feature.version from the last read. Missing header = advisory mode (last-write-wins) in iter 1.", "schema": { "type": "string" } }
+      ],
+      "patch": {
+        "summary": "Update a feature's title in place (inline edit — Manager only).",
+        "description": "Trimmed server-side; 1..200 chars after trim. Empty or whitespace-only titles are rejected as 400. Returns the refreshed FeatureSummary with a bumped `version`.",
+        "tags": ["plan"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UpdateFeatureTitlePayload" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FeatureSummary" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "502": { "$ref": "#/components/responses/BadGateway" }
+        }
+      }
+    },
+    "/api/plan/features/{id}/description": {
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } },
+        { "name": "If-Match", "in": "header", "required": false, "schema": { "type": "string" } }
+      ],
+      "patch": {
+        "summary": "Update a feature's description (inline edit — Manager only).",
+        "description": "0..4000 chars after trim; empty or null clears the field. Leading whitespace preserved; trailing whitespace trimmed.",
+        "tags": ["plan"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UpdateFeatureDescriptionPayload" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FeatureSummary" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "502": { "$ref": "#/components/responses/BadGateway" }
+        }
+      }
+    },
+    "/api/plan/features/{id}/stages/{stage}/owner": {
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } },
+        { "name": "stage", "in": "path", "required": true, "schema": { "$ref": "#/components/schemas/FeatureState" } },
+        { "name": "If-Match", "in": "header", "required": false, "description": "Optional stage-scoped optimistic-concurrency token (stagePlans[].stageVersion).", "schema": { "type": "string" } }
+      ],
+      "patch": {
+        "summary": "Reassign a single stage's owner (inline edit — Manager only).",
+        "description": "`stageOwnerUserId` must be null (clear) or a positive integer on the feature manager's roster. Role-prefixed naming per microservices/contracts.md.",
+        "tags": ["plan"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UpdateStageOwnerPayload" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FeatureSummary" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "502": { "$ref": "#/components/responses/BadGateway" }
+        }
+      }
+    },
+    "/api/plan/features/{id}/stages/{stage}/planned-start": {
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } },
+        { "name": "stage", "in": "path", "required": true, "schema": { "$ref": "#/components/schemas/FeatureState" } },
+        { "name": "If-Match", "in": "header", "required": false, "schema": { "type": "string" } }
+      ],
+      "patch": {
+        "summary": "Update a single stage's planned start date (inline edit — Manager only).",
+        "description": "ISO yyyy-MM-dd string or null to clear. Must be on or before the stage's existing plannedEnd when both are set. Derived feature.plannedStart recomputed server-side.",
+        "tags": ["plan"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UpdateStagePlannedStartPayload" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FeatureSummary" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "422": { "$ref": "#/components/responses/UnprocessableEntity" },
+          "502": { "$ref": "#/components/responses/BadGateway" }
+        }
+      }
+    },
+    "/api/plan/features/{id}/stages/{stage}/planned-end": {
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } },
+        { "name": "stage", "in": "path", "required": true, "schema": { "$ref": "#/components/schemas/FeatureState" } },
+        { "name": "If-Match", "in": "header", "required": false, "schema": { "type": "string" } }
+      ],
+      "patch": {
+        "summary": "Update a single stage's planned end date (inline edit — Manager only).",
+        "description": "Symmetric to planned-start. Must be on or after the stage's existing plannedStart.",
+        "tags": ["plan"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UpdateStagePlannedEndPayload" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FeatureSummary" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "422": { "$ref": "#/components/responses/UnprocessableEntity" },
+          "502": { "$ref": "#/components/responses/BadGateway" }
+        }
+      }
+    },
     "/api/plan/features/{id}/tasks/{jiraId}": {
       "parameters": [
         { "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } },
@@ -168,6 +318,10 @@
       "BadGateway": {
         "description": "Upstream service temporarily unavailable.",
         "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "Conflict": {
+        "description": "Version mismatch (concurrent edit detected). Body may include a conflict.currentVersion hint.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
       }
     },
     "schemas": {
@@ -183,18 +337,19 @@
       "StagePlan": {
         "type": "object",
         "description": "List-row stage plan — id-only performer.",
-        "required": ["stage", "plannedStart", "plannedEnd", "performerUserId"],
+        "required": ["stage", "plannedStart", "plannedEnd", "performerUserId", "stageVersion"],
         "properties": {
           "stage": { "$ref": "#/components/schemas/FeatureState" },
           "plannedStart": { "type": "string", "format": "date", "nullable": true },
           "plannedEnd":   { "type": "string", "format": "date", "nullable": true },
-          "performerUserId": { "type": "integer", "format": "int32", "nullable": true }
+          "performerUserId": { "type": "integer", "format": "int32", "nullable": true },
+          "stageVersion": { "type": "integer", "format": "int32", "description": "Per-stage optimistic-concurrency token; consumed by the FE inline editor's If-Match header for stage-scoped PATCHes." }
         }
       },
       "StagePlanDetail": {
         "type": "object",
         "description": "Detail stage plan — resolved performer mini-member. `performer` is null when the stage is unassigned OR when the stored performer id is no longer on the manager's roster (stale). In the stale case `performerUserId` is still emitted so the FE can render the 'Performer no longer on team' state.",
-        "required": ["stage", "plannedStart", "plannedEnd", "performerUserId", "performer"],
+        "required": ["stage", "plannedStart", "plannedEnd", "performerUserId", "performer", "stageVersion"],
         "properties": {
           "stage": { "$ref": "#/components/schemas/FeatureState" },
           "plannedStart": { "type": "string", "format": "date", "nullable": true },
@@ -203,7 +358,8 @@
           "performer": {
             "nullable": true,
             "allOf": [ { "$ref": "#/components/schemas/MiniTeamMember" } ]
-          }
+          },
+          "stageVersion": { "type": "integer", "format": "int32", "description": "Per-stage optimistic-concurrency token." }
         }
       },
       "StagePlanPayload": {
@@ -238,7 +394,7 @@
       },
       "FeatureSummary": {
         "type": "object",
-        "required": ["id","title","description","state","plannedStart","plannedEnd","leadUserId","managerUserId","taskCount","taskIds","stagePlans"],
+        "required": ["id","title","description","state","plannedStart","plannedEnd","leadUserId","managerUserId","taskCount","taskIds","stagePlans","version"],
         "properties": {
           "id":            { "type": "integer", "format": "int32" },
           "title":         { "type": "string", "maxLength": 200 },
@@ -256,7 +412,8 @@
             "maxItems": 5,
             "items": { "$ref": "#/components/schemas/StagePlan" },
             "description": "Always length 5, canonical FeatureState order. Performer is id-only on list rows."
-          }
+          },
+          "version": { "type": "integer", "format": "int32", "description": "Monotonically-increasing row version used as an optimistic-concurrency token. Bumped by every inline-edit PATCH." }
         }
       },
       "FeatureDetail": {
@@ -311,6 +468,42 @@
         "required": ["reassignToFeatureId"],
         "properties": {
           "reassignToFeatureId": { "type": "integer", "format": "int32", "minimum": 1 }
+        }
+      },
+      "UpdateFeatureTitlePayload": {
+        "type": "object",
+        "required": ["title"],
+        "properties": {
+          "title": { "type": "string", "minLength": 1, "maxLength": 200 }
+        }
+      },
+      "UpdateFeatureDescriptionPayload": {
+        "type": "object",
+        "required": ["description"],
+        "properties": {
+          "description": { "type": "string", "nullable": true, "maxLength": 4000 }
+        }
+      },
+      "UpdateStageOwnerPayload": {
+        "type": "object",
+        "required": ["stageOwnerUserId"],
+        "description": "Role-prefixed naming: `stageOwnerUserId` is an opaque cross-service reference to the Users service. Null clears the assignment.",
+        "properties": {
+          "stageOwnerUserId": { "type": "integer", "format": "int32", "nullable": true, "minimum": 1 }
+        }
+      },
+      "UpdateStagePlannedStartPayload": {
+        "type": "object",
+        "required": ["plannedStart"],
+        "properties": {
+          "plannedStart": { "type": "string", "format": "date", "nullable": true }
+        }
+      },
+      "UpdateStagePlannedEndPayload": {
+        "type": "object",
+        "required": ["plannedEnd"],
+        "properties": {
+          "plannedEnd": { "type": "string", "format": "date", "nullable": true }
         }
       }
     }
