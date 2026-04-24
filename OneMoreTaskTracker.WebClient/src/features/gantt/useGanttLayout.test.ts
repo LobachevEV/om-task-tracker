@@ -55,6 +55,25 @@ describe('useGanttLayout', () => {
     expect(result.current.todayPercent!).toBeLessThan(100);
   });
 
+  it('each lane exposes stageBars of length 5 in canonical order', () => {
+    const { result } = renderHook(() =>
+      useGanttLayout({
+        features: [MINI_TEAM_FEATURE],
+        today: FIXTURE_TODAY,
+        zoom: 'month',
+      }),
+    );
+    const lane = result.current.lanes[0];
+    expect(lane.stageBars).toHaveLength(5);
+    expect(lane.stageBars.map((s) => s.stage)).toEqual([
+      'CsApproving',
+      'Development',
+      'Testing',
+      'EthalonTesting',
+      'LiveRelease',
+    ]);
+  });
+
   it('memoizes the output for identical inputs', () => {
     const features = [SOLO_FEATURE];
     const { result, rerender } = renderHook(

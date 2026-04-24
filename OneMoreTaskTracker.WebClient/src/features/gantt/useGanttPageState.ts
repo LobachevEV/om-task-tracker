@@ -47,14 +47,20 @@ export interface GanttPageState {
   scope: FeatureScope;
   stateFilter: FeatureState | 'all';
   selectedFeatureId: number | null;
+  /** Stage to focus in the drawer when it opens. Null = no preselection. */
+  selectedInitialStage: FeatureState | null;
   revealedFeatureId: number | null;
+  /** Session-scoped: ids of features whose stage timeline is expanded inline. */
+  expandedFeatureIds: ReadonlySet<number>;
   today: string;
   setZoom: (z: ZoomLevel) => void;
   setScope: (s: FeatureScope) => void;
   setStateFilter: (s: FeatureState | 'all') => void;
-  openFeature: (id: number) => void;
+  openFeature: (id: number, initialStage?: FeatureState) => void;
   closeFeature: () => void;
   revealTasks: (id: number | null) => void;
+  /** Flip the expansion state for one feature id. */
+  toggleFeatureExpanded: (id: number) => void;
 }
 
 export function useGanttPageState(role: UserRole): GanttPageState {
@@ -64,7 +70,11 @@ export function useGanttPageState(role: UserRole): GanttPageState {
   );
   const [stateFilter, setStateFilter] = useState<FeatureState | 'all'>('all');
   const [selectedFeatureId, setSelectedFeatureId] = useState<number | null>(null);
+  const [selectedInitialStage, setSelectedInitialStage] = useState<FeatureState | null>(null);
   const [revealedFeatureId, setRevealedFeatureId] = useState<number | null>(null);
+  const [expandedFeatureIds, setExpandedFeatureIds] = useState<ReadonlySet<number>>(
+    () => new Set<number>(),
+  );
 
   // `today` is snapshotted on mount; reload to advance.
   const todayRef = useRef<string>(initialTodayIso());
@@ -75,9 +85,23 @@ export function useGanttPageState(role: UserRole): GanttPageState {
     persistZoom(z);
   }, []);
 
-  const openFeature = useCallback((id: number) => setSelectedFeatureId(id), []);
-  const closeFeature = useCallback(() => setSelectedFeatureId(null), []);
+  const openFeature = useCallback((id: number, initialStage?: FeatureState) => {
+    setSelectedFeatureId(id);
+    setSelectedInitialStage(initialStage ?? null);
+  }, []);
+  const closeFeature = useCallback(() => {
+    setSelectedFeatureId(null);
+    setSelectedInitialStage(null);
+  }, []);
   const revealTasks = useCallback((id: number | null) => setRevealedFeatureId(id), []);
+  const toggleFeatureExpanded = useCallback((id: number) => {
+    setExpandedFeatureIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
 
   return useMemo(
     () => ({
@@ -85,7 +109,9 @@ export function useGanttPageState(role: UserRole): GanttPageState {
       scope,
       stateFilter,
       selectedFeatureId,
+      selectedInitialStage,
       revealedFeatureId,
+      expandedFeatureIds,
       today,
       setZoom,
       setScope,
@@ -93,18 +119,22 @@ export function useGanttPageState(role: UserRole): GanttPageState {
       openFeature,
       closeFeature,
       revealTasks,
+      toggleFeatureExpanded,
     }),
     [
       zoom,
       scope,
       stateFilter,
       selectedFeatureId,
+      selectedInitialStage,
       revealedFeatureId,
+      expandedFeatureIds,
       today,
       setZoom,
       openFeature,
       closeFeature,
       revealTasks,
+      toggleFeatureExpanded,
     ],
   );
 }

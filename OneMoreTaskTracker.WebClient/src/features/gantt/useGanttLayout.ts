@@ -8,10 +8,18 @@ import {
   type DateWindow,
   type ZoomLevel,
 } from './ganttMath';
+import { computeStageBars, type StageBarGeometry } from './ganttStageGeometry';
 
 export interface GanttLane {
   feature: FeatureSummary;
+  /**
+   * Summary-bar geometry. Null when the feature has no derivable window at all
+   * (both `plannedStart` and `plannedEnd` are null AND no stagePlan has dates)
+   * — in that case the feature lands in `unscheduled`, not in `lanes`.
+   */
   bar: BarGeometry;
+  /** Per-stage geometry, always length 5 (one per FEATURE_STATES entry). */
+  stageBars: StageBarGeometry[];
 }
 
 export interface GanttLayout {
@@ -43,7 +51,11 @@ export function useGanttLayout(args: UseGanttLayoutArgs): GanttLayout {
       if (bar == null) {
         unscheduled.push(feature);
       } else {
-        lanes.push({ feature, bar });
+        lanes.push({
+          feature,
+          bar,
+          stageBars: computeStageBars(window, feature, today),
+        });
       }
     }
     return {

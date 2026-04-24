@@ -126,7 +126,7 @@ export function GanttPageInternal({
   const pageStyle = { '--day-count': String(ZOOM_DAYS[state.zoom]) } as CSSProperties;
 
   return (
-    <main className="gantt-page" style={pageStyle}>
+    <main className="gantt-page" style={pageStyle} data-testid="gantt-page">
       <GanttToolbar
         role={role}
         zoom={state.zoom}
@@ -190,20 +190,24 @@ export function GanttPageInternal({
               // Summary view knows only the lead; task-assignee resolution requires
               // FeatureDetail (lazy), so the mini-team fills in once the drawer opens.
               const miniTeam = [lead];
+              const expanded = state.expandedFeatureIds.has(lane.feature.id);
               return (
                 <GanttFeatureRow
                   key={lane.feature.id}
                   feature={lane.feature}
                   bar={lane.bar}
+                  stageBars={lane.stageBars}
                   window={layout.window}
                   today={state.today}
                   lead={lead}
                   miniTeam={miniTeam}
-                  isTasksRevealed={state.revealedFeatureId === lane.feature.id}
-                  onRevealTasks={(next) =>
-                    state.revealTasks(next ? lane.feature.id : null)
-                  }
+                  expanded={expanded}
+                  onToggleExpand={() => state.toggleFeatureExpanded(lane.feature.id)}
                   onOpen={() => state.openFeature(lane.feature.id)}
+                  onOpenStage={(stage) => state.openFeature(lane.feature.id, stage)}
+                  resolvePerformer={(id) =>
+                    id == null ? undefined : rosterById.get(id)
+                  }
                 />
               );
             })}

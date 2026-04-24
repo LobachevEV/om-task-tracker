@@ -1,0 +1,125 @@
+{
+  "today": "2026-04-21",
+  "roster": [
+    { "userId": 1, "email": "pm@example.com", "displayName": "Mel PM", "role": "Manager" },
+    { "userId": 11, "email": "fe@example.com", "displayName": "Fe Wong", "role": "FrontendDeveloper" },
+    { "userId": 12, "email": "be@example.com", "displayName": "Be Ivanov", "role": "BackendDeveloper" },
+    { "userId": 10, "email": "qa@example.com", "displayName": "Qa Smith", "role": "Qa" }
+  ],
+  "features": [
+    {
+      "id": 101,
+      "title": "F1 Fully planned Development active",
+      "description": null,
+      "state": "Development",
+      "plannedStart": "2026-04-15",
+      "plannedEnd": "2026-05-05",
+      "leadUserId": 11,
+      "managerUserId": 1,
+      "taskCount": 0,
+      "taskIds": [],
+      "stagePlans": [
+        { "stage": "CsApproving",    "plannedStart": "2026-04-15", "plannedEnd": "2026-04-17", "performerUserId": 1 },
+        { "stage": "Development",    "plannedStart": "2026-04-17", "plannedEnd": "2026-04-25", "performerUserId": 11 },
+        { "stage": "Testing",        "plannedStart": "2026-04-25", "plannedEnd": "2026-04-29", "performerUserId": 10 },
+        { "stage": "EthalonTesting", "plannedStart": "2026-04-29", "plannedEnd": "2026-05-02", "performerUserId": 10 },
+        { "stage": "LiveRelease",    "plannedStart": "2026-05-03", "plannedEnd": "2026-05-05", "performerUserId": 1 }
+      ]
+    },
+    {
+      "id": 102,
+      "title": "F2 Testing OVERDUE",
+      "description": null,
+      "state": "Testing",
+      "plannedStart": "2026-04-01",
+      "plannedEnd": "2026-04-18",
+      "leadUserId": 12,
+      "managerUserId": 1,
+      "taskCount": 0,
+      "taskIds": [],
+      "stagePlans": [
+        { "stage": "CsApproving",    "plannedStart": "2026-04-01", "plannedEnd": "2026-04-03", "performerUserId": 1 },
+        { "stage": "Development",    "plannedStart": "2026-04-03", "plannedEnd": "2026-04-10", "performerUserId": 12 },
+        { "stage": "Testing",        "plannedStart": "2026-04-10", "plannedEnd": "2026-04-15", "performerUserId": 10 },
+        { "stage": "EthalonTesting", "plannedStart": "2026-04-15", "plannedEnd": "2026-04-17", "performerUserId": 10 },
+        { "stage": "LiveRelease",    "plannedStart": "2026-04-17", "plannedEnd": "2026-04-18", "performerUserId": 1 }
+      ]
+    },
+    {
+      "id": 103,
+      "title": "F3 Partial plan",
+      "description": null,
+      "state": "CsApproving",
+      "plannedStart": "2026-04-18",
+      "plannedEnd": "2026-04-24",
+      "leadUserId": 12,
+      "managerUserId": 1,
+      "taskCount": 0,
+      "taskIds": [],
+      "stagePlans": [
+        { "stage": "CsApproving",    "plannedStart": "2026-04-18", "plannedEnd": "2026-04-20", "performerUserId": 1 },
+        { "stage": "Development",    "plannedStart": "2026-04-20", "plannedEnd": "2026-04-24", "performerUserId": 12 },
+        { "stage": "Testing",        "plannedStart": null,          "plannedEnd": null,          "performerUserId": null },
+        { "stage": "EthalonTesting", "plannedStart": null,          "plannedEnd": null,          "performerUserId": null },
+        { "stage": "LiveRelease",    "plannedStart": "2026-04-28", "plannedEnd": "2026-04-28", "performerUserId": 1 }
+      ]
+    },
+    {
+      "id": 104,
+      "title": "F4 No plan at all",
+      "description": null,
+      "state": "CsApproving",
+      "plannedStart": null,
+      "plannedEnd": null,
+      "leadUserId": 11,
+      "managerUserId": 1,
+      "taskCount": 0,
+      "taskIds": [],
+      "stagePlans": [
+        { "stage": "CsApproving",    "plannedStart": null, "plannedEnd": null, "performerUserId": null },
+        { "stage": "Development",    "plannedStart": null, "plannedEnd": null, "performerUserId": null },
+        { "stage": "Testing",        "plannedStart": null, "plannedEnd": null, "performerUserId": null },
+        { "stage": "EthalonTesting", "plannedStart": null, "plannedEnd": null, "performerUserId": null },
+        { "stage": "LiveRelease",    "plannedStart": null, "plannedEnd": null, "performerUserId": null }
+      ]
+    },
+    {
+      "id": 105,
+      "title": "F5 Shipped LiveRelease",
+      "description": null,
+      "state": "LiveRelease",
+      "plannedStart": "2026-04-02",
+      "plannedEnd": "2026-04-20",
+      "leadUserId": 11,
+      "managerUserId": 1,
+      "taskCount": 0,
+      "taskIds": [],
+      "stagePlans": [
+        { "stage": "CsApproving",    "plannedStart": "2026-04-02", "plannedEnd": "2026-04-04", "performerUserId": 1 },
+        { "stage": "Development",    "plannedStart": "2026-04-04", "plannedEnd": "2026-04-12", "performerUserId": 11 },
+        { "stage": "Testing",        "plannedStart": "2026-04-12", "plannedEnd": "2026-04-15", "performerUserId": 10 },
+        { "stage": "EthalonTesting", "plannedStart": "2026-04-15", "plannedEnd": "2026-04-18", "performerUserId": 10 },
+        { "stage": "LiveRelease",    "plannedStart": "2026-04-18", "plannedEnd": "2026-04-20", "performerUserId": 1 }
+      ]
+    },
+    {
+      "id": 106,
+      "title": "F6 Stale performer",
+      "description": null,
+      "state": "Development",
+      "plannedStart": "2026-04-14",
+      "plannedEnd": "2026-05-06",
+      "leadUserId": 12,
+      "managerUserId": 1,
+      "taskCount": 0,
+      "taskIds": [],
+      "stagePlans": [
+        { "stage": "CsApproving",    "plannedStart": "2026-04-14", "plannedEnd": "2026-04-16", "performerUserId": 1 },
+        { "stage": "Development",    "plannedStart": "2026-04-16", "plannedEnd": "2026-04-28", "performerUserId": 9999 },
+        { "stage": "Testing",        "plannedStart": "2026-04-28", "plannedEnd": "2026-05-02", "performerUserId": 10 },
+        { "stage": "EthalonTesting", "plannedStart": "2026-05-02", "plannedEnd": "2026-05-04", "performerUserId": 10 },
+        { "stage": "LiveRelease",    "plannedStart": "2026-05-04", "plannedEnd": "2026-05-06", "performerUserId": 1 }
+      ]
+    }
+  ]
+}

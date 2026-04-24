@@ -116,22 +116,19 @@ describe('GanttPageInternal', () => {
     expect(main.style.getPropertyValue('--day-count')).toBe('30');
   });
 
-  it('hovering a row reveals its sub-bar area and transfers the reveal to a second row', () => {
+  it('clicking the expand caret reveals five stage sub-rows for that feature', () => {
     const { container } = renderHarness({ role: 'Manager' });
-    const lanes = container.querySelectorAll<HTMLElement>('.gantt-row__lane');
-    expect(lanes.length).toBeGreaterThanOrEqual(2);
-    const first = lanes[0];
-    const second = lanes[1];
-
+    const firstCaret = container.querySelector<HTMLButtonElement>(
+      '[data-testid="expand-caret"]',
+    );
+    expect(firstCaret).not.toBeNull();
+    expect(firstCaret!.getAttribute('aria-expanded')).toBe('false');
     act(() => {
-      fireEvent.mouseEnter(first);
+      firstCaret!.click();
     });
-    expect(first.querySelector('.gantt-row__task-skeleton, .gantt-row__tasks')).not.toBeNull();
-
-    act(() => {
-      fireEvent.mouseEnter(second);
-    });
-    expect(second.querySelector('.gantt-row__task-skeleton, .gantt-row__tasks')).not.toBeNull();
+    expect(firstCaret!.getAttribute('aria-expanded')).toBe('true');
+    const subRows = container.querySelectorAll('[data-testid^="stage-subrow-"]');
+    expect(subRows).toHaveLength(5);
   });
 
   it('clicking a row title opens the drawer (FeatureDrawer becomes mounted)', () => {

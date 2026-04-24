@@ -82,6 +82,45 @@ describe('useGanttPageState', () => {
     expect(result.current.revealedFeatureId).toBeNull();
   });
 
+  it('toggleFeatureExpanded flips expansion state per feature id', () => {
+    const { result } = renderHook(() => useGanttPageState('Manager'));
+    expect(result.current.expandedFeatureIds.has(42)).toBe(false);
+    act(() => {
+      result.current.toggleFeatureExpanded(42);
+    });
+    expect(result.current.expandedFeatureIds.has(42)).toBe(true);
+    act(() => {
+      result.current.toggleFeatureExpanded(42);
+    });
+    expect(result.current.expandedFeatureIds.has(42)).toBe(false);
+  });
+
+  it('supports simultaneous expansion of multiple features', () => {
+    const { result } = renderHook(() => useGanttPageState('Manager'));
+    act(() => {
+      result.current.toggleFeatureExpanded(1);
+      result.current.toggleFeatureExpanded(2);
+      result.current.toggleFeatureExpanded(3);
+    });
+    expect(result.current.expandedFeatureIds.size).toBe(3);
+    expect(result.current.expandedFeatureIds.has(1)).toBe(true);
+    expect(result.current.expandedFeatureIds.has(2)).toBe(true);
+    expect(result.current.expandedFeatureIds.has(3)).toBe(true);
+  });
+
+  it('openFeature accepts an optional initial stage', () => {
+    const { result } = renderHook(() => useGanttPageState('Manager'));
+    act(() => {
+      result.current.openFeature(7, 'Testing');
+    });
+    expect(result.current.selectedFeatureId).toBe(7);
+    expect(result.current.selectedInitialStage).toBe('Testing');
+    act(() => {
+      result.current.closeFeature();
+    });
+    expect(result.current.selectedInitialStage).toBeNull();
+  });
+
   it('today stays stable across re-renders (snapshot on mount)', () => {
     const { result, rerender } = renderHook(() => useGanttPageState('Manager'));
     const initial = result.current.today;

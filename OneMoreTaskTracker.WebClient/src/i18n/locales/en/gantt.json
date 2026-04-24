@@ -41,7 +41,32 @@
     "dueOverdue_one": "Overdue {{count}} day",
     "dueOverdue_other": "Overdue {{count}} days",
     "dueToday": "Due today",
-    "unscheduled": "Unscheduled"
+    "unscheduled": "Unscheduled",
+    "unassigned": "Unassigned",
+    "removed": "removed",
+    "notPlannedYet": "Not planned yet",
+    "overdue": "Overdue",
+    "plannedCounter": "{{planned}}/{{total}} planned",
+    "expandAria": "Expand stage timeline for {{title}}",
+    "collapseAria": "Collapse stage timeline for {{title}}"
+  },
+  "segmentedBar": {
+    "ariaLabel": "Stage timeline for {{title}}",
+    "status": {
+      "current": "In progress",
+      "overdue": "Overdue",
+      "completed": "Completed",
+      "upcoming": "Upcoming",
+      "notPlanned": "Not planned"
+    }
+  },
+  "stageRow": {
+    "aria": "Stage {{index}} of 5: {{name}}. Owner {{owner}}."
+  },
+  "side": {
+    "Back": "Back",
+    "Front": "Front",
+    "Common": "Common"
   },
   "drawer": {
     "title": "Feature",

@@ -1,0 +1,104 @@
+/* Segmented summary bar for a feature row. Renders five crisp signal blocks
+ * on the date grid. Color encoding comes from the --state-* tokens. No
+ * left-stripe markers (BAN 1) — the current segment is called out with a
+ * full top+bottom amber hairline + a centerline dot. */
+
+.gantt-seg-bar {
+  position: absolute;
+  inset: 0;
+  padding-block: 10px;
+}
+
+.gantt-seg-bar[data-variant='ghost'] {
+  display: flex;
+  align-items: center;
+  padding-inline: 12px;
+}
+
+.gantt-seg-bar__empty-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.gantt-seg-bar__segment {
+  position: absolute;
+  top: 14px;
+  left: calc(var(--seg-left, 0) * 1%);
+  width: calc(var(--seg-width, 0) * 1%);
+  height: 24px;
+  min-width: 6px;
+  padding: 0;
+  border: none;
+  border-radius: 2px;
+  background: var(--seg-color, var(--state-in-dev));
+  cursor: pointer;
+  font: inherit;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  box-sizing: border-box;
+}
+
+.gantt-seg-bar__segment:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* Completed stage: recede to 60% opacity. */
+.gantt-seg-bar__segment[data-status='completed'] {
+  opacity: 0.6;
+}
+
+/* Upcoming stage (planned but not yet reached): lower saturation via
+ * generic graphite overlay using opacity — NO new color token. */
+.gantt-seg-bar__segment[data-status='upcoming'] {
+  opacity: 0.85;
+}
+
+/* Ghost segment: 1px dashed outline, no fill. */
+.gantt-seg-bar__segment[data-variant='ghost'] {
+  background: transparent;
+  border: 1px dashed var(--border-strong);
+  opacity: 0.8;
+}
+
+/* Active (current) stage — amber top+bottom hairlines, never a left-stripe. */
+.gantt-seg-bar__segment[data-active='true'] {
+  border-top: 1px solid var(--accent);
+  border-bottom: 1px solid var(--accent);
+}
+
+/* Overdue segment — danger top+bottom hairlines on the same geometry. */
+.gantt-seg-bar__segment[data-overdue='true'] {
+  border-top: 1px solid var(--danger);
+  border-bottom: 1px solid var(--danger);
+}
+
+.gantt-seg-bar__active-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 4px var(--accent-dim);
+}
+
+.gantt-seg-bar__completed-glyph {
+  font-size: 10px;
+  color: var(--text);
+  line-height: 1;
+  padding-inline-end: 3px;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gantt-seg-bar__active-dot {
+    box-shadow: none;
+  }
+}

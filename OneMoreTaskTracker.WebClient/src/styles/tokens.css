@@ -14,6 +14,7 @@
   --accent:        oklch(0.75 0.14 85);
   --accent-hover:  oklch(0.80 0.14 85);
   --accent-ink:    oklch(0.18 0.02 85);
+  --accent-dim:    oklch(0.75 0.14 85 / 0.15);
 
   /* State palette — pipeline stages */
   --state-not-started: oklch(0.40 0.006 60);

@@ -1,177 +1,179 @@
-import { useMemo, type CSSProperties, type KeyboardEvent } from 'react';
+import { useMemo, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
-  AttachedTask,
+  FeatureState,
   FeatureSummary,
   MiniTeamMember,
 } from '../../../shared/types/feature';
-import { STATE_CLASS } from '../../../shared/constants/taskConstants';
-import { FEATURE_STATE_CSS } from '../stateConfig';
 import { GanttAssigneeStack } from '../GanttAssigneeStack';
 import type { BarGeometry, DateWindow } from '../ganttMath';
 import { daysBetween } from '../ganttMath';
+import type { StageBarGeometry } from '../ganttStageGeometry';
+import { featureIsOverdue, plannedStageCount } from '../ganttStageGeometry';
+import { GanttSegmentedBar } from '../GanttSegmentedBar';
+import { GanttStageSubRow } from '../GanttStageSubRow';
 import './GanttFeatureRow.css';
 
 export interface GanttFeatureRowProps {
   feature: FeatureSummary;
   bar: BarGeometry | null;
+  stageBars: StageBarGeometry[];
   window: DateWindow;
   today: string;
   lead: MiniTeamMember;
   miniTeam: MiniTeamMember[];
-  tasks?: AttachedTask[];
+  /** Inline expansion of the stage sub-rows (session-scoped). */
+  expanded: boolean;
+  onToggleExpand: () => void;
+  /** Open the drawer for this feature, optionally pre-selecting a stage. */
   onOpen: (featureId: number) => void;
-  isTasksRevealed?: boolean;
-  onRevealTasks?: (next: boolean) => void;
+  onOpenStage: (stage: FeatureState) => void;
+  /** Resolve a performer id against the cached roster for sub-row owner rendering. */
+  resolvePerformer: (userId: number | null | undefined) => MiniTeamMember | undefined;
 }
 
-function daysOverdue(today: string, plannedEnd: string | null): number {
-  if (!plannedEnd) return 0;
-  return Math.max(0, daysBetween(plannedEnd, today));
+function computeFeatureDtr(feature: FeatureSummary, today: string): string {
+  if (feature.state === 'LiveRelease') return '✓';
+  const active = feature.stagePlans.find((p) => p.stage === feature.state);
+  const plannedEnd = active?.plannedEnd ?? feature.plannedEnd;
+  if (plannedEnd == null) return '—';
+  const delta = daysBetween(today, plannedEnd);
+  if (delta < 0) return `-${Math.abs(delta)}d`;
+  return `${delta}d`;
 }
 
 export function GanttFeatureRow({
   feature,
   bar,
-  window: _window,
+  stageBars,
   today,
   lead,
   miniTeam,
-  tasks,
+  expanded,
+  onToggleExpand,
   onOpen,
-  isTasksRevealed = false,
-  onRevealTasks,
+  onOpenStage,
+  resolvePerformer,
 }: GanttFeatureRowProps) {
   const { t } = useTranslation('gantt');
 
-  const barStyle = useMemo<CSSProperties>(() => {
-    return {
-      ['--bar-left' as string]: bar ? String(bar.leftPercent) : '0',
-      ['--bar-width' as string]: bar ? String(bar.widthPercent) : '0',
-      ['--bar-color' as string]: `var(${FEATURE_STATE_CSS[feature.state]})`,
-    };
-  }, [bar, feature.state]);
-
-  const overdueDays = useMemo(
-    () => daysOverdue(today, feature.plannedEnd),
-    [today, feature.plannedEnd],
-  );
-  const isOverdue = overdueDays > 0 && feature.state !== 'LiveRelease';
+  const isOverdue = useMemo(() => featureIsOverdue(feature, today), [feature, today]);
+  const planned = useMemo(() => plannedStageCount(feature), [feature]);
+  const dtr = useMemo(() => computeFeatureDtr(feature, today), [feature, today]);
+  const totalStages = feature.stagePlans.length;
 
   const ariaLabel = `${feature.title}. ${t('row.lead')}: ${lead.displayName}. ${t('row.team')}: ${miniTeam.length}`;
 
   const handleTitleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      onOpen(feature.id);
+      onToggleExpand();
     }
   };
 
-  const narrowBar = bar != null && bar.widthPercent < 6;
-
   const showBar = bar != null;
-  const laneClass = showBar ? 'gantt-row__lane' : 'gantt-row__lane gantt-row__lane--unscheduled';
+  const laneClass = showBar
+    ? 'gantt-row__lane'
+    : 'gantt-row__lane gantt-row__lane--unscheduled';
 
   return (
-    <div
-      className="gantt-row"
-      data-feature-id={feature.id}
-    >
-      <div className="gantt-row__gutter">
-        <button
-          type="button"
-          className="gantt-row__title"
-          aria-label={ariaLabel}
-          aria-expanded={onRevealTasks ? isTasksRevealed : undefined}
-          onClick={() => onOpen(feature.id)}
-          onKeyDown={handleTitleKeyDown}
-        >
-          {onRevealTasks ? (
-            <span
-              className="gantt-row__chevron"
-              data-open={isTasksRevealed ? 'true' : 'false'}
-              aria-hidden="true"
-            >
-              ▶
-            </span>
-          ) : null}
-          <span>{feature.title}</span>
-        </button>
-        <div className="gantt-row__lead">
-          {t('row.lead')}: {lead.displayName}
-        </div>
-        <GanttAssigneeStack members={miniTeam} aria-label={t('row.team')} />
-      </div>
-
+    <>
       <div
-        className={laneClass}
-        style={barStyle}
-        onMouseEnter={onRevealTasks ? () => onRevealTasks(true) : undefined}
-        onMouseLeave={onRevealTasks ? () => onRevealTasks(false) : undefined}
+        className="gantt-row"
+        data-feature-id={feature.id}
+        data-testid={`feature-row-${feature.id}`}
       >
-        {!showBar ? (
-          <span>{t('row.unscheduled')}</span>
-        ) : (
-          <>
+        <div className="gantt-row__gutter" data-testid="feature-info-panel">
+          <div className="gantt-row__title-line">
             <button
               type="button"
-              className={[
-                'gantt-row__bar',
-                narrowBar ? 'gantt-row__bar--narrow' : '',
-                isOverdue ? 'gantt-row__bar--overdue' : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              aria-label={ariaLabel}
-              title={feature.title}
-              onClick={() => onOpen(feature.id)}
+              className="gantt-row__caret"
+              data-testid="expand-caret"
+              aria-expanded={expanded}
+              aria-label={
+                expanded
+                  ? t('row.collapseAria', { title: feature.title })
+                  : t('row.expandAria', { title: feature.title })
+              }
+              onClick={onToggleExpand}
             >
-              {bar.clampedLeft ? (
-                <span className="gantt-row__clamp gantt-row__clamp--left" aria-hidden="true">‹</span>
-              ) : null}
-              <span>{feature.title}</span>
-              {bar.clampedRight ? (
-                <span className="gantt-row__clamp gantt-row__clamp--right" aria-hidden="true">›</span>
-              ) : null}
+              {expanded ? '▾' : '▸'}
             </button>
-            {narrowBar ? (
-              <span className="gantt-row__bar-label-outside">{feature.title}</span>
-            ) : null}
+            <button
+              type="button"
+              className="gantt-row__title"
+              aria-label={ariaLabel}
+              onClick={() => onOpen(feature.id)}
+              onKeyDown={handleTitleKeyDown}
+            >
+              <span>{feature.title}</span>
+            </button>
+          </div>
+          <div className="gantt-row__lead">
+            {t('row.lead')}: {lead.displayName}
+          </div>
+          <div className="gantt-row__meta">
+            <span className="gantt-row__dates">
+              {feature.plannedStart ?? '—'}
+              <span className="gantt-row__meta-sep">{' · '}</span>
+              {feature.plannedEnd ?? '—'}
+            </span>
+            <span className="gantt-row__meta-sep">{'·'}</span>
+            <span
+              className="gantt-row__dtr"
+              data-testid="feature-dtr"
+              data-overdue={isOverdue ? 'true' : 'false'}
+            >
+              {dtr}
+            </span>
+            <span className="gantt-row__meta-sep">{'·'}</span>
+            <span
+              className="gantt-row__planned-counter"
+              data-testid="feature-planned-counter"
+              data-partial={planned < totalStages ? 'true' : 'false'}
+            >
+              {t('row.plannedCounter', { planned, total: totalStages })}
+            </span>
             {isOverdue ? (
-              <span className="gantt-row__sr-only">
-                {t('row.dueOverdue', { count: overdueDays })}
+              <span
+                className="gantt-row__overdue-badge"
+                data-testid="feature-overdue-badge"
+              >
+                {t('row.overdue')}
               </span>
             ) : null}
-            {isTasksRevealed ? (
-              tasks == null ? (
-                <div className="gantt-row__task-skeleton" aria-hidden="true" />
-              ) : tasks.length > 0 ? (
-                <>
-                  <span className="gantt-row__sr-only" id={`gantt-row-tasks-${feature.id}`}>
-                    {t('row.tasks')}
-                  </span>
-                  <div
-                    className="gantt-row__tasks"
-                    role="group"
-                    aria-labelledby={`gantt-row-tasks-${feature.id}`}
-                  >
-                    {tasks.map((task) => (
-                      <div
-                        key={task.id}
-                        role="button"
-                        tabIndex={0}
-                        className={`gantt-row__task-bar gantt-row__task-bar--${STATE_CLASS[task.state]}`}
-                        title={`${task.jiraId} · ${task.state}`}
-                        aria-label={`${task.jiraId} · ${task.state}`}
-                      />
-                    ))}
-                  </div>
-                </>
-              ) : null
-            ) : null}
-          </>
-        )}
+          </div>
+          <GanttAssigneeStack members={miniTeam} aria-label={t('row.team')} />
+        </div>
+
+        <div className={laneClass}>
+          {!showBar ? (
+            <span>{t('row.unscheduled')}</span>
+          ) : (
+            <GanttSegmentedBar
+              feature={feature}
+              stageBars={stageBars}
+              today={today}
+              resolvePerformer={resolvePerformer}
+              onOpenStage={onOpenStage}
+            />
+          )}
+        </div>
       </div>
-    </div>
+
+      {expanded
+        ? stageBars.map((seg, index) => (
+            <GanttStageSubRow
+              key={seg.stage}
+              feature={feature}
+              seg={seg}
+              today={today}
+              resolvePerformer={resolvePerformer}
+              index={index}
+              onOpenStage={onOpenStage}
+            />
+          ))
+        : null}
+    </>
   );
 }

@@ -9,11 +9,6 @@
   border-bottom: 1px solid var(--border);
 }
 
-.gantt-row:hover .gantt-row__bar,
-.gantt-row:focus-within .gantt-row__bar {
-  box-shadow: 0 0 0 1px var(--border-strong);
-}
-
 .gantt-row__gutter {
   position: sticky;
   inset-inline-start: 0;
@@ -24,6 +19,37 @@
   display: grid;
   gap: 4px;
   align-content: center;
+}
+
+.gantt-row__title-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.gantt-row__caret {
+  all: unset;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--text-muted);
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.gantt-row__caret:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.gantt-row__caret[aria-expanded='true'] {
+  color: var(--text);
 }
 
 .gantt-row__title {
@@ -48,14 +74,36 @@
   border-radius: 2px;
 }
 
-.gantt-row__chevron {
-  font-size: 10px;
+.gantt-row__meta {
+  font-size: 11px;
   color: var(--text-muted);
-  transition: transform 120ms ease;
+  font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
 }
 
-.gantt-row__chevron[data-open='true'] {
-  transform: rotate(90deg);
+.gantt-row__meta-sep {
+  color: var(--text-dim);
+}
+
+.gantt-row__planned-counter[data-partial='true'] {
+  color: var(--accent);
+}
+
+.gantt-row__dtr[data-overdue='true'] {
+  color: var(--danger);
+}
+
+.gantt-row__overdue-badge {
+  color: var(--danger);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding-inline: 6px;
+  border: 1px solid var(--danger);
+  border-radius: 2px;
 }
 
 .gantt-row__lead {
@@ -66,7 +114,6 @@
 .gantt-row__lane {
   position: relative;
   height: 100%;
-  padding-block: 10px;
   overflow: hidden;
 }
 
@@ -77,115 +124,6 @@
   color: var(--text-muted);
   font-size: 12px;
   font-style: italic;
-}
-
-.gantt-row__bar {
-  position: absolute;
-  top: 14px;
-  left: calc(var(--bar-left, 0) * 1%);
-  width: calc(var(--bar-width, 0) * 1%);
-  height: 24px;
-  border-radius: 4px;
-  background: var(--bar-color, var(--state-in-dev));
-  color: var(--text);
-  padding-inline: 8px;
-  display: inline-flex;
-  align-items: center;
-  font-size: 12px;
-  font-weight: 500;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  border-inline-start: 2px solid var(--bar-color, var(--state-in-dev));
-  transition: box-shadow 150ms ease;
-  cursor: pointer;
-}
-
-.gantt-row__bar--narrow {
-  color: transparent;
-}
-
-.gantt-row__bar--overdue {
-  text-decoration: underline solid 1.5px var(--state-danger, var(--danger));
-}
-
-.gantt-row__bar-label-outside {
-  position: absolute;
-  top: 14px;
-  left: calc((var(--bar-left, 0) + var(--bar-width, 0)) * 1% + 6px);
-  height: 24px;
-  display: inline-flex;
-  align-items: center;
-  font-size: 12px;
-  color: var(--text-muted);
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-.gantt-row__clamp {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text);
-  pointer-events: none;
-  font-size: 12px;
-  line-height: 1;
-}
-
-.gantt-row__clamp--left {
-  left: 2px;
-}
-
-.gantt-row__clamp--right {
-  right: 2px;
-}
-
-.gantt-row__tasks {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 40px;
-  display: flex;
-  gap: 2px;
-  padding-inline: calc(var(--bar-left, 0) * 1%) 0;
-}
-
-.gantt-row__task-bar {
-  height: 8px;
-  min-width: 18px;
-  border-radius: 3px;
-  cursor: pointer;
-  outline: none;
-  border: 1px solid transparent;
-}
-
-.gantt-row__task-bar:focus-visible {
-  border-color: var(--accent);
-}
-
-.gantt-row__task-bar--not-started  { background: var(--state-not-started); }
-.gantt-row__task-bar--in-dev       { background: var(--state-in-dev); }
-.gantt-row__task-bar--mr-to-release{ background: var(--state-mr-release); }
-.gantt-row__task-bar--in-test      { background: var(--state-in-test); }
-.gantt-row__task-bar--mr-to-master { background: var(--state-mr-master); }
-.gantt-row__task-bar--completed    { background: var(--state-completed); }
-
-.gantt-row__task-skeleton {
-  position: absolute;
-  left: calc(var(--bar-left, 0) * 1%);
-  width: calc(var(--bar-width, 0) * 1%);
-  top: 40px;
-  height: 8px;
-  border-radius: 3px;
-  background: color-mix(in oklch, var(--surface) 60%, var(--border));
-  opacity: 0.6;
-  animation: gantt-row-skeleton 1.2s linear infinite;
-}
-
-@keyframes gantt-row-skeleton {
-  0% { opacity: 0.35; }
-  50% { opacity: 0.75; }
-  100% { opacity: 0.35; }
 }
 
 .gantt-row__sr-only {

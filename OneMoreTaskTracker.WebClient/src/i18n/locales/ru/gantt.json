@@ -49,7 +49,32 @@
     "dueOverdue_many": "Просрочено на {{count}} дней",
     "dueOverdue_other": "Просрочено на {{count}} дней",
     "dueToday": "Срок сегодня",
-    "unscheduled": "Без сроков"
+    "unscheduled": "Без сроков",
+    "unassigned": "Не назначен",
+    "removed": "удалён",
+    "notPlannedYet": "План ещё не задан",
+    "overdue": "Просрочено",
+    "plannedCounter": "{{planned}}/{{total}} запланировано",
+    "expandAria": "Развернуть таймлайн этапов для {{title}}",
+    "collapseAria": "Свернуть таймлайн этапов для {{title}}"
+  },
+  "segmentedBar": {
+    "ariaLabel": "Таймлайн этапов фичи {{title}}",
+    "status": {
+      "current": "В работе",
+      "overdue": "Просрочено",
+      "completed": "Завершено",
+      "upcoming": "Впереди",
+      "notPlanned": "Не запланировано"
+    }
+  },
+  "stageRow": {
+    "aria": "Этап {{index}} из 5: {{name}}. Ответственный {{owner}}."
+  },
+  "side": {
+    "Back": "Back",
+    "Front": "Front",
+    "Common": "Common"
   },
   "drawer": {
     "title": "Фича",

@@ -1,0 +1,189 @@
+import { useTranslation } from 'react-i18next';
+import type { FeatureState, FeatureSummary, MiniTeamMember } from '../../../shared/types/feature';
+import { Avatar, Badge } from '../../../shared/ds';
+import { FEATURE_STATE_CSS } from '../stateConfig';
+import type { StageBarGeometry } from '../ganttStageGeometry';
+import { daysBetween } from '../ganttMath';
+import { roleToSide } from '../roleToSide';
+import './GanttStageSubRow.css';
+
+export interface GanttStageSubRowProps {
+  feature: FeatureSummary;
+  seg: StageBarGeometry;
+  today: string;
+  /** Previous-performer name when the user has been removed from the team. */
+  removedPerformerName?: string | null;
+  resolvePerformer: (userId: number | null | undefined) => MiniTeamMember | undefined;
+  /** Index (0..4) in canonical order, for the `01…05` numeral. */
+  index: number;
+  onOpenStage: (stage: FeatureState) => void;
+}
+
+function avatarTone(role: MiniTeamMember['role']): 'manager' | 'frontend' | 'backend' | 'qa' {
+  switch (role) {
+    case 'Manager':
+      return 'manager';
+    case 'FrontendDeveloper':
+      return 'frontend';
+    case 'BackendDeveloper':
+      return 'backend';
+    case 'Qa':
+      return 'qa';
+  }
+}
+
+function sideBadgeTone(side: 'Back' | 'Front' | 'Common') {
+  switch (side) {
+    case 'Back':
+      return 'role-backend' as const;
+    case 'Front':
+      return 'role-frontend' as const;
+    default:
+      return 'neutral' as const;
+  }
+}
+
+function computeDtr(opts: {
+  plannedEnd: string | null;
+  today: string;
+  isOverdue: boolean;
+  isCompleted: boolean;
+  isLiveReleaseDone: boolean;
+}): string {
+  const { plannedEnd, today, isOverdue, isCompleted, isLiveReleaseDone } = opts;
+  if (isLiveReleaseDone) return '✓';
+  if (plannedEnd == null) return '—';
+  const delta = daysBetween(today, plannedEnd);
+  // delta > 0: today < plannedEnd → N days remaining
+  // delta === 0: today === plannedEnd → 0d
+  // delta < 0: today > plannedEnd → overdue, show -Nd
+  if (isOverdue) return `-${Math.abs(delta)}d`;
+  if (isCompleted) return '✓';
+  return `${delta}d`;
+}
+
+export function GanttStageSubRow({
+  feature,
+  seg,
+  today,
+  removedPerformerName,
+  resolvePerformer,
+  index,
+  onOpenStage,
+}: GanttStageSubRowProps) {
+  const { t } = useTranslation('gantt');
+  const plan = feature.stagePlans.find((p) => p.stage === seg.stage) ?? null;
+  const performer = resolvePerformer(plan?.performerUserId ?? null);
+  const hasPerformerId = plan?.performerUserId != null;
+  const stale = hasPerformerId && performer == null;
+
+  const side = performer ? roleToSide(performer.role) : null;
+  const dtr = computeDtr({
+    plannedEnd: plan?.plannedEnd ?? null,
+    today,
+    isOverdue: seg.isOverdue,
+    isCompleted: seg.isCompleted,
+    isLiveReleaseDone: seg.stage === 'LiveRelease' && seg.isCompleted,
+  });
+
+  const numeral = String(index + 1).padStart(2, '0');
+  const stageName = t(`state.${seg.stage}`);
+
+  let ownerNode;
+  if (!hasPerformerId) {
+    ownerNode = <span className="gantt-stage-row__unassigned">{t('row.unassigned')}</span>;
+  } else if (stale) {
+    const displayName = removedPerformerName ?? `#${plan?.performerUserId ?? ''}`;
+    ownerNode = (
+      <>
+        <span className="gantt-stage-row__avatar-placeholder" aria-hidden="true" />
+        <span className="gantt-stage-row__owner-text">
+          {displayName} · {t('row.removed')}
+        </span>
+      </>
+    );
+  } else if (performer) {
+    ownerNode = (
+      <>
+        <Avatar name={performer.displayName} size="sm" tone={avatarTone(performer.role)} />
+        <span className="gantt-stage-row__owner-text">{performer.displayName}</span>
+      </>
+    );
+  }
+
+  return (
+    <div
+      className="gantt-stage-row"
+      data-testid={`stage-subrow-${feature.id}-${seg.stage}`}
+      data-active={seg.isCurrent ? 'true' : 'false'}
+      data-status={seg.status}
+      data-overdue={seg.isOverdue ? 'true' : 'false'}
+    >
+      <div className="gantt-stage-row__gutter">
+        <button
+          type="button"
+          className="gantt-stage-row__trigger"
+          onClick={() => onOpenStage(seg.stage)}
+          aria-label={t('stageRow.aria', {
+            index: index + 1,
+            name: stageName,
+            owner: performer?.displayName ?? t('row.unassigned'),
+          })}
+        >
+          <span className="gantt-stage-row__numeral" aria-hidden="true">
+            {numeral}
+          </span>
+          <span
+            className="gantt-stage-row__dot"
+            style={{ background: `var(${FEATURE_STATE_CSS[seg.stage]})` }}
+            aria-hidden="true"
+          />
+          <span className="gantt-stage-row__stage-name">{stageName}</span>
+          <span className="gantt-stage-row__owner" data-testid="stage-owner">
+            {ownerNode}
+          </span>
+          {side != null && performer != null ? (
+            <Badge tone={sideBadgeTone(side)} className="gantt-stage-row__side" data-testid="stage-side">
+              {t(`side.${side}`)}
+            </Badge>
+          ) : null}
+          <span className="gantt-stage-row__dates">
+            <span className="gantt-stage-row__date">
+              {plan?.plannedStart ?? '—'}
+            </span>
+            <span className="gantt-stage-row__sep" aria-hidden="true">
+              {' · '}
+            </span>
+            <span className="gantt-stage-row__date">
+              {plan?.plannedEnd ?? '—'}
+            </span>
+            <span className="gantt-stage-row__sep" aria-hidden="true">
+              {' · '}
+            </span>
+            <span
+              className="gantt-stage-row__dtr"
+              data-testid="stage-dtr"
+              data-overdue={seg.isOverdue ? 'true' : 'false'}
+            >
+              {dtr}
+            </span>
+          </span>
+        </button>
+      </div>
+      <div className="gantt-stage-row__lane">
+        {seg.bar || seg.ghost ? (
+          <span
+            className="gantt-stage-row__segment"
+            data-variant={seg.bar ? 'solid' : 'ghost'}
+            style={{
+              ['--seg-left' as string]: String((seg.bar ?? seg.ghost)!.leftPercent),
+              ['--seg-width' as string]: String((seg.bar ?? seg.ghost)!.widthPercent),
+              ['--seg-color' as string]: `var(${FEATURE_STATE_CSS[seg.stage]})`,
+            }}
+            aria-hidden="true"
+          />
+        ) : null}
+      </div>
+    </div>
+  );
+}
