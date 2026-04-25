@@ -28,7 +28,8 @@ export interface GanttFeatureRowProps {
   window: DateWindow;
   today: string;
   lead: MiniTeamMember;
-  miniTeam: MiniTeamMember[];
+  /** Optional override for the assignee stack — defaults to `[lead]`. */
+  miniTeam?: MiniTeamMember[];
   /**
    * Why this lane renders the way it does. `planned` is the normal case;
    * `noPlan` and `outOfWindow` render a ghost lane so the manager still sees
@@ -228,7 +229,7 @@ export function GanttFeatureRow({
               {t('row.plannedCounter', { planned, total: totalStages })}
             </span>
           </div>
-          <GanttAssigneeStack members={miniTeam} aria-label={t('row.team')} />
+          <GanttAssigneeStack members={miniTeam ?? [lead]} aria-label={t('row.team')} />
         </div>
 
         <div className="gantt-row__lane" data-variant={variant}>

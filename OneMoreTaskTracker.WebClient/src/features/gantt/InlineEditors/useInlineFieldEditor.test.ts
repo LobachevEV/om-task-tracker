@@ -83,7 +83,7 @@ describe('useInlineFieldEditor', () => {
     await act(() => result.current.commit());
     expect(result.current.status).toBe('error');
     expect(result.current.draft).toBe('A');
-    expect(result.current.lastRejectedDraft).toBe('B');
+    expect(result.current.lastRejectedDraft).toEqual({ value: 'B' });
 
     await act(() => result.current.retry());
     expect(onSave).toHaveBeenNthCalledWith(2, 'B');
@@ -98,7 +98,7 @@ describe('useInlineFieldEditor', () => {
     );
     act(() => result.current.setDraft('B'));
     await act(() => result.current.commit());
-    expect(result.current.lastRejectedDraft).toBe('B');
+    expect(result.current.lastRejectedDraft).toEqual({ value: 'B' });
     act(() => result.current.cancel());
     expect(result.current.lastRejectedDraft).toBeNull();
     expect(result.current.status).toBe('idle');

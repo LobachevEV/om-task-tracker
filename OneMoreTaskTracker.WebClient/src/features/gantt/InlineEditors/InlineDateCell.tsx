@@ -44,11 +44,7 @@ function nudgeIso(iso: string | null, direction: 1 | -1): string | null {
   if (iso == null) return iso;
   const ms = Date.parse(`${iso}T00:00:00Z`);
   if (Number.isNaN(ms)) return iso;
-  const next = new Date(ms + direction * 86_400_000);
-  const y = next.getUTCFullYear().toString().padStart(4, '0');
-  const m = (next.getUTCMonth() + 1).toString().padStart(2, '0');
-  const d = next.getUTCDate().toString().padStart(2, '0');
-  return `${y}-${m}-${d}`;
+  return new Date(ms + direction * 86_400_000).toISOString().slice(0, 10);
 }
 
 function toDraft(value: string | null): string {
@@ -100,11 +96,8 @@ export function InlineDateCell({
       return null;
     },
     buildAnnouncement,
+    onAnnounce,
   });
-
-  if (onAnnounce && editor.announcement) {
-    queueMicrotask(() => onAnnounce(editor.announcement));
-  }
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
@@ -163,7 +156,7 @@ export function InlineDateCell({
         error={editor.error}
         onRetry={() => void editor.retry()}
         onRevert={editor.cancel}
-        rejectedValueLabel={editor.lastRejectedDraft || null}
+        rejectedValueLabel={editor.lastRejectedLabel}
         resolveMessage={(err) => resolveDateCellMessage(err, t)}
       />
     </span>

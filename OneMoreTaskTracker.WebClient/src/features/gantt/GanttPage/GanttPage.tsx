@@ -227,9 +227,6 @@ export function GanttPageInternal({
             ) : null}
             {layout.lanes.map((lane: GanttLane) => {
               const lead = resolveMember(lane.feature.leadUserId);
-              // Summary view knows only the lead; task-assignee resolution requires
-              // FeatureDetail (lazy), so the mini-team fills in once the drawer opens.
-              const miniTeam = [lead];
               const expanded = state.expandedFeatureIds.has(lane.feature.id);
               return (
                 <GanttFeatureRow
@@ -240,7 +237,6 @@ export function GanttPageInternal({
                   window={layout.window}
                   today={state.today}
                   lead={lead}
-                  miniTeam={miniTeam}
                   variant={lane.variant}
                   expanded={expanded}
                   onToggleExpand={() => state.toggleFeatureExpanded(lane.feature.id)}

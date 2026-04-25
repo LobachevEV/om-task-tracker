@@ -63,11 +63,9 @@ export function InlineOwnerPicker({
     committed: value,
     onSave,
     buildAnnouncement,
+    onAnnounce,
+    formatRejectedLabel: (next) => resolveOwnerLabel(next, roster),
   });
-
-  if (onAnnounce && editor.announcement) {
-    queueMicrotask(() => onAnnounce(editor.announcement));
-  }
 
   const [query, setQuery] = useState<string>(displayName ?? '');
   const [open, setOpen] = useState(false);
@@ -269,7 +267,7 @@ export function InlineOwnerPicker({
         error={editor.error}
         onRetry={() => void editor.retry()}
         onRevert={editor.cancel}
-        rejectedValueLabel={resolveOwnerLabel(editor.lastRejectedDraft, roster)}
+        rejectedValueLabel={editor.lastRejectedLabel}
       />
     </div>
   );

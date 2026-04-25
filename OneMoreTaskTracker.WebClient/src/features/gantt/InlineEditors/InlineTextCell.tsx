@@ -63,12 +63,8 @@ export function InlineTextCell({
     onSave,
     validate,
     buildAnnouncement,
+    onAnnounce,
   });
-
-  // Relay announcements to the parent's aria-live region.
-  if (onAnnounce && editor.announcement) {
-    queueMicrotask(() => onAnnounce(editor.announcement));
-  }
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
@@ -115,7 +111,7 @@ export function InlineTextCell({
         error={editor.error}
         onRetry={() => void editor.retry()}
         onRevert={editor.cancel}
-        rejectedValueLabel={editor.lastRejectedDraft}
+        rejectedValueLabel={editor.lastRejectedLabel}
       />
     </span>
   );
