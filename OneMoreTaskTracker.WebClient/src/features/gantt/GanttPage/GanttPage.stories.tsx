@@ -61,6 +61,8 @@ function PageHarness({
       onRetry={() => {}}
       state={state}
       onFeatureUpdated={() => {}}
+      loadChunk={async () => {}}
+      bounds={null}
     />
   );
 }

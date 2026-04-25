@@ -16,6 +16,7 @@ const members = Object.values(MINI_TEAM_MEMBERS) as MiniTeamMember[];
 const resolve = (id: number | null | undefined): MiniTeamMember | undefined =>
   id == null ? undefined : members.find((m) => m.userId === id);
 const win = windowForZoom(FIXTURE_TODAY, 'month');
+const DAY_PX = 32;
 
 const meta: Meta<typeof GanttStageSubRow> = {
   title: 'features/gantt/GanttStageSubRow',
@@ -32,10 +33,10 @@ const meta: Meta<typeof GanttStageSubRow> = {
 export default meta;
 type Story = StoryObj<typeof GanttStageSubRow>;
 
-const miniTeamBars = computeStageBars(win, MINI_TEAM_FEATURE, FIXTURE_TODAY);
-const overdueBars = computeStageBars(win, OVERDUE_FEATURE, FIXTURE_TODAY);
-const shippedBars = computeStageBars(win, SHIPPED_FEATURE, FIXTURE_TODAY);
-const unscheduledBars = computeStageBars(win, UNSCHEDULED_FEATURE, FIXTURE_TODAY);
+const miniTeamBars = computeStageBars(win, MINI_TEAM_FEATURE, FIXTURE_TODAY, DAY_PX);
+const overdueBars = computeStageBars(win, OVERDUE_FEATURE, FIXTURE_TODAY, DAY_PX);
+const shippedBars = computeStageBars(win, SHIPPED_FEATURE, FIXTURE_TODAY, DAY_PX);
+const unscheduledBars = computeStageBars(win, UNSCHEDULED_FEATURE, FIXTURE_TODAY, DAY_PX);
 
 export const ActiveTestingStage: Story = {
   args: {

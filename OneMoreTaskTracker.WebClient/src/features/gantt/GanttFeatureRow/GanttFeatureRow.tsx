@@ -7,7 +7,6 @@ import type {
 } from '../../../shared/types/feature';
 import type { TeamRosterMember } from '../../../shared/api/teamApi';
 import { GanttAssigneeStack } from '../GanttAssigneeStack';
-import type { BarGeometry, DateWindow } from '../ganttMath';
 import { daysBetween } from '../ganttMath';
 import type { StageBarGeometry } from '../ganttStageGeometry';
 import { featureIsOverdue, plannedStageCount } from '../ganttStageGeometry';
@@ -23,9 +22,7 @@ import './GanttFeatureRow.css';
 
 export interface GanttFeatureRowProps {
   feature: FeatureSummary;
-  bar: BarGeometry | null;
   stageBars: StageBarGeometry[];
-  window: DateWindow;
   today: string;
   lead: MiniTeamMember;
   /** Optional override for the assignee stack — defaults to `[lead]`. */

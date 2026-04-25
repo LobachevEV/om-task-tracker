@@ -14,11 +14,11 @@ export interface GanttSegmentedBarProps {
   /** Click handler — opens the drawer at the given stage. */
   onOpenStage: (stage: FeatureState) => void;
   /**
-   * Lane-level context: `noPlan` / `outOfWindow` render a ghost lane with the
-   * 'Not planned yet' label (or similar) instead of dim segments. Defaults to
-   * `planned` when the lane has bar geometry.
+   * Lane-level context: `noPlan` renders a ghost lane with the 'Not planned
+   * yet' label instead of dim segments. Defaults to `planned` when the lane
+   * has bar geometry.
    */
-  laneVariant?: 'planned' | 'noPlan' | 'outOfWindow';
+  laneVariant?: 'planned' | 'noPlan';
 }
 
 interface SegmentLabelParams {
@@ -68,9 +68,7 @@ export function GanttSegmentedBar({
     >
       {isGhostLane ? (
         <span className="gantt-seg-bar__empty-label" aria-hidden="true">
-          {laneVariant === 'outOfWindow'
-            ? t('row.outOfWindow', { defaultValue: 'Outside this window' })
-            : t('row.notPlannedYet')}
+          {t('row.notPlannedYet')}
         </span>
       ) : null}
       {stageBars.map((seg, index) => {
@@ -90,8 +88,8 @@ export function GanttSegmentedBar({
                 : t('segmentedBar.status.upcoming');
 
         const style = {
-          ['--seg-left' as string]: geometry ? String(geometry.leftPercent) : '0',
-          ['--seg-width' as string]: geometry ? String(geometry.widthPercent) : '0',
+          ['--seg-left' as string]: geometry ? `${geometry.leftPx}px` : '0px',
+          ['--seg-width' as string]: geometry ? `${geometry.widthPx}px` : '0px',
           ['--seg-color' as string]: `var(${cssVar})`,
         } as CSSProperties;
 

@@ -16,6 +16,7 @@ import type { MiniTeamMember } from '../../../shared/types/feature';
 
 const { fe, be, qa, mg } = MINI_TEAM_MEMBERS;
 const win = windowForZoom(FIXTURE_TODAY, 'month');
+const DAY_PX = 32;
 
 function resolverFor(members: MiniTeamMember[]) {
   const byId = new Map(members.map((m) => [m.userId, m]));
@@ -29,7 +30,7 @@ describe('GanttStageSubRow', () => {
   });
 
   it('renders owner name and a Side badge when the stage has a performer', () => {
-    const bars = computeStageBars(win, MINI_TEAM_FEATURE, FIXTURE_TODAY);
+    const bars = computeStageBars(win, MINI_TEAM_FEATURE, FIXTURE_TODAY, DAY_PX);
     const testingSeg = bars.find((b) => b.stage === 'Testing')!;
     render(
       <GanttStageSubRow
@@ -46,7 +47,7 @@ describe('GanttStageSubRow', () => {
   });
 
   it('renders an "Unassigned" owner + no side badge when performer is null', () => {
-    const bars = computeStageBars(win, UNSCHEDULED_FEATURE, FIXTURE_TODAY);
+    const bars = computeStageBars(win, UNSCHEDULED_FEATURE, FIXTURE_TODAY, DAY_PX);
     const seg = bars[0];
     render(
       <GanttStageSubRow
@@ -63,7 +64,7 @@ describe('GanttStageSubRow', () => {
   });
 
   it('renders DTR as `—` for unplanned stages', () => {
-    const bars = computeStageBars(win, UNSCHEDULED_FEATURE, FIXTURE_TODAY);
+    const bars = computeStageBars(win, UNSCHEDULED_FEATURE, FIXTURE_TODAY, DAY_PX);
     render(
       <GanttStageSubRow
         feature={UNSCHEDULED_FEATURE}
@@ -78,7 +79,7 @@ describe('GanttStageSubRow', () => {
   });
 
   it('renders DTR with leading minus when the stage is overdue', () => {
-    const bars = computeStageBars(win, OVERDUE_FEATURE, FIXTURE_TODAY);
+    const bars = computeStageBars(win, OVERDUE_FEATURE, FIXTURE_TODAY, DAY_PX);
     const dev = bars.find((b) => b.stage === 'Development')!;
     render(
       <GanttStageSubRow
@@ -96,7 +97,7 @@ describe('GanttStageSubRow', () => {
   });
 
   it('renders DTR as `✓` for the completed LiveRelease stage of a shipped feature', () => {
-    const bars = computeStageBars(win, SHIPPED_FEATURE, FIXTURE_TODAY);
+    const bars = computeStageBars(win, SHIPPED_FEATURE, FIXTURE_TODAY, DAY_PX);
     const live = bars.find((b) => b.stage === 'LiveRelease')!;
     render(
       <GanttStageSubRow
@@ -112,7 +113,7 @@ describe('GanttStageSubRow', () => {
   });
 
   it('renders "<name> · removed" without throwing when the performer id is stale', () => {
-    const bars = computeStageBars(win, MINI_TEAM_FEATURE, FIXTURE_TODAY);
+    const bars = computeStageBars(win, MINI_TEAM_FEATURE, FIXTURE_TODAY, DAY_PX);
     const dev = bars.find((b) => b.stage === 'Development')!;
     render(
       <GanttStageSubRow

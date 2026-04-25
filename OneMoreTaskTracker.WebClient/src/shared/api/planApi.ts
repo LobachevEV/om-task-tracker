@@ -1,11 +1,13 @@
 import { API_BASE_URL, authHeaders, handleResponse } from './httpClient';
 import {
+  featureBoundsSchema,
   featureDetailSchema,
   featureSummaryListSchema,
   featureSummarySchema,
 } from './schemas';
 import type {
   CreateFeaturePayload,
+  FeatureBounds,
   FeatureDetail,
   FeatureScope,
   FeatureState,
@@ -29,19 +31,43 @@ function jsonHeaders(ifMatch?: number): Record<string, string> {
   return headers;
 }
 
+export interface ListFeaturesParams {
+  scope?: FeatureScope;
+  state?: FeatureState;
+  /** Inclusive ISO yyyy-MM-dd; pairs with `windowEnd`. */
+  windowStart?: string;
+  /** Inclusive ISO yyyy-MM-dd; pairs with `windowStart`. */
+  windowEnd?: string;
+  /** Optional AbortSignal — caller cancels stale chunk fetches on fast pan. */
+  signal?: AbortSignal;
+}
+
 export async function listFeatures(
-  params: { scope?: FeatureScope; state?: FeatureState } = {},
+  params: ListFeaturesParams = {},
 ): Promise<FeatureSummary[]> {
   const query = new URLSearchParams();
   if (params.scope) query.set('scope', params.scope);
   if (params.state) query.set('state', params.state);
+  if (params.windowStart) query.set('windowStart', params.windowStart);
+  if (params.windowEnd) query.set('windowEnd', params.windowEnd);
   const qs = query.toString();
   const response = await fetch(
     `${API_BASE_URL}/api/plan/features${qs ? `?${qs}` : ''}`,
-    { headers: authHeaders() },
+    { headers: authHeaders(), signal: params.signal },
   );
   const data = await handleResponse<unknown>(response);
   return featureSummaryListSchema.parse(data);
+}
+
+export async function getFeatureBounds(
+  options: { signal?: AbortSignal } = {},
+): Promise<FeatureBounds> {
+  const response = await fetch(`${API_BASE_URL}/api/plan/features/bounds`, {
+    headers: authHeaders(),
+    signal: options.signal,
+  });
+  const data = await handleResponse<unknown>(response);
+  return featureBoundsSchema.parse(data);
 }
 
 export async function getFeature(id: number): Promise<FeatureDetail> {
@@ -196,6 +222,7 @@ export async function updateStagePlannedEnd(
 
 export type {
   CreateFeaturePayload,
+  FeatureBounds,
   FeatureDetail,
   FeatureScope,
   FeatureState,

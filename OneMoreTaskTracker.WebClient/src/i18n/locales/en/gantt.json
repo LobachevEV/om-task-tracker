@@ -109,6 +109,35 @@
   "loading": "Loading plan…",
   "failed": "Could not load the plan.",
   "retry": "Try again",
+  "today": "Today",
+  "chip": {
+    "today": "▸ Today",
+    "todayAria": "Jump to today"
+  },
+  "scroller": {
+    "label": "Gantt timeline, scrollable date axis"
+  },
+  "dateHeader": {
+    "daysAria": "Calendar days, scrollable"
+  },
+  "bounds": {
+    "earliest": "Earliest plan: {{date}}",
+    "end": "End of plan: {{date}}",
+    "endNoFuture": "No plans past today"
+  },
+  "chunk": {
+    "loading": "Loading dates…",
+    "failed": "Couldn't load these dates.",
+    "retry": "Retry"
+  },
+  "goTo": {
+    "legend": "Go to date",
+    "placeholder": "YYYY-MM-DD",
+    "invalid": "Use YYYY-MM-DD"
+  },
+  "narrowViewport": {
+    "notice": "The Gantt timeline scrolls horizontally — pan with the trackbar or arrow keys."
+  },
   "state": {
     "CsApproving": "CS approving",
     "Development": "Development",

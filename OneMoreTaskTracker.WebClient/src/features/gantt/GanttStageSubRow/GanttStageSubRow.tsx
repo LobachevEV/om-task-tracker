@@ -377,8 +377,8 @@ export function GanttStageSubRow({
             className="gantt-stage-row__segment"
             data-variant={seg.bar ? 'solid' : 'ghost'}
             style={{
-              ['--seg-left' as string]: String((seg.bar ?? seg.ghost)!.leftPercent),
-              ['--seg-width' as string]: String((seg.bar ?? seg.ghost)!.widthPercent),
+              ['--seg-left' as string]: `${(seg.bar ?? seg.ghost)!.leftPx}px`,
+              ['--seg-width' as string]: `${(seg.bar ?? seg.ghost)!.widthPx}px`,
               ['--seg-color' as string]: `var(${FEATURE_STATE_CSS[seg.stage]})`,
             }}
             aria-hidden="true"

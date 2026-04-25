@@ -2,9 +2,15 @@ import { describe, expect, it } from 'vitest';
 import {
   addDays,
   barGeometry,
+  barGeometryPx,
+  chunkRange,
+  clampToBounds,
+  dateToPixel,
   daysBetween,
+  loadedRangeFromBuffer,
   mondayOf,
   parseIsoDate,
+  pixelToDate,
   toIsoDate,
   todayPercent,
   windowForZoom,
@@ -146,5 +152,122 @@ describe('todayPercent', () => {
   });
   it('is proportional mid-window', () => {
     expect(todayPercent(windowWeek, '2026-04-23')).toBeCloseTo((3 / 7) * 100, 5);
+  });
+});
+
+describe('dateToPixel / pixelToDate', () => {
+  const start = '2026-04-20';
+  it('dateToPixel measures days × dayPx from rangeStart', () => {
+    expect(dateToPixel(start, '2026-04-20', 24)).toBe(0);
+    expect(dateToPixel(start, '2026-04-21', 24)).toBe(24);
+    expect(dateToPixel(start, '2026-05-04', 24)).toBe(14 * 24);
+  });
+  it('pixelToDate floors to the day index', () => {
+    expect(pixelToDate(start, 0, 24)).toBe('2026-04-20');
+    expect(pixelToDate(start, 23, 24)).toBe('2026-04-20');
+    expect(pixelToDate(start, 24, 24)).toBe('2026-04-21');
+    expect(pixelToDate(start, 49, 24)).toBe('2026-04-22');
+  });
+  it('pixelToDate rejects non-positive dayPx', () => {
+    expect(() => pixelToDate(start, 24, 0)).toThrow();
+  });
+});
+
+describe('barGeometryPx', () => {
+  const range = { start: '2026-04-20', end: '2026-04-27' };
+
+  it('returns null when both endpoints are null', () => {
+    expect(barGeometryPx(range, { start: null, end: null }, 24)).toBeNull();
+  });
+  it('positions a fully-inside bar at integer px', () => {
+    const g = barGeometryPx(range, { start: '2026-04-22', end: '2026-04-23' }, 24);
+    expect(g).not.toBeNull();
+    expect(g!.leftPx).toBe(2 * 24);
+    expect(g!.widthPx).toBe(2 * 24);
+    expect(g!.clampedLeft).toBe(false);
+    expect(g!.clampedRight).toBe(false);
+  });
+  it('clamps left when feature starts before range', () => {
+    const g = barGeometryPx(range, { start: '2026-04-15', end: '2026-04-23' }, 24);
+    expect(g).not.toBeNull();
+    expect(g!.leftPx).toBe(0);
+    expect(g!.widthPx).toBe(4 * 24);
+    expect(g!.clampedLeft).toBe(true);
+  });
+  it('clamps right when feature ends after range', () => {
+    const g = barGeometryPx(range, { start: '2026-04-22', end: '2026-05-10' }, 24);
+    expect(g).not.toBeNull();
+    expect(g!.leftPx).toBe(2 * 24);
+    expect(g!.widthPx).toBe(5 * 24);
+    expect(g!.clampedRight).toBe(true);
+  });
+  it('returns null fully outside', () => {
+    expect(
+      barGeometryPx(range, { start: '2026-03-01', end: '2026-03-02' }, 24),
+    ).toBeNull();
+  });
+});
+
+describe('loadedRangeFromBuffer', () => {
+  it('expands by bufferDays on each side of today plus viewportDays', () => {
+    const r = loadedRangeFromBuffer('2026-04-21', 30, 30);
+    expect(r.start).toBe('2026-03-22');
+    expect(daysBetween(r.start, r.end)).toBe(90);
+  });
+  it('handles zero buffer', () => {
+    const r = loadedRangeFromBuffer('2026-04-21', 14, 0);
+    expect(r.start).toBe('2026-04-21');
+    expect(daysBetween(r.start, r.end)).toBe(14);
+  });
+});
+
+describe('chunkRange', () => {
+  const loaded = { start: '2026-04-20', end: '2026-04-27' };
+  it('leading direction prepends a chunk before the loaded range', () => {
+    expect(chunkRange('leading', loaded, 7)).toEqual({
+      start: '2026-04-13',
+      end: '2026-04-20',
+    });
+  });
+  it('trailing direction appends a chunk after the loaded range', () => {
+    expect(chunkRange('trailing', loaded, 7)).toEqual({
+      start: '2026-04-27',
+      end: '2026-05-04',
+    });
+  });
+});
+
+describe('clampToBounds', () => {
+  const range = { start: '2026-01-01', end: '2026-12-31' };
+  it('clips overflow past the latest end + cushion', () => {
+    const r = clampToBounds(
+      range,
+      { earliestPlannedStart: '2026-04-01', latestPlannedEnd: '2026-06-30' },
+      14,
+    );
+    expect(r.start).toBe('2026-03-18'); // 2026-04-01 - 14
+    expect(r.end).toBe('2026-07-15'); // 2026-06-30 + 14 + 1 (half-open)
+  });
+  it('leaves a side untouched when its bound is null', () => {
+    const r = clampToBounds(
+      range,
+      { earliestPlannedStart: null, latestPlannedEnd: '2026-06-30' },
+      14,
+    );
+    expect(r.start).toBe('2026-01-01');
+    expect(r.end).toBe('2026-07-15');
+  });
+  it('returns input when bounds are both null', () => {
+    expect(
+      clampToBounds(range, { earliestPlannedStart: null, latestPlannedEnd: null }, 14),
+    ).toEqual(range);
+  });
+  it('does not invert when range is fully outside bounds (left)', () => {
+    const r = clampToBounds(
+      { start: '2027-01-01', end: '2027-02-01' },
+      { earliestPlannedStart: '2026-04-01', latestPlannedEnd: '2026-06-30' },
+      14,
+    );
+    expect(daysBetween(r.start, r.end)).toBeGreaterThan(0);
   });
 });

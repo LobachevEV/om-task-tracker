@@ -126,3 +126,13 @@ export interface UpdateStagePlannedEndPayload {
 }
 
 export type FeatureScope = 'all' | 'mine';
+
+/**
+ * Global planning bounds across all features owned by the current manager.
+ * Returned by `GET /api/plan/features/bounds`. Either field is `null` when no
+ * features have planned dates yet (cold-start).
+ */
+export interface FeatureBounds {
+  earliestPlannedStart: string | null; // ISO yyyy-MM-dd
+  latestPlannedEnd: string | null;     // ISO yyyy-MM-dd
+}

@@ -9,12 +9,13 @@ import {
   OVERDUE_FEATURE,
   UNSCHEDULED_FEATURE,
 } from '../__fixtures__/FeatureFixtures';
-import { barGeometry, windowForZoom } from '../ganttMath';
+import { windowForZoom } from '../ganttMath';
 import { computeStageBars } from '../ganttStageGeometry';
 import type { MiniTeamMember } from '../../../shared/types/feature';
 
 const { fe, be, qa, mg } = MINI_TEAM_MEMBERS;
 const windowMonth = windowForZoom(FIXTURE_TODAY, 'month');
+const DAY_PX = 32;
 
 function resolverFor(members: MiniTeamMember[]) {
   const byId = new Map(members.map((m) => [m.userId, m]));
@@ -22,11 +23,12 @@ function resolverFor(members: MiniTeamMember[]) {
     id == null ? undefined : byId.get(id);
 }
 
-const miniTeamBar = barGeometry(windowMonth, {
-  start: MINI_TEAM_FEATURE.plannedStart,
-  end: MINI_TEAM_FEATURE.plannedEnd,
-});
-const miniTeamStageBars = computeStageBars(windowMonth, MINI_TEAM_FEATURE, FIXTURE_TODAY);
+const miniTeamStageBars = computeStageBars(
+  windowMonth,
+  MINI_TEAM_FEATURE,
+  FIXTURE_TODAY,
+  DAY_PX,
+);
 
 describe('GanttFeatureRow', () => {
   beforeEach(async () => {
@@ -38,9 +40,7 @@ describe('GanttFeatureRow', () => {
     render(
       <GanttFeatureRow
         feature={MINI_TEAM_FEATURE}
-        bar={miniTeamBar}
         stageBars={miniTeamStageBars}
-        window={windowMonth}
         today={FIXTURE_TODAY}
         lead={be}
         miniTeam={[be, fe, qa]}
@@ -61,9 +61,7 @@ describe('GanttFeatureRow', () => {
     render(
       <GanttFeatureRow
         feature={MINI_TEAM_FEATURE}
-        bar={miniTeamBar}
         stageBars={miniTeamStageBars}
-        window={windowMonth}
         today={FIXTURE_TODAY}
         lead={be}
         miniTeam={[be, fe, qa]}
@@ -81,9 +79,7 @@ describe('GanttFeatureRow', () => {
     render(
       <GanttFeatureRow
         feature={MINI_TEAM_FEATURE}
-        bar={miniTeamBar}
         stageBars={miniTeamStageBars}
-        window={windowMonth}
         today={FIXTURE_TODAY}
         lead={be}
         miniTeam={[be]}
@@ -102,9 +98,7 @@ describe('GanttFeatureRow', () => {
     const { rerender } = render(
       <GanttFeatureRow
         feature={MINI_TEAM_FEATURE}
-        bar={miniTeamBar}
         stageBars={miniTeamStageBars}
-        window={windowMonth}
         today={FIXTURE_TODAY}
         lead={be}
         miniTeam={[be]}
@@ -122,9 +116,7 @@ describe('GanttFeatureRow', () => {
     rerender(
       <GanttFeatureRow
         feature={MINI_TEAM_FEATURE}
-        bar={miniTeamBar}
         stageBars={miniTeamStageBars}
-        window={windowMonth}
         today={FIXTURE_TODAY}
         lead={be}
         miniTeam={[be]}
@@ -141,9 +133,7 @@ describe('GanttFeatureRow', () => {
     render(
       <GanttFeatureRow
         feature={MINI_TEAM_FEATURE}
-        bar={miniTeamBar}
         stageBars={miniTeamStageBars}
-        window={windowMonth}
         today={FIXTURE_TODAY}
         lead={be}
         miniTeam={[be]}
@@ -164,9 +154,7 @@ describe('GanttFeatureRow', () => {
     render(
       <GanttFeatureRow
         feature={MINI_TEAM_FEATURE}
-        bar={miniTeamBar}
         stageBars={miniTeamStageBars}
-        window={windowMonth}
         today={FIXTURE_TODAY}
         lead={be}
         miniTeam={[be]}
@@ -181,17 +169,16 @@ describe('GanttFeatureRow', () => {
   });
 
   it('marks the DTR as overdue when the active stage is past its plannedEnd', () => {
-    const overdueStageBars = computeStageBars(windowMonth, OVERDUE_FEATURE, FIXTURE_TODAY);
-    const overdueBar = barGeometry(windowMonth, {
-      start: OVERDUE_FEATURE.plannedStart,
-      end: OVERDUE_FEATURE.plannedEnd,
-    });
+    const overdueStageBars = computeStageBars(
+      windowMonth,
+      OVERDUE_FEATURE,
+      FIXTURE_TODAY,
+      DAY_PX,
+    );
     render(
       <GanttFeatureRow
         feature={OVERDUE_FEATURE}
-        bar={overdueBar}
         stageBars={overdueStageBars}
-        window={windowMonth}
         today={FIXTURE_TODAY}
         lead={be}
         miniTeam={[be]}
@@ -205,17 +192,16 @@ describe('GanttFeatureRow', () => {
   });
 
   it('exposes a non-"5/5 planned" counter for partial plans', () => {
-    const overdueStageBars = computeStageBars(windowMonth, OVERDUE_FEATURE, FIXTURE_TODAY);
-    const overdueBar = barGeometry(windowMonth, {
-      start: OVERDUE_FEATURE.plannedStart,
-      end: OVERDUE_FEATURE.plannedEnd,
-    });
+    const overdueStageBars = computeStageBars(
+      windowMonth,
+      OVERDUE_FEATURE,
+      FIXTURE_TODAY,
+      DAY_PX,
+    );
     render(
       <GanttFeatureRow
         feature={OVERDUE_FEATURE}
-        bar={overdueBar}
         stageBars={overdueStageBars}
-        window={windowMonth}
         today={FIXTURE_TODAY}
         lead={be}
         miniTeam={[be]}
@@ -234,9 +220,7 @@ describe('GanttFeatureRow', () => {
     render(
       <GanttFeatureRow
         feature={UNSCHEDULED_FEATURE}
-        bar={null}
-        stageBars={computeStageBars(windowMonth, UNSCHEDULED_FEATURE, FIXTURE_TODAY)}
-        window={windowMonth}
+        stageBars={computeStageBars(windowMonth, UNSCHEDULED_FEATURE, FIXTURE_TODAY, DAY_PX)}
         today={FIXTURE_TODAY}
         lead={fe}
         miniTeam={[fe]}
@@ -253,9 +237,7 @@ describe('GanttFeatureRow', () => {
     render(
       <GanttFeatureRow
         feature={UNSCHEDULED_FEATURE}
-        bar={null}
-        stageBars={computeStageBars(windowMonth, UNSCHEDULED_FEATURE, FIXTURE_TODAY)}
-        window={windowMonth}
+        stageBars={computeStageBars(windowMonth, UNSCHEDULED_FEATURE, FIXTURE_TODAY, DAY_PX)}
         today={FIXTURE_TODAY}
         lead={fe}
         miniTeam={[fe]}
@@ -271,9 +253,6 @@ describe('GanttFeatureRow', () => {
   });
 
   it('never renders the numeric id placeholder for a stale performer', () => {
-    // F6-style fixture: a stagePlan references a performerUserId that the
-    // resolver does not know about. The row should render the bare "removed"
-    // copy — NOT `#9999`.
     const fakeId = 9999;
     const feature = {
       ...MINI_TEAM_FEATURE,
@@ -284,9 +263,7 @@ describe('GanttFeatureRow', () => {
     render(
       <GanttFeatureRow
         feature={feature}
-        bar={miniTeamBar}
-        stageBars={computeStageBars(windowMonth, feature, FIXTURE_TODAY)}
-        window={windowMonth}
+        stageBars={computeStageBars(windowMonth, feature, FIXTURE_TODAY, DAY_PX)}
         today={FIXTURE_TODAY}
         lead={fe}
         miniTeam={[fe]}

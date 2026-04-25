@@ -118,3 +118,128 @@ export function todayPercent(window: DateWindow, today: string): number | null {
   if (delta < 0 || delta >= totalDays) return null;
   return (delta / totalDays) * 100;
 }
+
+/**
+ * Px-based geometry primitives — used by the scrollable Gantt where the date
+ * axis lives in a single horizontally-scrolling element of width
+ * `dayCount * dayPx`. Both endpoints are inclusive ISO yyyy-MM-dd.
+ */
+export interface BarGeometryPx {
+  leftPx: number;
+  widthPx: number;
+  clampedLeft: boolean;
+  clampedRight: boolean;
+}
+
+export function dateToPixel(rangeStart: string, iso: string, dayPx: number): number {
+  return daysBetween(rangeStart, iso) * dayPx;
+}
+
+export function pixelToDate(rangeStart: string, px: number, dayPx: number): string {
+  if (dayPx <= 0) throw new Error('dayPx must be > 0');
+  return addDays(rangeStart, Math.floor(px / dayPx));
+}
+
+/**
+ * Px-positioned bar inside a `range` with the given `dayPx`. Same null
+ * semantics as `barGeometry`: returns null when fully outside, both
+ * endpoints null, or end < start.
+ */
+export function barGeometryPx(
+  range: DateWindow,
+  planned: { start: string | null; end: string | null },
+  dayPx: number,
+): BarGeometryPx | null {
+  const totalDays = daysBetween(range.start, range.end);
+  if (totalDays <= 0) return null;
+
+  let plannedStart = planned.start;
+  let plannedEnd = planned.end;
+  if (plannedStart == null && plannedEnd == null) return null;
+  if (plannedStart == null) plannedStart = plannedEnd;
+  if (plannedEnd == null) plannedEnd = plannedStart;
+  if (daysBetween(plannedStart!, plannedEnd!) < 0) return null;
+
+  const startDelta = daysBetween(range.start, plannedStart!);
+  const endDelta = daysBetween(range.start, plannedEnd!) + 1;
+
+  if (endDelta <= 0) return null;
+  if (startDelta >= totalDays) return null;
+
+  const clampedLeft = startDelta < 0;
+  const clampedRight = endDelta > totalDays;
+  const clippedStart = Math.max(startDelta, 0);
+  const clippedEnd = Math.min(endDelta, totalDays);
+
+  return {
+    leftPx: clippedStart * dayPx,
+    widthPx: (clippedEnd - clippedStart) * dayPx,
+    clampedLeft,
+    clampedRight,
+  };
+}
+
+/**
+ * Initial loaded range: `bufferDays` on each side of `today` plus the visible
+ * `viewportDays` itself. Result is half-open `[start, end)`.
+ */
+export function loadedRangeFromBuffer(
+  today: string,
+  viewportDays: number,
+  bufferDays: number,
+): DateWindow {
+  const span = Math.max(1, viewportDays + bufferDays * 2);
+  const start = addDays(today, -bufferDays);
+  return { start, end: addDays(start, span) };
+}
+
+export type ChunkDirection = 'leading' | 'trailing';
+
+/**
+ * Compute the next chunk window to fetch when the user pans toward an edge.
+ * Returns the chunk's own [start, end) (also half-open). Caller merges into
+ * the loaded range.
+ */
+export function chunkRange(
+  direction: ChunkDirection,
+  loaded: DateWindow,
+  chunkDays: number,
+): DateWindow {
+  const days = Math.max(1, chunkDays);
+  if (direction === 'leading') {
+    const start = addDays(loaded.start, -days);
+    return { start, end: loaded.start };
+  }
+  const start = loaded.end;
+  return { start, end: addDays(loaded.end, days) };
+}
+
+/**
+ * Clip `range` so it does not extend past
+ * `[bounds.earliestPlannedStart - cushion, bounds.latestPlannedEnd + cushion + 1)`
+ * — this prevents loading unbounded empty space past the global plan edges.
+ * Either bound may be null (no data yet); the corresponding side is left as-is.
+ */
+export function clampToBounds(
+  range: DateWindow,
+  bounds: { earliestPlannedStart: string | null; latestPlannedEnd: string | null },
+  cushionDays: number,
+): DateWindow {
+  let { start, end } = range;
+  const cushion = Math.max(0, cushionDays);
+  if (bounds.earliestPlannedStart) {
+    const min = addDays(bounds.earliestPlannedStart, -cushion);
+    // Pull start forward (later) if it sits before the cushion.
+    if (daysBetween(start, min) > 0) start = min;
+  }
+  if (bounds.latestPlannedEnd) {
+    // bounds.latestPlannedEnd is inclusive; treat as +1 for half-open end.
+    const max = addDays(bounds.latestPlannedEnd, cushion + 1);
+    // Pull end backward (earlier) if it sits past the cushion.
+    if (daysBetween(max, end) > 0) end = max;
+  }
+  if (daysBetween(start, end) <= 0) {
+    end = addDays(start, 1);
+  }
+  return { start, end };
+}

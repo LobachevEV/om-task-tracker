@@ -1,6 +1,9 @@
 .gantt-page {
   --gantt-gutter-width: 280px;
-  --day-count: 14;
+  --day-px: 32px;
+  --gantt-cushion-width: 0px;
+  --gantt-loaded-width: 0px;
+  --gantt-today-px: 0px;
   display: flex;
   flex-direction: column;
   /* Definite block-size (not just min-) so flex children with
@@ -28,7 +31,8 @@
      suppresses `overflow: auto` on the child. Force shrink-to-fit so the
      internal scroll container works inside a flex column parent. */
   min-block-size: 0;
-  overflow-x: auto;
+  /* The scroller owns horizontal overflow; the wrap owns vertical. */
+  overflow-x: hidden;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -36,55 +40,58 @@
   padding-block-end: var(--space-6, 24px);
 }
 
-.gantt-page__lanes {
-  position: relative;
+/* Sticky 3-band date header sits at the top of the scrollable inner content.
+ * Combines the leading flank, the day-band header, and the trailing flank. */
+.gantt-page__header-row {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 4;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  background: var(--surface);
+  border-block-end: 1px solid var(--border);
+}
+
+.gantt-page__header-flank {
+  flex: 0 0 auto;
+  background: var(--surface);
+}
+
+.gantt-page__date-header {
+  flex: 0 0 auto;
 }
 
 /*
  * Today hairline — runs full-height through every feature row lane.
- * Positioned in the same 1fr track as the lane bodies: left =
- * gutter-width + (todayPercent% of the remaining lane column).
- * `role="separator"` + `aria-label="Today {{date}}"` in the DOM.
+ * Anchored to `--gantt-today-px` (set on the page root by JS). Lives inside
+ * the scrollable inner so it pans with the date axis.
  */
 .gantt-page__today-hairline {
   position: absolute;
-  /* Sit exactly on top of the lane column (right of the sticky gutter). */
   inset-block: 0;
   inline-size: 1px;
-  inset-inline-start: calc(
-    var(--gantt-gutter-width, 280px) +
-      (100% - var(--gantt-gutter-width, 280px)) * var(--today-percent, 0) / 100
-  );
+  inset-inline-start: var(--gantt-today-px, 0px);
   background: var(--accent);
   opacity: 0.55;
   pointer-events: none;
-  /* Above the lane row borders but below the sticky gutter overlay (z=2). */
-  z-index: 1;
+  z-index: 2;
 }
 
-/* Today chip — sits at the top of the lanes column, anchored to the same
- * percent as the hairline. Lives outside the timeline header so it cannot
- * collide with weekday/day labels at narrow zoom. */
-.gantt-page__today-chip {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: calc(
-    var(--gantt-gutter-width, 280px) +
-      (100% - var(--gantt-gutter-width, 280px)) * var(--today-percent, 0) / 100
-  );
-  transform: translate(-50%, -50%);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  line-height: 1;
-  color: var(--accent-ink, var(--text));
-  background: var(--accent);
-  padding: 3px 6px;
-  border-radius: 9999px;
-  pointer-events: none;
-  white-space: nowrap;
-  z-index: 1;
+/* Lanes row sits below the sticky date header. Cushions / chunk stripes flank
+ * the lane stack on either side so panning past the loaded range still shows
+ * a meaningful surface (bound label or loading/failed stripe). */
+.gantt-page__lanes-row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  position: relative;
+}
+
+.gantt-page__lanes {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
 }
 
 .gantt-page__unscheduled {

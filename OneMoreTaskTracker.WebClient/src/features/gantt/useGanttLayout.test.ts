@@ -7,17 +7,27 @@ import {
   SOLO_FEATURE,
   UNSCHEDULED_FEATURE,
 } from './__fixtures__/FeatureFixtures';
+import { loadedRangeFromBuffer } from './ganttMath';
 import { useGanttLayout } from './useGanttLayout';
+
+const DAY_PX = 32;
+const WIDE_RANGE = loadedRangeFromBuffer(FIXTURE_TODAY, 30, 60);
+const NARROW_RANGE = loadedRangeFromBuffer(FIXTURE_TODAY, 7, 0);
 
 describe('useGanttLayout', () => {
   it('returns an empty layout for an empty features list', () => {
     const { result } = renderHook(() =>
-      useGanttLayout({ features: [], today: FIXTURE_TODAY, zoom: 'week' }),
+      useGanttLayout({
+        features: [],
+        today: FIXTURE_TODAY,
+        loadedRange: WIDE_RANGE,
+        dayPx: DAY_PX,
+      }),
     );
     expect(result.current.lanes).toEqual([]);
     expect(result.current.unscheduled).toEqual([]);
-    // By construction today is inside the weekly window starting on Monday 2026-04-20.
-    expect(result.current.todayPercent).not.toBeNull();
+    expect(result.current.todayPx).not.toBeNull();
+    expect(result.current.totalWidthPx).toBeGreaterThan(0);
   });
 
   it('keeps unscheduled features as ghost lanes instead of hiding them', () => {
@@ -25,7 +35,8 @@ describe('useGanttLayout', () => {
       useGanttLayout({
         features: [UNSCHEDULED_FEATURE, SOLO_FEATURE],
         today: FIXTURE_TODAY,
-        zoom: 'month',
+        loadedRange: WIDE_RANGE,
+        dayPx: DAY_PX,
       }),
     );
     expect(result.current.unscheduled).toEqual([]);
@@ -44,25 +55,39 @@ describe('useGanttLayout', () => {
     expect(soloLane!.bar).not.toBeNull();
   });
 
-  it('every feature is kept visible — lanes.length === features.length', () => {
+  it('drops planned features that fall fully outside the loaded range', () => {
+    // SOLO_FEATURE has dates around FIXTURE_TODAY. NARROW_RANGE is just 7 days
+    // forward — features with plan inside it stay; ones way before/after drop.
     const { result } = renderHook(() =>
-      useGanttLayout({ features: ALL_FEATURES, today: FIXTURE_TODAY, zoom: 'twoWeeks' }),
+      useGanttLayout({
+        features: ALL_FEATURES,
+        today: FIXTURE_TODAY,
+        loadedRange: NARROW_RANGE,
+        dayPx: DAY_PX,
+      }),
     );
-    expect(result.current.lanes.length).toBe(ALL_FEATURES.length);
-    expect(result.current.unscheduled).toEqual([]);
+    // Unscheduled features are still kept as ghost lanes regardless.
+    const ghosts = result.current.lanes.filter((l) => l.variant === 'noPlan');
+    const planned = result.current.lanes.filter((l) => l.variant === 'planned');
+    expect(ghosts.length).toBeGreaterThanOrEqual(0);
+    // Planned lanes are all overlapping the narrow range.
+    for (const l of planned) {
+      expect(l.bar).not.toBeNull();
+    }
   });
 
-  it('todayPercent is inside the window by construction (Monday-anchored)', () => {
+  it('todayPx is inside the loaded range when today is within it', () => {
     const { result } = renderHook(() =>
       useGanttLayout({
         features: [MINI_TEAM_FEATURE],
         today: FIXTURE_TODAY,
-        zoom: 'week',
+        loadedRange: WIDE_RANGE,
+        dayPx: DAY_PX,
       }),
     );
-    expect(result.current.todayPercent).not.toBeNull();
-    expect(result.current.todayPercent!).toBeGreaterThanOrEqual(0);
-    expect(result.current.todayPercent!).toBeLessThan(100);
+    expect(result.current.todayPx).not.toBeNull();
+    expect(result.current.todayPx!).toBeGreaterThanOrEqual(0);
+    expect(result.current.todayPx!).toBeLessThan(result.current.totalWidthPx);
   });
 
   it('tags no-plan features with variant `noPlan` and bar=null', () => {
@@ -70,7 +95,8 @@ describe('useGanttLayout', () => {
       useGanttLayout({
         features: [UNSCHEDULED_FEATURE],
         today: FIXTURE_TODAY,
-        zoom: 'month',
+        loadedRange: WIDE_RANGE,
+        dayPx: DAY_PX,
       }),
     );
     expect(result.current.lanes).toHaveLength(1);
@@ -84,7 +110,8 @@ describe('useGanttLayout', () => {
       useGanttLayout({
         features: [MINI_TEAM_FEATURE],
         today: FIXTURE_TODAY,
-        zoom: 'month',
+        loadedRange: WIDE_RANGE,
+        dayPx: DAY_PX,
       }),
     );
     const lane = result.current.lanes[0];
@@ -101,14 +128,19 @@ describe('useGanttLayout', () => {
   it('memoizes the output for identical inputs', () => {
     const features = [SOLO_FEATURE];
     const { result, rerender } = renderHook(
-      ({ zoom }: { zoom: 'week' | 'twoWeeks' | 'month' }) =>
-        useGanttLayout({ features, today: FIXTURE_TODAY, zoom }),
-      { initialProps: { zoom: 'week' } },
+      ({ dayPx }: { dayPx: number }) =>
+        useGanttLayout({
+          features,
+          today: FIXTURE_TODAY,
+          loadedRange: WIDE_RANGE,
+          dayPx,
+        }),
+      { initialProps: { dayPx: 32 } },
     );
     const first = result.current;
-    rerender({ zoom: 'week' });
+    rerender({ dayPx: 32 });
     expect(result.current).toBe(first);
-    rerender({ zoom: 'month' });
+    rerender({ dayPx: 24 });
     expect(result.current).not.toBe(first);
   });
 });

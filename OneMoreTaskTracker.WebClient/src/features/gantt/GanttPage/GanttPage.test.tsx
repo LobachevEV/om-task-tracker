@@ -56,6 +56,8 @@ function Harness({
       onRetry={onRetry}
       state={state}
       onFeatureUpdated={() => {}}
+      loadChunk={async () => {}}
+      bounds={null}
     />
   );
 }
@@ -110,13 +112,13 @@ describe('GanttPageInternal', () => {
     expect(within(empty).queryByRole('button')).toBeNull();
   });
 
-  it('switching zoom updates the --day-count inline custom property on the page', () => {
+  it('switching zoom updates the --day-px inline custom property on the page', () => {
     const { container } = renderHarness({ role: 'Manager' });
     const main = container.querySelector<HTMLElement>('main.gantt-page')!;
-    expect(main.style.getPropertyValue('--day-count')).toBe('14'); // default twoWeeks
+    expect(main.style.getPropertyValue('--day-px')).toBe('32px'); // default twoWeeks
     const monthBtn = screen.getByRole('button', { name: 'Month' });
     fireEvent.click(monthBtn);
-    expect(main.style.getPropertyValue('--day-count')).toBe('30');
+    expect(main.style.getPropertyValue('--day-px')).toBe('24px');
   });
 
   it('clicking the expand caret reveals five stage sub-rows for that feature', () => {

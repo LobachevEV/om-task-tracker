@@ -201,8 +201,8 @@
 .gantt-stage-row__segment {
   position: absolute;
   top: 10px;
-  left: calc(var(--seg-left, 0) * 1%);
-  width: calc(var(--seg-width, 0) * 1%);
+  left: var(--seg-left, 0px);
+  width: var(--seg-width, 0px);
   height: 18px;
   min-width: 6px;
   border-radius: 2px;
