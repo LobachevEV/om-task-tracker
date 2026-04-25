@@ -177,7 +177,7 @@ describe('GanttFeatureRow', () => {
       />,
     );
     fireEvent.click(screen.getByTestId('segment-Testing'));
-    expect(onOpenStage).toHaveBeenCalledWith('Testing');
+    expect(onOpenStage).toHaveBeenCalledWith(MINI_TEAM_FEATURE.id, 'Testing');
   });
 
   it('marks the DTR as overdue when the active stage is past its plannedEnd', () => {

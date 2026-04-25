@@ -33,17 +33,7 @@ export interface InlineTextCellProps {
 
 /**
  * Single-line inline text editor — feature title cell in the summary row.
- *
- * Keyboard contract (design brief §6):
- *  - `Enter` commits and stays on the cell.
- *  - `Tab` / `Shift+Tab` commits and moves to the next focusable element
- *    (browser-native; we just rely on `blur` to fire `commit`).
- *  - `Esc` reverts to the committed value; focus stays on the cell.
- *
- * Visual contract (iter 1 skeleton): a plain `<input>` takes the cell width,
- * shows a bottom hairline, and flashes `--accent-dim` on success. Design
- * polish (dotted hover underline, chevrons, viewport-flipping pickers) is
- * Phase B.
+ * Enter commits, Esc reverts, Tab/blur commits via the browser default.
  */
 export function InlineTextCell({
   value,

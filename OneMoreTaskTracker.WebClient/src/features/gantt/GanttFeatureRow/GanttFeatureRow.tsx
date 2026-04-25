@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, type KeyboardEvent } from 'react';
+import { memo, useCallback, useMemo, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
   FeatureState,
@@ -17,7 +17,7 @@ import type { GanttLaneVariant } from '../useGanttLayout';
 import {
   InlineLiveRegion,
   InlineTextCell,
-  type OptimisticFeatureMutations,
+  type FeatureMutationCallbacks,
 } from '../InlineEditors';
 import './GanttFeatureRow.css';
 
@@ -38,24 +38,22 @@ export interface GanttFeatureRowProps {
   variant?: GanttLaneVariant;
   /** Inline expansion of the stage sub-rows (session-scoped). */
   expanded: boolean;
-  onToggleExpand: () => void;
+  /**
+   * Toggle handler. Receives the feature id so the page can pass a single
+   * stable callback for every row (enabling React.memo on the row).
+   */
+  onToggleExpand: (featureId: number) => void;
   /** Click handler for per-stage cells (segmented bar + sub-row numeral). */
-  onOpenStage: (stage: FeatureState) => void;
+  onOpenStage: (featureId: number, stage: FeatureState) => void;
   /** Resolve a performer id against the cached roster for sub-row owner rendering. */
   resolvePerformer: (userId: number | null | undefined) => MiniTeamMember | undefined;
-  /**
-   * Known previous displayName for a stale performer id (e.g. `{ 9999: 'Ex Dev' }`).
-   * Supplied by the page-level roster cache; when absent the sub-row renders
-   * the bare "removed" microcopy — never `#<id>`.
-   */
-  removedPerformerNames?: ReadonlyMap<number, string>;
   /**
    * True when the signed-in user may edit this feature (manager + owner).
    * Gates the inline editors; non-managers see the existing read-only row.
    */
   canEdit?: boolean;
   /** Wired by GanttPage — the five per-field PATCH callers. */
-  mutations?: OptimisticFeatureMutations;
+  mutations?: FeatureMutationCallbacks;
   /** Roster used by the stage-owner picker inside expanded sub-rows. */
   roster?: readonly TeamRosterMember[];
 }
@@ -74,7 +72,7 @@ function computeFeatureDtr(
   return `${delta}d`;
 }
 
-export function GanttFeatureRow({
+function GanttFeatureRowInner({
   feature,
   stageBars,
   today,
@@ -85,7 +83,6 @@ export function GanttFeatureRow({
   onToggleExpand,
   onOpenStage,
   resolvePerformer,
-  removedPerformerNames,
   canEdit = false,
   mutations,
   roster,
@@ -108,10 +105,19 @@ export function GanttFeatureRow({
     variant,
   });
 
+  const handleToggleExpand = useCallback(
+    () => onToggleExpand(feature.id),
+    [onToggleExpand, feature.id],
+  );
+  const handleOpenStage = useCallback(
+    (stage: FeatureState) => onOpenStage(feature.id, stage),
+    [onOpenStage, feature.id],
+  );
+
   const handleTitleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      onToggleExpand();
+      handleToggleExpand();
     }
   };
 
@@ -154,11 +160,11 @@ export function GanttFeatureRow({
                   ? t('row.collapseAria', { title: feature.title })
                   : t('row.expandAria', { title: feature.title })
               }
-              onClick={onToggleExpand}
+              onClick={handleToggleExpand}
             >
               {expanded ? '▾' : '▸'}
             </button>
-            {inlineEnabled ? (
+            {inlineEnabled && mutations != null ? (
               <InlineTextCell
                 value={feature.title}
                 ariaLabel={t('inlineEdit.titleAria', {
@@ -182,7 +188,7 @@ export function GanttFeatureRow({
                   return null;
                 }}
                 onSave={async (next) => {
-                  await mutations!.saveTitle(feature.id, next.trim(), feature.version ?? 0);
+                  await mutations.saveTitle(feature.id, next.trim(), feature.version ?? 0);
                 }}
                 onAnnounce={handleAnnounce}
                 buildAnnouncement={buildTitleAnnouncement}
@@ -192,7 +198,7 @@ export function GanttFeatureRow({
                 type="button"
                 className="gantt-row__title"
                 aria-label={ariaLabel}
-                onClick={onToggleExpand}
+                onClick={handleToggleExpand}
                 onKeyDown={handleTitleKeyDown}
               >
                 <span>{feature.title}</span>
@@ -238,7 +244,7 @@ export function GanttFeatureRow({
             stageBars={stageBars}
             today={today}
             resolvePerformer={resolvePerformer}
-            onOpenStage={onOpenStage}
+            onOpenStage={handleOpenStage}
             laneVariant={variant}
           />
         </div>
@@ -253,16 +259,9 @@ export function GanttFeatureRow({
               seg={seg}
               today={today}
               resolvePerformer={resolvePerformer}
-              removedPerformerName={
-                (() => {
-                  const plan = feature.stagePlans.find((p) => p.stage === seg.stage);
-                  const id = plan?.performerUserId ?? null;
-                  if (id == null) return null;
-                  return removedPerformerNames?.get(id) ?? null;
-                })()
-              }
+              removedPerformerName={null}
               index={index}
-              onOpenStage={onOpenStage}
+              onOpenStage={handleOpenStage}
               canEdit={inlineEnabled}
               mutations={mutations}
               roster={roster}
@@ -275,3 +274,5 @@ export function GanttFeatureRow({
     </>
   );
 }
+
+export const GanttFeatureRow = memo(GanttFeatureRowInner);

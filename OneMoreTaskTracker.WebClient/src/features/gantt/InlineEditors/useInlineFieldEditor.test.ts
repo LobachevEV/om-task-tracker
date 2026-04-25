@@ -83,24 +83,28 @@ describe('useInlineFieldEditor', () => {
     await act(() => result.current.commit());
     expect(result.current.status).toBe('error');
     expect(result.current.draft).toBe('A');
-    expect(result.current.lastRejectedDraft).toEqual({ value: 'B' });
+    expect(result.current.hasRejection).toBe(true);
+    expect(result.current.lastRejectedValue).toBe('B');
 
     await act(() => result.current.retry());
     expect(onSave).toHaveBeenNthCalledWith(2, 'B');
     expect(result.current.status).toBe('idle');
-    expect(result.current.lastRejectedDraft).toBeNull();
+    expect(result.current.hasRejection).toBe(false);
+    expect(result.current.lastRejectedValue).toBeNull();
   });
 
-  it('cancel clears the lastRejectedDraft', async () => {
+  it('cancel clears the rejection state', async () => {
     const onSave = vi.fn().mockRejectedValue(new ApiError(500, 'boom'));
     const { result } = renderHook(() =>
       useInlineFieldEditor({ committed: 'A', onSave }),
     );
     act(() => result.current.setDraft('B'));
     await act(() => result.current.commit());
-    expect(result.current.lastRejectedDraft).toEqual({ value: 'B' });
+    expect(result.current.hasRejection).toBe(true);
+    expect(result.current.lastRejectedValue).toBe('B');
     act(() => result.current.cancel());
-    expect(result.current.lastRejectedDraft).toBeNull();
+    expect(result.current.hasRejection).toBe(false);
+    expect(result.current.lastRejectedValue).toBeNull();
     expect(result.current.status).toBe('idle');
   });
 

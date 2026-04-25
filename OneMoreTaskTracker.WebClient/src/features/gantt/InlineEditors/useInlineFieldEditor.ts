@@ -67,14 +67,17 @@ export interface UseInlineFieldEditorResult<T> {
    * failure without retyping the value.
    */
   retry: () => Promise<void>;
+  /** True when the most recent commit was rejected and is pending retry. */
+  hasRejection: boolean;
   /**
-   * The value that was last rejected by the server (or null when none).
-   * Wrapped so a valid `null` payload (e.g. unassigning an owner) is
-   * distinguishable from "no rejection".
+   * The value that was rejected. Meaningful only when `hasRejection` is
+   * true; otherwise `null`. Read alongside `hasRejection` rather than
+   * treating `null` as "no rejection" — `null` is a legitimate rejected
+   * payload (e.g. unassigning an owner).
    */
-  lastRejectedDraft: { value: T } | null;
+  lastRejectedValue: T | null;
   /**
-   * The user-facing label for `lastRejectedDraft`, projected via
+   * The user-facing label for the rejected value, projected via
    * `formatRejectedLabel` if supplied. Null when nothing is rejected.
    */
   lastRejectedLabel: string | null;
@@ -91,9 +94,13 @@ export interface UseInlineFieldEditorResult<T> {
   flashing: boolean;
 }
 
+const reducedMotionQuery =
+  typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)')
+    : null;
+
 function prefersReducedMotion(): boolean {
-  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return reducedMotionQuery?.matches ?? false;
 }
 
 function defaultRejectedLabel<T>(value: T): string | null {
@@ -237,6 +244,8 @@ export function useInlineFieldEditor<T>(
     await commit(lastRejectedDraft.value);
   }, [commit, lastRejectedDraft]);
 
+  const hasRejection = lastRejectedDraft !== null;
+  const lastRejectedValue = lastRejectedDraft ? lastRejectedDraft.value : null;
   const lastRejectedLabel = lastRejectedDraft
     ? (formatRejectedLabel ?? defaultRejectedLabel)(lastRejectedDraft.value)
     : null;
@@ -247,7 +256,8 @@ export function useInlineFieldEditor<T>(
     commit,
     cancel,
     retry,
-    lastRejectedDraft,
+    hasRejection,
+    lastRejectedValue,
     lastRejectedLabel,
     status,
     error,

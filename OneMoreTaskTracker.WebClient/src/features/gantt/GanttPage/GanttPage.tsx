@@ -15,7 +15,7 @@ import { useTeamRoster } from '../useTeamRoster';
 import { useGanttLayout, type GanttLane } from '../useGanttLayout';
 import { useGanttPageState, type GanttPageState } from '../useGanttPageState';
 import { ZOOM_DAYS } from '../ganttMath';
-import { useOptimisticFeatureMutation } from '../InlineEditors';
+import { useFeatureMutationCallbacks } from '../InlineEditors';
 import './GanttPage.css';
 
 const PLACEHOLDER_ROLE: MiniTeamMember['role'] = 'FrontendDeveloper';
@@ -111,7 +111,7 @@ export function GanttPageInternal({
 
   const layout = useGanttLayout({ features, today: state.today, zoom: state.zoom });
   const isManager = role === 'Manager';
-  const mutations = useOptimisticFeatureMutation({ onApplied: onFeatureUpdated });
+  const mutations = useFeatureMutationCallbacks({ onApplied: onFeatureUpdated });
 
   const rosterById = useMemo(() => {
     const map = new Map<number, MiniTeamMember>();
@@ -122,6 +122,17 @@ export function GanttPageInternal({
   const resolveMember = useCallback(
     (userId: number): MiniTeamMember => rosterById.get(userId) ?? placeholderMember(userId),
     [rosterById],
+  );
+
+  const resolvePerformer = useCallback(
+    (id: number | null | undefined): MiniTeamMember | undefined =>
+      id == null ? undefined : rosterById.get(id),
+    [rosterById],
+  );
+
+  const handleOpenStage = useCallback(
+    (featureId: number) => state.toggleFeatureExpanded(featureId),
+    [state],
   );
 
   const handleCreated = useCallback(
@@ -239,11 +250,9 @@ export function GanttPageInternal({
                   lead={lead}
                   variant={lane.variant}
                   expanded={expanded}
-                  onToggleExpand={() => state.toggleFeatureExpanded(lane.feature.id)}
-                  onOpenStage={() => state.toggleFeatureExpanded(lane.feature.id)}
-                  resolvePerformer={(id) =>
-                    id == null ? undefined : rosterById.get(id)
-                  }
+                  onToggleExpand={state.toggleFeatureExpanded}
+                  onOpenStage={handleOpenStage}
+                  resolvePerformer={resolvePerformer}
                   canEdit={isManager}
                   mutations={isManager ? mutations : undefined}
                   roster={isManager ? rawRoster : undefined}

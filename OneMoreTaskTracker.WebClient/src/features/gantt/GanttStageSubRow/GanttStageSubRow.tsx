@@ -9,7 +9,7 @@ import { roleToSide } from '../roleToSide';
 import {
   InlineDateCell,
   InlineOwnerPicker,
-  type OptimisticFeatureMutations,
+  type FeatureMutationCallbacks,
 } from '../InlineEditors';
 import './GanttStageSubRow.css';
 
@@ -47,7 +47,7 @@ export interface GanttStageSubRowProps {
    * layout — no tab stops, no editor affordances. Fail-closed.
    */
   canEdit?: boolean;
-  mutations?: OptimisticFeatureMutations;
+  mutations?: FeatureMutationCallbacks;
   roster?: readonly TeamRosterMember[];
   /** Relay inline-edit commit outcomes into the parent aria-live region. */
   onAnnounce?: (message: string) => void;
@@ -168,7 +168,7 @@ export function GanttStageSubRow({
   // microcopy path even in inline-edit mode. The picker would render the
   // stale name as if it were valid which is misleading.
   let ownerNode;
-  if (inlineEnabled && roster && !stale) {
+  if (inlineEnabled && mutations != null && roster && !stale) {
     ownerNode = (
       <InlineOwnerPicker
         value={plan?.performerUserId ?? null}
@@ -181,7 +181,7 @@ export function GanttStageSubRow({
         })}
         testId={`stage-owner-editor-${feature.id}-${seg.stage}`}
         onSave={async (next) => {
-          await mutations!.saveStageOwner(feature.id, seg.stage, next, stageVersion);
+          await mutations.saveStageOwner(feature.id, seg.stage, next, stageVersion);
         }}
         onAnnounce={onAnnounce}
         buildAnnouncement={announceOwner}
@@ -220,7 +220,7 @@ export function GanttStageSubRow({
       data-overdue={seg.isOverdue ? 'true' : 'false'}
     >
       <div className="gantt-stage-row__gutter">
-        {inlineEnabled ? (
+        {inlineEnabled && mutations != null ? (
           <div
             className="gantt-stage-row__trigger gantt-stage-row__trigger--inline"
             role="group"
@@ -272,7 +272,7 @@ export function GanttStageSubRow({
                   })}
                   testId={`stage-planned-start-${feature.id}-${seg.stage}`}
                   onSave={async (next) => {
-                    await mutations!.saveStagePlannedStart(
+                    await mutations.saveStagePlannedStart(
                       feature.id,
                       seg.stage,
                       next,
@@ -294,7 +294,7 @@ export function GanttStageSubRow({
                   })}
                   testId={`stage-planned-end-${feature.id}-${seg.stage}`}
                   onSave={async (next) => {
-                    await mutations!.saveStagePlannedEnd(
+                    await mutations.saveStagePlannedEnd(
                       feature.id,
                       seg.stage,
                       next,

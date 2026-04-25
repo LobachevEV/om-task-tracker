@@ -14,10 +14,10 @@ export type {
   UseInlineFieldEditorOptions,
   UseInlineFieldEditorResult,
 } from './useInlineFieldEditor';
-export { useOptimisticFeatureMutation } from './useOptimisticFeatureMutation';
+export { useFeatureMutationCallbacks } from './useFeatureMutationCallbacks';
 export type {
-  OptimisticFeatureMutations,
-  UseOptimisticFeatureMutationOptions,
-} from './useOptimisticFeatureMutation';
+  FeatureMutationCallbacks,
+  UseFeatureMutationCallbacksOptions,
+} from './useFeatureMutationCallbacks';
 export type { InlineEditorStatus } from './InlineEditorStatus';
 export type { InlineEditorError } from './InlineEditorError';

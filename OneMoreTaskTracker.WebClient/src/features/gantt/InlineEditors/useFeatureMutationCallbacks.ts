@@ -5,7 +5,7 @@ import type {
   FeatureSummary,
 } from '../../../shared/types/feature';
 
-export interface OptimisticFeatureMutations {
+export interface FeatureMutationCallbacks {
   saveTitle: (featureId: number, nextTitle: string, version: number) => Promise<void>;
   saveStageOwner: (
     featureId: number,
@@ -27,17 +27,17 @@ export interface OptimisticFeatureMutations {
   ) => Promise<void>;
 }
 
-export interface UseOptimisticFeatureMutationOptions {
+export interface UseFeatureMutationCallbacksOptions {
   /** Called with the authoritative server summary on success. */
   onApplied: (next: FeatureSummary) => void;
 }
 
-export function useOptimisticFeatureMutation(
-  options: UseOptimisticFeatureMutationOptions,
-): OptimisticFeatureMutations {
+export function useFeatureMutationCallbacks(
+  options: UseFeatureMutationCallbacksOptions,
+): FeatureMutationCallbacks {
   const { onApplied } = options;
 
-  const saveTitle = useCallback<OptimisticFeatureMutations['saveTitle']>(
+  const saveTitle = useCallback<FeatureMutationCallbacks['saveTitle']>(
     async (featureId, nextTitle, version) => {
       const updated = await planApi.updateFeatureTitle(
         featureId,
@@ -49,7 +49,7 @@ export function useOptimisticFeatureMutation(
     [onApplied],
   );
 
-  const saveStageOwner = useCallback<OptimisticFeatureMutations['saveStageOwner']>(
+  const saveStageOwner = useCallback<FeatureMutationCallbacks['saveStageOwner']>(
     async (featureId, stage, next, stageVersion) => {
       const updated = await planApi.updateStageOwner(
         featureId,
@@ -63,7 +63,7 @@ export function useOptimisticFeatureMutation(
   );
 
   const saveStagePlannedStart = useCallback<
-    OptimisticFeatureMutations['saveStagePlannedStart']
+    FeatureMutationCallbacks['saveStagePlannedStart']
   >(
     async (featureId, stage, next, stageVersion) => {
       const updated = await planApi.updateStagePlannedStart(
@@ -78,7 +78,7 @@ export function useOptimisticFeatureMutation(
   );
 
   const saveStagePlannedEnd = useCallback<
-    OptimisticFeatureMutations['saveStagePlannedEnd']
+    FeatureMutationCallbacks['saveStagePlannedEnd']
   >(
     async (featureId, stage, next, stageVersion) => {
       const updated = await planApi.updateStagePlannedEnd(

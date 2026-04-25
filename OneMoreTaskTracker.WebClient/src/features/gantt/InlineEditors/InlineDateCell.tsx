@@ -13,8 +13,6 @@ export interface InlineDateCellProps {
   onSave: (next: string | null) => Promise<void>;
   /** Accessible label — must carry field + stage + feature context. */
   ariaLabel: string;
-  /** Optional per-field validator. Runs on the parsed `"yyyy-MM-dd" | null`. */
-  validate?: (next: string | null) => string | null;
   /** Disable the editor (viewer role / submitting). */
   readOnly?: boolean;
   /** Hook into the test id seam for Evaluator assertions. */
@@ -31,13 +29,7 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 function parseDraft(raw: string): string | null {
   const trimmed = raw.trim();
-  if (trimmed === '') return null;
-  if (!ISO_DATE.test(trimmed)) {
-    // Iter 1 skeleton: keep it simple — reject anything not ISO. Phase B
-    // will add localized-short parsing ("12 May").
-    throw new Error('invalid-date');
-  }
-  return trimmed;
+  return trimmed === '' ? null : trimmed;
 }
 
 function nudgeIso(iso: string | null, direction: 1 | -1): string | null {
@@ -52,26 +44,15 @@ function toDraft(value: string | null): string {
 }
 
 /**
- * Stage planned-start / planned-end inline editor.
- *
- * Iter 1 skeleton:
- * - Accepts ISO yyyy-MM-dd strings (brief §6 primary input path).
- * - `ArrowUp` / `ArrowDown` nudge the date by one day (brief §5 "Nudge a
- *   planned date" flow) when the draft parses as ISO.
- * - Invalid strings roll back with the inline error — no keystroke is
- *   rejected mid-type.
- *
- * Phase B will add:
- * - Chevron-triggered calendar popover (anchored below; flips above near
- *   the viewport bottom).
- * - Localized-short parsing ("12 May").
- * - Stage-overlap validation client-side.
+ * Stage planned-start / planned-end inline editor. Accepts ISO yyyy-MM-dd
+ * strings; ArrowUp/ArrowDown nudge by ±1 day when the draft parses.
+ * Invalid strings roll back via the hook's `validate` slot — no keystroke
+ * is rejected mid-type.
  */
 export function InlineDateCell({
   value,
   onSave,
   ariaLabel,
-  validate,
   readOnly,
   testId,
   onAnnounce,
@@ -81,14 +62,7 @@ export function InlineDateCell({
   const inputRef = useRef<HTMLInputElement>(null);
   const editor = useInlineFieldEditor<string>({
     committed: toDraft(value),
-    onSave: async (next: string) => {
-      const parsed = parseDraft(next);
-      if (validate) {
-        const violation = validate(parsed);
-        if (violation != null) throw new Error(violation);
-      }
-      await onSave(parsed);
-    },
+    onSave: (next: string) => onSave(parseDraft(next)),
     validate: (next) => {
       const trimmed = next.trim();
       if (trimmed === '') return null;
@@ -164,22 +138,9 @@ export function InlineDateCell({
 }
 
 /**
- * Resolve the user-facing message for a date-cell error.
- *
- * The inline-edit BE contract (api-contract.md) emits two structured
- * date-related error envelopes that deserve a friendlier copy than the raw
- * server text:
- *
- * - HTTP 422 `{ error: "Stage order violation",
- *               conflict: { kind: "overlap", with: "Development" } }`
- *   → "Overlaps with Development" (per inlineEdit.errors.stageOverlap).
- *
- * - HTTP 400 `{ error: "Use a real release date" }`  (year outside 2000..2100)
- *   → keep the literal copy via inlineEdit.errors.invalidDate so it stays
- *     localizable.
- *
- * Anything else falls through to the server-supplied `error.message` (which
- * `toInlineEditorError` already strips of the `Request failed (N): ` prefix).
+ * Resolve the user-facing message for a date-cell error. Translates the
+ * two structured BE envelopes (422 stage-overlap, 400 "real release date")
+ * into localised copy; anything else falls through to `error.message`.
  */
 function resolveDateCellMessage(
   error: InlineEditorError,
