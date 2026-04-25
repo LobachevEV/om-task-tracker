@@ -132,11 +132,54 @@
   font-size: 11px;
   line-height: 1.2;
   white-space: nowrap;
-  max-inline-size: 320px;
+  max-inline-size: 360px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.inline-cell__error-text {
   overflow: hidden;
   text-overflow: ellipsis;
-  pointer-events: none;
-  z-index: 1;
+}
+
+.inline-cell__error-actions {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.inline-cell__error-action {
+  all: unset;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.2;
+  color: var(--danger);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.inline-cell__error-action:hover {
+  color: var(--danger);
+  text-decoration-thickness: 2px;
+}
+
+.inline-cell__error-action:focus-visible {
+  outline: 1px solid var(--danger);
+  outline-offset: 1px;
+}
+
+.inline-cell__error-action--ghost {
+  color: var(--text-muted);
+  text-decoration-color: var(--text-muted);
+}
+
+.inline-cell__error-action--ghost:hover {
+  color: var(--text);
 }
 
 /* ------------- Owner picker listbox ------------- */

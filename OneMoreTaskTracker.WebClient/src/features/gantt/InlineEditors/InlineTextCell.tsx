@@ -1,6 +1,7 @@
 import { useCallback, useRef, type KeyboardEvent } from 'react';
 import { useInlineFieldEditor } from './useInlineFieldEditor';
 import type { InlineEditorError } from './InlineEditorError';
+import { InlineCellError } from './InlineCellError';
 import './InlineEditors.css';
 
 export interface InlineTextCellProps {
@@ -110,21 +111,12 @@ export function InlineTextCell({
         onKeyDown={handleKeyDown}
         data-testid={testId ? `${testId}-input` : undefined}
       />
-      <InlineCellMessage error={editor.error} />
-    </span>
-  );
-}
-
-function InlineCellMessage({ error }: { error: InlineEditorError | null }) {
-  if (!error) return null;
-  return (
-    <span
-      className="inline-cell__error"
-      role="alert"
-      data-kind={error.kind}
-      data-testid="inline-cell-error"
-    >
-      {error.message}
+      <InlineCellError
+        error={editor.error}
+        onRetry={() => void editor.retry()}
+        onRevert={editor.cancel}
+        rejectedValueLabel={editor.lastRejectedDraft}
+      />
     </span>
   );
 }

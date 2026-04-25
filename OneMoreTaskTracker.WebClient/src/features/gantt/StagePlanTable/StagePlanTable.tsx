@@ -16,11 +16,6 @@ export interface StagePlanTableProps {
   submitting: boolean;
   /** True when the viewer cannot edit (non-manager role). */
   readOnly: boolean;
-  /**
-   * Parent hands us the form instance so it can diff draft vs. initial and
-   * merge `stagePlans` into the atomic feature patch. This keeps
-   * `FeatureEditForm` the single source of truth for the Save click.
-   */
   form: UseStagePlanFormResult;
   /**
    * Optional injected roster — tests / stories pass one so they can exercise

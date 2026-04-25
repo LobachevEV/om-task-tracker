@@ -27,7 +27,6 @@ const meta: Meta<typeof GanttFeatureRow> = {
   parameters: { layout: 'padded' },
   tags: ['autodocs'],
   args: {
-    onOpen: fn(),
     onOpenStage: fn(),
     onToggleExpand: fn(),
     today: FIXTURE_TODAY,

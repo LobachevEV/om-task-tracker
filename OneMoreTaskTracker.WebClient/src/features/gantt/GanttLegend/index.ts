@@ -1,0 +1,1 @@
+export { GanttLegend } from './GanttLegend';

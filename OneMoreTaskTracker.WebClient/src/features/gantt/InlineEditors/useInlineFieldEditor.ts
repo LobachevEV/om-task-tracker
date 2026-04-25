@@ -68,6 +68,18 @@ export interface UseInlineFieldEditorResult<T> {
   commit: (override?: T) => Promise<void>;
   /** Restore `draft` to `committed` (Esc semantics). */
   cancel: () => void;
+  /**
+   * Re-attempt the most recent rejected commit. No-op when nothing was
+   * rejected. Lets the user recover from a transient network/conflict
+   * failure without retyping the value.
+   */
+  retry: () => Promise<void>;
+  /**
+   * The value that was last rejected by the server (or null when none).
+   * Preserved so the cell can offer a Retry affordance and surface the
+   * value alongside the server's current one.
+   */
+  lastRejectedDraft: T | null;
   /** Current lifecycle status — drives CSS `data-status`. */
   status: InlineEditorStatus;
   /** Last commit error if `status === 'error'`, else null. */
@@ -105,6 +117,7 @@ export function useInlineFieldEditor<T>(
   const [error, setError] = useState<InlineEditorError | null>(null);
   const [flashing, setFlashing] = useState<boolean>(false);
   const [announcement, setAnnouncement] = useState<string>('');
+  const [lastRejectedDraft, setLastRejectedDraft] = useState<T | null>(null);
 
   // Local draft state, keyed by the render-time `committed` value for the
   // idle-resync case. Using `useState` as a "controlled/uncontrolled mix"
@@ -129,6 +142,7 @@ export function useInlineFieldEditor<T>(
     setDraftState(next);
     setStatus((s) => (s === 'error' ? 'editing' : s));
     setError((prev) => (prev == null ? prev : null));
+    setLastRejectedDraft((prev) => (prev === null ? prev : null));
   }, []);
 
   const enterEdit = useCallback(() => {
@@ -139,6 +153,7 @@ export function useInlineFieldEditor<T>(
     setDraftState(lastCommittedRef.current);
     setStatus('idle');
     setError(null);
+    setLastRejectedDraft(null);
   }, []);
 
   const commit = useCallback(
@@ -166,8 +181,8 @@ export function useInlineFieldEditor<T>(
       setError(null);
       try {
         await onSave(next);
-        // `committed` will update via parent; we defensively snap idle here.
         setStatus('idle');
+        setLastRejectedDraft(null);
         if (!prefersReducedMotion()) {
           setFlashing(true);
           window.setTimeout(() => setFlashing(false), ACCEPT_FLASH_MS);
@@ -180,6 +195,7 @@ export function useInlineFieldEditor<T>(
         const normalised = toInlineEditorError(err);
         setError(normalised);
         setStatus('error');
+        setLastRejectedDraft(next);
         setDraftState(lastCommittedRef.current);
         if (buildAnnouncement) {
           const text = buildAnnouncement('error', lastCommittedRef.current, normalised);
@@ -190,5 +206,22 @@ export function useInlineFieldEditor<T>(
     [draft, isEqual, onSave, status, validate, buildAnnouncement],
   );
 
-  return { draft, setDraft, commit, cancel, status, error, enterEdit, flashing, announcement };
+  const retry = useCallback(async () => {
+    if (lastRejectedDraft === null) return;
+    await commit(lastRejectedDraft);
+  }, [commit, lastRejectedDraft]);
+
+  return {
+    draft,
+    setDraft,
+    commit,
+    cancel,
+    retry,
+    lastRejectedDraft,
+    status,
+    error,
+    enterEdit,
+    flashing,
+    announcement,
+  };
 }

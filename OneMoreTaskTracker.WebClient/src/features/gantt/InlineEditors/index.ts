@@ -1,4 +1,6 @@
 export { InlineCellChevron } from './InlineCellChevron';
+export { InlineCellError } from './InlineCellError';
+export type { InlineCellErrorProps } from './InlineCellError';
 export { InlineLiveRegion } from './InlineLiveRegion';
 export type { InlineLiveRegionProps } from './InlineLiveRegion';
 export { InlineTextCell } from './InlineTextCell';
@@ -7,8 +9,6 @@ export { InlineDateCell } from './InlineDateCell';
 export type { InlineDateCellProps } from './InlineDateCell';
 export { InlineOwnerPicker } from './InlineOwnerPicker';
 export type { InlineOwnerPickerProps } from './InlineOwnerPicker';
-export { InlineDescriptionEditor } from './InlineDescriptionEditor';
-export type { InlineDescriptionEditorProps } from './InlineDescriptionEditor';
 export { useInlineFieldEditor } from './useInlineFieldEditor';
 export type {
   UseInlineFieldEditorOptions,

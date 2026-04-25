@@ -15,7 +15,6 @@ import { GanttSegmentedBar } from '../GanttSegmentedBar';
 import { GanttStageSubRow } from '../GanttStageSubRow';
 import type { GanttLaneVariant } from '../useGanttLayout';
 import {
-  InlineDescriptionEditor,
   InlineLiveRegion,
   InlineTextCell,
   type OptimisticFeatureMutations,
@@ -39,8 +38,7 @@ export interface GanttFeatureRowProps {
   /** Inline expansion of the stage sub-rows (session-scoped). */
   expanded: boolean;
   onToggleExpand: () => void;
-  /** Open the drawer for this feature, optionally pre-selecting a stage. */
-  onOpen: (featureId: number) => void;
+  /** Click handler for per-stage cells (segmented bar + sub-row numeral). */
   onOpenStage: (stage: FeatureState) => void;
   /** Resolve a performer id against the cached roster for sub-row owner rendering. */
   resolvePerformer: (userId: number | null | undefined) => MiniTeamMember | undefined;
@@ -61,8 +59,12 @@ export interface GanttFeatureRowProps {
   roster?: readonly TeamRosterMember[];
 }
 
-function computeFeatureDtr(feature: FeatureSummary, today: string): string {
-  if (feature.state === 'LiveRelease') return '✓';
+function computeFeatureDtr(
+  feature: FeatureSummary,
+  today: string,
+  doneLabel: string,
+): string {
+  if (feature.state === 'LiveRelease') return doneLabel;
   const active = feature.stagePlans.find((p) => p.stage === feature.state);
   const plannedEnd = active?.plannedEnd ?? feature.plannedEnd;
   if (plannedEnd == null) return '—';
@@ -80,7 +82,6 @@ export function GanttFeatureRow({
   variant = 'planned',
   expanded,
   onToggleExpand,
-  onOpen,
   onOpenStage,
   resolvePerformer,
   removedPerformerNames,
@@ -92,7 +93,11 @@ export function GanttFeatureRow({
 
   const isOverdue = useMemo(() => featureIsOverdue(feature, today), [feature, today]);
   const planned = useMemo(() => plannedStageCount(feature), [feature]);
-  const dtr = useMemo(() => computeFeatureDtr(feature, today), [feature, today]);
+  const doneLabel = t('row.done', { defaultValue: 'Done' });
+  const dtr = useMemo(
+    () => computeFeatureDtr(feature, today, doneLabel),
+    [feature, today, doneLabel],
+  );
   const totalStages = feature.stagePlans.length;
 
   const ariaLabel = t('row.rowAria', {
@@ -124,17 +129,6 @@ export function GanttFeatureRow({
           })
         : t('inlineEdit.announce.titleError', {
             defaultValue: 'Feature title change was rejected.',
-          }),
-    [t],
-  );
-  const buildDescriptionAnnouncement = useCallback(
-    (outcome: 'saved' | 'error') =>
-      outcome === 'saved'
-        ? t('inlineEdit.announce.descriptionSaved', {
-            defaultValue: 'Feature description saved.',
-          })
-        : t('inlineEdit.announce.descriptionError', {
-            defaultValue: 'Feature description change was rejected.',
           }),
     [t],
   );
@@ -197,7 +191,7 @@ export function GanttFeatureRow({
                 type="button"
                 className="gantt-row__title"
                 aria-label={ariaLabel}
-                onClick={() => onOpen(feature.id)}
+                onClick={onToggleExpand}
                 onKeyDown={handleTitleKeyDown}
               >
                 <span>{feature.title}</span>
@@ -233,14 +227,6 @@ export function GanttFeatureRow({
             >
               {t('row.plannedCounter', { planned, total: totalStages })}
             </span>
-            {isOverdue ? (
-              <span
-                className="gantt-row__overdue-badge"
-                data-testid="feature-overdue-badge"
-              >
-                {t('row.overdue')}
-              </span>
-            ) : null}
           </div>
           <GanttAssigneeStack members={miniTeam} aria-label={t('row.team')} />
         </div>
@@ -259,21 +245,6 @@ export function GanttFeatureRow({
 
       {expanded ? (
         <>
-          <InlineDescriptionEditor
-            value={feature.description}
-            readOnly={!inlineEnabled}
-            testId={`feature-description-${feature.id}`}
-            ariaLabel={t('inlineEdit.descriptionAria', {
-              defaultValue: 'Description for feature "{{title}}"',
-              title: feature.title,
-            })}
-            onSave={async (next) => {
-              if (!inlineEnabled) return;
-              await mutations!.saveDescription(feature.id, next, feature.version ?? 0);
-            }}
-            onAnnounce={handleAnnounce}
-            buildAnnouncement={buildDescriptionAnnouncement}
-          />
           {stageBars.map((seg, index) => (
             <GanttStageSubRow
               key={seg.stage}

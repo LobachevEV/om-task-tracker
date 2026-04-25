@@ -17,7 +17,7 @@ export const FEATURE_STATES: readonly FeatureState[] = [
 
 export interface MiniTeamMember {
   userId: number;
-  email: string;
+  email: string | null;
   displayName: string;
   role: 'Manager' | 'FrontendDeveloper' | 'BackendDeveloper' | 'Qa';
 }

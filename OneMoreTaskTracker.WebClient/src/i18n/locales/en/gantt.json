@@ -27,6 +27,8 @@
     "miniTeam": "Mini-team of {{count}}"
   },
   "legend": {
+    "title": "Legend",
+    "status": "Status",
     "states": "Lifecycle",
     "today": "Today",
     "todayAt": "Today {{date}}",
@@ -47,6 +49,7 @@
     "removed": "removed",
     "notPlannedYet": "Not planned yet",
     "overdue": "Overdue",
+    "done": "Done",
     "plannedCounter": "{{planned}}/{{total}} planned",
     "expandAria": "Expand stage timeline for {{title}}",
     "collapseAria": "Collapse stage timeline for {{title}}",
@@ -87,12 +90,6 @@
       "plannedEnd": "Planned end",
       "lead": "Lead"
     },
-    "tasksHeading": "Tasks",
-    "attachTaskLabel": "Attach task (Jira ID)",
-    "attachTaskSubmit": "Attach",
-    "detach": "Detach",
-    "detachConfirm": "Detach {{jiraId}} from this feature?",
-    "detachTarget": "Move to which feature?",
     "validation": {
       "titleRequired": "Title is required"
     }
@@ -121,8 +118,6 @@
   },
   "inlineEdit": {
     "titleAria": "Feature title: {{title}}",
-    "descriptionAria": "Description for feature \"{{title}}\"",
-    "descriptionEmpty": "Add a description",
     "ownerAria": "Owner for {{stage}} stage of \"{{title}}\"",
     "plannedStartAria": "Planned start for {{stage}} stage of \"{{title}}\"",
     "plannedEndAria": "Planned end for {{stage}} stage of \"{{title}}\"",
@@ -137,11 +132,14 @@
       "conflict": "Someone else just updated this; reload to see latest",
       "network": "Couldn't save. Retry?"
     },
+    "recovery": {
+      "retry": "Retry",
+      "retryWithValue": "Retry: {{value}}",
+      "revert": "Dismiss"
+    },
     "announce": {
       "titleSaved": "Feature title saved.",
       "titleError": "Feature title change was rejected.",
-      "descriptionSaved": "Feature description saved.",
-      "descriptionError": "Feature description change was rejected.",
       "ownerSaved": "{{stage}} stage owner saved.",
       "ownerError": "{{stage}} stage owner change was rejected.",
       "startSaved": "{{stage}} planned start saved.",

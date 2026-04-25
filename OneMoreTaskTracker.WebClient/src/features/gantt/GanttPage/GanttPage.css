@@ -64,6 +64,29 @@
   z-index: 1;
 }
 
+/* Today chip — sits at the top of the lanes column, anchored to the same
+ * percent as the hairline. Lives outside the timeline header so it cannot
+ * collide with weekday/day labels at narrow zoom. */
+.gantt-page__today-chip {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: calc(
+    var(--gantt-gutter-width, 280px) +
+      (100% - var(--gantt-gutter-width, 280px)) * var(--today-percent, 0) / 100
+  );
+  transform: translate(-50%, -50%);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1;
+  color: var(--accent-ink, var(--text));
+  background: var(--accent);
+  padding: 3px 6px;
+  border-radius: 9999px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 1;
+}
+
 .gantt-page__unscheduled {
   padding: var(--space-4, 16px) var(--space-6, 24px);
   border-block-start: 1px dashed var(--border-soft, var(--border-strong));

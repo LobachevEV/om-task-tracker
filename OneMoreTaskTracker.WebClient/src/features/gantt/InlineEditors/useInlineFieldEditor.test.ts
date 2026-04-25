@@ -71,6 +71,39 @@ describe('useInlineFieldEditor', () => {
     expect(result.current.status).toBe('idle');
   });
 
+  it('preserves the rejected draft and re-fires it via retry()', async () => {
+    const onSave = vi
+      .fn()
+      .mockRejectedValueOnce(new ApiError(500, 'boom'))
+      .mockResolvedValueOnce(undefined);
+    const { result } = renderHook(() =>
+      useInlineFieldEditor({ committed: 'A', onSave }),
+    );
+    act(() => result.current.setDraft('B'));
+    await act(() => result.current.commit());
+    expect(result.current.status).toBe('error');
+    expect(result.current.draft).toBe('A');
+    expect(result.current.lastRejectedDraft).toBe('B');
+
+    await act(() => result.current.retry());
+    expect(onSave).toHaveBeenNthCalledWith(2, 'B');
+    expect(result.current.status).toBe('idle');
+    expect(result.current.lastRejectedDraft).toBeNull();
+  });
+
+  it('cancel clears the lastRejectedDraft', async () => {
+    const onSave = vi.fn().mockRejectedValue(new ApiError(500, 'boom'));
+    const { result } = renderHook(() =>
+      useInlineFieldEditor({ committed: 'A', onSave }),
+    );
+    act(() => result.current.setDraft('B'));
+    await act(() => result.current.commit());
+    expect(result.current.lastRejectedDraft).toBe('B');
+    act(() => result.current.cancel());
+    expect(result.current.lastRejectedDraft).toBeNull();
+    expect(result.current.status).toBe('idle');
+  });
+
   it('client-side validation blocks the network call and surfaces the message', async () => {
     const onSave = vi.fn();
     const { result } = renderHook(() =>

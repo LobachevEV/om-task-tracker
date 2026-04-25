@@ -5,7 +5,6 @@ import { Spinner, Button, Callout } from '../../../shared/ds';
 import { isUserRole, type UserRole } from '../../../shared/auth/roles';
 import type { FeatureSummary, MiniTeamMember } from '../../../shared/types/feature';
 import type { TeamRosterMember } from '../../../shared/api/teamApi';
-import { FeatureDrawer } from '../FeatureDrawer';
 import { GanttEmpty } from '../GanttEmpty';
 import { GanttFeatureRow } from '../GanttFeatureRow';
 import { GanttTimeline } from '../GanttTimeline';
@@ -30,13 +29,10 @@ function toMiniMember(row: TeamRosterMember): MiniTeamMember {
   };
 }
 
-// Synthetic stand-in when a feature references a user that is no longer in the
-// roster (e.g. removed manager/dev). email is intentionally non-deliverable —
-// it is only ever rendered, never sent.
 function placeholderMember(userId: number): MiniTeamMember {
   return {
     userId,
-    email: `user-${userId}@placeholder`,
+    email: null,
     displayName: `#${userId}`,
     role: PLACEHOLDER_ROLE,
   };
@@ -131,7 +127,7 @@ export function GanttPageInternal({
   const handleCreated = useCallback(
     (id: number) => {
       setCreateOpen(false);
-      state.openFeature(id);
+      state.toggleFeatureExpanded(id);
       onRetry();
     },
     [state, onRetry],
@@ -202,19 +198,32 @@ export function GanttPageInternal({
           <GanttTimeline window={layout.window} zoom={state.zoom} todayPercent={layout.todayPercent} />
           <div className="gantt-page__lanes" role="list">
             {layout.todayPercent != null ? (
-              <div
-                className="gantt-page__today-hairline"
-                role="separator"
-                aria-label={t('legend.todayAt', {
-                  defaultValue: 'Today {{date}}',
-                  date: state.today,
-                })}
-                style={
-                  {
-                    ['--today-percent' as string]: String(layout.todayPercent),
-                  } as CSSProperties
-                }
-              />
+              <>
+                <div
+                  className="gantt-page__today-hairline"
+                  role="separator"
+                  aria-label={t('legend.todayAt', {
+                    defaultValue: 'Today {{date}}',
+                    date: state.today,
+                  })}
+                  style={
+                    {
+                      ['--today-percent' as string]: String(layout.todayPercent),
+                    } as CSSProperties
+                  }
+                />
+                <span
+                  className="gantt-page__today-chip"
+                  aria-hidden="true"
+                  style={
+                    {
+                      ['--today-percent' as string]: String(layout.todayPercent),
+                    } as CSSProperties
+                  }
+                >
+                  {t('legend.today')}
+                </span>
+              </>
             ) : null}
             {layout.lanes.map((lane: GanttLane) => {
               const lead = resolveMember(lane.feature.leadUserId);
@@ -235,8 +244,7 @@ export function GanttPageInternal({
                   variant={lane.variant}
                   expanded={expanded}
                   onToggleExpand={() => state.toggleFeatureExpanded(lane.feature.id)}
-                  onOpen={() => state.openFeature(lane.feature.id)}
-                  onOpenStage={(stage) => state.openFeature(lane.feature.id, stage)}
+                  onOpenStage={() => state.toggleFeatureExpanded(lane.feature.id)}
                   resolvePerformer={(id) =>
                     id == null ? undefined : rosterById.get(id)
                   }
@@ -249,16 +257,10 @@ export function GanttPageInternal({
           </div>
           <UnscheduledSection
             features={layout.unscheduled}
-            onOpen={state.openFeature}
+            onOpen={state.toggleFeatureExpanded}
           />
         </section>
       )}
-
-      <FeatureDrawer
-        featureId={state.selectedFeatureId}
-        onClose={state.closeFeature}
-        canEdit={isManager}
-      />
 
       {isManager ? (
         <CreateFeatureDialog

@@ -60,7 +60,7 @@ describe('InlineTextCell', () => {
     fireEvent.keyDown(input, { key: 'Enter' });
     await act(flush);
     expect(onSave).not.toHaveBeenCalled();
-    expect(screen.getByTestId('inline-cell-error').textContent).toBe(
+    expect(screen.getByTestId('inline-cell-error-text').textContent).toBe(
       "Title can't be empty",
     );
     expect(input.value).toBe('Hello');

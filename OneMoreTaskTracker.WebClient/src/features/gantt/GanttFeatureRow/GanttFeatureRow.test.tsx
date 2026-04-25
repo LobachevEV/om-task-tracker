@@ -33,8 +33,8 @@ describe('GanttFeatureRow', () => {
     await i18n.changeLanguage('en');
   });
 
-  it('calls onOpen when the title button is clicked', () => {
-    const onOpen = vi.fn();
+  it('calls onToggleExpand when the title button is clicked', () => {
+    const onToggleExpand = vi.fn();
     render(
       <GanttFeatureRow
         feature={MINI_TEAM_FEATURE}
@@ -45,8 +45,7 @@ describe('GanttFeatureRow', () => {
         lead={be}
         miniTeam={[be, fe, qa]}
         expanded={false}
-        onToggleExpand={vi.fn()}
-        onOpen={onOpen}
+        onToggleExpand={onToggleExpand}
         onOpenStage={vi.fn()}
         resolvePerformer={resolverFor([fe, be, qa, mg])}
       />,
@@ -55,7 +54,7 @@ describe('GanttFeatureRow', () => {
       .getAllByRole('button', { name: new RegExp(MINI_TEAM_FEATURE.title, 'i') })
       .find((el) => el.classList.contains('gantt-row__title'))!;
     fireEvent.click(titleBtn);
-    expect(onOpen).toHaveBeenCalledWith(MINI_TEAM_FEATURE.id);
+    expect(onToggleExpand).toHaveBeenCalledTimes(1);
   });
 
   it('renders five segment buttons inside the summary bar', () => {
@@ -70,7 +69,6 @@ describe('GanttFeatureRow', () => {
         miniTeam={[be, fe, qa]}
         expanded={false}
         onToggleExpand={vi.fn()}
-        onOpen={vi.fn()}
         onOpenStage={vi.fn()}
         resolvePerformer={resolverFor([fe, be, qa, mg])}
       />,
@@ -91,7 +89,6 @@ describe('GanttFeatureRow', () => {
         miniTeam={[be]}
         expanded={false}
         onToggleExpand={vi.fn()}
-        onOpen={vi.fn()}
         onOpenStage={vi.fn()}
         resolvePerformer={resolverFor([fe, be, qa, mg])}
       />,
@@ -113,7 +110,6 @@ describe('GanttFeatureRow', () => {
         miniTeam={[be]}
         expanded={false}
         onToggleExpand={onToggleExpand}
-        onOpen={vi.fn()}
         onOpenStage={vi.fn()}
         resolvePerformer={resolverFor([fe, be, qa, mg])}
       />,
@@ -134,7 +130,6 @@ describe('GanttFeatureRow', () => {
         miniTeam={[be]}
         expanded={true}
         onToggleExpand={onToggleExpand}
-        onOpen={vi.fn()}
         onOpenStage={vi.fn()}
         resolvePerformer={resolverFor([fe, be, qa, mg])}
       />,
@@ -154,7 +149,6 @@ describe('GanttFeatureRow', () => {
         miniTeam={[be]}
         expanded={true}
         onToggleExpand={vi.fn()}
-        onOpen={vi.fn()}
         onOpenStage={vi.fn()}
         resolvePerformer={resolverFor([fe, be, qa, mg])}
       />,
@@ -178,7 +172,6 @@ describe('GanttFeatureRow', () => {
         miniTeam={[be]}
         expanded={false}
         onToggleExpand={vi.fn()}
-        onOpen={vi.fn()}
         onOpenStage={onOpenStage}
         resolvePerformer={resolverFor([fe, be, qa, mg])}
       />,
@@ -187,7 +180,7 @@ describe('GanttFeatureRow', () => {
     expect(onOpenStage).toHaveBeenCalledWith('Testing');
   });
 
-  it('renders the overdue badge when the active stage is past its plannedEnd', () => {
+  it('marks the DTR as overdue when the active stage is past its plannedEnd', () => {
     const overdueStageBars = computeStageBars(windowMonth, OVERDUE_FEATURE, FIXTURE_TODAY);
     const overdueBar = barGeometry(windowMonth, {
       start: OVERDUE_FEATURE.plannedStart,
@@ -204,12 +197,11 @@ describe('GanttFeatureRow', () => {
         miniTeam={[be]}
         expanded={false}
         onToggleExpand={vi.fn()}
-        onOpen={vi.fn()}
         onOpenStage={vi.fn()}
         resolvePerformer={resolverFor([fe, be, qa, mg])}
       />,
     );
-    expect(screen.getByTestId('feature-overdue-badge')).toBeInTheDocument();
+    expect(screen.getByTestId('feature-dtr')).toHaveAttribute('data-overdue', 'true');
   });
 
   it('exposes a non-"5/5 planned" counter for partial plans', () => {
@@ -229,7 +221,6 @@ describe('GanttFeatureRow', () => {
         miniTeam={[be]}
         expanded={false}
         onToggleExpand={vi.fn()}
-        onOpen={vi.fn()}
         onOpenStage={vi.fn()}
         resolvePerformer={resolverFor([fe, be, qa, mg])}
       />,
@@ -251,7 +242,6 @@ describe('GanttFeatureRow', () => {
         miniTeam={[fe]}
         expanded={false}
         onToggleExpand={vi.fn()}
-        onOpen={vi.fn()}
         onOpenStage={vi.fn()}
         resolvePerformer={resolverFor([fe, be, qa, mg])}
       />,
@@ -272,7 +262,6 @@ describe('GanttFeatureRow', () => {
         variant="noPlan"
         expanded={false}
         onToggleExpand={vi.fn()}
-        onOpen={vi.fn()}
         onOpenStage={vi.fn()}
         resolvePerformer={resolverFor([fe, be, qa, mg])}
       />,
@@ -303,7 +292,6 @@ describe('GanttFeatureRow', () => {
         miniTeam={[fe]}
         expanded={true}
         onToggleExpand={vi.fn()}
-        onOpen={vi.fn()}
         onOpenStage={vi.fn()}
         resolvePerformer={resolverFor([fe, be, qa, mg])}
       />,

@@ -22,13 +22,6 @@ const EMPTY_DRAFT: DraftState = {
   description: '',
 };
 
-/**
- * Build the CreateFeaturePayload from the dialog draft.
- *
- * Per api-contract.md v1, `POST /api/plan/features` does not accept
- * `plannedStart` / `plannedEnd` anymore — stage plans materialize empty on
- * create and are authored via PATCH (the per-stage table in FeatureEditForm).
- */
 function buildPayload(draft: DraftState): CreateFeaturePayload {
   const payload: CreateFeaturePayload = { title: draft.title.trim() };
   if (draft.description.trim() !== '') payload.description = draft.description;

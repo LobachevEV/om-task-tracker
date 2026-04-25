@@ -134,16 +134,18 @@ describe('GanttPageInternal', () => {
     expect(subRows).toHaveLength(5);
   });
 
-  it('clicking a row title opens the drawer for non-manager viewers', () => {
-    // Managers now inline-edit the title; the drawer is opened via the
-    // stage-row trigger instead. Viewer roles keep the classic click path.
+  it('clicking a row title expands the row for non-manager viewers', () => {
     const { container } = renderHarness({ role: 'Qa' });
     const titleBtn = container.querySelector<HTMLButtonElement>('.gantt-row__title');
     expect(titleBtn).not.toBeNull();
+    const caret = container.querySelector<HTMLButtonElement>('[data-testid="expand-caret"]');
+    expect(caret!.getAttribute('aria-expanded')).toBe('false');
     act(() => {
       titleBtn!.click();
     });
-    expect(document.querySelector('.feature-drawer')).not.toBeNull();
+    expect(caret!.getAttribute('aria-expanded')).toBe('true');
+    const subRows = container.querySelectorAll('[data-testid^="stage-subrow-"]');
+    expect(subRows).toHaveLength(5);
   });
 
   it('renders an error state with a retry button when `error` is set', () => {

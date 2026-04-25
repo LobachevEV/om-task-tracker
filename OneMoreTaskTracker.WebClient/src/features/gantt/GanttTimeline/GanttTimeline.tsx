@@ -78,20 +78,11 @@ export function GanttTimeline({ window, zoom, todayPercent, className }: GanttTi
         );
       })}
       {todayPercent != null ? (
-        <>
-          <div
-            className="gantt-timeline__today"
-            style={{ left: `${todayPercent}%` }}
-            aria-hidden="true"
-          />
-          <span
-            className="gantt-timeline__today-label"
-            style={{ left: `calc(${todayPercent}% + 4px)` }}
-            aria-hidden="true"
-          >
-            {t('legend.today')}
-          </span>
-        </>
+        <div
+          className="gantt-timeline__today"
+          style={{ left: `${todayPercent}%` }}
+          aria-hidden="true"
+        />
       ) : null}
     </div>
   );

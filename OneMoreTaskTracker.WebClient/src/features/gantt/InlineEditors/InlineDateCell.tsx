@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useInlineFieldEditor } from './useInlineFieldEditor';
 import type { InlineEditorError } from './InlineEditorError';
 import { InlineCellChevron } from './InlineCellChevron';
+import { InlineCellError } from './InlineCellError';
 import './InlineEditors.css';
 
 export interface InlineDateCellProps {
@@ -158,7 +159,13 @@ export function InlineDateCell({
         data-testid={testId ? `${testId}-input` : undefined}
       />
       <InlineCellChevron />
-      <InlineCellMessage error={editor.error} translate={t} />
+      <InlineCellError
+        error={editor.error}
+        onRetry={() => void editor.retry()}
+        onRevert={editor.cancel}
+        rejectedValueLabel={editor.lastRejectedDraft || null}
+        resolveMessage={(err) => resolveDateCellMessage(err, t)}
+      />
     </span>
   );
 }
@@ -199,23 +206,3 @@ function resolveDateCellMessage(
   return error.message;
 }
 
-function InlineCellMessage({
-  error,
-  translate,
-}: {
-  error: InlineEditorError | null;
-  translate: (key: string, opts?: Record<string, unknown>) => string;
-}) {
-  if (!error) return null;
-  const message = resolveDateCellMessage(error, translate);
-  return (
-    <span
-      className="inline-cell__error"
-      role="alert"
-      data-kind={error.kind}
-      data-testid="inline-cell-error"
-    >
-      {message}
-    </span>
-  );
-}

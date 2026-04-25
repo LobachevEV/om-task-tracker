@@ -4,6 +4,7 @@ import type { TeamRosterMember } from '../../../shared/api/teamApi';
 import { useInlineFieldEditor } from './useInlineFieldEditor';
 import type { InlineEditorError } from './InlineEditorError';
 import { InlineCellChevron } from './InlineCellChevron';
+import { InlineCellError } from './InlineCellError';
 import './InlineEditors.css';
 
 export interface InlineOwnerPickerProps {
@@ -264,21 +265,21 @@ export function InlineOwnerPicker({
           )}
         </ul>
       ) : null}
-      <InlineCellMessage error={editor.error} />
+      <InlineCellError
+        error={editor.error}
+        onRetry={() => void editor.retry()}
+        onRevert={editor.cancel}
+        rejectedValueLabel={resolveOwnerLabel(editor.lastRejectedDraft, roster)}
+      />
     </div>
   );
 }
 
-function InlineCellMessage({ error }: { error: InlineEditorError | null }) {
-  if (!error) return null;
-  return (
-    <span
-      className="inline-cell__error"
-      role="alert"
-      data-kind={error.kind}
-      data-testid="inline-cell-error"
-    >
-      {error.message}
-    </span>
-  );
+function resolveOwnerLabel(
+  userId: number | null | undefined,
+  roster: readonly TeamRosterMember[],
+): string | null {
+  if (userId == null) return null;
+  const match = roster.find((m) => m.userId === userId);
+  return match?.displayName ?? null;
 }

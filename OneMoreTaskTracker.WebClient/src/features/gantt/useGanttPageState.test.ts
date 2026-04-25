@@ -53,19 +53,6 @@ describe('useGanttPageState', () => {
     expect(result.current.zoom).toBe('twoWeeks');
   });
 
-  it('openFeature then closeFeature toggles selectedFeatureId', () => {
-    const { result } = renderHook(() => useGanttPageState('Manager'));
-    expect(result.current.selectedFeatureId).toBeNull();
-    act(() => {
-      result.current.openFeature(5);
-    });
-    expect(result.current.selectedFeatureId).toBe(5);
-    act(() => {
-      result.current.closeFeature();
-    });
-    expect(result.current.selectedFeatureId).toBeNull();
-  });
-
   it('revealTasks switches the revealed id and only allows one at a time', () => {
     const { result } = renderHook(() => useGanttPageState('Manager'));
     act(() => {
@@ -106,19 +93,6 @@ describe('useGanttPageState', () => {
     expect(result.current.expandedFeatureIds.has(1)).toBe(true);
     expect(result.current.expandedFeatureIds.has(2)).toBe(true);
     expect(result.current.expandedFeatureIds.has(3)).toBe(true);
-  });
-
-  it('openFeature accepts an optional initial stage', () => {
-    const { result } = renderHook(() => useGanttPageState('Manager'));
-    act(() => {
-      result.current.openFeature(7, 'Testing');
-    });
-    expect(result.current.selectedFeatureId).toBe(7);
-    expect(result.current.selectedInitialStage).toBe('Testing');
-    act(() => {
-      result.current.closeFeature();
-    });
-    expect(result.current.selectedInitialStage).toBeNull();
   });
 
   it('today stays stable across re-renders (snapshot on mount)', () => {

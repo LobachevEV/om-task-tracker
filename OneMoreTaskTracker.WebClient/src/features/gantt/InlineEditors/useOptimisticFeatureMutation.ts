@@ -21,11 +21,6 @@ import type {
  */
 export interface OptimisticFeatureMutations {
   saveTitle: (featureId: number, nextTitle: string, version: number) => Promise<void>;
-  saveDescription: (
-    featureId: number,
-    next: string | null,
-    version: number,
-  ) => Promise<void>;
   saveStageOwner: (
     featureId: number,
     stage: FeatureState,
@@ -61,18 +56,6 @@ export function useOptimisticFeatureMutation(
       const updated = await planApi.updateFeatureTitle(
         featureId,
         { title: nextTitle },
-        version,
-      );
-      onApplied(updated);
-    },
-    [onApplied],
-  );
-
-  const saveDescription = useCallback<OptimisticFeatureMutations['saveDescription']>(
-    async (featureId, next, version) => {
-      const updated = await planApi.updateFeatureDescription(
-        featureId,
-        { description: next },
         version,
       );
       onApplied(updated);
@@ -125,7 +108,6 @@ export function useOptimisticFeatureMutation(
 
   return {
     saveTitle,
-    saveDescription,
     saveStageOwner,
     saveStagePlannedStart,
     saveStagePlannedEnd,

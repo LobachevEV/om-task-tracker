@@ -5,9 +5,15 @@ import type { FeatureScope, FeatureState } from '../../../shared/types/feature';
 import type { UserRole } from '../../../shared/auth/auth';
 import { ZOOM_DAYS, type ZoomLevel } from '../ganttMath';
 import { FEATURE_STATE_ENTRIES } from '../stateConfig';
+import { GanttLegend } from '../GanttLegend';
 import './GanttToolbar.css';
 
 const ZOOM_ORDER: readonly ZoomLevel[] = Object.keys(ZOOM_DAYS) as ZoomLevel[];
+
+const STATE_FILTER_ORDER: readonly (FeatureState | 'all')[] = [
+  'all',
+  ...FEATURE_STATE_ENTRIES.map((e) => e.state),
+];
 
 export interface GanttToolbarProps {
   role: UserRole;
@@ -49,17 +55,33 @@ export function GanttToolbar({
     [zoom, onZoomChange],
   );
 
+  const cycleStateFilter = useCallback(
+    (direction: 1 | -1) => {
+      const idx = STATE_FILTER_ORDER.indexOf(stateFilter);
+      const next =
+        STATE_FILTER_ORDER[
+          (idx + direction + STATE_FILTER_ORDER.length) % STATE_FILTER_ORDER.length
+        ];
+      onStateFilterChange(next);
+    },
+    [stateFilter, onStateFilterChange],
+  );
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'z' && e.key !== 'Z') return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (isTypingTarget(e.target)) return;
-      e.preventDefault();
-      cycleZoom(e.shiftKey ? -1 : 1);
+      if (e.key === 'z' || e.key === 'Z') {
+        e.preventDefault();
+        cycleZoom(e.shiftKey ? -1 : 1);
+      } else if (e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        cycleStateFilter(e.shiftKey ? -1 : 1);
+      }
     };
     globalThis.addEventListener('keydown', onKey);
     return () => globalThis.removeEventListener('keydown', onKey);
-  }, [cycleZoom]);
+  }, [cycleZoom, cycleStateFilter]);
 
   const zoomButtons = useMemo(
     () =>
@@ -85,8 +107,7 @@ export function GanttToolbar({
   return (
     <div className="gantt-toolbar" role="toolbar" aria-label={t('title')}>
       <div className="gantt-toolbar__heading">
-        <span className="gantt-toolbar__eyebrow">{t('title')}</span>
-        <h2 className="gantt-toolbar__title">{t('subtitle')}</h2>
+        <h2 className="gantt-toolbar__title">{t('title')}</h2>
       </div>
 
       <div className="gantt-toolbar__controls">
@@ -114,23 +135,40 @@ export function GanttToolbar({
           </Button>
         </div>
 
-        <div className="gantt-toolbar__group">
-          <label className="gantt-toolbar__group-label" htmlFor="gantt-toolbar-state">
-            {t('drawer.fields.state')}:
-          </label>
-          <select
-            id="gantt-toolbar-state"
-            className="gantt-toolbar__select"
-            value={stateFilter}
-            onChange={(e) => onStateFilterChange(e.target.value as FeatureState | 'all')}
+        <div
+          className="gantt-toolbar__group"
+          role="group"
+          aria-label={t('drawer.fields.state')}
+        >
+          <span className="gantt-toolbar__group-label">
+            {t('drawer.fields.state')} <Kbd size="sm">S</Kbd>:
+          </span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            aria-pressed={stateFilter === 'all'}
+            className={`gantt-toolbar__state-button${stateFilter === 'all' ? ' gantt-toolbar__state-button--active' : ''}`}
+            onClick={() => onStateFilterChange('all')}
           >
-            <option value="all">{t('toolbar.scope.all')}</option>
-            {FEATURE_STATE_ENTRIES.map((entry) => (
-              <option key={entry.state} value={entry.state}>
+            {t('toolbar.scope.all')}
+          </Button>
+          {FEATURE_STATE_ENTRIES.map((entry) => {
+            const active = stateFilter === entry.state;
+            return (
+              <Button
+                key={entry.state}
+                type="button"
+                variant="ghost"
+                size="sm"
+                aria-pressed={active}
+                className={`gantt-toolbar__state-button${active ? ' gantt-toolbar__state-button--active' : ''}`}
+                onClick={() => onStateFilterChange(entry.state)}
+              >
                 {t(entry.i18nKey)}
-              </option>
-            ))}
-          </select>
+              </Button>
+            );
+          })}
         </div>
 
         <div
@@ -144,6 +182,8 @@ export function GanttToolbar({
           </span>
           {zoomButtons}
         </div>
+
+        <GanttLegend />
 
         {isManager && onNewFeature ? (
           <Button type="button" variant="primary" size="sm" onClick={onNewFeature}>

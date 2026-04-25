@@ -24,9 +24,7 @@ public class FeatureFieldsController(
         [FromHeader(Name = "If-Match")] string? ifMatch,
         CancellationToken ct)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
-        if (string.IsNullOrWhiteSpace(body.Title))
+        if (!ModelState.IsValid || string.IsNullOrWhiteSpace(body.Title))
             return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
 
         var callerUserId = User.GetUserId();
