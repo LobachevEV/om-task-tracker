@@ -1,4 +1,5 @@
 import { useCallback, useRef, type KeyboardEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useInlineFieldEditor } from './useInlineFieldEditor';
 import type { InlineEditorError } from './InlineEditorError';
 import { InlineCellChevron } from './InlineCellChevron';
@@ -79,6 +80,7 @@ export function InlineDateCell({
   onAnnounce,
   buildAnnouncement,
 }: InlineDateCellProps) {
+  const { t } = useTranslation('gantt');
   const inputRef = useRef<HTMLInputElement>(null);
   const editor = useInlineFieldEditor<string>({
     committed: toDraft(value),
@@ -156,13 +158,56 @@ export function InlineDateCell({
         data-testid={testId ? `${testId}-input` : undefined}
       />
       <InlineCellChevron />
-      <InlineCellMessage error={editor.error} />
+      <InlineCellMessage error={editor.error} translate={t} />
     </span>
   );
 }
 
-function InlineCellMessage({ error }: { error: InlineEditorError | null }) {
+/**
+ * Resolve the user-facing message for a date-cell error.
+ *
+ * The inline-edit BE contract (api-contract.md) emits two structured
+ * date-related error envelopes that deserve a friendlier copy than the raw
+ * server text:
+ *
+ * - HTTP 422 `{ error: "Stage order violation",
+ *               conflict: { kind: "overlap", with: "Development" } }`
+ *   → "Overlaps with Development" (per inlineEdit.errors.stageOverlap).
+ *
+ * - HTTP 400 `{ error: "Use a real release date" }`  (year outside 2000..2100)
+ *   → keep the literal copy via inlineEdit.errors.invalidDate so it stays
+ *     localizable.
+ *
+ * Anything else falls through to the server-supplied `error.message` (which
+ * `toInlineEditorError` already strips of the `Request failed (N): ` prefix).
+ */
+function resolveDateCellMessage(
+  error: InlineEditorError,
+  translate: (key: string, opts?: Record<string, unknown>) => string,
+): string {
+  if (error.kind === 'conflict' && error.conflict?.kind === 'overlap' && error.conflict.with) {
+    return translate('inlineEdit.errors.stageOverlap', {
+      defaultValue: 'Overlaps with {{neighbour}}',
+      neighbour: error.conflict.with,
+    });
+  }
+  if (error.kind === 'validation' && /real release date/i.test(error.message)) {
+    return translate('inlineEdit.errors.invalidDate', {
+      defaultValue: 'Use a real release date',
+    });
+  }
+  return error.message;
+}
+
+function InlineCellMessage({
+  error,
+  translate,
+}: {
+  error: InlineEditorError | null;
+  translate: (key: string, opts?: Record<string, unknown>) => string;
+}) {
   if (!error) return null;
+  const message = resolveDateCellMessage(error, translate);
   return (
     <span
       className="inline-cell__error"
@@ -170,7 +215,7 @@ function InlineCellMessage({ error }: { error: InlineEditorError | null }) {
       data-kind={error.kind}
       data-testid="inline-cell-error"
     >
-      {error.message}
+      {message}
     </span>
   );
 }

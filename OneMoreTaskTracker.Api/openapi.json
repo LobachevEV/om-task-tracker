@@ -379,8 +379,8 @@
       },
       "StagePlan": {
         "type": "object",
-        "description": "List-row stage plan — id-only performer.",
-        "required": ["stage", "plannedStart", "plannedEnd", "performerUserId", "stageVersion"],
+        "description": "List-row stage plan — id-only performer. `stageVersion` is rolled out additively (api-contract.md §rollout-tolerance) and is therefore NOT in the required set; old payloads that predate the inline-edit feature may omit it.",
+        "required": ["stage", "plannedStart", "plannedEnd", "performerUserId"],
         "properties": {
           "stage": { "$ref": "#/components/schemas/FeatureState" },
           "plannedStart": { "type": "string", "format": "date", "nullable": true },
@@ -392,7 +392,7 @@
       "StagePlanDetail": {
         "type": "object",
         "description": "Detail stage plan — resolved performer mini-member. `performer` is null when the stage is unassigned OR when the stored performer id is no longer on the manager's roster (stale). In the stale case `performerUserId` is still emitted so the FE can render the 'Performer no longer on team' state.",
-        "required": ["stage", "plannedStart", "plannedEnd", "performerUserId", "performer", "stageVersion"],
+        "required": ["stage", "plannedStart", "plannedEnd", "performerUserId", "performer"],
         "properties": {
           "stage": { "$ref": "#/components/schemas/FeatureState" },
           "plannedStart": { "type": "string", "format": "date", "nullable": true },
@@ -437,7 +437,7 @@
       },
       "FeatureSummary": {
         "type": "object",
-        "required": ["id","title","description","state","plannedStart","plannedEnd","leadUserId","managerUserId","taskCount","taskIds","stagePlans","version"],
+        "required": ["id","title","description","state","plannedStart","plannedEnd","leadUserId","managerUserId","taskCount","taskIds","stagePlans"],
         "properties": {
           "id":            { "type": "integer", "format": "int32" },
           "title":         { "type": "string", "maxLength": 200 },

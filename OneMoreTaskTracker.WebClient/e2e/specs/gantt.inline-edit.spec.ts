@@ -381,3 +381,46 @@ test.describe('gantt inline-edit — 409 conflict', () => {
     await expect(page.getByTestId('inline-cell-error').first()).toContainText(/refresh|updated/i);
   });
 });
+
+test.describe('gantt inline-edit — 422 stage-order overlap', () => {
+  test('Flow 7: 422 overlap surfaces inline "Overlaps with Development" copy', async ({
+    page,
+  }) => {
+    await pinToday(page, FIXTURE_TODAY);
+    await seedAuth(page);
+    await installStubs(page, {
+      initial: FEATURE_TEMPLATE,
+      patchBehavior: async (route, url) => {
+        // Simulate the iter-3 BE behaviour: PATCHing Testing.plannedStart to a
+        // date BEFORE Development.plannedEnd → 422 with overlap envelope.
+        if (url.pathname.endsWith('/stages/Testing/planned-start')) {
+          await route.fulfill({
+            status: 422,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              error: 'Stage order violation',
+              conflict: { kind: 'overlap', with: 'Development' },
+            }),
+          });
+          return true;
+        }
+        return false;
+      },
+    });
+    await waitForPlan(page);
+    await page.getByTestId('expand-caret').first().click();
+
+    const startEditor = page.getByTestId('stage-planned-start-101-Testing-input');
+    await startEditor.click();
+    await startEditor.fill('2026-05-15'); // before Development.plannedEnd 2026-06-30
+    await startEditor.blur();
+
+    const errorBadge = page.getByTestId('inline-cell-error').first();
+    await expect(errorBadge).toBeVisible();
+    await expect(errorBadge).toContainText('Overlaps with Development');
+    await expect(errorBadge).toHaveAttribute('data-kind', 'conflict');
+
+    // Per-row aria-live region announces the rejection.
+    await expect(page.getByRole('status').first()).toContainText(/rejected|отклон/i);
+  });
+});

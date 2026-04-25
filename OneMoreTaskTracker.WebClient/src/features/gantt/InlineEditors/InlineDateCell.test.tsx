@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { InlineDateCell } from './InlineDateCell';
+import { ApiError } from '../../../shared/api/ApiError';
 
 function flush(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 0));
@@ -55,9 +56,39 @@ describe('InlineDateCell', () => {
     fireEvent.keyDown(input, { key: 'Enter' });
     await act(flush);
     expect(onSave).not.toHaveBeenCalled();
-    expect(screen.getByTestId('inline-cell-error')).toHaveTextContent(
-      /real release date/i,
+    // The error renders through the i18n layer; the test setup may default to
+    // any locale, so assert the validation kind + presence rather than copy.
+    const errorEl = screen.getByTestId('inline-cell-error');
+    expect(errorEl).toBeInTheDocument();
+    expect(errorEl).toHaveAttribute('data-kind', 'validation');
+    expect(errorEl.textContent?.length ?? 0).toBeGreaterThan(0);
+    // Rolled back to committed.
+    expect(input.value).toBe('2026-05-12');
+  });
+
+  it('renders the 422 overlap conflict envelope as a localized "Overlaps with X" message', async () => {
+    const onSave = vi.fn().mockRejectedValue(
+      new ApiError(422, 'Stage order violation', { kind: 'overlap', with: 'Development' }),
     );
+    render(
+      <InlineDateCell
+        value="2026-05-12"
+        onSave={onSave}
+        ariaLabel="Planned start"
+      />,
+    );
+    const input = screen.getByLabelText('Planned start') as HTMLInputElement;
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: '2026-05-15' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await act(flush);
+    expect(onSave).toHaveBeenCalledWith('2026-05-15');
+    const errorEl = screen.getByTestId('inline-cell-error');
+    // The translation table contains "Development" as the interpolated
+    // neighbour name regardless of the active locale (EN: "Overlaps with
+    // Development", RU: "Пересекается с этапом «Development»").
+    expect(errorEl).toHaveTextContent(/Development/);
+    expect(errorEl).toHaveAttribute('data-kind', 'conflict');
     // Rolled back to committed.
     expect(input.value).toBe('2026-05-12');
   });

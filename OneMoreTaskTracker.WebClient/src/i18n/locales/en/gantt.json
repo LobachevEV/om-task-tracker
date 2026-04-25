@@ -133,6 +133,7 @@
       "invalidDate": "Use a real release date",
       "endBeforeStart": "End must be on or after {{date}}",
       "startAfterEnd": "Start must be on or before {{date}}",
+      "stageOverlap": "Overlaps with {{neighbour}}",
       "conflict": "Someone else just updated this; reload to see latest",
       "network": "Couldn't save. Retry?"
     },
