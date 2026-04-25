@@ -7,8 +7,6 @@ using ProtoFeatureState = OneMoreTaskTracker.Proto.Features.FeatureState;
 
 namespace OneMoreTaskTracker.Features.Features.Update;
 
-// Inline-edit per-field PATCH handler for a single stage's planned_end.
-// Symmetric to UpdateStagePlannedStartHandler; kept separate per handler-per-use-case.
 public sealed class UpdateStagePlannedEndHandler(
     FeaturesDbContext db,
     ILogger<UpdateStagePlannedEndHandler> logger) : StagePlannedEndUpdater.StagePlannedEndUpdaterBase
@@ -40,9 +38,6 @@ public sealed class UpdateStagePlannedEndHandler(
 
         FeatureValidation.ValidateDateOrder(plan.PlannedStart, parsed);
 
-        // Cross-stage chronological-order check (mirror of the start handler);
-        // see api-contract.md §4 / §5. Build a snapshot with the tentative new
-        // end for the mutated stage and walk neighbour pairs.
         var snapshots = feature.StagePlans
             .Select(sp => sp.Stage == stageOrdinal
                 ? new StagePlanSnapshot(sp.Stage, sp.PlannedStart, parsed)

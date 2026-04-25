@@ -199,16 +199,9 @@ public class PlanController(
             PlannedEnd = body.PlannedEnd ?? string.Empty,
             LeadUserId = body.LeadUserId.GetValueOrDefault(),
             State = PlanMapper.ParseState(body.State),
-            // Propagate the authenticated caller id so the Features service can
-            // re-verify feature ownership (double-defense; see
-            // ~/.claude/rules/microservices/security.md).
             CallerUserId = callerUserId,
         };
 
-        // Stage plan boundary validation lives here — omitted means "do not
-        // touch" (nothing added to request.StagePlans). Non-null MUST have
-        // exactly 5 entries with unique recognised stage names, matching
-        // api-contract.md "Partial update semantics".
         if (body.StagePlans is not null)
         {
             if (body.StagePlans.Count != ExpectedStageCount)
@@ -225,8 +218,6 @@ public class PlanController(
                     Stage           = protoStage,
                     PlannedStart    = sp.PlannedStart ?? string.Empty,
                     PlannedEnd      = sp.PlannedEnd   ?? string.Empty,
-                    // performer_user_id on the wire = 0 means "unassigned"; we
-                    // coerce negative / zero inputs to 0 defensively.
                     PerformerUserId = sp.PerformerUserId is { } p and > 0 ? p : 0,
                 });
             }
@@ -235,12 +226,6 @@ public class PlanController(
         var updated = await featureUpdater.UpdateAsync(request, cancellationToken: ct);
         return Ok(PlanMapper.MapSummary(updated, new Dictionary<int, List<int>>(), logger));
     }
-
-    // ----- Inline-edit per-field PATCH endpoints (gantt-inline-edit feature) -----
-    // Each endpoint returns the refreshed FeatureSummary so the FE reconciles
-    // derived fields (plannedStart/plannedEnd/state/version) in one round trip.
-    // `If-Match: <version>` is optional in iter 1 and forwarded to the Features
-    // service as `expected_version` / `expected_stage_version`.
 
     [HttpPatch("features/{id:int}/title")]
     [Authorize(Roles = Roles.Manager)]
@@ -264,8 +249,6 @@ public class PlanController(
             Title = body.Title,
             CallerUserId = callerUserId,
         };
-        // Assigning a proto3 `optional` field also flips the Has* flag; absent
-        // header → leave unset → handler runs in advisory / last-write-wins mode.
         if (expectedVersion.HasValue)
             request.ExpectedVersion = expectedVersion.Value;
 
@@ -291,7 +274,6 @@ public class PlanController(
         var request = new UpdateFeatureDescriptionRequest
         {
             Id = id,
-            // Wire convention: "" == null (matches feature.Description nullable).
             Description = body.Description ?? string.Empty,
             CallerUserId = callerUserId,
         };
@@ -315,18 +297,14 @@ public class PlanController(
         if (!PlanMapper.TryParseStage(stage, out var parsedStage))
             return BadRequest(new { error = "Invalid request data" });
 
-        // Reject unparseable owner ids; null clears the assignment.
+        // null clears the assignment; negative ids are malformed.
         if (body.StageOwnerUserId is { } ownerId && ownerId < 1)
             return BadRequest(new { error = "Invalid request data" });
 
         var callerUserId = User.GetUserId();
 
-        // Gateway-side roster membership check: api-contract.md §3 requires
-        // positive stageOwnerUserIds to be on the authenticated manager's
-        // roster. This closes the "typed-in rogue id" attack — FE pickers are
-        // sourced from the roster, so a non-member id can only come from a
-        // direct API caller. We compose cross-service here rather than
-        // east-west from the Features service (microservices/composition.md).
+        // Roster membership check at the gateway — closes the typed-in rogue-id path
+        // since FE pickers are roster-sourced. Composed here rather than east-west.
         if (body.StageOwnerUserId is { } positiveOwnerId && positiveOwnerId >= 1)
         {
             var roster = await LoadRosterForManager(callerUserId, ct);
@@ -340,7 +318,6 @@ public class PlanController(
         {
             FeatureId = id,
             Stage = parsedStage,
-            // proto3 default 0 on the wire = unassigned.
             StageOwnerUserId = body.StageOwnerUserId ?? 0,
             CallerUserId = callerUserId,
         };
@@ -425,9 +402,7 @@ public class PlanController(
         string jiraId,
         CancellationToken ct)
     {
-        // Verify the feature exists before asking the Tasks service to attach;
-        // the Tasks DB has no FK constraint across schemas, so the gateway
-        // enforces the invariant. NotFound bubbles up through the middleware.
+        // No cross-schema FK to enforce existence — the gateway pre-checks.
         var feature = await featureGetter.GetAsync(
             new GetFeatureRequest { Id = id },
             cancellationToken: ct);
@@ -464,26 +439,16 @@ public class PlanController(
         return Ok(PlanMapper.MapSummary(feature, new Dictionary<int, List<int>>(), logger));
     }
 
-    // Inline-edit responses do not compose per-feature task lists (the Gantt
-    // row keeps its current taskCount / taskIds from the last list/detail
-    // fetch). Returning an empty map here is safe: MapSummary looks up by
-    // feature id and falls back to an empty array when missing.
     private static readonly IReadOnlyDictionary<int, List<int>> EmptyTasks =
         new Dictionary<int, List<int>>();
 
-    // If-Match header parser for the inline-edit endpoints. Returns null when
-    // the header is missing or unparseable (advisory / last-write-wins). When
-    // present and parseable it returns the explicit version, INCLUDING 0 — so
-    // a freshly-created feature at v=0 can still send `If-Match: 0` and have
-    // it round-trip through the proto-`optional` wire to the handler.
+    // Returns null on missing/unparseable; explicit 0 round-trips so a freshly-created
+    // feature can still send `If-Match: 0`. RFC 7232 quoted ETags are tolerated.
     private int? ParseIfMatch(string? ifMatch)
     {
         if (string.IsNullOrWhiteSpace(ifMatch))
             return null;
 
-        // Strip optional surrounding quotes per the RFC 7232 weak/strong ETag
-        // convention; clients that send `If-Match: "7"` and `If-Match: 7`
-        // should produce identical server behavior.
         var trimmed = ifMatch.Trim().Trim('"');
         if (int.TryParse(trimmed, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) && parsed >= 0)
             return parsed;

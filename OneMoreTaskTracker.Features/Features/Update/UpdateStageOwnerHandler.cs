@@ -7,11 +7,7 @@ using ProtoFeatureState = OneMoreTaskTracker.Proto.Features.FeatureState;
 
 namespace OneMoreTaskTracker.Features.Features.Update;
 
-// Inline-edit per-field PATCH handler for a single stage's owner.
-// Contract: api-contract.md § "PATCH /api/plan/features/{id}/stages/{stage}/owner".
-// Roster-membership validation is performed at the gateway (composition.md —
-// Features service does NOT call Users east-west); this handler treats the
-// incoming id opaquely.
+// Roster membership is validated at the gateway; this handler treats the id opaquely.
 public sealed class UpdateStageOwnerHandler(
     FeaturesDbContext db,
     ILogger<UpdateStageOwnerHandler> logger) : StageOwnerUpdater.StageOwnerUpdaterBase
@@ -39,8 +35,6 @@ public sealed class UpdateStageOwnerHandler(
         if (request.HasExpectedStageVersion && request.ExpectedStageVersion != plan.Version)
             throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(plan.Version)));
 
-        // proto3 scalar default 0 = unassigned; negatives coerced defensively
-        // (mirrors StagePlanUpserter.NormalizePerformer).
         var newOwner = request.StageOwnerUserId > 0 ? request.StageOwnerUserId : 0;
         var ownerBefore = plan.PerformerUserId;
         var stageVersionBefore = plan.Version;

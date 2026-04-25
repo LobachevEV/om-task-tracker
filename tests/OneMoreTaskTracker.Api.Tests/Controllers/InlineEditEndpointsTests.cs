@@ -23,13 +23,6 @@ using UpdateStagePlannedEndDto = OneMoreTaskTracker.Proto.Features.UpdateStagePl
 
 namespace OneMoreTaskTracker.Api.Tests.Controllers;
 
-// Gateway-level integration tests for the five per-field inline-edit PATCH
-// endpoints. Covers:
-//   - happy path per endpoint (200 + forwarded proto request shape)
-//   - unauthenticated (401) and non-manager role (403)
-//   - malformed payloads (400) — empty title, unknown stage, negative owner id
-//   - upstream PermissionDenied bubbles through the gateway middleware as 403
-//   - If-Match header forwarding
 public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactory factory)
     : IClassFixture<TasksControllerWebApplicationFactory>
 {
@@ -51,9 +44,6 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
     private string DevToken(int userId = 2) =>
         _factory.GenerateToken(userId, "dev@example.com", Roles.FrontendDeveloper);
 
-    // Roster stub used by UpdateStageOwner (gateway-side roster membership
-    // defense per api-contract.md §3). Returns a roster containing the
-    // manager + the listed teammate ids as simple members.
     private void StubRoster(int managerUserId, params int[] teammateUserIds)
     {
         var response = new GetTeamRosterResponse
@@ -160,9 +150,6 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
         {
             Content = JsonBody(new { title = "Renamed" })
         };
-        // RFC 7232 strong ETag grammar requires quoted-string syntax; the
-        // gateway's ParseIfMatch strips surrounding quotes so either form works
-        // server-side, but HttpClient validates the header per the spec.
         request.Headers.TryAddWithoutValidation("If-Match", "\"7\"");
 
         var response = await client.SendAsync(request);
@@ -381,7 +368,6 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
         captured.StageOwnerUserId.Should().Be(42);
 
         var body = await response.Content.ReadAsStringAsync();
-        // stageVersion is exposed on the stagePlans[] entries in FeatureSummary.
         body.Should().Contain("\"stageVersion\":1");
     }
 
@@ -439,8 +425,6 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
     {
         var client = ClientWithToken(ManagerToken());
 
-        // Gateway-side reject: 0 means "unassign" via `null`; an explicit
-        // negative id is malformed.
         var response = await client.PatchAsync("/api/plan/features/1/stages/Development/owner",
             JsonBody(new { stageOwnerUserId = -5 }));
 
@@ -461,13 +445,9 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
     [Fact]
     public async Task UpdateStageOwner_IdNotOnRoster_Returns400WithRosterMessage()
     {
-        // api-contract.md §3: positive stageOwnerUserId MUST be on the caller's
-        // roster. Gateway fails fast with "Pick a teammate from the list" and
-        // never reaches the Features service (closes the rogue-id attack).
         var client = ClientWithToken(ManagerToken(userId: 1));
         StubRoster(1, 2, 3);
-        // The substitute is shared across tests via IClassFixture; scope the
-        // "no call was made" assertion to this test's invocations only.
+        // Substitute is shared across the IClassFixture — capture the baseline call count.
         _factory.MockStageOwnerUpdater.ClearReceivedCalls();
 
         var response = await client.PatchAsync("/api/plan/features/1/stages/Development/owner",
@@ -477,7 +457,6 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
         var body = await response.Content.ReadAsStringAsync();
         body.Should().Contain("Pick a teammate from the list");
 
-        // Features service must NOT have been invoked for a failed roster check.
         _factory.MockStageOwnerUpdater.DidNotReceive().UpdateAsync(
             Arg.Any<UpdateStageOwnerRequest>(),
             Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>());
@@ -525,9 +504,7 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
     [Fact]
     public async Task UpdateStageOwner_NullOwner_SkipsRosterCheckAndClears()
     {
-        // Clearing the assignment (null) MUST not require a roster call —
-        // there's nothing to verify. Stub the roster with zero teammates; the
-        // Features service still receives stageOwnerUserId=0.
+        // Clearing the assignment skips the roster check; empty stub proves no membership lookup happens.
         var client = ClientWithToken(ManagerToken(userId: 1));
         StubRoster(managerUserId: 1);
         UpdateStageOwnerRequest? captured = null;
@@ -567,10 +544,6 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
     [Fact]
     public async Task UpdateStageOwner_UpstreamAlreadyExists_Returns409WithConflictBody()
     {
-        // Extended error envelope (api-contract.md § "Error Envelope"): when
-        // the Features service reports a version conflict, the gateway surfaces
-        // 409 with both `error` and the structured `conflict.currentVersion`
-        // so the FE can decide between replay and hard-reload.
         var client = ClientWithToken(ManagerToken(userId: 1));
         StubRoster(1, 42);
         _factory.MockStageOwnerUpdater
@@ -658,12 +631,6 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    // BE-003-01 regression: dates outside the 2000-2100 release window are
-    // rejected at the gateway with the friendly "Use a real release date" copy,
-    // NOT generalised to "Invalid request data" by GrpcExceptionMiddleware
-    // (which would normally swallow upstream InvalidArgument detail per
-    // microservices/security.md error-surface rules). Mirrors the existing
-    // "Pick a teammate from the list" controller-side pre-check pattern.
     [Fact]
     public async Task UpdateStagePlannedStart_PreYear2000Date_Returns400WithFriendlyCopy()
     {
@@ -700,11 +667,6 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
             Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>());
     }
 
-    // BE-002-04 regression: prior to making `expected_version` proto3-`optional`,
-    // the wire could not distinguish an explicit `If-Match: 0` (a freshly-created
-    // feature at v=0) from "no header sent". The controller now forwards explicit
-    // presence via the proto3 Has* flag — verified here by checking both
-    // `HasExpectedVersion == true` AND the literal value `0`.
     [Fact]
     public async Task UpdateTitle_WithExplicitZeroIfMatch_ForwardsHasFlagAndZero()
     {
@@ -841,10 +803,6 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
-    // Regression: BE-002-03 — case-insensitive stage path segment.
-    // Previously `stages/development/owner` returned 400 because TryParseStage
-    // was a case-sensitive switch over PascalCase names. backend-eval-contract
-    // §3 requires the lowercase form to canonicalise to the same FeatureState.
     [Fact]
     public async Task UpdateStageOwner_LowercaseStageInPath_CanonicalisesAndForwardsAsDevelopment()
     {
