@@ -1,4 +1,4 @@
-namespace OneMoreTaskTracker.Api.Controllers;
+namespace OneMoreTaskTracker.Api.Controllers.Team;
 
 public sealed record UserStatusDto(
     int Active,

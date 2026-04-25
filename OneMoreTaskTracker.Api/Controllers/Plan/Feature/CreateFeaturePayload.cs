@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace OneMoreTaskTracker.Api.Controllers;
+namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature;
 
 public record CreateFeaturePayload(
     [Required][MaxLength(200)] string Title,

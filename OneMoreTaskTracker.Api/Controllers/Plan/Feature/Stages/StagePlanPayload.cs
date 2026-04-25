@@ -1,4 +1,4 @@
-namespace OneMoreTaskTracker.Api.Controllers;
+namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
 
 public record StagePlanPayload(
     string Stage,

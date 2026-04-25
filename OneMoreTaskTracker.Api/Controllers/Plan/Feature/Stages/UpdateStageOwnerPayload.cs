@@ -1,4 +1,4 @@
-namespace OneMoreTaskTracker.Api.Controllers;
+namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
 
 // Inline-edit payload for PATCH /api/plan/features/{id}/stages/{stage}/owner.
 // `null` clears the owner; otherwise the user id must be on the manager's

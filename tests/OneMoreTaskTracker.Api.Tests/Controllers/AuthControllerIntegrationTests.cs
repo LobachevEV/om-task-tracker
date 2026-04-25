@@ -7,6 +7,8 @@ using NSubstitute;
 using OneMoreTaskTracker.Api.Tests.Infra;
 using OneMoreTaskTracker.Proto.Users;
 using Xunit;
+using AuthenticateResponse = OneMoreTaskTracker.Api.Auth.AuthenticateResponse;
+using RegisterResponse = OneMoreTaskTracker.Api.Auth.RegisterResponse;
 
 namespace OneMoreTaskTracker.Api.Tests.Controllers;
 

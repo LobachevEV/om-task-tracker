@@ -10,7 +10,7 @@ using OneMoreTaskTracker.Proto.Tasks.ListTasksQuery;
 using OneMoreTaskTracker.Proto.Users;
 using CreateTaskDto = OneMoreTaskTracker.Proto.Tasks.CreateTaskCommand.TaskDto;
 
-namespace OneMoreTaskTracker.Api.Controllers;
+namespace OneMoreTaskTracker.Api.Controllers.Tasks;
 
 [ApiController]
 [Authorize]

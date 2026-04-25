@@ -1,4 +1,4 @@
-namespace OneMoreTaskTracker.Api.Controllers;
+namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
 
 // Performer is null when the stage is unassigned or the stored performer id is
 // no longer on the manager's roster (stale). The stale case still emits

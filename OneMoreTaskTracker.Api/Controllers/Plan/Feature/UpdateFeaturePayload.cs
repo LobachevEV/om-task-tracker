@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
 
-namespace OneMoreTaskTracker.Api.Controllers;
+namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature;
 
 public record UpdateFeaturePayload(
     [MaxLength(200)] string? Title,

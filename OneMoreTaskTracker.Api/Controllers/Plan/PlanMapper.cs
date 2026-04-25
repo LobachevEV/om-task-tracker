@@ -1,3 +1,5 @@
+using OneMoreTaskTracker.Api.Controllers.Plan.Feature;
+using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
 using OneMoreTaskTracker.Proto.Features;
 using OneMoreTaskTracker.Proto.Users;
 using CreateFeatureDto = OneMoreTaskTracker.Proto.Features.CreateFeatureCommand.FeatureDto;
@@ -11,7 +13,7 @@ using UpdateStageOwnerDto = OneMoreTaskTracker.Proto.Features.UpdateStageOwnerCo
 using UpdateStagePlannedStartDto = OneMoreTaskTracker.Proto.Features.UpdateStagePlannedStartCommand.FeatureDto;
 using UpdateStagePlannedEndDto = OneMoreTaskTracker.Proto.Features.UpdateStagePlannedEndCommand.FeatureDto;
 
-namespace OneMoreTaskTracker.Api.Controllers;
+namespace OneMoreTaskTracker.Api.Controllers.Plan;
 
 internal static class PlanMapper
 {

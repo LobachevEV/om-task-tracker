@@ -1,4 +1,6 @@
-namespace OneMoreTaskTracker.Api.Controllers;
+using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
+
+namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature;
 
 public record FeatureDetailResponse(
     FeatureSummaryResponse Feature,
