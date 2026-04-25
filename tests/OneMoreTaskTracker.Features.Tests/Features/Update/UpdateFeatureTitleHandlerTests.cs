@@ -142,10 +142,14 @@ public sealed class UpdateFeatureTitleHandlerTests
     }
 
     [Fact]
-    public async Task Update_WithStaleIfMatchVersion_ThrowsAlreadyExists()
+    public async Task Update_WithStaleIfMatchOfZero_ThrowsAlreadyExists()
     {
-        // Arrange: seed a feature then pretend the client still holds version 0
-        // after a concurrent bump.
+        // BE-002-04 regression: prior to adding `optional` to the proto field,
+        // `ExpectedVersion = 0` was indistinguishable from "header missing",
+        // so a client that legitimately read v=0 and waited until the row had
+        // been bumped to v=1 by another writer would silently overwrite it.
+        // With `optional int32 expected_version` the wire now carries
+        // explicit-presence, so an explicit `If-Match: 0` against v=1 must 409.
         var db = NewDb();
         var created = await new CreateFeatureHandler(db).Create(
             new CreateFeatureRequest { Title = "X", ManagerUserId = 1 },
@@ -154,37 +158,41 @@ public sealed class UpdateFeatureTitleHandlerTests
             new UpdateFeatureTitleRequest { Id = created.Id, Title = "First", CallerUserId = 1 },
             TestServerCallContext.Create());
 
-        // Act: second client sends an expected_version matching the pre-bump state.
         var act = () => Handler(db).Update(
             new UpdateFeatureTitleRequest
             {
                 Id = created.Id,
                 Title = "Second",
                 CallerUserId = 1,
-                ExpectedVersion = 0, // <-- stale; actual version is now 1
+                ExpectedVersion = 0, // stale; actual version is now 1
             },
             TestServerCallContext.Create());
 
-        // Assert: AlreadyExists maps to HTTP 409 via GrpcExceptionMiddleware.
-        // We pass a literal `0` sentinel here to bypass the "missing header"
-        // branch; Version starts at 1 after the first update.
-        // NB: `ExpectedVersion = 0` in proto3 == missing (default); use 99 instead.
-        // Correct approach: pass a clearly-stale non-zero value.
-        await Task.CompletedTask;
-        _ = act;
-
-        var act2 = () => Handler(db).Update(
-            new UpdateFeatureTitleRequest
-            {
-                Id = created.Id,
-                Title = "Second",
-                CallerUserId = 1,
-                ExpectedVersion = 99,
-            },
-            TestServerCallContext.Create());
-
-        var ex = await act2.Should().ThrowAsync<RpcException>();
+        var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.AlreadyExists);
+    }
+
+    [Fact]
+    public async Task Update_WithoutIfMatchHeader_SkipsConcurrencyCheck()
+    {
+        // Advisory / last-write-wins: when the client omits If-Match the
+        // proto field is unset (HasExpectedVersion == false), so the handler
+        // must NOT compare against the stored version.
+        var db = NewDb();
+        var created = await new CreateFeatureHandler(db).Create(
+            new CreateFeatureRequest { Title = "X", ManagerUserId = 1 },
+            TestServerCallContext.Create());
+        await Handler(db).Update(
+            new UpdateFeatureTitleRequest { Id = created.Id, Title = "First", CallerUserId = 1 },
+            TestServerCallContext.Create());
+
+        // Second update sends no ExpectedVersion at all; must succeed.
+        var dto = await Handler(db).Update(
+            new UpdateFeatureTitleRequest { Id = created.Id, Title = "Second", CallerUserId = 1 },
+            TestServerCallContext.Create());
+
+        dto.Title.Should().Be("Second");
+        dto.Version.Should().Be(2);
     }
 
     [Fact]

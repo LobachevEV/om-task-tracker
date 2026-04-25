@@ -258,13 +258,18 @@ public class PlanController(
         var callerUserId = User.GetUserId();
         var expectedVersion = ParseIfMatch(ifMatch);
 
-        var dto = await featureTitleUpdater.UpdateAsync(new UpdateFeatureTitleRequest
+        var request = new UpdateFeatureTitleRequest
         {
             Id = id,
             Title = body.Title,
             CallerUserId = callerUserId,
-            ExpectedVersion = expectedVersion,
-        }, cancellationToken: ct);
+        };
+        // Assigning a proto3 `optional` field also flips the Has* flag; absent
+        // header → leave unset → handler runs in advisory / last-write-wins mode.
+        if (expectedVersion.HasValue)
+            request.ExpectedVersion = expectedVersion.Value;
+
+        var dto = await featureTitleUpdater.UpdateAsync(request, cancellationToken: ct);
 
         return Ok(PlanMapper.MapSummary(dto, EmptyTasks, logger));
     }
@@ -283,14 +288,17 @@ public class PlanController(
         var callerUserId = User.GetUserId();
         var expectedVersion = ParseIfMatch(ifMatch);
 
-        var dto = await featureDescriptionUpdater.UpdateAsync(new UpdateFeatureDescriptionRequest
+        var request = new UpdateFeatureDescriptionRequest
         {
             Id = id,
             // Wire convention: "" == null (matches feature.Description nullable).
             Description = body.Description ?? string.Empty,
             CallerUserId = callerUserId,
-            ExpectedVersion = expectedVersion,
-        }, cancellationToken: ct);
+        };
+        if (expectedVersion.HasValue)
+            request.ExpectedVersion = expectedVersion.Value;
+
+        var dto = await featureDescriptionUpdater.UpdateAsync(request, cancellationToken: ct);
 
         return Ok(PlanMapper.MapSummary(dto, EmptyTasks, logger));
     }
@@ -328,15 +336,18 @@ public class PlanController(
 
         var expectedStageVersion = ParseIfMatch(ifMatch);
 
-        var dto = await stageOwnerUpdater.UpdateAsync(new UpdateStageOwnerRequest
+        var request = new UpdateStageOwnerRequest
         {
             FeatureId = id,
             Stage = parsedStage,
             // proto3 default 0 on the wire = unassigned.
             StageOwnerUserId = body.StageOwnerUserId ?? 0,
             CallerUserId = callerUserId,
-            ExpectedStageVersion = expectedStageVersion,
-        }, cancellationToken: ct);
+        };
+        if (expectedStageVersion.HasValue)
+            request.ExpectedStageVersion = expectedStageVersion.Value;
+
+        var dto = await stageOwnerUpdater.UpdateAsync(request, cancellationToken: ct);
 
         return Ok(PlanMapper.MapSummary(dto, EmptyTasks, logger));
     }
@@ -353,17 +364,23 @@ public class PlanController(
         if (!PlanMapper.TryParseStage(stage, out var parsedStage))
             return BadRequest(new { error = "Invalid request data" });
 
+        if (PlanMapper.ValidateOptionalReleaseDate(body.PlannedStart) is { } dateError)
+            return BadRequest(new { error = dateError });
+
         var callerUserId = User.GetUserId();
         var expectedStageVersion = ParseIfMatch(ifMatch);
 
-        var dto = await stagePlannedStartUpdater.UpdateAsync(new UpdateStagePlannedStartRequest
+        var request = new UpdateStagePlannedStartRequest
         {
             FeatureId = id,
             Stage = parsedStage,
             PlannedStart = body.PlannedStart ?? string.Empty,
             CallerUserId = callerUserId,
-            ExpectedStageVersion = expectedStageVersion,
-        }, cancellationToken: ct);
+        };
+        if (expectedStageVersion.HasValue)
+            request.ExpectedStageVersion = expectedStageVersion.Value;
+
+        var dto = await stagePlannedStartUpdater.UpdateAsync(request, cancellationToken: ct);
 
         return Ok(PlanMapper.MapSummary(dto, EmptyTasks, logger));
     }
@@ -380,17 +397,23 @@ public class PlanController(
         if (!PlanMapper.TryParseStage(stage, out var parsedStage))
             return BadRequest(new { error = "Invalid request data" });
 
+        if (PlanMapper.ValidateOptionalReleaseDate(body.PlannedEnd) is { } dateError)
+            return BadRequest(new { error = dateError });
+
         var callerUserId = User.GetUserId();
         var expectedStageVersion = ParseIfMatch(ifMatch);
 
-        var dto = await stagePlannedEndUpdater.UpdateAsync(new UpdateStagePlannedEndRequest
+        var request = new UpdateStagePlannedEndRequest
         {
             FeatureId = id,
             Stage = parsedStage,
             PlannedEnd = body.PlannedEnd ?? string.Empty,
             CallerUserId = callerUserId,
-            ExpectedStageVersion = expectedStageVersion,
-        }, cancellationToken: ct);
+        };
+        if (expectedStageVersion.HasValue)
+            request.ExpectedStageVersion = expectedStageVersion.Value;
+
+        var dto = await stagePlannedEndUpdater.UpdateAsync(request, cancellationToken: ct);
 
         return Ok(PlanMapper.MapSummary(dto, EmptyTasks, logger));
     }
@@ -448,13 +471,15 @@ public class PlanController(
     private static readonly IReadOnlyDictionary<int, List<int>> EmptyTasks =
         new Dictionary<int, List<int>>();
 
-    // If-Match header parser for the inline-edit endpoints. Iter 1 treats the
-    // header as optional — missing or unparseable values pass 0 sentinel to
-    // the Features service, which falls back to last-write-wins and logs.
-    private int ParseIfMatch(string? ifMatch)
+    // If-Match header parser for the inline-edit endpoints. Returns null when
+    // the header is missing or unparseable (advisory / last-write-wins). When
+    // present and parseable it returns the explicit version, INCLUDING 0 — so
+    // a freshly-created feature at v=0 can still send `If-Match: 0` and have
+    // it round-trip through the proto-`optional` wire to the handler.
+    private int? ParseIfMatch(string? ifMatch)
     {
         if (string.IsNullOrWhiteSpace(ifMatch))
-            return 0;
+            return null;
 
         // Strip optional surrounding quotes per the RFC 7232 weak/strong ETag
         // convention; clients that send `If-Match: "7"` and `If-Match: 7`
@@ -464,7 +489,7 @@ public class PlanController(
             return parsed;
 
         logger.LogWarning("Could not parse If-Match header value '{IfMatch}'; proceeding in advisory mode", ifMatch);
-        return 0;
+        return null;
     }
 
     private async Task<IEnumerable<int>> GetTeamMemberIds(int userId, CancellationToken ct)

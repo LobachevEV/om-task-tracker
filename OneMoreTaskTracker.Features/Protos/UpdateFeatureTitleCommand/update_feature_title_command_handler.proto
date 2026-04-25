@@ -20,10 +20,12 @@ message UpdateFeatureTitleRequest {
   // of what the gateway's [Authorize] enforces. Double-defense per
   // ~/.claude/rules/microservices/security.md.
   int32  caller_user_id   = 3;
-  // Client's If-Match version (optional in iter 1; 0 sentinel = "missing
-  // header, advisory mode"). When > 0 and the stored Feature.Version differs,
-  // the handler throws RpcException(AlreadyExists) → HTTP 409.
-  int32  expected_version = 4;
+  // Client's If-Match version. `optional` so the wire can distinguish
+  // "no header sent" (advisory mode) from `If-Match: 0` (legitimate v=0
+  // freshly-created feature). When present and the stored Feature.Version
+  // differs, the handler throws RpcException(AlreadyExists) → HTTP 409.
+  // When absent: advisory / last-write-wins.
+  optional int32 expected_version = 4;
 }
 
 // Duplicated per-command so each proto file is independently routable by

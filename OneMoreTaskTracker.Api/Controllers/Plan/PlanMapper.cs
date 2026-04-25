@@ -76,6 +76,30 @@ internal static class PlanMapper
         return false;
     }
 
+    // Pre-validation for the inline-edit date endpoints. Mirrors
+    // FeatureValidation.ParseOptionalDate's year guard but at the gateway,
+    // so the friendly copy "Use a real release date" reaches the FE
+    // without going through GrpcExceptionMiddleware (which generalises
+    // InvalidArgument to "Invalid request data" per microservices/security
+    // error-surface rules). Empty/null input is allowed and means "clear".
+    // Returns null on success; otherwise the user-facing error string.
+    internal const int MinReleaseYear = 2000;
+    internal const int MaxReleaseYear = 2100;
+
+    internal static string? ValidateOptionalReleaseDate(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+            return null;
+
+        if (!DateOnly.TryParseExact(raw, "yyyy-MM-dd", out var date))
+            return "Date must be YYYY-MM-DD";
+
+        if (date.Year < MinReleaseYear || date.Year > MaxReleaseYear)
+            return "Use a real release date";
+
+        return null;
+    }
+
     internal static MiniTeamMemberResponse BuildMiniTeamMember(
         int userId,
         IReadOnlyDictionary<int, TeamRosterMember> roster)

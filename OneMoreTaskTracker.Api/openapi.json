@@ -366,7 +366,7 @@
             "description": "Structured conflict context. Absent when the upstream did not supply one.",
             "required": ["kind"],
             "properties": {
-              "kind": { "type": "string", "enum": ["version", "overlap", "order", "rangeInvalid"] },
+              "kind": { "type": "string", "enum": ["version", "overlap"] },
               "currentVersion": { "type": "integer", "format": "int32", "description": "Server's current version (kind='version')." },
               "with": { "$ref": "#/components/schemas/FeatureState" }
             }

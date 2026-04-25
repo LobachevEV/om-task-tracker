@@ -38,7 +38,7 @@ public sealed class UpdateFeatureDescriptionHandler(
         if (request.CallerUserId <= 0 || feature.ManagerUserId != request.CallerUserId)
             throw new RpcException(new Status(StatusCode.PermissionDenied, "Not the feature owner"));
 
-        if (request.ExpectedVersion > 0 && request.ExpectedVersion != feature.Version)
+        if (request.HasExpectedVersion && request.ExpectedVersion != feature.Version)
             throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));
 
         var versionBefore = feature.Version;

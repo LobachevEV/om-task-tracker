@@ -658,6 +658,138 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
+    // BE-003-01 regression: dates outside the 2000-2100 release window are
+    // rejected at the gateway with the friendly "Use a real release date" copy,
+    // NOT generalised to "Invalid request data" by GrpcExceptionMiddleware
+    // (which would normally swallow upstream InvalidArgument detail per
+    // microservices/security.md error-surface rules). Mirrors the existing
+    // "Pick a teammate from the list" controller-side pre-check pattern.
+    [Fact]
+    public async Task UpdateStagePlannedStart_PreYear2000Date_Returns400WithFriendlyCopy()
+    {
+        var client = ClientWithToken(ManagerToken());
+        _factory.MockStagePlannedStartUpdater.ClearReceivedCalls();
+
+        var response = await client.PatchAsync("/api/plan/features/1/stages/Development/planned-start",
+            JsonBody(new { plannedStart = "1999-12-31" }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().Contain("Use a real release date");
+
+        _factory.MockStagePlannedStartUpdater.DidNotReceive().UpdateAsync(
+            Arg.Any<UpdateStagePlannedStartRequest>(),
+            Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task UpdateStagePlannedEnd_PostYear2100Date_Returns400WithFriendlyCopy()
+    {
+        var client = ClientWithToken(ManagerToken());
+        _factory.MockStagePlannedEndUpdater.ClearReceivedCalls();
+
+        var response = await client.PatchAsync("/api/plan/features/1/stages/Development/planned-end",
+            JsonBody(new { plannedEnd = "2200-01-01" }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().Contain("Use a real release date");
+
+        _factory.MockStagePlannedEndUpdater.DidNotReceive().UpdateAsync(
+            Arg.Any<UpdateStagePlannedEndRequest>(),
+            Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>());
+    }
+
+    // BE-002-04 regression: prior to making `expected_version` proto3-`optional`,
+    // the wire could not distinguish an explicit `If-Match: 0` (a freshly-created
+    // feature at v=0) from "no header sent". The controller now forwards explicit
+    // presence via the proto3 Has* flag — verified here by checking both
+    // `HasExpectedVersion == true` AND the literal value `0`.
+    [Fact]
+    public async Task UpdateTitle_WithExplicitZeroIfMatch_ForwardsHasFlagAndZero()
+    {
+        var client = ClientWithToken(ManagerToken());
+        UpdateFeatureTitleRequest? captured = null;
+        _factory.MockFeatureTitleUpdater
+            .UpdateAsync(Arg.Do<UpdateFeatureTitleRequest>(r => captured = r),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(TitleDto()));
+
+        var request = new HttpRequestMessage(HttpMethod.Patch, "/api/plan/features/1/title")
+        {
+            Content = JsonBody(new { title = "Renamed" })
+        };
+        request.Headers.TryAddWithoutValidation("If-Match", "0");
+
+        var response = await client.SendAsync(request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        captured!.HasExpectedVersion.Should().BeTrue();
+        captured.ExpectedVersion.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task UpdateTitle_WithoutIfMatch_DoesNotSetHasExpectedVersion()
+    {
+        var client = ClientWithToken(ManagerToken());
+        UpdateFeatureTitleRequest? captured = null;
+        _factory.MockFeatureTitleUpdater
+            .UpdateAsync(Arg.Do<UpdateFeatureTitleRequest>(r => captured = r),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(TitleDto()));
+
+        var response = await client.PatchAsync("/api/plan/features/1/title",
+            JsonBody(new { title = "Renamed" }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        captured!.HasExpectedVersion.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task UpdateStageOwner_WithExplicitZeroIfMatch_ForwardsHasFlagAndZero()
+    {
+        var client = ClientWithToken(ManagerToken(userId: 1));
+        StubRoster(1, 42);
+        UpdateStageOwnerRequest? captured = null;
+        _factory.MockStageOwnerUpdater
+            .UpdateAsync(Arg.Do<UpdateStageOwnerRequest>(r => captured = r),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new UpdateStageOwnerDto
+            {
+                Id = 1,
+                Title = "X",
+                Description = string.Empty,
+                State = FeatureState.Development,
+                PlannedStart = string.Empty,
+                PlannedEnd = string.Empty,
+                LeadUserId = 1,
+                ManagerUserId = 1,
+                CreatedAt = DateTime.UtcNow.ToString("O"),
+                UpdatedAt = DateTime.UtcNow.ToString("O"),
+                Version = 2,
+                StagePlans =
+                {
+                    ProtoPlan(FeatureState.CsApproving),
+                    new FeatureStagePlan { Stage = FeatureState.Development, PlannedStart = "", PlannedEnd = "", PerformerUserId = 42, Version = 1 },
+                    ProtoPlan(FeatureState.Testing),
+                    ProtoPlan(FeatureState.EthalonTesting),
+                    ProtoPlan(FeatureState.LiveRelease),
+                }
+            }));
+
+        var request = new HttpRequestMessage(HttpMethod.Patch, "/api/plan/features/1/stages/Development/owner")
+        {
+            Content = JsonBody(new { stageOwnerUserId = 42 })
+        };
+        request.Headers.TryAddWithoutValidation("If-Match", "0");
+
+        var response = await client.SendAsync(request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        captured!.HasExpectedStageVersion.Should().BeTrue();
+        captured.ExpectedStageVersion.Should().Be(0);
+    }
+
     // -------- Stage Planned End --------
 
     [Fact]

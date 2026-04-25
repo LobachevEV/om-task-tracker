@@ -36,7 +36,7 @@ public sealed class UpdateStageOwnerHandler(
         var plan = feature.StagePlans.FirstOrDefault(sp => sp.Stage == stageOrdinal)
                    ?? throw new RpcException(new Status(StatusCode.NotFound, $"stage {request.Stage} not found"));
 
-        if (request.ExpectedStageVersion > 0 && request.ExpectedStageVersion != plan.Version)
+        if (request.HasExpectedStageVersion && request.ExpectedStageVersion != plan.Version)
             throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(plan.Version)));
 
         // proto3 scalar default 0 = unassigned; negatives coerced defensively

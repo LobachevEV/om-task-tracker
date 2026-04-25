@@ -45,7 +45,7 @@ public sealed class UpdateFeatureTitleHandler(
         // Advisory optimistic-concurrency check for iter 1: only reject when the
         // client sent an If-Match and it doesn't match. Missing header (0) falls
         // through to last-write-wins (api-contract.md § "Optimistic Concurrency").
-        if (request.ExpectedVersion > 0 && request.ExpectedVersion != feature.Version)
+        if (request.HasExpectedVersion && request.ExpectedVersion != feature.Version)
             throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));
 
         var before = feature.Title;
