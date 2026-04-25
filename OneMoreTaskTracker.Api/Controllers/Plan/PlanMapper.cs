@@ -41,19 +41,39 @@ internal static class PlanMapper
         _                => FeatureState.CsApproving
     };
 
-    // Strict parser — returns false on unknown/blank names so the caller can
-    // surface a 400 instead of silently falling back.
+    // Lenient parser — accepts any case (e.g. `development`, `DEVELOPMENT`,
+    // `Development`) and canonicalises to the proto enum value.
+    // backend-eval-contract.md §3 requires `/stages/development/owner` to
+    // resolve identically to `/stages/Development/owner`. Returns false only
+    // when the input does not match any FeatureState name.
     internal static bool TryParseStage(string raw, out FeatureState stage)
     {
-        switch (raw)
+        if (string.IsNullOrWhiteSpace(raw))
         {
-            case "CsApproving":    stage = FeatureState.CsApproving;    return true;
-            case "Development":    stage = FeatureState.Development;    return true;
-            case "Testing":        stage = FeatureState.Testing;        return true;
-            case "EthalonTesting": stage = FeatureState.EthalonTesting; return true;
-            case "LiveRelease":    stage = FeatureState.LiveRelease;    return true;
-            default: stage = default; return false;
+            stage = default;
+            return false;
         }
+
+        // Reject pure-numeric inputs (e.g. "3"); Enum.TryParse would otherwise
+        // accept them via the underlying-int parse path. The wire contract
+        // names stages by canonical PascalCase only.
+        if (char.IsDigit(raw[0]) || raw[0] == '-' || raw[0] == '+')
+        {
+            stage = default;
+            return false;
+        }
+
+        // ignoreCase=true accepts both PascalCase and lowercase wire values;
+        // Enum.IsDefined guards against numeric values that bypass the rules.
+        if (Enum.TryParse<FeatureState>(raw, ignoreCase: true, out var parsed)
+            && Enum.IsDefined(typeof(FeatureState), parsed))
+        {
+            stage = parsed;
+            return true;
+        }
+
+        stage = default;
+        return false;
     }
 
     internal static MiniTeamMemberResponse BuildMiniTeamMember(

@@ -40,6 +40,16 @@ public sealed class UpdateStagePlannedEndHandler(
 
         FeatureValidation.ValidateDateOrder(plan.PlannedStart, parsed);
 
+        // Cross-stage chronological-order check (mirror of the start handler);
+        // see api-contract.md §4 / §5. Build a snapshot with the tentative new
+        // end for the mutated stage and walk neighbour pairs.
+        var snapshots = feature.StagePlans
+            .Select(sp => sp.Stage == stageOrdinal
+                ? new StagePlanSnapshot(sp.Stage, sp.PlannedStart, parsed)
+                : new StagePlanSnapshot(sp.Stage, sp.PlannedStart, sp.PlannedEnd))
+            .ToList();
+        FeatureValidation.ValidateStageOrder(snapshots, stageOrdinal);
+
         var endBefore = plan.PlannedEnd;
         var stageVersionBefore = plan.Version;
         var featureVersionBefore = feature.Version;

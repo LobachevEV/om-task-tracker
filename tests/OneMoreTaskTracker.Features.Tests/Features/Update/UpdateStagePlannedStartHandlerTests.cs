@@ -180,4 +180,94 @@ public sealed class UpdateStagePlannedStartHandlerTests
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.PermissionDenied);
     }
+
+    // Regression: BE-002-02 — year lower-bound guard. Previously only the upper
+    // bound (2100) was enforced; 1899-01-01 silently round-tripped at 200.
+    [Fact]
+    public async Task Update_YearBelow2000_ThrowsInvalidArgumentWithRealReleaseDateMessage()
+    {
+        var db = NewDb();
+        var created = await new CreateFeatureHandler(db).Create(
+            new CreateFeatureRequest { Title = "X", ManagerUserId = 1 },
+            TestServerCallContext.Create());
+
+        var act = () => Handler(db).Update(
+            new UpdateStagePlannedStartRequest
+            {
+                FeatureId = created.Id,
+                Stage = ProtoFeatureState.Development,
+                PlannedStart = "1899-01-01",
+                CallerUserId = 1,
+            },
+            TestServerCallContext.Create());
+
+        var ex = await act.Should().ThrowAsync<RpcException>();
+        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
+        ex.Which.Status.Detail.Should().Be("Use a real release date");
+    }
+
+    [Fact]
+    public async Task Update_YearAbove2100_ThrowsInvalidArgumentWithRealReleaseDateMessage()
+    {
+        var db = NewDb();
+        var created = await new CreateFeatureHandler(db).Create(
+            new CreateFeatureRequest { Title = "X", ManagerUserId = 1 },
+            TestServerCallContext.Create());
+
+        var act = () => Handler(db).Update(
+            new UpdateStagePlannedStartRequest
+            {
+                FeatureId = created.Id,
+                Stage = ProtoFeatureState.Development,
+                PlannedStart = "2150-01-01",
+                CallerUserId = 1,
+            },
+            TestServerCallContext.Create());
+
+        var ex = await act.Should().ThrowAsync<RpcException>();
+        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
+        ex.Which.Status.Detail.Should().Be("Use a real release date");
+    }
+
+    // Regression: BE-002-01 — cross-stage chronological-order validator.
+    // Previously only same-stage start>end was checked; Testing.start could be
+    // < Development.end and the handler returned 200.
+    [Fact]
+    public async Task Update_TestingStartBeforeDevelopmentEnd_ThrowsFailedPreconditionWithOverlapEnvelope()
+    {
+        var db = NewDb();
+        var created = await new CreateFeatureHandler(db).Create(
+            new CreateFeatureRequest { Title = "X", ManagerUserId = 1 },
+            TestServerCallContext.Create());
+
+        // Seed Development.PlannedEnd = 2026-05-15
+        var endHandler = new UpdateStagePlannedEndHandler(
+            db, NullLogger<UpdateStagePlannedEndHandler>.Instance);
+        await endHandler.Update(
+            new OneMoreTaskTracker.Proto.Features.UpdateStagePlannedEndCommand.UpdateStagePlannedEndRequest
+            {
+                FeatureId = created.Id,
+                Stage = ProtoFeatureState.Development,
+                PlannedEnd = "2026-05-15",
+                CallerUserId = 1,
+            },
+            TestServerCallContext.Create());
+
+        // Mutate Testing.PlannedStart = 2026-05-10 (before Development.PlannedEnd)
+        var act = () => Handler(db).Update(
+            new UpdateStagePlannedStartRequest
+            {
+                FeatureId = created.Id,
+                Stage = ProtoFeatureState.Testing,
+                PlannedStart = "2026-05-10",
+                CallerUserId = 1,
+            },
+            TestServerCallContext.Create());
+
+        var ex = await act.Should().ThrowAsync<RpcException>();
+        ex.Which.StatusCode.Should().Be(StatusCode.FailedPrecondition);
+        ex.Which.Status.Detail.Should().StartWith("Stage order violation|conflict=");
+        ex.Which.Status.Detail.Should().Contain("\"kind\":\"overlap\"");
+        ex.Which.Status.Detail.Should().Contain("\"with\":\"Development\"");
+    }
 }

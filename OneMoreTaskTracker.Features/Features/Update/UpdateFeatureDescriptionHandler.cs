@@ -58,10 +58,11 @@ public sealed class UpdateFeatureDescriptionHandler(
         }
 
         // PII-safe log: length only, never the raw text (see backend-plan.md
-        // § Observability).
+        // § Observability and backend-eval-contract.md §73 description_length).
+        var descriptionLength = feature.Description?.Length ?? 0;
         logger.LogInformation(
-            "Feature inline edit applied: feature_id={FeatureId} field=description description_len_before={Before} description_len_after={After} actor_user_id={ActorUserId} version_before={V0} version_after={V1}",
-            feature.Id, lenBefore, feature.Description?.Length ?? 0, request.CallerUserId, versionBefore, feature.Version);
+            "Feature inline edit applied: feature_id={FeatureId} field=description description_length={DescriptionLength} description_len_before={Before} description_len_after={After} actor_user_id={ActorUserId} version_before={V0} version_after={V1}",
+            feature.Id, descriptionLength, lenBefore, descriptionLength, request.CallerUserId, versionBefore, feature.Version);
 
         var dto = feature.Adapt<FeatureDto>();
         dto.StagePlans.Add(FeatureMappingConfig.BuildProtoStagePlans(feature));

@@ -43,6 +43,17 @@ public sealed class UpdateStagePlannedStartHandler(
         // Per-row invariant: start <= end when both present.
         FeatureValidation.ValidateDateOrder(parsed, plan.PlannedEnd);
 
+        // Cross-stage chronological-order check: build a snapshot with the
+        // tentative new value for the mutated stage, then walk neighbour pairs
+        // (api-contract.md §4 "Cross-stage chronological order"). Failure
+        // throws FailedPrecondition → 422 with `{ conflict: { kind, with } }`.
+        var snapshots = feature.StagePlans
+            .Select(sp => sp.Stage == stageOrdinal
+                ? new StagePlanSnapshot(sp.Stage, parsed, sp.PlannedEnd)
+                : new StagePlanSnapshot(sp.Stage, sp.PlannedStart, sp.PlannedEnd))
+            .ToList();
+        FeatureValidation.ValidateStageOrder(snapshots, stageOrdinal);
+
         var startBefore = plan.PlannedStart;
         var stageVersionBefore = plan.Version;
         var featureVersionBefore = feature.Version;

@@ -122,4 +122,69 @@ public sealed class UpdateStagePlannedEndHandlerTests
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.PermissionDenied);
     }
+
+    // Regression: BE-002-02 — year guard on planned-end mirror.
+    [Fact]
+    public async Task Update_YearBelow2000_ThrowsInvalidArgumentWithRealReleaseDateMessage()
+    {
+        var db = NewDb();
+        var created = await new CreateFeatureHandler(db).Create(
+            new CreateFeatureRequest { Title = "X", ManagerUserId = 1 },
+            TestServerCallContext.Create());
+
+        var act = () => Handler(db).Update(
+            new UpdateStagePlannedEndRequest
+            {
+                FeatureId = created.Id,
+                Stage = ProtoFeatureState.Development,
+                PlannedEnd = "1999-12-31",
+                CallerUserId = 1,
+            },
+            TestServerCallContext.Create());
+
+        var ex = await act.Should().ThrowAsync<RpcException>();
+        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
+        ex.Which.Status.Detail.Should().Be("Use a real release date");
+    }
+
+    // Regression: BE-002-01 — cross-stage chronological validator on the
+    // planned-end mirror. Mutating Development.End past Testing.Start trips
+    // the validator; surface 422 with `conflict.kind="overlap"`.
+    [Fact]
+    public async Task Update_DevelopmentEndAfterTestingStart_ThrowsFailedPreconditionWithOverlapEnvelope()
+    {
+        var db = NewDb();
+        var created = await new CreateFeatureHandler(db).Create(
+            new CreateFeatureRequest { Title = "X", ManagerUserId = 1 },
+            TestServerCallContext.Create());
+
+        // Seed Testing.PlannedStart = 2026-05-20 via the start handler.
+        var startHandler = new UpdateStagePlannedStartHandler(
+            db, NullLogger<UpdateStagePlannedStartHandler>.Instance);
+        await startHandler.Update(
+            new OneMoreTaskTracker.Proto.Features.UpdateStagePlannedStartCommand.UpdateStagePlannedStartRequest
+            {
+                FeatureId = created.Id,
+                Stage = ProtoFeatureState.Testing,
+                PlannedStart = "2026-05-20",
+                CallerUserId = 1,
+            },
+            TestServerCallContext.Create());
+
+        // Now attempt Development.PlannedEnd = 2026-05-25 (past Testing.start).
+        var act = () => Handler(db).Update(
+            new UpdateStagePlannedEndRequest
+            {
+                FeatureId = created.Id,
+                Stage = ProtoFeatureState.Development,
+                PlannedEnd = "2026-05-25",
+                CallerUserId = 1,
+            },
+            TestServerCallContext.Create());
+
+        var ex = await act.Should().ThrowAsync<RpcException>();
+        ex.Which.StatusCode.Should().Be(StatusCode.FailedPrecondition);
+        ex.Which.Status.Detail.Should().StartWith("Stage order violation|conflict=");
+        ex.Which.Status.Detail.Should().Contain("\"with\":\"Testing\"");
+    }
 }

@@ -19,4 +19,15 @@ internal static class ConflictDetail
             kind = "version",
             currentVersion
         })}";
+
+    // Cross-stage chronological-order violation. The neighbour stage name
+    // (canonical PascalCase) is what the FE renders inline as
+    // "Overlaps with {with}" — see api-contract.md § "Error Envelope" and the
+    // 422 row in backend-eval-contract.md §4.
+    public static string StageOrderOverlap(string neighbourStage) =>
+        $"Stage order violation{Marker}{JsonSerializer.Serialize(new
+        {
+            kind = "overlap",
+            with = neighbourStage
+        })}";
 }

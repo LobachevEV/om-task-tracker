@@ -708,4 +708,85 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
 
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
+
+    // Regression: BE-002-03 — case-insensitive stage path segment.
+    // Previously `stages/development/owner` returned 400 because TryParseStage
+    // was a case-sensitive switch over PascalCase names. backend-eval-contract
+    // §3 requires the lowercase form to canonicalise to the same FeatureState.
+    [Fact]
+    public async Task UpdateStageOwner_LowercaseStageInPath_CanonicalisesAndForwardsAsDevelopment()
+    {
+        var client = ClientWithToken(ManagerToken(userId: 1));
+        StubRoster(1, 42);
+        UpdateStageOwnerRequest? captured = null;
+        _factory.MockStageOwnerUpdater
+            .UpdateAsync(Arg.Do<UpdateStageOwnerRequest>(r => captured = r),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new UpdateStageOwnerDto
+            {
+                Id = 1,
+                Title = "X",
+                Description = string.Empty,
+                State = FeatureState.Development,
+                PlannedStart = string.Empty,
+                PlannedEnd = string.Empty,
+                LeadUserId = 1,
+                ManagerUserId = 1,
+                CreatedAt = DateTime.UtcNow.ToString("O"),
+                UpdatedAt = DateTime.UtcNow.ToString("O"),
+                Version = 2,
+                StagePlans =
+                {
+                    ProtoPlan(FeatureState.CsApproving),
+                    new FeatureStagePlan { Stage = FeatureState.Development, PlannedStart = "", PlannedEnd = "", PerformerUserId = 42, Version = 1 },
+                    ProtoPlan(FeatureState.Testing),
+                    ProtoPlan(FeatureState.EthalonTesting),
+                    ProtoPlan(FeatureState.LiveRelease),
+                }
+            }));
+
+        var response = await client.PatchAsync("/api/plan/features/1/stages/development/owner",
+            JsonBody(new { stageOwnerUserId = 42 }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        captured!.Stage.Should().Be(FeatureState.Development);
+    }
+
+    [Fact]
+    public async Task UpdateStagePlannedStart_UppercaseStageInPath_CanonicalisesAndForwardsAsTesting()
+    {
+        var client = ClientWithToken(ManagerToken(userId: 1));
+        UpdateStagePlannedStartRequest? captured = null;
+        _factory.MockStagePlannedStartUpdater
+            .UpdateAsync(Arg.Do<UpdateStagePlannedStartRequest>(r => captured = r),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new UpdateStagePlannedStartDto
+            {
+                Id = 1,
+                Title = "X",
+                Description = string.Empty,
+                State = FeatureState.Testing,
+                PlannedStart = "2026-06-01",
+                PlannedEnd = string.Empty,
+                LeadUserId = 1,
+                ManagerUserId = 1,
+                CreatedAt = DateTime.UtcNow.ToString("O"),
+                UpdatedAt = DateTime.UtcNow.ToString("O"),
+                Version = 2,
+                StagePlans =
+                {
+                    ProtoPlan(FeatureState.CsApproving),
+                    ProtoPlan(FeatureState.Development),
+                    new FeatureStagePlan { Stage = FeatureState.Testing, PlannedStart = "2026-06-01", PlannedEnd = "", PerformerUserId = 0, Version = 1 },
+                    ProtoPlan(FeatureState.EthalonTesting),
+                    ProtoPlan(FeatureState.LiveRelease),
+                }
+            }));
+
+        var response = await client.PatchAsync("/api/plan/features/1/stages/TESTING/planned-start",
+            JsonBody(new { plannedStart = "2026-06-01" }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        captured!.Stage.Should().Be(FeatureState.Testing);
+    }
 }

@@ -143,6 +143,7 @@
           "403": { "$ref": "#/components/responses/Forbidden" },
           "404": { "$ref": "#/components/responses/NotFound" },
           "409": { "$ref": "#/components/responses/Conflict" },
+          "422": { "$ref": "#/components/responses/UnprocessableEntity" },
           "502": { "$ref": "#/components/responses/BadGateway" }
         }
       }
@@ -172,6 +173,7 @@
           "403": { "$ref": "#/components/responses/Forbidden" },
           "404": { "$ref": "#/components/responses/NotFound" },
           "409": { "$ref": "#/components/responses/Conflict" },
+          "422": { "$ref": "#/components/responses/UnprocessableEntity" },
           "502": { "$ref": "#/components/responses/BadGateway" }
         }
       }
@@ -184,7 +186,7 @@
       ],
       "patch": {
         "summary": "Reassign a single stage's owner (inline edit — Manager only).",
-        "description": "`stageOwnerUserId` must be null (clear) or a positive integer on the feature manager's roster. Role-prefixed naming per microservices/contracts.md.",
+        "description": "`stageOwnerUserId` must be null (clear) or a positive integer on the feature manager's roster. Role-prefixed naming per microservices/contracts.md. Stage path segment is case-insensitive (`development`, `Development`, `DEVELOPMENT` all canonicalise to the same FeatureState).",
         "tags": ["plan"],
         "requestBody": {
           "required": true,
@@ -202,6 +204,7 @@
           "403": { "$ref": "#/components/responses/Forbidden" },
           "404": { "$ref": "#/components/responses/NotFound" },
           "409": { "$ref": "#/components/responses/Conflict" },
+          "422": { "$ref": "#/components/responses/UnprocessableEntity" },
           "502": { "$ref": "#/components/responses/BadGateway" }
         }
       }
@@ -214,7 +217,7 @@
       ],
       "patch": {
         "summary": "Update a single stage's planned start date (inline edit — Manager only).",
-        "description": "ISO yyyy-MM-dd string or null to clear. Must be on or before the stage's existing plannedEnd when both are set. Derived feature.plannedStart recomputed server-side.",
+        "description": "ISO yyyy-MM-dd string or null to clear. Year must be 2000..2100 inclusive (`Use a real release date` otherwise). Must be on or before the stage's existing plannedEnd when both are set. Cross-stage chronological order is enforced — violation returns 422 with `conflict.kind = 'overlap'` and `conflict.with` set to the neighbour stage. Stage path segment is case-insensitive. Derived feature.plannedStart recomputed server-side.",
         "tags": ["plan"],
         "requestBody": {
           "required": true,
@@ -245,7 +248,7 @@
       ],
       "patch": {
         "summary": "Update a single stage's planned end date (inline edit — Manager only).",
-        "description": "Symmetric to planned-start. Must be on or after the stage's existing plannedStart.",
+        "description": "Symmetric to planned-start. Year must be 2000..2100 inclusive. Must be on or after the stage's existing plannedStart. Cross-stage chronological order is enforced — violation returns 422 with `conflict.kind = 'overlap'` and `conflict.with` set to the neighbour stage. Stage path segment is case-insensitive.",
         "tags": ["plan"],
         "requestBody": {
           "required": true,
@@ -334,8 +337,8 @@
         "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
       },
       "UnprocessableEntity": {
-        "description": "Validation error.",
-        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+        "description": "Validation error. On cross-stage chronological-order violations the body extends to `{ error, conflict: { kind: 'overlap' | 'order' | 'rangeInvalid', with: <stage> } }` so the FE can highlight the offending neighbour stage.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ConflictError" } } }
       },
       "BadGateway": {
         "description": "Upstream service temporarily unavailable.",
