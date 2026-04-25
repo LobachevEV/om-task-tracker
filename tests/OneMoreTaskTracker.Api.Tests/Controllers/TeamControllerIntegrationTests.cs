@@ -9,7 +9,6 @@ using OneMoreTaskTracker.Api.Tests.Infra;
 using OneMoreTaskTracker.Proto.Tasks.TaskAggregateQuery;
 using OneMoreTaskTracker.Proto.Users;
 using Xunit;
-using RegisterResponse = OneMoreTaskTracker.Api.Auth.RegisterResponse;
 
 namespace OneMoreTaskTracker.Api.Tests.Controllers;
 

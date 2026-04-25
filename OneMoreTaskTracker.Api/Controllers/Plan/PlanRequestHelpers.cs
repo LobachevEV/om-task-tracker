@@ -11,6 +11,42 @@ internal static class PlanRequestHelpers
     internal static readonly IReadOnlyDictionary<int, List<int>> EmptyTasks =
         new Dictionary<int, List<int>>();
 
+    internal static bool TryParseIsoDate(string? raw, out DateOnly value)
+    {
+        value = default;
+        if (string.IsNullOrWhiteSpace(raw))
+            return false;
+        return DateOnly.TryParseExact(raw, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out value);
+    }
+
+    internal static bool TryValidateDateWindow(string? rawStart, string? rawEnd, out string? error)
+    {
+        error = null;
+
+        var hasStart = !string.IsNullOrWhiteSpace(rawStart);
+        var hasEnd = !string.IsNullOrWhiteSpace(rawEnd);
+
+        DateOnly start = default;
+        DateOnly end = default;
+
+        if (hasStart && !TryParseIsoDate(rawStart, out start))
+        {
+            error = InvalidRequest;
+            return false;
+        }
+        if (hasEnd && !TryParseIsoDate(rawEnd, out end))
+        {
+            error = InvalidRequest;
+            return false;
+        }
+        if (hasStart && hasEnd && start > end)
+        {
+            error = InvalidRequest;
+            return false;
+        }
+        return true;
+    }
+
     // Returns null on missing/unparseable; explicit 0 round-trips so a freshly-created
     // feature can still send `If-Match: 0`. RFC 7232 quoted ETags are tolerated.
     internal static int? ParseIfMatch(string? ifMatch, ILogger logger)

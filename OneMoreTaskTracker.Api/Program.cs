@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using OneMoreTaskTracker.Api.Auth;
 using OneMoreTaskTracker.Api.Middleware;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
+using OneMoreTaskTracker.Proto.Features.GetFeatureBoundsQuery;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
@@ -106,6 +107,9 @@ builder.Services
 
 builder.Services
     .AddGrpcClient<FeatureGetter.FeatureGetterClient>(o => o.Address = new Uri(featuresServiceAddress));
+
+builder.Services
+    .AddGrpcClient<BoundsGetter.BoundsGetterClient>(o => o.Address = new Uri(featuresServiceAddress));
 
 builder.Services
     .AddGrpcClient<TaskFeatureLinker.TaskFeatureLinkerClient>(o => o.Address = new Uri(tasksServiceAddress));

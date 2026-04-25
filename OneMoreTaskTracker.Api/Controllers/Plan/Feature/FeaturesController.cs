@@ -5,6 +5,7 @@ using OneMoreTaskTracker.Api.Controllers.Plan;
 using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
 using OneMoreTaskTracker.Proto.Features;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
+using OneMoreTaskTracker.Proto.Features.GetFeatureBoundsQuery;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
@@ -21,6 +22,7 @@ public class FeaturesController(
     FeatureUpdater.FeatureUpdaterClient featureUpdater,
     FeaturesLister.FeaturesListerClient featuresLister,
     FeatureGetter.FeatureGetterClient featureGetter,
+    BoundsGetter.BoundsGetterClient boundsGetter,
     UserService.UserServiceClient userService,
     ILogger<FeaturesController> logger) : ControllerBase
 {
@@ -30,12 +32,22 @@ public class FeaturesController(
     public async Task<ActionResult<IEnumerable<FeatureSummaryResponse>>> List(
         [FromQuery] string? scope,
         [FromQuery] string? state,
+        [FromQuery] string? windowStart,
+        [FromQuery] string? windowEnd,
         CancellationToken ct)
     {
+        if (!PlanRequestHelpers.TryValidateDateWindow(windowStart, windowEnd, out var windowError))
+            return BadRequest(new { error = windowError });
+
         var userId = User.GetUserId();
 
         var listResponse = await featuresLister.ListAsync(
-            new ListFeaturesRequest { ManagerUserId = userId },
+            new ListFeaturesRequest
+            {
+                ManagerUserId = userId,
+                WindowStart = windowStart ?? string.Empty,
+                WindowEnd = windowEnd ?? string.Empty,
+            },
             cancellationToken: ct);
 
         var features = listResponse.Features.AsEnumerable();
@@ -54,6 +66,29 @@ public class FeaturesController(
             .ToList();
 
         return Ok(summaries);
+    }
+
+    [HttpGet("bounds")]
+    public async Task<ActionResult<FeatureBoundsResponse>> GetBounds(
+        [FromQuery] string? scope,
+        [FromQuery] string? state,
+        CancellationToken ct)
+    {
+        _ = scope;
+        _ = state;
+
+        var userId = User.GetUserId();
+
+        var bounds = await boundsGetter.GetAsync(
+            new GetFeatureBoundsRequest { ManagerUserId = userId },
+            cancellationToken: ct);
+
+        Response.Headers.CacheControl = "private, max-age=10";
+        Response.Headers.Vary = "Authorization";
+
+        return Ok(new FeatureBoundsResponse(
+            string.IsNullOrEmpty(bounds.EarliestPlannedStart) ? null : bounds.EarliestPlannedStart,
+            string.IsNullOrEmpty(bounds.LatestPlannedEnd) ? null : bounds.LatestPlannedEnd));
     }
 
     [HttpGet("{id:int}")]

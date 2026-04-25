@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
+using OneMoreTaskTracker.Proto.Features.GetFeatureBoundsQuery;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
@@ -57,6 +58,7 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
                 d.ServiceType == typeof(FeatureUpdater.FeatureUpdaterClient) ||
                 d.ServiceType == typeof(FeaturesLister.FeaturesListerClient) ||
                 d.ServiceType == typeof(FeatureGetter.FeatureGetterClient) ||
+                d.ServiceType == typeof(BoundsGetter.BoundsGetterClient) ||
                 d.ServiceType == typeof(FeatureTitleUpdater.FeatureTitleUpdaterClient) ||
                 d.ServiceType == typeof(FeatureDescriptionUpdater.FeatureDescriptionUpdaterClient) ||
                 d.ServiceType == typeof(StageOwnerUpdater.StageOwnerUpdaterClient) ||
@@ -77,6 +79,7 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
             services.AddSingleton(Substitute.For<FeatureUpdater.FeatureUpdaterClient>());
             services.AddSingleton(Substitute.For<FeaturesLister.FeaturesListerClient>());
             services.AddSingleton(Substitute.For<FeatureGetter.FeatureGetterClient>());
+            services.AddSingleton(Substitute.For<BoundsGetter.BoundsGetterClient>());
             services.AddSingleton(Substitute.For<FeatureTitleUpdater.FeatureTitleUpdaterClient>());
             services.AddSingleton(Substitute.For<FeatureDescriptionUpdater.FeatureDescriptionUpdaterClient>());
             services.AddSingleton(Substitute.For<StageOwnerUpdater.StageOwnerUpdaterClient>());
