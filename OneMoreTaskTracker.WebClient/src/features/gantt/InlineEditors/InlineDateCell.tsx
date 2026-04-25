@@ -1,6 +1,7 @@
 import { useCallback, useRef, type KeyboardEvent } from 'react';
 import { useInlineFieldEditor } from './useInlineFieldEditor';
 import type { InlineEditorError } from './InlineEditorError';
+import { InlineCellChevron } from './InlineCellChevron';
 import './InlineEditors.css';
 
 export interface InlineDateCellProps {
@@ -16,6 +17,12 @@ export interface InlineDateCellProps {
   readOnly?: boolean;
   /** Hook into the test id seam for Evaluator assertions. */
   testId?: string;
+  /**
+   * Relay a commit outcome into the parent's aria-live region.
+   */
+  onAnnounce?: (message: string) => void;
+  /** Build the announcement message for screen-reader relay. */
+  buildAnnouncement?: (outcome: 'saved' | 'error', value: string, error: InlineEditorError | null) => string;
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -69,6 +76,8 @@ export function InlineDateCell({
   validate,
   readOnly,
   testId,
+  onAnnounce,
+  buildAnnouncement,
 }: InlineDateCellProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const editor = useInlineFieldEditor<string>({
@@ -87,7 +96,12 @@ export function InlineDateCell({
       if (!ISO_DATE.test(trimmed)) return 'Use a real release date';
       return null;
     },
+    buildAnnouncement,
   });
+
+  if (onAnnounce && editor.announcement) {
+    queueMicrotask(() => onAnnounce(editor.announcement));
+  }
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
@@ -122,6 +136,7 @@ export function InlineDateCell({
     <span
       className="inline-cell inline-cell--date"
       data-status={editor.status}
+      data-flash={editor.flashing ? 'true' : undefined}
       data-testid={testId}
     >
       <input
@@ -140,6 +155,7 @@ export function InlineDateCell({
         onKeyDown={handleKeyDown}
         data-testid={testId ? `${testId}-input` : undefined}
       />
+      <InlineCellChevron />
       <InlineCellMessage error={editor.error} />
     </span>
   );

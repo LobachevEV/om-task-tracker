@@ -25,11 +25,6 @@ interface PasswordToast {
 export default function TeamPage() {
   const { t } = useTranslation('team');
   const { user } = useAuth();
-  if (!user) return null;
-
-  const viewerRole = user.role as UserRole;
-  const isManager = viewerRole === 'Manager';
-  const isDev = isDeveloperRole(viewerRole);
 
   const [roster, setRoster] = useState<TeamRosterMember[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -47,7 +42,7 @@ export default function TeamPage() {
       setLoadError(null);
       const data = await teamApi.getRoster();
       setRoster(data);
-    } catch (err) {
+    } catch {
       setLoadError(t('loadFailed'));
     } finally {
       setLoading(false);
@@ -55,7 +50,8 @@ export default function TeamPage() {
   };
 
   useEffect(() => {
-    loadRoster();
+    void loadRoster();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -66,6 +62,32 @@ export default function TeamPage() {
       return () => clearTimeout(timer);
     }
   }, [passwordToast]);
+
+  const viewerUserId = user?.userId ?? 0;
+  const sortedRoster = useMemo(() => {
+    const source = roster ?? [];
+    const filtered = query
+      ? source.filter((m) => {
+          const q = query.toLowerCase();
+          return (
+            m.displayName.toLowerCase().includes(q) ||
+            m.email.toLowerCase().includes(q)
+          );
+        })
+      : source;
+    return sortRoster(filtered, viewerUserId);
+  }, [roster, query, viewerUserId]);
+
+  const developerCount = useMemo(
+    () => (roster ?? []).filter((m) => !m.isSelf && m.role !== 'Manager').length,
+    [roster],
+  );
+
+  if (!user) return null;
+
+  const viewerRole = user.role as UserRole;
+  const isManager = viewerRole === 'Manager';
+  const isDev = isDeveloperRole(viewerRole);
 
   const handleInvite = async (args: { email: string; role: DeveloperRole }) => {
     try {
@@ -97,7 +119,7 @@ export default function TeamPage() {
       await teamApi.removeMember(userId);
       setConfirmRemoveUser(null);
       await loadRoster();
-    } catch (err) {
+    } catch {
       setRemoveError(t('removeFailed'));
     }
   };
@@ -106,25 +128,6 @@ export default function TeamPage() {
     setConfirmRemoveUser(null);
     setRemoveError(null);
   };
-
-  const sortedRoster = useMemo(() => {
-    const source = roster ?? [];
-    const filtered = query
-      ? source.filter((m) => {
-          const q = query.toLowerCase();
-          return (
-            m.displayName.toLowerCase().includes(q) ||
-            m.email.toLowerCase().includes(q)
-          );
-        })
-      : source;
-    return sortRoster(filtered, user.userId);
-  }, [roster, query, user.userId]);
-
-  const developerCount = useMemo(
-    () => (roster ?? []).filter((m) => !m.isSelf && m.role !== 'Manager').length,
-    [roster],
-  );
 
   const showEmptyState =
     sortedRoster.length === 0 && (query !== '' || (roster ?? []).length > 1);

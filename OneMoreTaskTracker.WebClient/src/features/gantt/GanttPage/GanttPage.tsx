@@ -271,10 +271,12 @@ export function GanttPageInternal({
   );
 }
 
+const ANONYMOUS_ROLE: UserRole = 'FrontendDeveloper';
+
 export function GanttPage() {
   const { user } = useAuth();
-  if (!user) return null;
-  const role = user.role;
+  // All hooks must execute unconditionally; we gate rendering, not hook calls.
+  const role: UserRole = user?.role ?? ANONYMOUS_ROLE;
   const state = useGanttPageState(role);
   const features = usePlanFeatures({
     scope: state.scope,
@@ -286,6 +288,8 @@ export function GanttPage() {
     () => (roster.data ?? []).map(toMiniMember),
     [roster.data],
   );
+
+  if (!user) return null;
 
   return (
     <GanttPageInternal

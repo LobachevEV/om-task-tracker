@@ -1,4 +1,5 @@
 import { createElement, useEffect } from 'react';
+import type React from 'react';
 import { I18nextProvider } from 'react-i18next';
 import type { Decorator, Preview } from '@storybook/react-vite';
 
@@ -6,8 +7,13 @@ import i18n from '../src/i18n/config';
 import '../src/index.css';
 import './fonts.css';
 
-const withI18n: Decorator = (Story, context) => {
-  const locale = (context.globals.locale as string | undefined) ?? 'ru';
+// Wrap the decorator body in a component so `useEffect` is called inside a
+// React function component (satisfies react-hooks/rules-of-hooks lint).
+interface I18nShellProps {
+  locale: string;
+  children: React.ReactNode;
+}
+function I18nShell({ locale, children }: I18nShellProps) {
   useEffect(() => {
     if (i18n.language !== locale) {
       void i18n.changeLanguage(locale);
@@ -16,7 +22,12 @@ const withI18n: Decorator = (Story, context) => {
   useEffect(() => {
     document.documentElement.dataset.theme = 'dark';
   }, []);
-  return createElement(I18nextProvider, { i18n }, createElement(Story));
+  return createElement(I18nextProvider, { i18n }, children);
+}
+
+const withI18n: Decorator = (Story, context) => {
+  const locale = (context.globals.locale as string | undefined) ?? 'ru';
+  return createElement(I18nShell, { locale }, createElement(Story));
 };
 
 const preview: Preview = {

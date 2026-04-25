@@ -1,3 +1,6 @@
+export { InlineCellChevron } from './InlineCellChevron';
+export { InlineLiveRegion } from './InlineLiveRegion';
+export type { InlineLiveRegionProps } from './InlineLiveRegion';
 export { InlineTextCell } from './InlineTextCell';
 export type { InlineTextCellProps } from './InlineTextCell';
 export { InlineDateCell } from './InlineDateCell';

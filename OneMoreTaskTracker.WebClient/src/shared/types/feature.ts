@@ -46,8 +46,12 @@ export interface FeatureStagePlan {
   performerUserId: number | null;
   /** Present only when returned as part of FeatureDetail. */
   performer?: MiniTeamMember | null;
-  /** Monotonically-increasing per-stage row version. */
-  stageVersion: number;
+  /**
+   * Monotonically-increasing per-stage row version. Optional during iter-1
+   * rollout per api-contract.md §109; consumers treat absent as 0 and skip
+   * If-Match.
+   */
+  stageVersion?: number;
 }
 
 export interface FeatureSummary {
@@ -67,9 +71,11 @@ export interface FeatureSummary {
   stagePlans: FeatureStagePlan[];
   /**
    * Monotonically-increasing row version — used as the optimistic-concurrency
-   * token on `If-Match` headers for feature-scoped inline edits.
+   * token on `If-Match` headers for feature-scoped inline edits. Optional
+   * during iter-1 rollout per api-contract.md §109; consumers treat absent
+   * as 0 and skip If-Match.
    */
-  version: number;
+  version?: number;
 }
 
 export interface FeatureDetail {

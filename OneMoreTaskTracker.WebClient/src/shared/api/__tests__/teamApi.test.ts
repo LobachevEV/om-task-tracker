@@ -5,7 +5,7 @@ import * as teamApi from '../teamApi';
 vi.mock('../httpClient', () => ({
   API_BASE_URL: 'http://localhost:5000',
   authHeaders: () => ({ Authorization: 'Bearer test-token' }),
-  handleResponse: vi.fn(async (response: any) => {
+  handleResponse: vi.fn(async (response: Response) => {
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'HTTP Error');
@@ -18,7 +18,7 @@ vi.mock('../httpClient', () => ({
 }));
 
 describe('teamApi', () => {
-  const mockFetch = window.fetch as any;
+  const mockFetch = window.fetch as unknown as ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     // Clear all mocks before each test

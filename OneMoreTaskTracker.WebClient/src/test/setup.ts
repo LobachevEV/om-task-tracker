@@ -10,7 +10,7 @@ beforeEach(async () => {
 
 // Mock fetch globally
 if (typeof window !== 'undefined') {
-  window.fetch = vi.fn() as any;
+  window.fetch = vi.fn() as unknown as typeof window.fetch;
 }
 
 // Fix localStorage.clear in jsdom environment

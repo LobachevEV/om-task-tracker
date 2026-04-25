@@ -18,22 +18,32 @@ export function useFeatureDrawerData(featureId: number | null): FeatureDrawerDat
   const [loading, setLoading] = useState<boolean>(featureId != null);
   const [error, setError] = useState<Error | null>(null);
   const [refetchCounter, setRefetchCounter] = useState(0);
+  const [trackedFeatureId, setTrackedFeatureId] = useState<number | null>(featureId);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Derive state during render when featureId transitions (drawer close or
+  // switch to a different feature). Avoids setState-in-effect which the
+  // React Compiler lint flags as a cascading-render risk.
+  if (featureId == null && trackedFeatureId != null) {
+    setTrackedFeatureId(null);
+    setData(null);
+    setLoading(false);
+    setError(null);
+  } else if (featureId != null && trackedFeatureId !== featureId) {
+    setTrackedFeatureId(featureId);
+    setData(null);
+    setLoading(true);
+    setError(null);
+  }
 
   useEffect(() => {
     if (featureId == null) {
-      setData(null);
-      setLoading(false);
-      setError(null);
       return;
     }
 
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-
-    setLoading(true);
-    setError(null);
 
     planApi
       .getFeature(featureId)

@@ -1,4 +1,4 @@
-import { useMemo, type KeyboardEvent } from 'react';
+import { useCallback, useMemo, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
   FeatureState,
@@ -16,6 +16,7 @@ import { GanttStageSubRow } from '../GanttStageSubRow';
 import type { GanttLaneVariant } from '../useGanttLayout';
 import {
   InlineDescriptionEditor,
+  InlineLiveRegion,
   InlineTextCell,
   type OptimisticFeatureMutations,
 } from '../InlineEditors';
@@ -110,6 +111,34 @@ export function GanttFeatureRow({
 
   const inlineEnabled = canEdit && mutations != null;
 
+  // Per-row aria-live region for inline-edit outcome announcements. Stored
+  // here (not at page level) so each row reads the same pattern and the
+  // screen reader hears feature-scoped context.
+  const [announcement, setAnnouncement] = useState<string>('');
+  const handleAnnounce = useCallback((message: string) => setAnnouncement(message), []);
+  const buildTitleAnnouncement = useCallback(
+    (outcome: 'saved' | 'error') =>
+      outcome === 'saved'
+        ? t('inlineEdit.announce.titleSaved', {
+            defaultValue: 'Feature title saved.',
+          })
+        : t('inlineEdit.announce.titleError', {
+            defaultValue: 'Feature title change was rejected.',
+          }),
+    [t],
+  );
+  const buildDescriptionAnnouncement = useCallback(
+    (outcome: 'saved' | 'error') =>
+      outcome === 'saved'
+        ? t('inlineEdit.announce.descriptionSaved', {
+            defaultValue: 'Feature description saved.',
+          })
+        : t('inlineEdit.announce.descriptionError', {
+            defaultValue: 'Feature description change was rejected.',
+          }),
+    [t],
+  );
+
   return (
     <>
       <div
@@ -158,8 +187,10 @@ export function GanttFeatureRow({
                   return null;
                 }}
                 onSave={async (next) => {
-                  await mutations!.saveTitle(feature.id, next.trim(), feature.version);
+                  await mutations!.saveTitle(feature.id, next.trim(), feature.version ?? 0);
                 }}
+                onAnnounce={handleAnnounce}
+                buildAnnouncement={buildTitleAnnouncement}
               />
             ) : (
               <button
@@ -238,8 +269,10 @@ export function GanttFeatureRow({
             })}
             onSave={async (next) => {
               if (!inlineEnabled) return;
-              await mutations!.saveDescription(feature.id, next, feature.version);
+              await mutations!.saveDescription(feature.id, next, feature.version ?? 0);
             }}
+            onAnnounce={handleAnnounce}
+            buildAnnouncement={buildDescriptionAnnouncement}
           />
           {stageBars.map((seg, index) => (
             <GanttStageSubRow
@@ -261,10 +294,12 @@ export function GanttFeatureRow({
               canEdit={inlineEnabled}
               mutations={mutations}
               roster={roster}
+              onAnnounce={handleAnnounce}
             />
           ))}
         </>
       ) : null}
+      {inlineEnabled ? <InlineLiveRegion message={announcement} /> : null}
     </>
   );
 }

@@ -49,6 +49,8 @@ export interface GanttStageSubRowProps {
   canEdit?: boolean;
   mutations?: OptimisticFeatureMutations;
   roster?: readonly TeamRosterMember[];
+  /** Relay inline-edit commit outcomes into the parent aria-live region. */
+  onAnnounce?: (message: string) => void;
 }
 
 function avatarTone(role: MiniTeamMember['role']): 'manager' | 'frontend' | 'backend' | 'qa' {
@@ -105,6 +107,7 @@ export function GanttStageSubRow({
   canEdit = false,
   mutations,
   roster,
+  onAnnounce,
 }: GanttStageSubRowProps) {
   const { t, i18n } = useTranslation('gantt');
   const plan = feature.stagePlans.find((p) => p.stage === seg.stage) ?? null;
@@ -130,8 +133,42 @@ export function GanttStageSubRow({
   const inlineEnabled = canEdit && mutations != null;
   const stageVersion = plan?.stageVersion ?? 0;
 
+  const announceOwner = (outcome: 'saved' | 'error') =>
+    outcome === 'saved'
+      ? t('inlineEdit.announce.ownerSaved', {
+          defaultValue: '{{stage}} stage owner saved.',
+          stage: stageName,
+        })
+      : t('inlineEdit.announce.ownerError', {
+          defaultValue: '{{stage}} stage owner change was rejected.',
+          stage: stageName,
+        });
+  const announceStart = (outcome: 'saved' | 'error') =>
+    outcome === 'saved'
+      ? t('inlineEdit.announce.startSaved', {
+          defaultValue: '{{stage}} planned start saved.',
+          stage: stageName,
+        })
+      : t('inlineEdit.announce.startError', {
+          defaultValue: '{{stage}} planned start change was rejected.',
+          stage: stageName,
+        });
+  const announceEnd = (outcome: 'saved' | 'error') =>
+    outcome === 'saved'
+      ? t('inlineEdit.announce.endSaved', {
+          defaultValue: '{{stage}} planned end saved.',
+          stage: stageName,
+        })
+      : t('inlineEdit.announce.endError', {
+          defaultValue: '{{stage}} planned end change was rejected.',
+          stage: stageName,
+        });
+
+  // Stale performer: fall through to the read-only "previous-name · removed"
+  // microcopy path even in inline-edit mode. The picker would render the
+  // stale name as if it were valid which is misleading.
   let ownerNode;
-  if (inlineEnabled && roster) {
+  if (inlineEnabled && roster && !stale) {
     ownerNode = (
       <InlineOwnerPicker
         value={plan?.performerUserId ?? null}
@@ -146,6 +183,8 @@ export function GanttStageSubRow({
         onSave={async (next) => {
           await mutations!.saveStageOwner(feature.id, seg.stage, next, stageVersion);
         }}
+        onAnnounce={onAnnounce}
+        buildAnnouncement={announceOwner}
       />
     );
   } else if (!hasPerformerId) {
@@ -240,6 +279,8 @@ export function GanttStageSubRow({
                       stageVersion,
                     );
                   }}
+                  onAnnounce={onAnnounce}
+                  buildAnnouncement={announceStart}
                 />
                 <span className="gantt-stage-row__sep" aria-hidden="true">
                   {' – '}
@@ -260,6 +301,8 @@ export function GanttStageSubRow({
                       stageVersion,
                     );
                   }}
+                  onAnnounce={onAnnounce}
+                  buildAnnouncement={announceEnd}
                 />
                 <span className="gantt-stage-row__sep" aria-hidden="true">
                   {' · '}

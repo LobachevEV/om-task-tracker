@@ -1,3 +1,6 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+// Playwright fixtures receive a callback named `use` (the framework's
+// "provide-fixture" primitive, not the React hook).
 import { test as base, type APIRequestContext, type Page } from '@playwright/test';
 import {
   apiLogin,

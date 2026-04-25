@@ -28,7 +28,6 @@ export class ErrorBoundary extends Component<Props, State> {
     // Replace with a proper logger (e.g. Sentry) in production
     const message = error instanceof Error ? error.message : String(error);
     const componentStack = info.componentStack ?? '';
-    // eslint-disable-next-line no-console
     console.error('[ErrorBoundary]', message, componentStack);
   }
 

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { TeamRosterMember } from '../../../shared/api/teamApi';
 import { useInlineFieldEditor } from './useInlineFieldEditor';
 import type { InlineEditorError } from './InlineEditorError';
+import { InlineCellChevron } from './InlineCellChevron';
 import './InlineEditors.css';
 
 export interface InlineOwnerPickerProps {
@@ -20,6 +21,10 @@ export interface InlineOwnerPickerProps {
   readOnly?: boolean;
   /** Hook into the test id seam. */
   testId?: string;
+  /** Relay a commit outcome into the parent's aria-live region. */
+  onAnnounce?: (message: string) => void;
+  /** Build the announcement message. */
+  buildAnnouncement?: (outcome: 'saved' | 'error', value: number | null, error: InlineEditorError | null) => string;
 }
 
 function rosterMatches(m: TeamRosterMember, q: string): boolean {
@@ -46,6 +51,8 @@ export function InlineOwnerPicker({
   ariaLabel,
   readOnly,
   testId,
+  onAnnounce,
+  buildAnnouncement,
 }: InlineOwnerPickerProps) {
   const { t } = useTranslation('gantt');
   const rootRef = useRef<HTMLDivElement>(null);
@@ -54,16 +61,23 @@ export function InlineOwnerPicker({
   const editor = useInlineFieldEditor<number | null>({
     committed: value,
     onSave,
+    buildAnnouncement,
   });
+
+  if (onAnnounce && editor.announcement) {
+    queueMicrotask(() => onAnnounce(editor.announcement));
+  }
 
   const [query, setQuery] = useState<string>(displayName ?? '');
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
 
   // Sync the filter text when the committed value changes (e.g. after save).
-  const lastValueRef = useRef<number | null>(value);
-  if (lastValueRef.current !== value) {
-    lastValueRef.current = value;
+  // Use a state-tracking pattern (not a ref read during render) to satisfy
+  // the React Compiler strict lint.
+  const [trackedValue, setTrackedValue] = useState<number | null>(value);
+  if (trackedValue !== value) {
+    setTrackedValue(value);
     setQuery(displayName ?? '');
   }
 
@@ -164,6 +178,7 @@ export function InlineOwnerPicker({
       className="inline-cell inline-cell--owner"
       data-status={editor.status}
       data-open={open ? 'true' : 'false'}
+      data-flash={editor.flashing ? 'true' : undefined}
       data-testid={testId}
     >
       <input
@@ -189,6 +204,16 @@ export function InlineOwnerPicker({
         onKeyDown={handleKeyDown}
         data-testid={testId ? `${testId}-input` : undefined}
       />
+      <InlineCellChevron />
+      {value == null ? (
+        // Visually-hidden mirror of the placeholder so screen readers and
+        // text-based assertions can still find "Unassigned" without relying
+        // on the input's placeholder attribute (placeholders aren't text
+        // content for `Element.textContent`).
+        <span className="inline-live-region" data-testid="inline-cell-empty-label">
+          {t('row.unassigned')}
+        </span>
+      ) : null}
       {value != null ? (
         <button
           type="button"

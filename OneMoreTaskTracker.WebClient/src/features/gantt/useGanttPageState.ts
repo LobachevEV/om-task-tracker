@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { UserRole } from '../../shared/auth/auth';
 import type { FeatureScope, FeatureState } from '../../shared/types/feature';
 import { ZOOM_DAYS, type ZoomLevel } from './ganttMath';
@@ -76,9 +76,10 @@ export function useGanttPageState(role: UserRole): GanttPageState {
     () => new Set<number>(),
   );
 
-  // `today` is snapshotted on mount; reload to advance.
-  const todayRef = useRef<string>(initialTodayIso());
-  const today = todayRef.current;
+  // `today` is snapshotted on mount; reload to advance. useState with a
+  // lazy initializer gives us a stable, render-safe value (refs can't be
+  // read during render under the strict React Compiler lint).
+  const [today] = useState<string>(() => initialTodayIso());
 
   const setZoom = useCallback((z: ZoomLevel) => {
     setZoomState(z);

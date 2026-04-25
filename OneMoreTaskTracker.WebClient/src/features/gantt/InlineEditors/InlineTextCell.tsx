@@ -20,6 +20,14 @@ export interface InlineTextCellProps {
   className?: string;
   /** Hook into the test id seam for Evaluator assertions. */
   testId?: string;
+  /**
+   * Called when a commit outcome should be spoken by a screen reader.
+   * Parent (e.g. GanttFeatureRow) owns the `aria-live` region and relays
+   * the string verbatim. No-op when omitted.
+   */
+  onAnnounce?: (message: string) => void;
+  /** Build the announcement message. Receives committed value + outcome. */
+  buildAnnouncement?: (outcome: 'saved' | 'error', value: string, error: InlineEditorError | null) => string;
 }
 
 /**
@@ -45,13 +53,21 @@ export function InlineTextCell({
   placeholder,
   className,
   testId,
+  onAnnounce,
+  buildAnnouncement,
 }: InlineTextCellProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const editor = useInlineFieldEditor<string>({
     committed: value,
     onSave,
     validate,
+    buildAnnouncement,
   });
+
+  // Relay announcements to the parent's aria-live region.
+  if (onAnnounce && editor.announcement) {
+    queueMicrotask(() => onAnnounce(editor.announcement));
+  }
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
@@ -77,6 +93,7 @@ export function InlineTextCell({
     <span
       className={`inline-cell inline-cell--text ${className ?? ''}`.trim()}
       data-status={editor.status}
+      data-flash={editor.flashing ? 'true' : undefined}
       data-testid={testId}
     >
       <input

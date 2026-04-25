@@ -15,6 +15,10 @@ export interface InlineDescriptionEditorProps {
   readOnly?: boolean;
   /** Hook into the test id seam for Evaluator assertions. */
   testId?: string;
+  /** Relay commit outcomes into the parent aria-live region. */
+  onAnnounce?: (message: string) => void;
+  /** Build the announcement text. */
+  buildAnnouncement?: (outcome: 'saved' | 'error', value: string, error: InlineEditorError | null) => string;
 }
 
 const MAX_LEN = 4000;
@@ -43,6 +47,8 @@ export function InlineDescriptionEditor({
   ariaLabel,
   readOnly,
   testId,
+  onAnnounce,
+  buildAnnouncement,
 }: InlineDescriptionEditorProps) {
   const { t } = useTranslation('gantt');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -57,7 +63,12 @@ export function InlineDescriptionEditor({
       if (next.length > MAX_LEN) return `Description too long (max ${MAX_LEN} chars)`;
       return null;
     },
+    buildAnnouncement,
   });
+
+  if (onAnnounce && editor.announcement) {
+    queueMicrotask(() => onAnnounce(editor.announcement));
+  }
 
   const expand = useCallback(() => {
     setExpanded(true);

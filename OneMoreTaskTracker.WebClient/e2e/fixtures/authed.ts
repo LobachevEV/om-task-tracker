@@ -1,3 +1,7 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+// Playwright fixtures receive a callback named `use` (the framework's
+// "provide-fixture" primitive, not the React hook). The React lint plugin
+// mis-identifies it as a React `use()` hook call.
 import { test as base, type Page } from '@playwright/test';
 import {
   apiLogin,

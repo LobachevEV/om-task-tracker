@@ -135,6 +135,18 @@
       "startAfterEnd": "Start must be on or before {{date}}",
       "conflict": "Someone else just updated this; reload to see latest",
       "network": "Couldn't save. Retry?"
+    },
+    "announce": {
+      "titleSaved": "Feature title saved.",
+      "titleError": "Feature title change was rejected.",
+      "descriptionSaved": "Feature description saved.",
+      "descriptionError": "Feature description change was rejected.",
+      "ownerSaved": "{{stage}} stage owner saved.",
+      "ownerError": "{{stage}} stage owner change was rejected.",
+      "startSaved": "{{stage}} planned start saved.",
+      "startError": "{{stage}} planned start change was rejected.",
+      "endSaved": "{{stage}} planned end saved.",
+      "endError": "{{stage}} planned end change was rejected."
     }
   },
   "stagePlan": {

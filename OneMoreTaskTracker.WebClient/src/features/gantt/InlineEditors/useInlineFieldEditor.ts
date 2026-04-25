@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { InlineEditorStatus } from './InlineEditorStatus';
 import { toInlineEditorError, type InlineEditorError } from './InlineEditorError';
 
@@ -43,7 +43,16 @@ export interface UseInlineFieldEditorOptions<T> {
   validate?: (next: T) => string | null;
   /** Equality check — defaults to `Object.is`. */
   isEqual?: (a: T, b: T) => boolean;
+  /**
+   * Produce the screen-reader announcement after a successful commit or an
+   * error. Called AFTER the mutation resolves. Return an empty string to
+   * skip announcement. When omitted the hook emits no announcements.
+   */
+  buildAnnouncement?: (outcome: 'saved' | 'error', committed: T, error: InlineEditorError | null) => string;
 }
+
+/** Duration of the accept-flash background pulse (ms). */
+const ACCEPT_FLASH_MS = 120;
 
 export interface UseInlineFieldEditorResult<T> {
   /** Local draft value, either being typed or mirroring `committed`. */
@@ -65,27 +74,56 @@ export interface UseInlineFieldEditorResult<T> {
   error: InlineEditorError | null;
   /** Mark the editor "editing" — call on focus. */
   enterEdit: () => void;
+  /**
+   * True for ~120ms after a successful commit. Drives the accept-flash CSS
+   * (`data-flash="true"`). Respects `prefers-reduced-motion: reduce` —
+   * caller can guard with `matchMedia` if needed.
+   */
+  flashing: boolean;
+  /**
+   * Human-readable announcement after a transition. Drives the
+   * per-row `aria-live="polite"` region. Empty string when nothing to
+   * announce. Callers provide the text via `onCommitAnnouncement`.
+   */
+  announcement: string;
+}
+
+function prefersReducedMotion(): boolean {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
+  try {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  } catch {
+    return false;
+  }
 }
 
 export function useInlineFieldEditor<T>(
   options: UseInlineFieldEditorOptions<T>,
 ): UseInlineFieldEditorResult<T> {
-  const { committed, onSave, validate, isEqual = Object.is } = options;
-  const [draft, setDraftState] = useState<T>(committed);
+  const { committed, onSave, validate, isEqual = Object.is, buildAnnouncement } = options;
   const [status, setStatus] = useState<InlineEditorStatus>('idle');
   const [error, setError] = useState<InlineEditorError | null>(null);
+  const [flashing, setFlashing] = useState<boolean>(false);
+  const [announcement, setAnnouncement] = useState<string>('');
 
-  // Keep the draft in sync with `committed` if the parent replaces the
-  // source of truth (e.g. server push, refresh, conflict roll-back) while
-  // the editor is idle. We never steal focus — while editing, the user's
-  // draft wins.
-  const lastCommittedRef = useRef<T>(committed);
-  if (!isEqual(lastCommittedRef.current, committed) && status === 'idle') {
-    lastCommittedRef.current = committed;
+  // Local draft state, keyed by the render-time `committed` value for the
+  // idle-resync case. Using `useState` as a "controlled/uncontrolled mix"
+  // here would require a dangerous setState-in-effect; instead we derive
+  // the draft during render when the parent's source-of-truth changes while
+  // the editor is idle. This is the documented React pattern for "adjusting
+  // state while rendering" (see React docs: You Might Not Need An Effect).
+  const [trackedCommitted, setTrackedCommitted] = useState<T>(committed);
+  const [draft, setDraftState] = useState<T>(committed);
+
+  if (!isEqual(trackedCommitted, committed) && status === 'idle') {
+    setTrackedCommitted(committed);
     setDraftState(committed);
-  } else {
-    lastCommittedRef.current = committed;
   }
+
+  const lastCommittedRef = useRef<T>(committed);
+  useEffect(() => {
+    lastCommittedRef.current = committed;
+  }, [committed]);
 
   const setDraft = useCallback((next: T) => {
     setDraftState(next);
@@ -130,15 +168,27 @@ export function useInlineFieldEditor<T>(
         await onSave(next);
         // `committed` will update via parent; we defensively snap idle here.
         setStatus('idle');
+        if (!prefersReducedMotion()) {
+          setFlashing(true);
+          window.setTimeout(() => setFlashing(false), ACCEPT_FLASH_MS);
+        }
+        if (buildAnnouncement) {
+          const text = buildAnnouncement('saved', next, null);
+          if (text) setAnnouncement(text);
+        }
       } catch (err: unknown) {
         const normalised = toInlineEditorError(err);
         setError(normalised);
         setStatus('error');
         setDraftState(lastCommittedRef.current);
+        if (buildAnnouncement) {
+          const text = buildAnnouncement('error', lastCommittedRef.current, normalised);
+          if (text) setAnnouncement(text);
+        }
       }
     },
-    [draft, isEqual, onSave, status, validate],
+    [draft, isEqual, onSave, status, validate, buildAnnouncement],
   );
 
-  return { draft, setDraft, commit, cancel, status, error, enterEdit };
+  return { draft, setDraft, commit, cancel, status, error, enterEdit, flashing, announcement };
 }

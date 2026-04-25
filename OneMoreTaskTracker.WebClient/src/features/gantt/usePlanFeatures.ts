@@ -50,7 +50,20 @@ export function usePlanFeatures(params: UsePlanFeaturesParams): UsePlanFeaturesR
   const [loading, setLoading] = useState<boolean>(() => !featuresCache.has(key));
   const [error, setError] = useState<Error | null>(null);
   const [refetchToken, setRefetchToken] = useState(0);
+  const [trackedKey, setTrackedKey] = useState<string>(key);
   const activeKeyRef = useRef<string>(key);
+
+  // Resync state during render when the cache key changes. This is the
+  // React-idiomatic "adjusting state while rendering" pattern and avoids
+  // an in-effect setState (which the React Compiler lint flags as a
+  // cascading-render risk).
+  if (trackedKey !== key) {
+    setTrackedKey(key);
+    const cached = featuresCache.get(key);
+    setData(cached ?? null);
+    setLoading(!cached);
+    setError(null);
+  }
 
   const refetch = useCallback(() => {
     featuresCache.delete(key);
@@ -62,15 +75,11 @@ export function usePlanFeatures(params: UsePlanFeaturesParams): UsePlanFeaturesR
     activeKeyRef.current = key;
     const cached = featuresCache.get(key);
     if (cached) {
-      setData(cached);
-      setLoading(false);
-      setError(null);
+      // Already hydrated from cache during render (above). No-op here.
       return;
     }
 
     let cancelled = false;
-    setLoading(true);
-    setError(null);
 
     const existing = inFlight.get(key);
     const promise = existing ?? fetcher({ scope, state });
