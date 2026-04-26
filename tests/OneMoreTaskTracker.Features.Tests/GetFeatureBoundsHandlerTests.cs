@@ -16,10 +16,31 @@ public sealed class GetFeatureBoundsHandlerTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options);
 
-    private static Feature NewFeature(int manager, DateOnly? start = null, DateOnly? end = null) =>
-        new()
+    private static Feature NewFeatureWithStages(int manager, params (DateOnly?, DateOnly?)[] stages)
+    {
+        var feature = new Feature
         {
             Title         = "F",
+            ManagerUserId = manager,
+            LeadUserId    = manager,
+        };
+        var ord = 0;
+        foreach (var (s, e) in stages)
+        {
+            feature.StagePlans.Add(new FeatureStagePlan
+            {
+                Stage        = ord++,
+                PlannedStart = s,
+                PlannedEnd   = e,
+            });
+        }
+        return feature;
+    }
+
+    private static Feature NewFeatureWithLegacyDatesOnly(int manager, DateOnly? start, DateOnly? end) =>
+        new()
+        {
+            Title         = "Legacy",
             ManagerUserId = manager,
             LeadUserId    = manager,
             PlannedStart  = start,
@@ -43,7 +64,8 @@ public sealed class GetFeatureBoundsHandlerTests
     public async Task Get_ManagerUserIdZero_ShortCircuitsToEmptyStrings()
     {
         var db = NewDb();
-        db.Features.Add(NewFeature(1, new DateOnly(2026, 5, 1), new DateOnly(2026, 5, 10)));
+        db.Features.Add(NewFeatureWithStages(1,
+            (new DateOnly(2026, 5, 1), new DateOnly(2026, 5, 10))));
         await db.SaveChangesAsync();
 
         var handler = new GetFeatureBoundsHandler(db);
@@ -56,12 +78,16 @@ public sealed class GetFeatureBoundsHandlerTests
     }
 
     [Fact]
-    public async Task Get_ReturnsMinPlannedStartAndMaxPlannedEnd_ForManager()
+    public async Task Get_ReturnsMinPlannedStartAndMaxPlannedEnd_AcrossStages()
     {
         var db = NewDb();
-        db.Features.Add(NewFeature(1, new DateOnly(2026, 5, 1),  new DateOnly(2026, 5, 10)));
-        db.Features.Add(NewFeature(1, new DateOnly(2026, 6, 1),  new DateOnly(2026, 6, 30)));
-        db.Features.Add(NewFeature(1, new DateOnly(2026, 4, 15), new DateOnly(2026, 4, 30)));
+        db.Features.Add(NewFeatureWithStages(1,
+            (new DateOnly(2026, 5, 1),  new DateOnly(2026, 5, 10)),
+            (new DateOnly(2026, 5, 11), new DateOnly(2026, 5, 20))));
+        db.Features.Add(NewFeatureWithStages(1,
+            (new DateOnly(2026, 6, 1),  new DateOnly(2026, 6, 30))));
+        db.Features.Add(NewFeatureWithStages(1,
+            (new DateOnly(2026, 4, 15), new DateOnly(2026, 4, 30))));
         await db.SaveChangesAsync();
 
         var handler = new GetFeatureBoundsHandler(db);
@@ -77,8 +103,10 @@ public sealed class GetFeatureBoundsHandlerTests
     public async Task Get_IsolatesPerManager()
     {
         var db = NewDb();
-        db.Features.Add(NewFeature(1, new DateOnly(2026, 1, 1), new DateOnly(2026, 1, 31)));
-        db.Features.Add(NewFeature(2, new DateOnly(2026, 5, 1), new DateOnly(2026, 5, 31)));
+        db.Features.Add(NewFeatureWithStages(1,
+            (new DateOnly(2026, 1, 1), new DateOnly(2026, 1, 31))));
+        db.Features.Add(NewFeatureWithStages(2,
+            (new DateOnly(2026, 5, 1), new DateOnly(2026, 5, 31))));
         await db.SaveChangesAsync();
 
         var handler = new GetFeatureBoundsHandler(db);
@@ -91,12 +119,12 @@ public sealed class GetFeatureBoundsHandlerTests
     }
 
     [Fact]
-    public async Task Get_NullDates_AreIgnored()
+    public async Task Get_NullStageDates_AreIgnored()
     {
         var db = NewDb();
-        db.Features.Add(NewFeature(1));
-        db.Features.Add(NewFeature(1, new DateOnly(2026, 5, 1), null));
-        db.Features.Add(NewFeature(1, null, new DateOnly(2026, 5, 20)));
+        db.Features.Add(NewFeatureWithStages(1, (null, null)));
+        db.Features.Add(NewFeatureWithStages(1, (new DateOnly(2026, 5, 1), null)));
+        db.Features.Add(NewFeatureWithStages(1, (null, new DateOnly(2026, 5, 20))));
         await db.SaveChangesAsync();
 
         var handler = new GetFeatureBoundsHandler(db);
@@ -109,11 +137,11 @@ public sealed class GetFeatureBoundsHandlerTests
     }
 
     [Fact]
-    public async Task Get_AllNullDates_ReturnsEmptyStrings()
+    public async Task Get_AllNullStageDates_ReturnsEmptyStrings()
     {
         var db = NewDb();
-        db.Features.Add(NewFeature(1));
-        db.Features.Add(NewFeature(1));
+        db.Features.Add(NewFeatureWithStages(1, (null, null)));
+        db.Features.Add(NewFeatureWithStages(1, (null, null)));
         await db.SaveChangesAsync();
 
         var handler = new GetFeatureBoundsHandler(db);
@@ -123,5 +151,45 @@ public sealed class GetFeatureBoundsHandlerTests
 
         response.EarliestPlannedStart.Should().BeEmpty();
         response.LatestPlannedEnd.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Get_FeatureWithLegacyFeatureLevelDatesAndNoStages_ReturnsEmpty()
+    {
+        var db = NewDb();
+        db.Features.Add(NewFeatureWithLegacyDatesOnly(
+            manager: 1,
+            start:   new DateOnly(2025, 1, 1),
+            end:     new DateOnly(2025, 12, 31)));
+        await db.SaveChangesAsync();
+
+        var handler = new GetFeatureBoundsHandler(db);
+        var response = await handler.Get(
+            new GetFeatureBoundsRequest { ManagerUserId = 1 },
+            TestServerCallContext.Create());
+
+        response.EarliestPlannedStart.Should().BeEmpty();
+        response.LatestPlannedEnd.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Get_MixesPlannedFeatureWithUnplannedLegacyFeature_OnlyStageDatesContribute()
+    {
+        var db = NewDb();
+        db.Features.Add(NewFeatureWithStages(1,
+            (new DateOnly(2026, 5, 1), new DateOnly(2026, 5, 31))));
+        db.Features.Add(NewFeatureWithLegacyDatesOnly(
+            manager: 1,
+            start:   new DateOnly(2020, 1, 1),
+            end:     new DateOnly(2030, 12, 31)));
+        await db.SaveChangesAsync();
+
+        var handler = new GetFeatureBoundsHandler(db);
+        var response = await handler.Get(
+            new GetFeatureBoundsRequest { ManagerUserId = 1 },
+            TestServerCallContext.Create());
+
+        response.EarliestPlannedStart.Should().Be("2026-05-01");
+        response.LatestPlannedEnd.Should().Be("2026-05-31");
     }
 }

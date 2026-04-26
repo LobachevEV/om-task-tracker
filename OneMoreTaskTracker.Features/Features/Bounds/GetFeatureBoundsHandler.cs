@@ -18,14 +18,20 @@ public class GetFeatureBoundsHandler(FeaturesDbContext db) : BoundsGetter.Bounds
         if (request.ManagerUserId <= 0)
             return response;
 
-        var bounds = await db.Features.AsNoTracking()
-            .Where(f => f.ManagerUserId == request.ManagerUserId)
-            .GroupBy(_ => 1)
-            .Select(g => new
-            {
-                Earliest = g.Min(f => f.PlannedStart),
-                Latest = g.Max(f => f.PlannedEnd),
-            })
+        // Aggregate from FeatureStagePlans, not Feature.PlannedStart/PlannedEnd:
+        // the feature-level dates are denormalized and can hold stale legacy
+        // values for features whose stages were never planned. Per the brief,
+        // bounds = min/max of stage plannedStart/plannedEnd.
+        var bounds = await (
+                from sp in db.FeatureStagePlans.AsNoTracking()
+                join f in db.Features.AsNoTracking() on sp.FeatureId equals f.Id
+                where f.ManagerUserId == request.ManagerUserId
+                group sp by 1 into g
+                select new
+                {
+                    Earliest = g.Min(x => x.PlannedStart),
+                    Latest = g.Max(x => x.PlannedEnd),
+                })
             .FirstOrDefaultAsync(context.CancellationToken);
 
         if (bounds?.Earliest is { } e)
