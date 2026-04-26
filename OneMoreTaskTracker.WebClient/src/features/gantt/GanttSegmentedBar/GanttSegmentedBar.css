@@ -21,6 +21,21 @@
   font-style: italic;
 }
 
+.gantt-seg-bar__summary {
+  position: absolute;
+  top: 14px;
+  left: var(--summary-left, 0px);
+  width: var(--summary-width, 0px);
+  height: 24px;
+  min-width: 6px;
+  border-radius: 2px;
+  background: transparent;
+  border: 1px dashed var(--border-strong);
+  opacity: 0.85;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
 .gantt-seg-bar__segment {
   position: absolute;
   top: 14px;

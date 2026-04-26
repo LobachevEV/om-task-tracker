@@ -7,7 +7,7 @@ import type {
 } from '../../../shared/types/feature';
 import type { TeamRosterMember } from '../../../shared/api/teamApi';
 import { GanttAssigneeStack } from '../GanttAssigneeStack';
-import { daysBetween } from '../ganttMath';
+import { daysBetween, type BarGeometryPx } from '../ganttMath';
 import type { StageBarGeometry } from '../ganttStageGeometry';
 import { featureIsOverdue, plannedStageCount } from '../ganttStageGeometry';
 import { GanttSegmentedBar } from '../GanttSegmentedBar';
@@ -23,6 +23,12 @@ import './GanttFeatureRow.css';
 export interface GanttFeatureRowProps {
   feature: FeatureSummary;
   stageBars: StageBarGeometry[];
+  /**
+   * Feature-level planned-span geometry. When stage plans are absent but the
+   * feature has plannedStart/plannedEnd, the segmented bar uses this to draw a
+   * single summary bar so the row still shows on the timeline.
+   */
+  bar?: BarGeometryPx | null;
   today: string;
   lead: MiniTeamMember;
   /** Optional override for the assignee stack — defaults to `[lead]`. */
@@ -72,6 +78,7 @@ function computeFeatureDtr(
 function GanttFeatureRowInner({
   feature,
   stageBars,
+  bar,
   today,
   lead,
   miniTeam,
@@ -244,6 +251,7 @@ function GanttFeatureRowInner({
             resolvePerformer={resolvePerformer}
             onOpenStage={handleOpenStage}
             laneVariant={variant}
+            summaryBar={bar}
           />
         </div>
       </div>

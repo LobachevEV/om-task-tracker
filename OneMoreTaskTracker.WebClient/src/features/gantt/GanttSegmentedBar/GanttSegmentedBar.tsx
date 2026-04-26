@@ -2,6 +2,7 @@ import { useMemo, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FeatureState, FeatureSummary, MiniTeamMember } from '../../../shared/types/feature';
 import { FEATURE_STATE_CSS } from '../stateConfig';
+import type { BarGeometryPx } from '../ganttMath';
 import type { StageBarGeometry } from '../ganttStageGeometry';
 import './GanttSegmentedBar.css';
 
@@ -19,6 +20,13 @@ export interface GanttSegmentedBarProps {
    * has bar geometry.
    */
   laneVariant?: 'planned' | 'noPlan';
+  /**
+   * Feature-level planned-span geometry. Used to render an overall feature
+   * progress bar when the feature has planned dates but no individual stage
+   * has been planned yet (so per-stage segments are all ghost). Lets the
+   * manager still see the feature's overall span on the timeline.
+   */
+  summaryBar?: BarGeometryPx | null;
 }
 
 interface SegmentLabelParams {
@@ -47,15 +55,23 @@ export function GanttSegmentedBar({
   resolvePerformer,
   onOpenStage,
   laneVariant = 'planned',
+  summaryBar,
 }: GanttSegmentedBarProps) {
   const { t } = useTranslation('gantt');
 
-  // Is the feature fully unplanned? → the entire bar becomes a dashed ghost block.
   const allGhost = useMemo(
     () => stageBars.every((s) => s.status === 'ghost'),
     [stageBars],
   );
   const isGhostLane = allGhost || laneVariant !== 'planned';
+  const showSummaryBar = isGhostLane && summaryBar != null && summaryBar.widthPx > 0;
+
+  const summaryStyle = summaryBar
+    ? ({
+        ['--summary-left' as string]: `${summaryBar.leftPx}px`,
+        ['--summary-width' as string]: `${summaryBar.widthPx}px`,
+      } as CSSProperties)
+    : undefined;
 
   return (
     <div
@@ -66,7 +82,15 @@ export function GanttSegmentedBar({
       role="group"
       aria-label={t('segmentedBar.ariaLabel', { title: feature.title })}
     >
-      {isGhostLane ? (
+      {showSummaryBar ? (
+        <div
+          className="gantt-seg-bar__summary"
+          style={summaryStyle}
+          data-testid="segmented-bar-summary"
+          aria-hidden="true"
+        />
+      ) : null}
+      {isGhostLane && !showSummaryBar ? (
         <span className="gantt-seg-bar__empty-label" aria-hidden="true">
           {t('row.notPlannedYet')}
         </span>

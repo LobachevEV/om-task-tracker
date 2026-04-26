@@ -384,6 +384,7 @@ export function GanttPageInternal({
                       key={lane.feature.id}
                       feature={lane.feature}
                       stageBars={lane.stageBars}
+                      bar={lane.bar}
                       today={state.today}
                       lead={lead}
                       variant={lane.variant}
