@@ -345,7 +345,7 @@ export function useGanttTimelineScroll(
       if (!el) return;
       if (e.key === 'Home' && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
         e.preventDefault();
-        scrollToStart('auto');
+        scrollToToday('auto');
       } else if (e.key === 'End' && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
         e.preventDefault();
         scrollToEnd('auto');
@@ -365,7 +365,7 @@ export function useGanttTimelineScroll(
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [scrollerEl, dayPx, scrollToStart, scrollToEnd]);
+  }, [scrollerEl, dayPx, scrollToToday, scrollToEnd]);
 
   return {
     loadedRange,

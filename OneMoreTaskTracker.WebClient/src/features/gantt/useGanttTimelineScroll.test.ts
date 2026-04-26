@@ -309,10 +309,10 @@ describe('useGanttTimelineScroll', () => {
     document.body.removeChild(el);
   });
 
-  it('Home keyboard shortcut scrolls to bounds.earliestPlannedStart when known', async () => {
+  it('Home keyboard shortcut scrolls to today (anchored at leading 1/3 of viewport)', async () => {
     const loadChunk = vi.fn().mockResolvedValue(undefined);
     const bounds = {
-      earliestPlannedStart: '2026-03-01', // 5 days into the loaded range
+      earliestPlannedStart: '2026-03-01',
       latestPlannedEnd: '2026-12-31',
     };
     const { result } = renderHook(() =>
@@ -327,7 +327,8 @@ describe('useGanttTimelineScroll', () => {
         loadChunk,
       }),
     );
-    const el = makeScrollerEl({ clientWidth: VIEWPORT_DAYS * DAY_PX, scrollWidth: 5000 });
+    const VIEWPORT_PX = VIEWPORT_DAYS * DAY_PX; // 960
+    const el = makeScrollerEl({ clientWidth: VIEWPORT_PX, scrollWidth: 5000 });
     document.body.appendChild(el);
     await act(async () => {
       result.current.attachScroller(el);
@@ -338,8 +339,8 @@ describe('useGanttTimelineScroll', () => {
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home' }));
     });
 
-    // earliestPlannedStart = 2026-03-01 → 2026-02-24 + 5 days → 5 * 32 = 160 px
-    expect(el.scrollLeft).toBe(5 * DAY_PX);
+    // todayPx = 60 days * 32 = 1920 → 1920 - floor(960 / 3) = 1600
+    expect(el.scrollLeft).toBe(1920 - Math.floor(VIEWPORT_PX / 3));
     document.body.removeChild(el);
   });
 
