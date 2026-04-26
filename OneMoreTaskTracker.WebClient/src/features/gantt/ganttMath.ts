@@ -18,10 +18,10 @@ export interface BarGeometry {
   clampedRight: boolean;
 }
 
-const ISO_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+export const ISO_DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 export function parseIsoDate(iso: string): Date {
-  const m = ISO_RE.exec(iso);
+  const m = ISO_DATE_RE.exec(iso);
   if (!m) throw new Error(`Invalid ISO date: ${iso}`);
   const y = Number(m[1]);
   const mo = Number(m[2]);

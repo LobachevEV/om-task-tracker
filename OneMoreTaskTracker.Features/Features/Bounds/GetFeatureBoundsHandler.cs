@@ -18,20 +18,19 @@ public class GetFeatureBoundsHandler(FeaturesDbContext db) : BoundsGetter.Bounds
         if (request.ManagerUserId <= 0)
             return response;
 
-        var query = db.Features.AsNoTracking()
-            .Where(f => f.ManagerUserId == request.ManagerUserId);
+        var bounds = await db.Features.AsNoTracking()
+            .Where(f => f.ManagerUserId == request.ManagerUserId)
+            .GroupBy(_ => 1)
+            .Select(g => new
+            {
+                Earliest = g.Min(f => f.PlannedStart),
+                Latest = g.Max(f => f.PlannedEnd),
+            })
+            .FirstOrDefaultAsync(context.CancellationToken);
 
-        var earliest = await query
-            .Where(f => f.PlannedStart != null)
-            .MinAsync(f => (DateOnly?)f.PlannedStart, context.CancellationToken);
-
-        var latest = await query
-            .Where(f => f.PlannedEnd != null)
-            .MaxAsync(f => (DateOnly?)f.PlannedEnd, context.CancellationToken);
-
-        if (earliest is { } e)
+        if (bounds?.Earliest is { } e)
             response.EarliestPlannedStart = e.ToString("yyyy-MM-dd");
-        if (latest is { } l)
+        if (bounds?.Latest is { } l)
             response.LatestPlannedEnd = l.ToString("yyyy-MM-dd");
 
         return response;

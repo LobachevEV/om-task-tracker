@@ -124,6 +124,23 @@ export function GanttDateHeader({
     () => buildMonthBands(loadedRange, dayPx, i18n.language),
     [loadedRange, dayPx, i18n.language],
   );
+  const longDateFormatter = useMemo(() => {
+    try {
+      return new Intl.DateTimeFormat(i18n.language, {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      });
+    } catch {
+      return new Intl.DateTimeFormat('en', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      });
+    }
+  }, [i18n.language]);
 
   const totalWidthPx = days.length * dayPx;
   const style: CSSProperties = {
@@ -170,18 +187,12 @@ export function GanttDateHeader({
           ]
             .filter(Boolean)
             .join(' ');
-          const longDate = (() => {
-            try {
-              return new Intl.DateTimeFormat(i18n.language, {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              }).format(parseIsoDate(day.iso));
-            } catch {
-              return day.iso;
-            }
-          })();
+          let longDate: string;
+          try {
+            longDate = longDateFormatter.format(parseIsoDate(day.iso));
+          } catch {
+            longDate = day.iso;
+          }
           return (
             <div
               key={day.iso}

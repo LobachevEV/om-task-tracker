@@ -72,12 +72,8 @@ const miniTeamMemberSchema = z.object({
 });
 
 /**
- * List-row stage plan. Mirrors api-contract.md `StagePlan`.
- * Performer is id-only; the detail endpoint augments with resolved `performer`.
- *
- * `stageVersion` (v1 gantt-inline-edit contract) is the per-stage
- * optimistic-concurrency token. Optional during iter-1 rollout per
- * api-contract.md §109 — responses without it are tolerated and treated as 0.
+ * `stageVersion` is optional on the wire; absent values are treated as 0
+ * so older payloads that predate optimistic concurrency keep parsing.
  */
 export const stagePlanSchema = z.object({
   stage: featureStateSchema,
@@ -114,9 +110,8 @@ export const featureSummarySchema = z.object({
   /** Always length 5 — see api-contract.md. */
   stagePlans: z.array(stagePlanSchema).length(5),
   /**
-   * Feature-level optimistic-concurrency token. Optional during iter-1
-   * rollout per api-contract.md §109 — responses without it are tolerated
-   * and treated as 0 by consumers.
+   * Feature-level optimistic-concurrency token. Optional on the wire so
+   * older payloads keep parsing; absent values are treated as 0.
    */
   version: z.number().int().nonnegative().optional(),
 });

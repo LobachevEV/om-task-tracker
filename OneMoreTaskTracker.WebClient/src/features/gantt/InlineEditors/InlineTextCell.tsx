@@ -9,7 +9,7 @@ export interface InlineTextCellProps {
   value: string;
   /** Commit handler — throw on failure so the cell can roll back. */
   onSave: (next: string) => Promise<void>;
-  /** Accessible label; must carry field + feature/stage context per brief §7. */
+  /** Accessible label; must carry field + feature/stage context. */
   ariaLabel: string;
   /** Optional per-field validator. Return null when OK, else the inline message. */
   validate?: (next: string) => string | null;

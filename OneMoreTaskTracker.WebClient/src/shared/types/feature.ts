@@ -31,13 +31,12 @@ export interface AttachedTask {
 
 /**
  * Per-stage plan row. Always present in canonical `FEATURE_STATES` order on
- * every response — backend materializes 5 rows per feature (see api-contract.md).
+ * every response — backend materializes 5 rows per feature.
  *
  * `performer` is resolved only on detail reads; list rows carry the bare id.
  *
- * `stageVersion` (added v1 of the gantt-inline-edit-feature contract) is the
- * per-stage optimistic-concurrency token — consumed by the inline editor's
- * `If-Match` header for stage-scoped PATCHes.
+ * `stageVersion` is the per-stage optimistic-concurrency token consumed by
+ * the inline editor's `If-Match` header.
  */
 export interface FeatureStagePlan {
   stage: FeatureState;
@@ -46,11 +45,7 @@ export interface FeatureStagePlan {
   performerUserId: number | null;
   /** Present only when returned as part of FeatureDetail. */
   performer?: MiniTeamMember | null;
-  /**
-   * Monotonically-increasing per-stage row version. Optional during iter-1
-   * rollout per api-contract.md §109; consumers treat absent as 0 and skip
-   * If-Match.
-   */
+  /** Optional on the wire; consumers treat absent as 0 and skip If-Match. */
   stageVersion?: number;
 }
 
@@ -70,10 +65,8 @@ export interface FeatureSummary {
   /** Always length 5, canonical order. Performer is id-only on list rows. */
   stagePlans: FeatureStagePlan[];
   /**
-   * Monotonically-increasing row version — used as the optimistic-concurrency
-   * token on `If-Match` headers for feature-scoped inline edits. Optional
-   * during iter-1 rollout per api-contract.md §109; consumers treat absent
-   * as 0 and skip If-Match.
+   * Optimistic-concurrency token sent in `If-Match` for feature-scoped inline
+   * edits. Optional on the wire; consumers treat absent as 0 and skip If-Match.
    */
   version?: number;
 }
@@ -106,8 +99,8 @@ export interface UpdateFeaturePayload {
 }
 
 /**
- * Per-field inline-edit payloads (api-contract.md v1). Each mirrors exactly
- * one `PATCH /api/plan/features/{id}/...` endpoint — keep names in lockstep.
+ * Per-field inline-edit payloads. Each mirrors exactly one
+ * `PATCH /api/plan/features/{id}/...` endpoint — keep names in lockstep.
  */
 export interface UpdateFeatureTitlePayload {
   title: string;

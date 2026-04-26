@@ -3,7 +3,7 @@
  * - Row 2: day-of-month numerals (today highlighted in --accent).
  * - Row 3: single-letter weekday glyph (M T W T F S S in EN).
  * Mondays / months / weekends rely on data-attributes + 1px borders or a
- * 1.5%-darker tint — see design brief §5. */
+ * 1.5%-darker tint. */
 
 .gantt-date-header {
   --gantt-month-band-h: 24px;

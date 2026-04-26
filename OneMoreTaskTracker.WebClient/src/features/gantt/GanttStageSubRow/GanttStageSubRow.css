@@ -27,7 +27,7 @@
   border-inline-end: 1px solid var(--border);
   z-index: 2;
   /* Constrain strictly to the feature gutter so no child (owner / side /
-     dates / DTR) can overflow into the date-grid lane — UX-001-01. */
+     dates / DTR) can overflow into the date-grid lane. */
   max-inline-size: var(--gantt-gutter-width, 280px);
   overflow: hidden;
 }
@@ -37,10 +37,7 @@
   cursor: pointer;
   /* Two compact rows inside a strict 280px gutter — no horizontal overflow.
    * Row 1: numeral (20px) + dot (10px) + stage name (flex).
-   * Row 2: owner (flex) + side (auto) + DTR (auto, right-aligned).
-   * Fixed 180px "dates+DTR" block from brief §4 is delivered via row 2's
-   * `max-content + flex` split; dates moved to the stage name row to free
-   * vertical rhythm. */
+   * Row 2: owner (flex) + side (auto) + DTR (auto, right-aligned). */
   display: grid;
   grid-template-columns: 20px 10px 1fr;
   grid-template-rows: auto auto;
@@ -169,7 +166,6 @@
 }
 
 .gantt-stage-row__dates-block {
-  /* Fixed 180px dates+DTR block per brief §4 column rhythm (UX-001-09). */
   grid-column: 1 / -1;
   grid-row: 3 / 4;
   display: none;

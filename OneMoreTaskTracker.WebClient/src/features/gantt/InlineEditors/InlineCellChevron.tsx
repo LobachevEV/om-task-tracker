@@ -6,8 +6,6 @@
 export function InlineCellChevron() {
   return (
     <span aria-hidden="true" className="inline-cell__chevron" data-testid="inline-cell-chevron">
-      {/* Unicode geometric shape: small down-pointing triangle. Monoline,
-          proportional, 8–10px target size (design brief §3). */}
       ▾
     </span>
   );

@@ -4,6 +4,7 @@ import { useInlineFieldEditor } from './useInlineFieldEditor';
 import type { InlineEditorError } from './InlineEditorError';
 import { InlineCellChevron } from './InlineCellChevron';
 import { InlineCellError } from './InlineCellError';
+import { ISO_DATE_RE, addDays } from '../ganttMath';
 import './InlineEditors.css';
 
 export interface InlineDateCellProps {
@@ -25,18 +26,9 @@ export interface InlineDateCellProps {
   buildAnnouncement?: (outcome: 'saved' | 'error', value: string, error: InlineEditorError | null) => string;
 }
 
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
-
 function parseDraft(raw: string): string | null {
   const trimmed = raw.trim();
   return trimmed === '' ? null : trimmed;
-}
-
-function nudgeIso(iso: string | null, direction: 1 | -1): string | null {
-  if (iso == null) return iso;
-  const ms = Date.parse(`${iso}T00:00:00Z`);
-  if (Number.isNaN(ms)) return iso;
-  return new Date(ms + direction * 86_400_000).toISOString().slice(0, 10);
 }
 
 function toDraft(value: string | null): string {
@@ -66,7 +58,7 @@ export function InlineDateCell({
     validate: (next) => {
       const trimmed = next.trim();
       if (trimmed === '') return null;
-      if (!ISO_DATE.test(trimmed)) return 'Use a real release date';
+      if (!ISO_DATE_RE.test(trimmed)) return 'Use a real release date';
       return null;
     },
     buildAnnouncement,
@@ -83,12 +75,11 @@ export function InlineDateCell({
         e.preventDefault();
         editor.cancel();
       } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-        const direction = e.key === 'ArrowUp' ? 1 : -1;
         const current = editor.draft.trim();
-        if (current === '' || !ISO_DATE.test(current)) return;
+        if (current === '' || !ISO_DATE_RE.test(current)) return;
         e.preventDefault();
-        const nudged = nudgeIso(current, direction);
-        if (nudged) editor.setDraft(nudged);
+        const direction = e.key === 'ArrowUp' ? 1 : -1;
+        editor.setDraft(addDays(current, direction));
       }
     },
     [editor, readOnly],

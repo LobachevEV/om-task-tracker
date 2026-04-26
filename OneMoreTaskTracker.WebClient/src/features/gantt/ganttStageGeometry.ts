@@ -83,8 +83,9 @@ export function computeStageBars(
   const out: StageBarGeometry[] = [];
   // Iterate in canonical order regardless of input order — the contract guarantees
   // order, but defensive iteration keeps us resilient.
+  const planByStage = new Map(feature.stagePlans.map((p) => [p.stage, p]));
   for (const stage of FEATURE_STATES) {
-    const plan = feature.stagePlans.find((p) => p.stage === stage);
+    const plan = planByStage.get(stage);
     if (plan == null) {
       // Contract says length 5 — if we ever miss one, render a ghost.
       const ghostStart = ghostAnchor;

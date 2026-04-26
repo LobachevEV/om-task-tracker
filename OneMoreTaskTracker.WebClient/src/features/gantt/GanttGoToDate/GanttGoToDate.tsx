@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ISO_DATE_RE } from '../ganttMath';
 import './GanttGoToDate.css';
 
 export interface GanttGoToDateProps {
@@ -10,8 +11,6 @@ export interface GanttGoToDateProps {
   /** Called when the user dismisses (Esc or blur with empty value). */
   onClose: () => void;
 }
-
-const ISO_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export function GanttGoToDate({ open, onSubmit, onClose }: GanttGoToDateProps) {
   const { t } = useTranslation('gantt');
@@ -45,7 +44,7 @@ export function GanttGoToDate({ open, onSubmit, onClose }: GanttGoToDateProps) {
     (e: React.FormEvent) => {
       e.preventDefault();
       const trimmed = value.trim();
-      if (!ISO_RE.test(trimmed)) {
+      if (!ISO_DATE_RE.test(trimmed)) {
         setError(
           t('goTo.invalid', { defaultValue: 'Use YYYY-MM-DD' }),
         );

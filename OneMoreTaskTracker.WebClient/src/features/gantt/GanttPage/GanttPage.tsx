@@ -256,12 +256,15 @@ export function GanttPageInternal({
   const contentWidthPx = lanesInlinePx + effectiveTrailingPx;
   const todayPxAbs = todayPxInner + GUTTER_WIDTH_PX;
 
-  const pageStyle = {
-    ['--day-px']: `${dayPx}px`,
-    ['--gantt-cushion-width']: `${effectiveTrailingPx}px`,
-    ['--gantt-loaded-width']: `${totalWidthPx}px`,
-    ['--gantt-today-px']: `${todayPxAbs}px`,
-  } as CSSProperties;
+  const pageStyle = useMemo<CSSProperties>(
+    () => ({
+      ['--day-px']: `${dayPx}px`,
+      ['--gantt-cushion-width']: `${effectiveTrailingPx}px`,
+      ['--gantt-loaded-width']: `${totalWidthPx}px`,
+      ['--gantt-today-px']: `${todayPxAbs}px`,
+    }) as CSSProperties,
+    [dayPx, effectiveTrailingPx, totalWidthPx, todayPxAbs],
+  );
 
   return (
     <main className="gantt-page" style={pageStyle} data-testid="gantt-page">

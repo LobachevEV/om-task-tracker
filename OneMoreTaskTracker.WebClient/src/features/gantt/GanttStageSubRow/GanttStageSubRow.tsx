@@ -14,9 +14,8 @@ import {
 import './GanttStageSubRow.css';
 
 /**
- * Format an ISO yyyy-mm-dd as a short "Apr 17" label. Keeps the gutter under
- * its 280px budget and matches brief §7 microcopy example. Uses the active
- * i18n language (falls back to `en`). Returns the raw ISO on parse failure.
+ * Format an ISO yyyy-mm-dd as a short "Apr 17" label using the active i18n
+ * language. Returns the raw ISO on parse failure.
  */
 function formatShortDate(iso: string, locale: string): string {
   try {

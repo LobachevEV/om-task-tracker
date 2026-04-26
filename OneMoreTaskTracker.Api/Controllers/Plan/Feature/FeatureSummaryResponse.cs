@@ -14,7 +14,6 @@ public record FeatureSummaryResponse(
     int TaskCount,
     IReadOnlyList<int> TaskIds,
     IReadOnlyList<StagePlanResponse> StagePlans,
-    // Monotonically-increasing row version used as an optimistic-concurrency
-    // token (api-contract.md § "Optimistic Concurrency"). Bumped by every
-    // inline-edit PATCH. Additive on v1 — legacy clients can ignore.
+    // Optimistic-concurrency token. Bumped by every inline-edit PATCH;
+    // legacy clients that ignore it stay last-write-wins.
     int Version);
