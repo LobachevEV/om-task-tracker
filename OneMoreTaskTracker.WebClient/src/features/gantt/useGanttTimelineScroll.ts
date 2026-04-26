@@ -101,7 +101,9 @@ export function useGanttTimelineScroll(
   const leadingAbortRef = useRef<AbortController | null>(null);
   const trailingAbortRef = useRef<AbortController | null>(null);
   const loadChunkRef = useRef(loadChunk);
-  const initialScrollAppliedRef = useRef(false);
+  // Element identity — a boolean would skip re-anchoring when the page
+  // swaps in a fresh scroller (e.g. filter-driven remount).
+  const initialScrollAppliedForRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     loadChunkRef.current = loadChunk;
@@ -120,14 +122,12 @@ export function useGanttTimelineScroll(
     return Math.max(0, todayPx + gutterPx - Math.floor(viewportPx * TODAY_LEAD_FRACTION));
   }, [todayPx, gutterPx, initialViewportDays, dayPx, scrollerEl]);
 
-  // Apply initial scroll once the scroller is attached AND has measurable
-  // content width. Layout effect prevents a paint flash at scrollLeft=0.
   useLayoutEffect(() => {
-    if (initialScrollAppliedRef.current) return;
     if (!scrollerEl) return;
+    if (initialScrollAppliedForRef.current === scrollerEl) return;
     if (scrollerEl.scrollWidth <= 0) return;
     scrollerEl.scrollLeft = initialScrollLeft;
-    initialScrollAppliedRef.current = true;
+    initialScrollAppliedForRef.current = scrollerEl;
   }, [scrollerEl, initialScrollLeft]);
 
   const fetchChunk = useCallback(

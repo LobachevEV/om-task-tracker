@@ -524,4 +524,51 @@ describe('useGanttTimelineScroll', () => {
     );
     document.body.removeChild(el);
   });
+
+  it('re-anchors today when the scroller element is replaced (filter-driven remount)', async () => {
+    const loadChunk = vi.fn().mockResolvedValue(undefined);
+    const { result } = renderHook(() =>
+      useGanttTimelineScroll({
+        today: TODAY,
+        dayPx: DAY_PX,
+        initialViewportDays: VIEWPORT_DAYS,
+        initialBufferDays: BUFFER_DAYS,
+        chunkDays: CHUNK_DAYS,
+        cushionDays: CUSHION_DAYS,
+        bounds: null,
+        loadChunk,
+      }),
+    );
+    const expectedInitial = result.current.initialScrollLeft;
+    expect(expectedInitial).toBeGreaterThan(0);
+
+    const first = makeScrollerEl({
+      clientWidth: VIEWPORT_DAYS * DAY_PX,
+      scrollWidth: 5000,
+    });
+    document.body.appendChild(first);
+    await act(async () => {
+      result.current.attachScroller(first);
+    });
+    expect(first.scrollLeft).toBe(expectedInitial);
+
+    // Filter change → loading flips true → timeline unmounts → fresh
+    // <GanttTimelineScroller> remounts with a brand-new DOM element.
+    await act(async () => {
+      result.current.attachScroller(null);
+    });
+    const second = makeScrollerEl({
+      clientWidth: VIEWPORT_DAYS * DAY_PX,
+      scrollWidth: 5000,
+    });
+    document.body.appendChild(second);
+    await act(async () => {
+      result.current.attachScroller(second);
+    });
+
+    expect(second.scrollLeft).toBe(expectedInitial);
+
+    document.body.removeChild(first);
+    document.body.removeChild(second);
+  });
 });
