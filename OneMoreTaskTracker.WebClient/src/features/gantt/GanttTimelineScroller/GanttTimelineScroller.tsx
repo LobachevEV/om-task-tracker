@@ -49,13 +49,8 @@ export const GanttTimelineScroller = forwardRef<
 ) {
   const { t } = useTranslation('gantt');
   const [todayInView, setTodayInView] = useState(true);
-  // Track scroll position so we know when today has scrolled off-screen.
-  // We store the local element reference here purely for the scroll listener
-  // because the parent owns the scrollerRef via `forwardRef`.
   const [el, setEl] = useState<HTMLDivElement | null>(null);
 
-  // Compose the parent's ref + our own state-backed ref so we can listen to
-  // scroll events for the chip-visibility flag.
   const setRef = (node: HTMLDivElement | null) => {
     setEl(node);
     if (typeof ref === 'function') {
@@ -99,16 +94,27 @@ export const GanttTimelineScroller = forwardRef<
         </div>
       </div>
       {todayInView ? null : (
-        <button
-          type="button"
-          className="gantt-timeline-scroller__today-chip"
-          onClick={onJumpToToday}
-          aria-label={t('chip.todayAria', {
-            defaultValue: 'Jump to today',
-          })}
-        >
-          {t('chip.today', { defaultValue: '▸ Today' })}
-        </button>
+        <div className="gantt-timeline-scroller__chip-cluster">
+          <button
+            type="button"
+            className="gantt-timeline-scroller__today-chip"
+            onClick={onJumpToToday}
+            aria-label={t('chip.todayAria', {
+              defaultValue: 'Jump to today',
+            })}
+          >
+            <span className="gantt-timeline-scroller__today-chip-arrow" aria-hidden="true" />
+            <span>{t('chip.today', { defaultValue: 'Today' })}</span>
+          </button>
+          <span
+            className="gantt-timeline-scroller__shortcuts-hint"
+            aria-hidden="true"
+          >
+            {t('chip.shortcutsHint', {
+              defaultValue: 'Pan with arrows · Home · End · Ctrl+G to jump',
+            })}
+          </span>
+        </div>
       )}
     </div>
   );

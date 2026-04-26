@@ -187,6 +187,7 @@ export function GanttDateHeader({
               key={day.iso}
               className={cellClassName}
               data-date={day.iso}
+              data-day-cell={day.iso}
               role="gridcell"
               aria-label={longDate}
             >

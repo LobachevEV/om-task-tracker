@@ -111,8 +111,9 @@
   "retry": "Try again",
   "today": "Today",
   "chip": {
-    "today": "▸ Today",
-    "todayAria": "Jump to today"
+    "today": "Today",
+    "todayAria": "Jump to today",
+    "shortcutsHint": "Pan with arrows · Home · End · Ctrl+G to jump"
   },
   "scroller": {
     "label": "Gantt timeline, scrollable date axis"

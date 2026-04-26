@@ -38,34 +38,43 @@ export function useFeatureBounds(params: UseFeatureBoundsParams = {}): UseFeatur
   const [error, setError] = useState<Error | null>(null);
   const [refetchToken, setRefetchToken] = useState(0);
   const fetcherRef = useRef(fetcher);
-  fetcherRef.current = fetcher;
+  useEffect(() => {
+    fetcherRef.current = fetcher;
+  }, [fetcher]);
 
   const refetch = useCallback(() => {
     cache.delete(CACHE_KEY);
     inFlight.delete(CACHE_KEY);
+    setLoading(true);
+    setError(null);
     setRefetchToken((n) => n + 1);
   }, []);
 
   const invalidate = useCallback(() => {
     cache.delete(CACHE_KEY);
     inFlight.delete(CACHE_KEY);
+    setLoading(true);
     setRefetchToken((n) => n + 1);
   }, []);
 
+  // Render-time cache hydration. The React-idiomatic alternative to
+  // setState-in-effect — when a remount finds a value already in the
+  // module-level cache (e.g. another consumer populated it), seed local
+  // state during this render so the consumer doesn't paint a stale `null`.
+  const cached = cache.get(CACHE_KEY);
+  if (cached && bounds == null && refetchToken === 0) {
+    setBounds(cached);
+    if (loading) setLoading(false);
+  }
+
   useEffect(() => {
-    const cached = cache.get(CACHE_KEY);
-    if (cached && refetchToken === 0) {
-      setBounds(cached);
-      setLoading(false);
-      return;
-    }
+    if (cache.has(CACHE_KEY) && refetchToken === 0) return;
 
     let cancelled = false;
     const existing = inFlight.get(CACHE_KEY);
     const promise = existing ?? fetcherRef.current();
     if (!existing) inFlight.set(CACHE_KEY, promise);
 
-    setLoading(true);
     promise
       .then((value) => {
         if (cancelled) return;

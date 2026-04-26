@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import './GanttGoToDate.css';
 
@@ -15,20 +15,32 @@ const ISO_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export function GanttGoToDate({ open, onSubmit, onClose }: GanttGoToDateProps) {
   const { t } = useTranslation('gantt');
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  // Track which open-cycle we're rendering. When the parent flips `open`
+  // false → true we reset value/error during render via the
+  // "adjusting state during render" pattern, then auto-focus the input
+  // once it mounts. No setState-in-effect.
+  const [openCycle, setOpenCycle] = useState(open);
   const [value, setValue] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  // Auto-focus when opened.
-  useEffect(() => {
-    if (open) {
-      inputRef.current?.focus();
-      inputRef.current?.select();
-    } else {
-      setValue('');
-      setError(null);
-    }
-  }, [open]);
+  if (open !== openCycle) {
+    setOpenCycle(open);
+    setValue('');
+    setError(null);
+  }
+
+  // Auto-focus when opened — callback ref runs synchronously when the
+  // input element mounts, avoiding a setState-in-effect race.
+  const focusOnMount = useCallback(
+    (el: HTMLInputElement | null) => {
+      if (el && open) {
+        el.focus();
+        el.select();
+      }
+    },
+    [open],
+  );
+
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -70,7 +82,7 @@ export function GanttGoToDate({ open, onSubmit, onClose }: GanttGoToDateProps) {
           {t('goTo.legend', { defaultValue: 'Go to date' })}
         </span>
         <input
-          ref={inputRef}
+          ref={focusOnMount}
           type="text"
           inputMode="numeric"
           pattern="\d{4}-\d{2}-\d{2}"

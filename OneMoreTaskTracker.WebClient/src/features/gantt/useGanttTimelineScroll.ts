@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   addDays,
   chunkRange,
@@ -36,11 +36,12 @@ export interface UseGanttTimelineScrollParams {
 export interface ScrollState {
   loadedRange: DateWindow;
   totalWidthPx: number;
-  /** Px offset of `today` from `loadedRange.start`. */
+  /** Px offset of `today` from `loadedRange.start` (inner-content coordinate, == scrollLeft origin). */
   todayPx: number;
   /** Initial scrollLeft to apply once on mount: today anchored at leading 1/3 of viewport. */
   initialScrollLeft: number;
-  scrollerRef: React.RefObject<HTMLDivElement | null>;
+  /** Stable callback ref to attach the scrollable element. */
+  attachScroller: (el: HTMLDivElement | null) => void;
   isFetchingLeading: boolean;
   isFetchingTrailing: boolean;
   loadError: { direction: ChunkDirection; error: Error } | null;
@@ -87,54 +88,42 @@ export function useGanttTimelineScroll(
   );
   // `scrollerEl` is stored as state (not just a ref) so the scroll-listener
   // and keyboard effects re-bind when consumers attach the DOM node
-  // imperatively after mount (or via a callback ref). The exported
-  // `scrollerRef` is a stable proxy whose getter/setter forward to state, so
-  // consumers can keep the familiar `ref={scrollerRef}` JSX pattern AND
-  // imperative setters from tests both work without requiring callers to
-  // adopt a callback-ref API.
+  // imperatively after mount (or via a callback ref).
   const [scrollerEl, setScrollerEl] = useState<HTMLDivElement | null>(null);
-  const scrollerElRef = useRef<HTMLDivElement | null>(null);
-  scrollerElRef.current = scrollerEl;
-  const scrollerRefProxyRef = useRef<React.RefObject<HTMLDivElement | null> | null>(null);
-  if (scrollerRefProxyRef.current === null) {
-    scrollerRefProxyRef.current = {
-      get current() {
-        return scrollerElRef.current;
-      },
-      set current(value: HTMLDivElement | null) {
-        if (scrollerElRef.current === value) return;
-        scrollerElRef.current = value;
-        setScrollerEl(value);
-      },
-    };
-  }
   const leadingAbortRef = useRef<AbortController | null>(null);
   const trailingAbortRef = useRef<AbortController | null>(null);
   const loadChunkRef = useRef(loadChunk);
-  loadChunkRef.current = loadChunk;
   const initialScrollAppliedRef = useRef(false);
-  const scrollerRef = scrollerRefProxyRef.current;
+
+  useEffect(() => {
+    loadChunkRef.current = loadChunk;
+  }, [loadChunk]);
+
+  const attachScroller = useCallback((el: HTMLDivElement | null) => {
+    setScrollerEl((prev) => (prev === el ? prev : el));
+  }, []);
 
   const totalDays = daysBetween(loadedRange.start, loadedRange.end);
   const totalWidthPx = totalDays * dayPx;
   const todayPx = daysBetween(loadedRange.start, today) * dayPx;
 
-  // Initial scrollLeft — today anchored at leading 1/3 of viewport.
+  // Initial scrollLeft — today anchored at leading 1/3 of viewport. Computed
+  // against the actual viewport once attached; falls back to initialViewportDays
+  // before the element is measured.
   const initialScrollLeft = useMemo(() => {
-    const viewportPx = initialViewportDays * dayPx;
+    const viewportPx = scrollerEl?.clientWidth || initialViewportDays * dayPx;
     return Math.max(0, todayPx - Math.floor(viewportPx * TODAY_LEAD_FRACTION));
-    // Only depends on initial sizing — recomputed if today/dayPx/viewport changes.
-  }, [todayPx, initialViewportDays, dayPx]);
+  }, [todayPx, initialViewportDays, dayPx, scrollerEl]);
 
-  // Apply initial scroll once the scroller is attached (and only once).
-  useEffect(() => {
+  // Apply initial scroll once the scroller is attached AND has measurable
+  // content width. Layout effect prevents a paint flash at scrollLeft=0.
+  useLayoutEffect(() => {
     if (initialScrollAppliedRef.current) return;
     if (!scrollerEl) return;
+    if (scrollerEl.scrollWidth <= 0) return;
     scrollerEl.scrollLeft = initialScrollLeft;
     initialScrollAppliedRef.current = true;
-    // initialScrollLeft is intentionally not in deps — first-mount only.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scrollerEl]);
+  }, [scrollerEl, initialScrollLeft]);
 
   const fetchChunk = useCallback(
     async (direction: ChunkDirection) => {
@@ -253,37 +242,30 @@ export function useGanttTimelineScroll(
 
   const scrollToToday = useCallback(
     (behavior?: ScrollBehavior) => {
-      const el = scrollerRef.current;
+      const el = scrollerEl;
       if (!el) return;
       const viewportPx = el.clientWidth || initialViewportDays * dayPx;
-      const target = Math.max(
-        0,
-        daysBetween(loadedRange.start, today) * dayPx -
-          Math.floor(viewportPx * TODAY_LEAD_FRACTION),
-      );
+      const target = Math.max(0, todayPx - Math.floor(viewportPx * TODAY_LEAD_FRACTION));
       el.scrollTo({ left: target, behavior: respectMotionPref(behavior) });
     },
-    [loadedRange.start, today, dayPx, initialViewportDays],
+    [scrollerEl, todayPx, dayPx, initialViewportDays],
   );
 
   const scrollToStart = useCallback(
     (behavior?: ScrollBehavior) => {
-      const el = scrollerRef.current;
+      const el = scrollerEl;
       if (!el) return;
       const target = bounds?.earliestPlannedStart
-        ? Math.max(
-            0,
-            daysBetween(loadedRange.start, bounds.earliestPlannedStart) * dayPx,
-          )
+        ? Math.max(0, daysBetween(loadedRange.start, bounds.earliestPlannedStart) * dayPx)
         : 0;
       el.scrollTo({ left: target, behavior: respectMotionPref(behavior) });
     },
-    [bounds, loadedRange.start, dayPx],
+    [scrollerEl, bounds, loadedRange.start, dayPx],
   );
 
   const scrollToEnd = useCallback(
     (behavior?: ScrollBehavior) => {
-      const el = scrollerRef.current;
+      const el = scrollerEl;
       if (!el) return;
       const viewportPx = el.clientWidth;
       const target = bounds?.latestPlannedEnd
@@ -295,7 +277,7 @@ export function useGanttTimelineScroll(
         : el.scrollWidth - viewportPx;
       el.scrollTo({ left: target, behavior: respectMotionPref(behavior) });
     },
-    [bounds, loadedRange.start, dayPx],
+    [scrollerEl, bounds, loadedRange.start, dayPx],
   );
 
   const scrollToDate = useCallback(
@@ -331,18 +313,17 @@ export function useGanttTimelineScroll(
           else setIsFetchingTrailing(false);
         }
       }
-      const el = scrollerRef.current;
+      const el = scrollerEl;
       if (!el) return;
-      // After expansion, recompute target relative to the (possibly grown) start.
-      const start = scrollerRef.current ? loadedRange.start : loadedRange.start;
       const viewportPx = el.clientWidth || initialViewportDays * dayPx;
       const target = Math.max(
         0,
-        daysBetween(start, iso) * dayPx - Math.floor(viewportPx * TODAY_LEAD_FRACTION),
+        daysBetween(loadedRange.start, iso) * dayPx -
+          Math.floor(viewportPx * TODAY_LEAD_FRACTION),
       );
       el.scrollTo({ left: target, behavior: respectMotionPref(behavior) });
     },
-    [loadedRange, chunkDays, bounds, cushionDays, dayPx, initialViewportDays],
+    [scrollerEl, loadedRange, chunkDays, bounds, cushionDays, dayPx, initialViewportDays],
   );
 
   const retryFailedChunk = useCallback(() => {
@@ -391,7 +372,7 @@ export function useGanttTimelineScroll(
     totalWidthPx,
     todayPx,
     initialScrollLeft,
-    scrollerRef,
+    attachScroller,
     isFetchingLeading,
     isFetchingTrailing,
     loadError,

@@ -96,7 +96,9 @@ describe('useGanttTimelineScroll', () => {
   });
 
   it('triggers a leading chunk fetch when scrolled near the leading edge', async () => {
-    const loadChunk = vi.fn(async (_req: ScrollChunkRequest) => undefined);
+    const loadChunk = vi.fn<(req: ScrollChunkRequest) => Promise<undefined>>(
+      async () => undefined,
+    );
     const { result } = renderHook(() =>
       useGanttTimelineScroll({
         today: TODAY,
@@ -112,7 +114,7 @@ describe('useGanttTimelineScroll', () => {
     const el = makeScrollerEl({ clientWidth: VIEWPORT_DAYS * DAY_PX });
     document.body.appendChild(el);
     await act(async () => {
-      result.current.scrollerRef.current = el;
+      result.current.attachScroller(el);
     });
 
     // Scroll to the leading edge.
@@ -157,7 +159,7 @@ describe('useGanttTimelineScroll', () => {
     const el = makeScrollerEl({ clientWidth: VIEWPORT_DAYS * DAY_PX, scrollWidth: 5000 });
     document.body.appendChild(el);
     await act(async () => {
-      result.current.scrollerRef.current = el;
+      result.current.attachScroller(el);
     });
 
     // First leading prefetch via scroll-edge — hangs on `firstPromise`.
@@ -195,7 +197,7 @@ describe('useGanttTimelineScroll', () => {
 
   it('records loadError when the chunk fetch rejects, and clears it on retry', async () => {
     let mode: 'fail' | 'ok' = 'fail';
-    const loadChunk = vi.fn(async (_req: ScrollChunkRequest) => {
+    const loadChunk = vi.fn(async () => {
       if (mode === 'fail') throw new Error('boom');
     });
     const { result } = renderHook(() =>
@@ -213,7 +215,7 @@ describe('useGanttTimelineScroll', () => {
     const el = makeScrollerEl({ clientWidth: VIEWPORT_DAYS * DAY_PX });
     document.body.appendChild(el);
     await act(async () => {
-      result.current.scrollerRef.current = el;
+      result.current.attachScroller(el);
     });
 
     // Trigger leading fetch → fails.
@@ -236,7 +238,7 @@ describe('useGanttTimelineScroll', () => {
   });
 
   it('does not prefetch past leading bounds + cushion', async () => {
-    const loadChunk = vi.fn(async (_req: ScrollChunkRequest) => undefined);
+    const loadChunk = vi.fn(async () => undefined);
     // The initial loadedRange.start = today - 60 days = 2026-02-24. The
     // bounds-prefetch guard fires when `loadedRange.start <= earliest -
     // cushion`, so picking earliest = 2026-03-15 (cushion 14 → 2026-03-01,
@@ -261,7 +263,7 @@ describe('useGanttTimelineScroll', () => {
     const el = makeScrollerEl({ clientWidth: VIEWPORT_DAYS * DAY_PX });
     document.body.appendChild(el);
     await act(async () => {
-      result.current.scrollerRef.current = el;
+      result.current.attachScroller(el);
     });
 
     el.scrollLeft = 0;
@@ -296,7 +298,7 @@ describe('useGanttTimelineScroll', () => {
     const el = makeScrollerEl({ clientWidth: VIEWPORT_PX, scrollWidth: 5000 });
     document.body.appendChild(el);
     await act(async () => {
-      result.current.scrollerRef.current = el;
+      result.current.attachScroller(el);
     });
 
     act(() => {
@@ -328,7 +330,7 @@ describe('useGanttTimelineScroll', () => {
     const el = makeScrollerEl({ clientWidth: VIEWPORT_DAYS * DAY_PX, scrollWidth: 5000 });
     document.body.appendChild(el);
     await act(async () => {
-      result.current.scrollerRef.current = el;
+      result.current.attachScroller(el);
     });
     el.scrollLeft = 1000;
 
@@ -363,7 +365,7 @@ describe('useGanttTimelineScroll', () => {
     const el = makeScrollerEl({ clientWidth: VIEWPORT_PX, scrollWidth: 5000 });
     document.body.appendChild(el);
     await act(async () => {
-      result.current.scrollerRef.current = el;
+      result.current.attachScroller(el);
     });
     el.scrollLeft = 0;
 
@@ -396,7 +398,7 @@ describe('useGanttTimelineScroll', () => {
     const el = makeScrollerEl({ clientWidth: VIEWPORT_PX, scrollWidth: 5000 });
     document.body.appendChild(el);
     await act(async () => {
-      result.current.scrollerRef.current = el;
+      result.current.attachScroller(el);
     });
     el.scrollLeft = 1000;
 
@@ -429,7 +431,7 @@ describe('useGanttTimelineScroll', () => {
     const el = makeScrollerEl({ clientWidth: VIEWPORT_DAYS * DAY_PX, scrollWidth: 5000 });
     document.body.appendChild(el);
     await act(async () => {
-      result.current.scrollerRef.current = el;
+      result.current.attachScroller(el);
     });
     el.scrollLeft = 100;
 
@@ -463,7 +465,7 @@ describe('useGanttTimelineScroll', () => {
     const input = document.createElement('input');
     document.body.appendChild(input);
     await act(async () => {
-      result.current.scrollerRef.current = el;
+      result.current.attachScroller(el);
     });
     el.scrollLeft = 100;
 
@@ -509,7 +511,7 @@ describe('useGanttTimelineScroll', () => {
     const scrollToSpy = vi.fn();
     el.scrollTo = scrollToSpy;
     await act(async () => {
-      result.current.scrollerRef.current = el;
+      result.current.attachScroller(el);
     });
 
     act(() => {

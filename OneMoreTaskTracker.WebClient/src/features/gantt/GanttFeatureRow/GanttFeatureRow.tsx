@@ -142,6 +142,7 @@ function GanttFeatureRowInner({
       <div
         className="gantt-row"
         data-feature-id={feature.id}
+        data-feature-row={feature.id}
         data-testid={`feature-row-${feature.id}`}
         data-variant={variant}
       >

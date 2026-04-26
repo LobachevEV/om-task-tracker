@@ -98,7 +98,9 @@ export function usePlanFeatures(params: UsePlanFeaturesParams): UsePlanFeaturesR
   const [trackedKey, setTrackedKey] = useState<string>(key);
   const activeKeyRef = useRef<string>(key);
   const fetcherRef = useRef(fetcher);
-  fetcherRef.current = fetcher;
+  useEffect(() => {
+    fetcherRef.current = fetcher;
+  }, [fetcher]);
 
   // Resync state during render when the cache key changes. This is the
   // React-idiomatic "adjusting state while rendering" pattern.

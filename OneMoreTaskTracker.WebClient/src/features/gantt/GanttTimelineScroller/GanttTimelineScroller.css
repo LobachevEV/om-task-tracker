@@ -10,7 +10,10 @@
 .gantt-timeline-scroller__viewport {
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-color: var(--border-strong) transparent;
+  /* Track gets the page's surface tone so it sits flush with the lanes
+     instead of bleeding through to the browser default. Thumb keeps the
+     border tone for sufficient contrast against the surface. */
+  scrollbar-color: var(--border) var(--surface);
   scrollbar-width: thin;
   block-size: 100%;
 }
@@ -25,11 +28,17 @@
   block-size: 100%;
 }
 
-.gantt-timeline-scroller__today-chip {
+.gantt-timeline-scroller__chip-cluster {
   position: absolute;
   inset-block-start: 4px;
   inset-inline-end: 8px;
   z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gantt-timeline-scroller__today-chip {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -42,6 +51,30 @@
   font-size: 11px;
   letter-spacing: 0.04em;
   cursor: pointer;
+}
+
+.gantt-timeline-scroller__shortcuts-hint {
+  color: var(--text-muted);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .gantt-timeline-scroller__shortcuts-hint {
+    display: none;
+  }
+}
+
+/* Triangular indicator that points the eye back toward today.
+   Renders via a CSS triangle so it isn't a literal Unicode glyph in
+   the i18n payload (translators kept rotating it to broken codepoints). */
+.gantt-timeline-scroller__today-chip-arrow {
+  inline-size: 0;
+  block-size: 0;
+  border-block-start: 4px solid transparent;
+  border-block-end: 4px solid transparent;
+  border-inline-start: 5px solid currentColor;
 }
 
 .gantt-timeline-scroller__today-chip:hover {

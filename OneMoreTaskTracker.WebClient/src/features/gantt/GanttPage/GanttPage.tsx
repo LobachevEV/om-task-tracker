@@ -151,6 +151,15 @@ export function GanttPageInternal({
   const isManager = role === 'Manager';
   const mutations = useFeatureMutationCallbacks({ onApplied: onFeatureUpdated });
 
+  // Trailing-only cushion so the user can pan past the last chunk and still
+  // see "end of plan" rather than empty space. We don't render a *leading*
+  // cushion inside the scrollable content because that would offset every
+  // in-scroller coordinate (today hairline, scrollLeft anchor) by its width
+  // and force the page to reason in two coordinate systems. Instead the
+  // hard-bound cap on the leading edge is rendered by the scroller's left
+  // gutter once the user pans past the earliest planned date.
+  const cushionWidthPx = CUSHION_DAYS * dayPx;
+
   const scroll = useGanttTimelineScroll({
     today: state.today,
     dayPx,
@@ -161,11 +170,26 @@ export function GanttPageInternal({
     bounds,
     loadChunk,
   });
+  // Pull each scroll-hook field out into local consts so the lint plugin's
+  // ref-tracker doesn't taint the entire `scroll` object — passing
+  // `scroll.attachScroller` as a JSX `ref` prop made it flag every other
+  // `scroll.X` access as "ref read during render".
+  const {
+    attachScroller,
+    loadedRange,
+    isFetchingTrailing,
+    loadError,
+    scrollToToday,
+    scrollToDate,
+    retryFailedChunk,
+    todayPx: todayPxInner,
+    totalWidthPx,
+  } = scroll;
 
   const layout = useGanttLayout({
     features,
     today: state.today,
-    loadedRange: scroll.loadedRange,
+    loadedRange,
     dayPx,
   });
 
@@ -226,29 +250,24 @@ export function GanttPageInternal({
   const handleGoToSubmit = useCallback(
     (iso: string) => {
       setGoToOpen(false);
-      void scroll.scrollToDate(iso);
+      void scrollToDate(iso);
     },
-    [scroll],
+    [scrollToDate],
   );
 
   const hasAnyFeatures = layout.lanes.length + layout.unscheduled.length > 0;
 
-  // Cushion widths flank the loaded range so the user can pan past the last
-  // chunk and still see "earliest plan" / "end of plan" rather than empty space.
-  const cushionWidthPx = CUSHION_DAYS * dayPx;
-  const showLeadingStripe = scroll.isFetchingLeading || scroll.loadError?.direction === 'leading';
-  const showTrailingStripe =
-    scroll.isFetchingTrailing || scroll.loadError?.direction === 'trailing';
+  const showTrailingStripe = isFetchingTrailing || loadError?.direction === 'trailing';
 
-  // Total content width: leading flank (cushion or stripe) + loaded range + trailing flank.
-  const contentWidthPx = cushionWidthPx + scroll.totalWidthPx + cushionWidthPx;
-  const todayPxInScroller = cushionWidthPx + scroll.todayPx;
+  // Total content width: loaded range + trailing flank only (no leading
+  // cushion in the scrollable layer — see comment on cushionWidthPx above).
+  const contentWidthPx = totalWidthPx + cushionWidthPx;
 
   const pageStyle = {
     ['--day-px']: `${dayPx}px`,
     ['--gantt-cushion-width']: `${cushionWidthPx}px`,
-    ['--gantt-loaded-width']: `${scroll.totalWidthPx}px`,
-    ['--gantt-today-px']: `${todayPxInScroller}px`,
+    ['--gantt-loaded-width']: `${totalWidthPx}px`,
+    ['--gantt-today-px']: `${todayPxInner}px`,
   } as CSSProperties;
 
   return (
@@ -310,23 +329,20 @@ export function GanttPageInternal({
       ) : (
         <section className="gantt-page__timeline-wrap">
           <GanttTimelineScroller
-            ref={scroll.scrollerRef}
+            ref={attachScroller}
             contentWidthPx={contentWidthPx}
-            todayPx={todayPxInScroller}
-            onJumpToToday={scroll.scrollToToday}
+            todayPx={todayPxInner}
+            onJumpToToday={scrollToToday}
           >
-            {/* Sticky 3-band date header sits at the top of the inner scroller. */}
+            {/* Sticky 2-band date header sits at the top of the inner scroller.
+                The trailing flank pads past the loaded range so the header
+                visually extends to the trailing cushion. */}
             <div
               className="gantt-page__header-row"
               style={{ inlineSize: `${contentWidthPx}px` }}
             >
-              <div
-                className="gantt-page__header-flank"
-                style={{ inlineSize: `${cushionWidthPx}px` }}
-                aria-hidden="true"
-              />
               <GanttDateHeader
-                loadedRange={scroll.loadedRange}
+                loadedRange={loadedRange}
                 today={state.today}
                 dayPx={dayPx}
                 className="gantt-page__date-header"
@@ -346,33 +362,14 @@ export function GanttPageInternal({
                 defaultValue: 'Today {{date}}',
                 date: state.today,
               })}
-              style={{ insetInlineStart: `${todayPxInScroller}px` }}
+              style={{ insetInlineStart: `${todayPxInner}px` }}
             />
 
             <div className="gantt-page__lanes-row">
-              {showLeadingStripe ? (
-                <GanttChunkStripe
-                  side="leading"
-                  mode={scroll.isFetchingLeading ? 'loading' : 'failed'}
-                  widthPx={cushionWidthPx}
-                  onRetry={
-                    scroll.loadError?.direction === 'leading'
-                      ? scroll.retryFailedChunk
-                      : undefined
-                  }
-                />
-              ) : (
-                <GanttHardBoundCushion
-                  side="leading"
-                  boundIso={bounds?.earliestPlannedStart ?? null}
-                  widthPx={cushionWidthPx}
-                />
-              )}
-
               <div
                 className="gantt-page__lanes"
                 role="list"
-                style={{ inlineSize: `${scroll.totalWidthPx}px` }}
+                style={{ inlineSize: `${totalWidthPx}px` }}
               >
                 {layout.lanes.map((lane: GanttLane) => {
                   const lead = resolveMember(lane.feature.leadUserId);
@@ -400,12 +397,10 @@ export function GanttPageInternal({
               {showTrailingStripe ? (
                 <GanttChunkStripe
                   side="trailing"
-                  mode={scroll.isFetchingTrailing ? 'loading' : 'failed'}
+                  mode={isFetchingTrailing ? 'loading' : 'failed'}
                   widthPx={cushionWidthPx}
                   onRetry={
-                    scroll.loadError?.direction === 'trailing'
-                      ? scroll.retryFailedChunk
-                      : undefined
+                    loadError?.direction === 'trailing' ? retryFailedChunk : undefined
                   }
                 />
               ) : (
