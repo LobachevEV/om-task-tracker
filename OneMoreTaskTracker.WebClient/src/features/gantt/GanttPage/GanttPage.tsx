@@ -20,7 +20,6 @@ import { GanttDateHeader } from '../GanttDateHeader';
 import { GanttEmpty } from '../GanttEmpty';
 import { GanttFeatureRow } from '../GanttFeatureRow';
 import { GanttGoToDate } from '../GanttGoToDate';
-import { GanttHardBoundCushion } from '../GanttHardBoundCushion';
 import { GanttTimelineScroller } from '../GanttTimelineScroller';
 import { GanttToolbar } from '../GanttToolbar';
 import { CreateFeatureDialog } from '../CreateFeatureDialog';
@@ -94,7 +93,7 @@ export interface GanttPageInternalProps {
   onFeatureUpdated: (next: FeatureSummary) => void;
   /** Chunk-fetch callback wired into the scrollable timeline. */
   loadChunk: (req: ScrollChunkRequest) => Promise<unknown>;
-  /** Global plan bounds used to clamp scrollable range + render cushions. */
+  /** Global plan bounds used to clamp the scrollable range. */
   bounds: FeatureBounds | null;
 }
 
@@ -151,13 +150,6 @@ export function GanttPageInternal({
   const isManager = role === 'Manager';
   const mutations = useFeatureMutationCallbacks({ onApplied: onFeatureUpdated });
 
-  // Trailing-only cushion so the user can pan past the last chunk and still
-  // see "end of plan" rather than empty space. We don't render a *leading*
-  // cushion inside the scrollable content because that would offset every
-  // in-scroller coordinate (today hairline, scrollLeft anchor) by its width
-  // and force the page to reason in two coordinate systems. Instead the
-  // hard-bound cap on the leading edge is rendered by the scroller's left
-  // gutter once the user pans past the earliest planned date.
   const cushionWidthPx = CUSHION_DAYS * dayPx;
 
   const scroll = useGanttTimelineScroll({
@@ -258,14 +250,12 @@ export function GanttPageInternal({
   const hasAnyFeatures = layout.lanes.length + layout.unscheduled.length > 0;
 
   const showTrailingStripe = isFetchingTrailing || loadError?.direction === 'trailing';
-
-  // Total content width: loaded range + trailing flank only (no leading
-  // cushion in the scrollable layer — see comment on cushionWidthPx above).
-  const contentWidthPx = totalWidthPx + cushionWidthPx;
+  const effectiveTrailingPx = showTrailingStripe ? cushionWidthPx : 0;
+  const contentWidthPx = totalWidthPx + effectiveTrailingPx;
 
   const pageStyle = {
     ['--day-px']: `${dayPx}px`,
-    ['--gantt-cushion-width']: `${cushionWidthPx}px`,
+    ['--gantt-cushion-width']: `${effectiveTrailingPx}px`,
     ['--gantt-loaded-width']: `${totalWidthPx}px`,
     ['--gantt-today-px']: `${todayPxInner}px`,
   } as CSSProperties;
@@ -334,9 +324,6 @@ export function GanttPageInternal({
             todayPx={todayPxInner}
             onJumpToToday={scrollToToday}
           >
-            {/* Sticky 2-band date header sits at the top of the inner scroller.
-                The trailing flank pads past the loaded range so the header
-                visually extends to the trailing cushion. */}
             <div
               className="gantt-page__header-row"
               style={{ inlineSize: `${contentWidthPx}px` }}
@@ -347,11 +334,13 @@ export function GanttPageInternal({
                 dayPx={dayPx}
                 className="gantt-page__date-header"
               />
-              <div
-                className="gantt-page__header-flank"
-                style={{ inlineSize: `${cushionWidthPx}px` }}
-                aria-hidden="true"
-              />
+              {showTrailingStripe ? (
+                <div
+                  className="gantt-page__header-flank"
+                  style={{ inlineSize: `${cushionWidthPx}px` }}
+                  aria-hidden="true"
+                />
+              ) : null}
             </div>
 
             {/* Today hairline runs full-height through the lanes. */}
@@ -403,13 +392,7 @@ export function GanttPageInternal({
                     loadError?.direction === 'trailing' ? retryFailedChunk : undefined
                   }
                 />
-              ) : (
-                <GanttHardBoundCushion
-                  side="trailing"
-                  boundIso={bounds?.latestPlannedEnd ?? null}
-                  widthPx={cushionWidthPx}
-                />
-              )}
+              ) : null}
             </div>
           </GanttTimelineScroller>
 

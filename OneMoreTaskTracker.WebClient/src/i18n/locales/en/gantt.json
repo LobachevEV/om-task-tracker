@@ -121,11 +121,6 @@
   "dateHeader": {
     "daysAria": "Calendar days, scrollable"
   },
-  "bounds": {
-    "earliest": "Earliest plan: {{date}}",
-    "end": "End of plan: {{date}}",
-    "endNoFuture": "No plans past today"
-  },
   "chunk": {
     "loading": "Loading dates…",
     "failed": "Couldn't load these dates.",
