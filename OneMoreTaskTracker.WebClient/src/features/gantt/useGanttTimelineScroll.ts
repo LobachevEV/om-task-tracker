@@ -19,6 +19,13 @@ export interface UseGanttTimelineScrollParams {
   today: string;
   /** Width of one day column in px. */
   dayPx: number;
+  /**
+   * Width of the sticky leading gutter (px) that occupies the first column of
+   * each row. Date columns and segment bars start at scroller-x = gutterPx;
+   * scrollLeft anchors are offset by it so "today at viewport 1/3" lands the
+   * actual today column there, not the gutter.
+   */
+  gutterPx?: number;
   /** Initial visible width in days (used for loadedRange seed; overridden by scroller geometry once mounted). */
   initialViewportDays: number;
   /** How many days of pre/post buffer around `today` to prefetch on first mount. */
@@ -70,6 +77,7 @@ export function useGanttTimelineScroll(
   const {
     today,
     dayPx,
+    gutterPx = 0,
     initialViewportDays,
     initialBufferDays,
     chunkDays,
@@ -112,8 +120,8 @@ export function useGanttTimelineScroll(
   // before the element is measured.
   const initialScrollLeft = useMemo(() => {
     const viewportPx = scrollerEl?.clientWidth || initialViewportDays * dayPx;
-    return Math.max(0, todayPx - Math.floor(viewportPx * TODAY_LEAD_FRACTION));
-  }, [todayPx, initialViewportDays, dayPx, scrollerEl]);
+    return Math.max(0, todayPx + gutterPx - Math.floor(viewportPx * TODAY_LEAD_FRACTION));
+  }, [todayPx, gutterPx, initialViewportDays, dayPx, scrollerEl]);
 
   // Apply initial scroll once the scroller is attached AND has measurable
   // content width. Layout effect prevents a paint flash at scrollLeft=0.
@@ -187,7 +195,7 @@ export function useGanttTimelineScroll(
       const sl = el.scrollLeft;
       const cw = el.clientWidth;
       const sw = el.scrollWidth;
-      const leadingThresholdPx = EDGE_PREFETCH_DAYS * dayPx;
+      const leadingThresholdPx = gutterPx + EDGE_PREFETCH_DAYS * dayPx;
       const trailingThresholdPx = sw - cw - EDGE_PREFETCH_DAYS * dayPx;
       // Leading edge.
       if (sl < leadingThresholdPx && !isFetchingLeading) {
@@ -223,6 +231,7 @@ export function useGanttTimelineScroll(
   }, [
     scrollerEl,
     dayPx,
+    gutterPx,
     fetchChunk,
     isFetchingLeading,
     isFetchingTrailing,
@@ -245,10 +254,10 @@ export function useGanttTimelineScroll(
       const el = scrollerEl;
       if (!el) return;
       const viewportPx = el.clientWidth || initialViewportDays * dayPx;
-      const target = Math.max(0, todayPx - Math.floor(viewportPx * TODAY_LEAD_FRACTION));
+      const target = Math.max(0, todayPx + gutterPx - Math.floor(viewportPx * TODAY_LEAD_FRACTION));
       el.scrollTo({ left: target, behavior: respectMotionPref(behavior) });
     },
-    [scrollerEl, todayPx, dayPx, initialViewportDays],
+    [scrollerEl, todayPx, gutterPx, dayPx, initialViewportDays],
   );
 
   const scrollToStart = useCallback(
@@ -256,11 +265,11 @@ export function useGanttTimelineScroll(
       const el = scrollerEl;
       if (!el) return;
       const target = bounds?.earliestPlannedStart
-        ? Math.max(0, daysBetween(loadedRange.start, bounds.earliestPlannedStart) * dayPx)
+        ? Math.max(0, daysBetween(loadedRange.start, bounds.earliestPlannedStart) * dayPx + gutterPx)
         : 0;
       el.scrollTo({ left: target, behavior: respectMotionPref(behavior) });
     },
-    [scrollerEl, bounds, loadedRange.start, dayPx],
+    [scrollerEl, bounds, loadedRange.start, dayPx, gutterPx],
   );
 
   const scrollToEnd = useCallback(
@@ -271,13 +280,14 @@ export function useGanttTimelineScroll(
       const target = bounds?.latestPlannedEnd
         ? Math.max(
             0,
-            daysBetween(loadedRange.start, bounds.latestPlannedEnd) * dayPx -
+            daysBetween(loadedRange.start, bounds.latestPlannedEnd) * dayPx +
+              gutterPx -
               Math.floor(viewportPx * (1 - TODAY_LEAD_FRACTION)),
           )
         : el.scrollWidth - viewportPx;
       el.scrollTo({ left: target, behavior: respectMotionPref(behavior) });
     },
-    [scrollerEl, bounds, loadedRange.start, dayPx],
+    [scrollerEl, bounds, loadedRange.start, dayPx, gutterPx],
   );
 
   const scrollToDate = useCallback(
@@ -318,12 +328,13 @@ export function useGanttTimelineScroll(
       const viewportPx = el.clientWidth || initialViewportDays * dayPx;
       const target = Math.max(
         0,
-        daysBetween(loadedRange.start, iso) * dayPx -
+        daysBetween(loadedRange.start, iso) * dayPx +
+          gutterPx -
           Math.floor(viewportPx * TODAY_LEAD_FRACTION),
       );
       el.scrollTo({ left: target, behavior: respectMotionPref(behavior) });
     },
-    [scrollerEl, loadedRange, chunkDays, bounds, cushionDays, dayPx, initialViewportDays],
+    [scrollerEl, loadedRange, chunkDays, bounds, cushionDays, dayPx, gutterPx, initialViewportDays],
   );
 
   const retryFailedChunk = useCallback(() => {

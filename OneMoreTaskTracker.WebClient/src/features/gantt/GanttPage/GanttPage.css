@@ -57,6 +57,15 @@
   background: var(--surface);
 }
 
+/* Mirrors the sticky row-gutter so the date axis starts at the same scroller-x
+ * as each row's lane (and segment bars line up under their date columns). */
+.gantt-page__header-flank--leading {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  border-inline-end: 1px solid var(--border);
+}
+
 .gantt-page__date-header {
   flex: 0 0 auto;
 }

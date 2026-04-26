@@ -49,6 +49,12 @@ const INITIAL_VIEWPORT_DAYS = 60;
 const INITIAL_BUFFER_DAYS = 30;
 const CHUNK_DAYS = 30;
 const CUSHION_DAYS = 30;
+/**
+ * Width of the sticky leading column on every row (lead/team/title gutter).
+ * Date columns and segment bars start at scroller-x = GUTTER_WIDTH_PX so they
+ * share the same coordinate space; must match `--gantt-gutter-width` in CSS.
+ */
+const GUTTER_WIDTH_PX = 280;
 
 function toMiniMember(row: TeamRosterMember): MiniTeamMember {
   return {
@@ -155,6 +161,7 @@ export function GanttPageInternal({
   const scroll = useGanttTimelineScroll({
     today: state.today,
     dayPx,
+    gutterPx: GUTTER_WIDTH_PX,
     initialViewportDays: INITIAL_VIEWPORT_DAYS,
     initialBufferDays: INITIAL_BUFFER_DAYS,
     chunkDays: CHUNK_DAYS,
@@ -251,13 +258,17 @@ export function GanttPageInternal({
 
   const showTrailingStripe = isFetchingTrailing || loadError?.direction === 'trailing';
   const effectiveTrailingPx = showTrailingStripe ? cushionWidthPx : 0;
-  const contentWidthPx = totalWidthPx + effectiveTrailingPx;
+  // Date columns and segment bars share the same scroller-x origin: both start
+  // at GUTTER_WIDTH_PX (the row gutter occupies the first column on each row).
+  const lanesInlinePx = GUTTER_WIDTH_PX + totalWidthPx;
+  const contentWidthPx = lanesInlinePx + effectiveTrailingPx;
+  const todayPxAbs = todayPxInner + GUTTER_WIDTH_PX;
 
   const pageStyle = {
     ['--day-px']: `${dayPx}px`,
     ['--gantt-cushion-width']: `${effectiveTrailingPx}px`,
     ['--gantt-loaded-width']: `${totalWidthPx}px`,
-    ['--gantt-today-px']: `${todayPxInner}px`,
+    ['--gantt-today-px']: `${todayPxAbs}px`,
   } as CSSProperties;
 
   return (
@@ -321,13 +332,18 @@ export function GanttPageInternal({
           <GanttTimelineScroller
             ref={attachScroller}
             contentWidthPx={contentWidthPx}
-            todayPx={todayPxInner}
+            todayPx={todayPxAbs}
             onJumpToToday={scrollToToday}
           >
             <div
               className="gantt-page__header-row"
               style={{ inlineSize: `${contentWidthPx}px` }}
             >
+              <div
+                className="gantt-page__header-flank gantt-page__header-flank--leading"
+                style={{ inlineSize: `${GUTTER_WIDTH_PX}px` }}
+                aria-hidden="true"
+              />
               <GanttDateHeader
                 loadedRange={loadedRange}
                 today={state.today}
@@ -351,14 +367,14 @@ export function GanttPageInternal({
                 defaultValue: 'Today {{date}}',
                 date: state.today,
               })}
-              style={{ insetInlineStart: `${todayPxInner}px` }}
+              style={{ insetInlineStart: `${todayPxAbs}px` }}
             />
 
             <div className="gantt-page__lanes-row">
               <div
                 className="gantt-page__lanes"
                 role="list"
-                style={{ inlineSize: `${totalWidthPx}px` }}
+                style={{ inlineSize: `${lanesInlinePx}px` }}
               >
                 {layout.lanes.map((lane: GanttLane) => {
                   const lead = resolveMember(lane.feature.leadUserId);
