@@ -20,12 +20,7 @@ export interface GanttSegmentedBarProps {
    * has bar geometry.
    */
   laneVariant?: 'planned' | 'noPlan';
-  /**
-   * Feature-level planned-span geometry. Used to render an overall feature
-   * progress bar when the feature has planned dates but no individual stage
-   * has been planned yet (so per-stage segments are all ghost). Lets the
-   * manager still see the feature's overall span on the timeline.
-   */
+  /** Feature-level span; rendered as a summary bar when all stages are ghost. */
   summaryBar?: BarGeometryPx | null;
 }
 

@@ -41,7 +41,6 @@ export function GanttGoToDate({ open, onSubmit, onClose }: GanttGoToDateProps) {
     [open],
   );
 
-
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();

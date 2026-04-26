@@ -64,7 +64,7 @@ export interface ScrollState {
   retryFailedChunk: () => void;
 }
 
-const EDGE_PREFETCH_DAYS = 14; // Trigger prefetch when we're within this many days of either edge.
+const EDGE_PREFETCH_DAYS = 14;
 const TODAY_LEAD_FRACTION = 1 / 3;
 
 function isWithinRange(iso: string, range: DateWindow): boolean {
@@ -115,9 +115,6 @@ export function useGanttTimelineScroll(
   const totalWidthPx = totalDays * dayPx;
   const todayPx = daysBetween(loadedRange.start, today) * dayPx;
 
-  // Initial scrollLeft — today anchored at leading 1/3 of viewport. Computed
-  // against the actual viewport once attached; falls back to initialViewportDays
-  // before the element is measured.
   const initialScrollLeft = useMemo(() => {
     const viewportPx = scrollerEl?.clientWidth || initialViewportDays * dayPx;
     return Math.max(0, todayPx + gutterPx - Math.floor(viewportPx * TODAY_LEAD_FRACTION));
@@ -135,16 +132,12 @@ export function useGanttTimelineScroll(
 
   const fetchChunk = useCallback(
     async (direction: ChunkDirection) => {
-      // Compute the chunk window first; clamp to bounds (with cushion) so we
-      // never fetch past the planning horizon.
       const chunk = chunkRange(direction, loadedRange, chunkDays);
       const clamped = bounds
         ? clampToBounds(chunk, bounds, cushionDays)
         : chunk;
-      // If clamping reduced the chunk to zero days, do nothing.
       if (daysBetween(clamped.start, clamped.end) <= 0) return;
 
-      // Cancel any prior in-flight chunk in the same direction.
       const ref = direction === 'leading' ? leadingAbortRef : trailingAbortRef;
       ref.current?.abort();
       const ac = new AbortController();
@@ -159,7 +152,6 @@ export function useGanttTimelineScroll(
           signal: ac.signal,
         });
         if (ac.signal.aborted) return;
-        // Expand the loaded range to include the freshly-fetched chunk.
         setLoadedRange((prev) => {
           if (direction === 'leading') {
             const newStart =
@@ -197,7 +189,6 @@ export function useGanttTimelineScroll(
       const sw = el.scrollWidth;
       const leadingThresholdPx = gutterPx + EDGE_PREFETCH_DAYS * dayPx;
       const trailingThresholdPx = sw - cw - EDGE_PREFETCH_DAYS * dayPx;
-      // Leading edge.
       if (sl < leadingThresholdPx && !isFetchingLeading) {
         const atBoundsStart =
           bounds?.earliestPlannedStart != null &&
@@ -206,7 +197,6 @@ export function useGanttTimelineScroll(
           void fetchChunk('leading');
         }
       }
-      // Trailing edge.
       if (sl > trailingThresholdPx && !isFetchingTrailing) {
         const atBoundsEnd =
           bounds?.latestPlannedEnd != null &&
@@ -292,11 +282,9 @@ export function useGanttTimelineScroll(
 
   const scrollToDate = useCallback(
     async (iso: string, behavior?: ScrollBehavior): Promise<void> => {
-      // If the date is outside the loaded range, expand first.
       if (!isWithinRange(iso, loadedRange)) {
         const direction: ChunkDirection =
           daysBetween(iso, loadedRange.start) >= 0 ? 'leading' : 'trailing';
-        // Expand directly to cover the requested date plus a small buffer.
         const expandTo: DateWindow =
           direction === 'leading'
             ? { start: addDays(iso, -chunkDays), end: loadedRange.end }
@@ -342,11 +330,9 @@ export function useGanttTimelineScroll(
     void fetchChunk(loadError.direction);
   }, [loadError, fetchChunk]);
 
-  // Keyboard shortcuts: Home, End, Cmd/Ctrl+G, ArrowRight, Shift+ArrowRight, PageDown.
   useEffect(() => {
     if (!scrollerEl) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      // Ignore when focus is in an editable field.
       const target = e.target as HTMLElement | null;
       if (target) {
         const tag = target.tagName;

@@ -23,11 +23,7 @@ import './GanttFeatureRow.css';
 export interface GanttFeatureRowProps {
   feature: FeatureSummary;
   stageBars: StageBarGeometry[];
-  /**
-   * Feature-level planned-span geometry. When stage plans are absent but the
-   * feature has plannedStart/plannedEnd, the segmented bar uses this to draw a
-   * single summary bar so the row still shows on the timeline.
-   */
+  /** Feature-level span; forwarded to GanttSegmentedBar as the summary fallback. */
   bar?: BarGeometryPx | null;
   today: string;
   lead: MiniTeamMember;

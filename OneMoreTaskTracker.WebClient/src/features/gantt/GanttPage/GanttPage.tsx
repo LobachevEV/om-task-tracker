@@ -38,7 +38,6 @@ import './GanttPage.css';
 
 const PLACEHOLDER_ROLE: MiniTeamMember['role'] = 'FrontendDeveloper';
 
-/** Day-column px width per zoom level. Week zoom = roomy, month zoom = compact. */
 const DAY_PX_BY_ZOOM: Readonly<Record<ZoomLevel, number>> = {
   week: 48,
   twoWeeks: 32,
@@ -169,10 +168,6 @@ export function GanttPageInternal({
     bounds,
     loadChunk,
   });
-  // Pull each scroll-hook field out into local consts so the lint plugin's
-  // ref-tracker doesn't taint the entire `scroll` object — passing
-  // `scroll.attachScroller` as a JSX `ref` prop made it flag every other
-  // `scroll.X` access as "ref read during render".
   const {
     attachScroller,
     loadedRange,
@@ -223,7 +218,6 @@ export function GanttPageInternal({
     [state, onRetry],
   );
 
-  // Cmd/Ctrl+G opens the "Go to date" mini-form.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && (e.key === 'g' || e.key === 'G')) {
@@ -258,8 +252,6 @@ export function GanttPageInternal({
 
   const showTrailingStripe = isFetchingTrailing || loadError?.direction === 'trailing';
   const effectiveTrailingPx = showTrailingStripe ? cushionWidthPx : 0;
-  // Date columns and segment bars share the same scroller-x origin: both start
-  // at GUTTER_WIDTH_PX (the row gutter occupies the first column on each row).
   const lanesInlinePx = GUTTER_WIDTH_PX + totalWidthPx;
   const contentWidthPx = lanesInlinePx + effectiveTrailingPx;
   const todayPxAbs = todayPxInner + GUTTER_WIDTH_PX;
@@ -359,7 +351,6 @@ export function GanttPageInternal({
               ) : null}
             </div>
 
-            {/* Today hairline runs full-height through the lanes. */}
             <div
               className="gantt-page__today-hairline"
               role="separator"
@@ -441,7 +432,6 @@ const ANONYMOUS_ROLE: UserRole = 'FrontendDeveloper';
 
 export function GanttPage() {
   const { user } = useAuth();
-  // All hooks must execute unconditionally; we gate rendering, not hook calls.
   const role: UserRole = user?.role ?? ANONYMOUS_ROLE;
   const state = useGanttPageState(role);
   const features = usePlanFeatures({
