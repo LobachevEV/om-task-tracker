@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { RoleBadge } from './RoleBadge';
-import { ROLE_BADGE_CLASS, ROLE_LABEL_SHORT } from '../../../shared/auth/roles';
-import type { UserRole } from '../../../shared/auth/roles';
+import { ROLE_BADGE_CLASS, ROLE_LABEL_SHORT } from '../../../common/auth/roles';
+import type { UserRole } from '../../../common/auth/roles';
 
 const ROLE_LABEL_FULL_RU: Record<UserRole, string> = {
   Manager: 'Менеджер',

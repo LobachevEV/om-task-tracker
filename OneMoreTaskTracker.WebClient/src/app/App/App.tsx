@@ -8,8 +8,8 @@ import {TaskPage} from '../../features/tasks/TaskPage';
 import TeamPage from '../../features/team/TeamPage';
 import {GanttPage} from '../../features/gantt/GanttPage';
 import {HomeRoute} from '../HomeRoute';
-import {ErrorBoundary} from '../../shared/components/ErrorBoundary';
-import {AppHeader} from '../../shared/components/AppHeader';
+import {ErrorBoundary} from '../../common/components/ErrorBoundary';
+import {AppHeader} from '../../common/components/AppHeader';
 
 function App() {
   return (

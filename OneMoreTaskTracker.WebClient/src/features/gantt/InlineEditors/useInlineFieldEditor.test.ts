@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
 import { useInlineFieldEditor } from './useInlineFieldEditor';
-import { ApiError } from '../../../shared/api/ApiError';
+import { ApiError } from '../../../common/api/ApiError';
 
 describe('useInlineFieldEditor', () => {
   it('initial status is idle and draft mirrors committed', () => {

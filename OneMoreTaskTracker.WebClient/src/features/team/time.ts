@@ -1,4 +1,4 @@
-import i18n from '../../i18n/config';
+import i18n from '../../common/i18n/config';
 
 export function formatLastActive(iso: string | null): string {
   if (!iso) return i18n.t('team:lastActive.never');

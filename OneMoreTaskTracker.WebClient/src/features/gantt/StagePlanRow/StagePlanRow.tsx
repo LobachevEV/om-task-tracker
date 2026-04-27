@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import type { FeatureState, MiniTeamMember } from '../../../shared/types/feature';
+import type { FeatureState, MiniTeamMember } from '../../../common/types/feature';
 import { FEATURE_STATE_CSS } from '../stateConfig';
 import { StagePerformerCombobox } from '../StagePerformerCombobox';
 import type { StageRowDraft, StageRowValidation } from '../useStagePlanForm';
-import type { TeamRosterMember } from '../../../shared/api/teamApi';
+import type { TeamRosterMember } from '../../../common/api/teamApi';
 
 export interface StagePlanRowProps {
   /** Zero-based position — used for the `01…05` Geist Mono numeric prefix. */

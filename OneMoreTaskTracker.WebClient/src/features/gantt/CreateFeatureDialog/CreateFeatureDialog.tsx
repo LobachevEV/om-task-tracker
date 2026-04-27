@@ -1,8 +1,8 @@
 import { useCallback, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Callout, Dialog, TextField } from '../../../shared/ds';
-import * as planApi from '../../../shared/api/planApi';
-import type { CreateFeaturePayload, FeatureSummary } from '../../../shared/types/feature';
+import { Button, Callout, Dialog, TextField } from '../../../common/ds';
+import * as planApi from '../../../common/api/planApi';
+import type { CreateFeaturePayload, FeatureSummary } from '../../../common/types/feature';
 
 export interface CreateFeatureDialogProps {
   open: boolean;

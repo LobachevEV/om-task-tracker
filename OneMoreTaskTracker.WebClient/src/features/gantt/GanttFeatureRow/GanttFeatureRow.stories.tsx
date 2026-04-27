@@ -11,7 +11,7 @@ import {
 } from '../__fixtures__/FeatureFixtures';
 import { windowForZoom } from '../ganttMath';
 import { computeStageBars } from '../ganttStageGeometry';
-import type { MiniTeamMember } from '../../../shared/types/feature';
+import type { MiniTeamMember } from '../../../common/types/feature';
 
 const { qa, fe, be, mg } = MINI_TEAM_MEMBERS;
 const roster = [fe, be, qa, mg];

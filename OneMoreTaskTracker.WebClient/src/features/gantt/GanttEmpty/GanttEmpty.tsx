@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Button } from '../../../shared/ds';
+import { Button } from '../../../common/ds';
 import './GanttEmpty.css';
 
 export interface GanttEmptyProps {

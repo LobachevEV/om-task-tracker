@@ -4,9 +4,9 @@ import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { RegisterPage } from './RegisterPage';
 import { AuthProvider } from '../AuthContext';
-import * as authApi from '../../../shared/api/authApi';
+import * as authApi from '../../../common/api/authApi';
 
-vi.mock('../../../shared/api/authApi');
+vi.mock('../../../common/api/authApi');
 
 const renderPage = () => {
   return render(

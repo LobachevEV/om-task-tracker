@@ -5,7 +5,7 @@
  * 120ms accept flash, prefers-reduced-motion branch, chevron glyphs on
  * date/owner cells, inline micro-error text, owner picker mount fade.
  *
- * Colors MUST come from /src/styles/tokens.css — no OKLCH literals here.
+ * Colors MUST come from /src/common/styles/tokens.css — no OKLCH literals here.
  */
 
 .inline-cell {

@@ -1,6 +1,6 @@
 import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
-import i18n from '../../../i18n/config';
+import i18n from '../../../common/i18n/config';
 import './ErrorBoundary.css';
 
 interface Props {

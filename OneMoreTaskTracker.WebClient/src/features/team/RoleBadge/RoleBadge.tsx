@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { ROLE_BADGE_CLASS, ROLE_LABEL_SHORT } from '../../../shared/auth/roles';
-import type { UserRole } from '../../../shared/auth/roles';
+import { ROLE_BADGE_CLASS, ROLE_LABEL_SHORT } from '../../../common/auth/roles';
+import type { UserRole } from '../../../common/auth/roles';
 
 interface RoleBadgeProps {
   role: UserRole;

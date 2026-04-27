@@ -1,9 +1,9 @@
 import { useCallback, useMemo } from 'react';
-import * as planApi from '../../../shared/api/planApi';
+import * as planApi from '../../../common/api/planApi';
 import type {
   FeatureState,
   FeatureSummary,
-} from '../../../shared/types/feature';
+} from '../../../common/types/feature';
 
 export interface FeatureMutationCallbacks {
   saveTitle: (featureId: number, nextTitle: string, version: number) => Promise<void>;

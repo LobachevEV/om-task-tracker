@@ -4,8 +4,8 @@ import type {
   FeatureStagePlan,
   FeatureSummary,
   MiniTeamMember,
-} from '../../../shared/types/feature';
-import { FEATURE_STATES } from '../../../shared/types/feature';
+} from '../../../common/types/feature';
+import { FEATURE_STATES } from '../../../common/types/feature';
 
 export const FIXTURE_TODAY = '2026-04-21';
 

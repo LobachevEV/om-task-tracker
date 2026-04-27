@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer } from 'react';
-import * as teamApi from '../../shared/api/teamApi';
-import type { TeamRosterMember } from '../../shared/api/teamApi';
-import { useRefetchOnFocus } from '../../shared/hooks/useRefetchOnFocus';
+import * as teamApi from '../../common/api/teamApi';
+import type { TeamRosterMember } from '../../common/api/teamApi';
+import { useRefetchOnFocus } from '../../common/hooks/useRefetchOnFocus';
 
 export interface UseTeamRosterResult {
   data: TeamRosterMember[] | null;

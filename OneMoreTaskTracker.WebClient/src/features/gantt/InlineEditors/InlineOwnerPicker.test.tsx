@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { InlineOwnerPicker } from './InlineOwnerPicker';
-import type { TeamRosterMember } from '../../../shared/api/teamApi';
+import type { TeamRosterMember } from '../../../common/api/teamApi';
 
 function flush(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 0));

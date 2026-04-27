@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Spinner } from '../../../shared/ds';
+import { Spinner } from '../../../common/ds';
 import './GanttChunkStripe.css';
 
 export type ChunkStripeMode = 'loading' | 'failed';

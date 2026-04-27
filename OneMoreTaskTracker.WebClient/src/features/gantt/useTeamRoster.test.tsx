@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useTeamRoster, __resetTeamRosterCache } from './useTeamRoster';
-import type { TeamRosterMember } from '../../shared/api/teamApi';
+import type { TeamRosterMember } from '../../common/api/teamApi';
 
 const ROSTER: TeamRosterMember[] = [
   {

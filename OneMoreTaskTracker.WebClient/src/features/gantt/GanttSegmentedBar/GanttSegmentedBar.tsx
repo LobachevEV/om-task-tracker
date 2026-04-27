@@ -1,6 +1,6 @@
 import { useMemo, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { FeatureState, FeatureSummary, MiniTeamMember } from '../../../shared/types/feature';
+import type { FeatureState, FeatureSummary, MiniTeamMember } from '../../../common/types/feature';
 import { FEATURE_STATE_CSS } from '../stateConfig';
 import type { BarGeometryPx } from '../ganttMath';
 import type { StageBarGeometry } from '../ganttStageGeometry';

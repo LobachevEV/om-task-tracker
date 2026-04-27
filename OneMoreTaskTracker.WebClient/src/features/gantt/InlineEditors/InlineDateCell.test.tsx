@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { InlineDateCell } from './InlineDateCell';
-import { ApiError } from '../../../shared/api/ApiError';
+import { ApiError } from '../../../common/api/ApiError';
 
 function flush(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 0));

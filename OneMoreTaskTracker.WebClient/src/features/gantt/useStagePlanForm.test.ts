@@ -5,8 +5,8 @@ import {
   toDraft,
   useStagePlanForm,
 } from './useStagePlanForm';
-import type { FeatureStagePlan } from '../../shared/types/feature';
-import { FEATURE_STATES } from '../../shared/types/feature';
+import type { FeatureStagePlan } from '../../common/types/feature';
+import { FEATURE_STATES } from '../../common/types/feature';
 
 function emptyPlans(): FeatureStagePlan[] {
   return FEATURE_STATES.map((stage) => ({

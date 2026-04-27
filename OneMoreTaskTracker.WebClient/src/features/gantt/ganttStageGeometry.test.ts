@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FEATURE_STATES } from '../../shared/types/feature';
+import { FEATURE_STATES } from '../../common/types/feature';
 import {
   MINI_TEAM_FEATURE,
   OVERDUE_FEATURE,

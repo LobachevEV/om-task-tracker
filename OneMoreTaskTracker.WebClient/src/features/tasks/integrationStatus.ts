@@ -1,4 +1,4 @@
-import type { Task } from '../../shared/types/task';
+import type { Task } from '../../common/types/task';
 
 export type IntegrationKind = 'git' | 'jira' | 'confluence' | 'slack';
 export type IntegrationSignal = 'waiting' | 'passed' | 'failed' | 'none';

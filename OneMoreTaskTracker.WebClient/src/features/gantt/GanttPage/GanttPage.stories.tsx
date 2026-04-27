@@ -9,8 +9,8 @@ import {
   MINI_TEAM_MEMBERS,
   SOLO_FEATURE,
 } from '../__fixtures__/FeatureFixtures';
-import type { MiniTeamMember } from '../../../shared/types/feature';
-import type { UserRole } from '../../../shared/auth/auth';
+import type { MiniTeamMember } from '../../../common/types/feature';
+import type { UserRole } from '../../../common/auth/auth';
 
 const ROSTER: MiniTeamMember[] = [
   MINI_TEAM_MEMBERS.mg,

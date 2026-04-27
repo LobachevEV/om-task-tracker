@@ -1,5 +1,5 @@
-import type { FeatureState, FeatureStagePlan, FeatureSummary } from '../../shared/types/feature';
-import { FEATURE_STATES } from '../../shared/types/feature';
+import type { FeatureState, FeatureStagePlan, FeatureSummary } from '../../common/types/feature';
+import { FEATURE_STATES } from '../../common/types/feature';
 import { FEATURE_STATE_ORDER } from './stateConfig';
 import {
   addDays,

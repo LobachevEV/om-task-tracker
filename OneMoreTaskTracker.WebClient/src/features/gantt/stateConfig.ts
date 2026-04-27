@@ -1,4 +1,4 @@
-import type { FeatureState } from '../../shared/types/feature';
+import type { FeatureState } from '../../common/types/feature';
 
 export interface FeatureStateEntry {
   state: FeatureState;

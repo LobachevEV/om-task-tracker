@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
-import i18n from '../../../i18n/config';
+import i18n from '../../../common/i18n/config';
 import { GanttFeatureRow } from './GanttFeatureRow';
 import {
   FIXTURE_TODAY,
@@ -11,7 +11,7 @@ import {
 } from '../__fixtures__/FeatureFixtures';
 import { windowForZoom } from '../ganttMath';
 import { computeStageBars } from '../ganttStageGeometry';
-import type { MiniTeamMember } from '../../../shared/types/feature';
+import type { MiniTeamMember } from '../../../common/types/feature';
 
 const { fe, be, qa, mg } = MINI_TEAM_MEMBERS;
 const windowMonth = windowForZoom(FIXTURE_TODAY, 'month');

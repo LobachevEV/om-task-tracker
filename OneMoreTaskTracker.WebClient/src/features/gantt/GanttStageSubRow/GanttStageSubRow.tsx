@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import type { FeatureState, FeatureSummary, MiniTeamMember } from '../../../shared/types/feature';
-import type { TeamRosterMember } from '../../../shared/api/teamApi';
-import { Avatar, Badge } from '../../../shared/ds';
+import type { FeatureState, FeatureSummary, MiniTeamMember } from '../../../common/types/feature';
+import type { TeamRosterMember } from '../../../common/api/teamApi';
+import { Avatar, Badge } from '../../../common/ds';
 import { FEATURE_STATE_CSS } from '../stateConfig';
 import type { StageBarGeometry } from '../ganttStageGeometry';
 import { daysBetween, parseIsoDate } from '../ganttMath';

@@ -1,4 +1,4 @@
-import type { StateMix } from '../../shared/api/teamApi';
+import type { StateMix } from '../../common/api/teamApi';
 
 export interface TeamStateEntry {
   key: keyof StateMix;
