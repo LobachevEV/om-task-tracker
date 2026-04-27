@@ -1,8 +1,8 @@
 import {BrowserRouter, Route, Routes} from 'react-router-dom';
 import {AuthProvider} from '../../common/auth/AuthContext';
-import {LoginPage} from '../../features/auth/LoginPage';
+import {LoginPage} from '../../pages/Login';
 import {ProtectedRoute} from '../../common/auth/ProtectedRoute';
-import {RegisterPage} from '../../features/auth/RegisterPage';
+import {RegisterPage} from '../../pages/Register';
 import {TaskDetailPage} from '../../features/tasks/TaskDetailPage';
 import {TaskPage} from '../../features/tasks/TaskPage';
 import TeamPage from '../../features/team/TeamPage';

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { LoginPage } from './LoginPage';
-import { AuthProvider } from '../../../common/auth/AuthContext';
+import { AuthProvider } from '../../common/auth/AuthContext';
 
 const renderPage = () =>
   render(
