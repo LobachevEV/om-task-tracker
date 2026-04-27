@@ -1,4 +1,111 @@
+x-users-build: &users-build
+  image: onemoretracker-users
+  build:
+    context: .
+    dockerfile: OneMoreTaskTracker.Users/Dockerfile
+
+x-tasks-build: &tasks-build
+  image: onemoretracker-tasks
+  build:
+    context: .
+    dockerfile: OneMoreTaskTracker.Tasks/Dockerfile
+
+x-features-build: &features-build
+  image: onemoretracker-features
+  build:
+    context: .
+    dockerfile: OneMoreTaskTracker.Features/Dockerfile
+
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/init.sh:/docker-entrypoint-initdb.d/init.sh:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate-users:
+    <<: *users-build
+    command: ["--migrate"]
+    restart: "no"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__UsersContext: "Host=postgres;Port=5432;Database=Users;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  migrate-tasks:
+    <<: *tasks-build
+    command: ["--migrate"]
+    restart: "no"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__TasksContext: "Host=postgres;Port=5432;Database=Tasks;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  migrate-features:
+    <<: *features-build
+    command: ["--migrate"]
+    restart: "no"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__FeaturesContext: "Host=postgres;Port=5432;Database=Features;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  users:
+    <<: *users-build
+    ports:
+      - "5103:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      Kestrel__Endpoints__Http__Url: http://+:8080
+      ConnectionStrings__UsersContext: "Host=postgres;Port=5432;Database=Users;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}"
+    depends_on:
+      migrate-users:
+        condition: service_completed_successfully
+
+  tasks:
+    <<: *tasks-build
+    ports:
+      - "5102:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__TasksContext: "Host=postgres;Port=5432;Database=Tasks;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}"
+      GitLabProxy__Address: http://gitlab-proxy:8080
+    depends_on:
+      migrate-tasks:
+        condition: service_completed_successfully
+      gitlab-proxy:
+        condition: service_started
+
+  features:
+    <<: *features-build
+    ports:
+      - "5110:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__FeaturesContext: "Host=postgres;Port=5432;Database=Features;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}"
+    depends_on:
+      migrate-features:
+        condition: service_completed_successfully
+
   gitlab-proxy:
     image: onemoretracker-gitlab-proxy
     build:
@@ -7,22 +114,48 @@ services:
     ports:
       - "5176:8080"
     environment:
-      - GitLab__BaseUrl=${GitLab__BaseUrl}
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      GitLab__BaseUrl: ${GitLab__BaseUrl:-https://gitlab.com}
 
-  tasks:
-    image: onemoretracker-tasks
+  api:
+    image: onemoretracker-api
     build:
       context: .
-      dockerfile: OneMoreTaskTracker.Tasks/Dockerfile
+      dockerfile: OneMoreTaskTracker.Api/Dockerfile
     ports:
-      - "5102:8080"
-
-  features:
-    image: onemoretracker-features
-    build:
-      context: .
-      dockerfile: OneMoreTaskTracker.Features/Dockerfile
-    ports:
-      - "5110:8080"
+      - "5000:8080"
     environment:
-      - ConnectionStrings__FeaturesContext=Host=host.docker.internal;Port=5432;Database=Features;Username=postgres;Password=postgres
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      Kestrel__Endpoints__Http__Url: http://+:8080
+      TasksService__Address: http://tasks:8080
+      UsersService__Address: http://users:8080
+      FeaturesService__Address: http://features:8080
+      Cors__AllowedOrigins__0: http://localhost:8080
+      Cors__AllowedOrigins__1: http://localhost:5173
+      Jwt__Secret: ${Jwt__Secret:-CHANGE-ME-in-production-use-env-var-at-least-32-chars-long!!}
+    depends_on:
+      users:
+        condition: service_started
+      tasks:
+        condition: service_started
+      features:
+        condition: service_started
+      gitlab-proxy:
+        condition: service_started
+
+  webclient:
+    image: onemoretracker-webclient
+    build:
+      context: ./OneMoreTaskTracker.WebClient
+    ports:
+      - "8080:80"
+    environment:
+      API_BASE_URL: /api
+    depends_on:
+      api:
+        condition: service_started
+
+volumes:
+  pgdata:
