@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../auth/AuthContext';
+import { useAuth } from '../../../common/auth/AuthContext';
 import { isDeveloperRole } from '../../../common/auth/roles';
 import type { UserRole } from '../../../common/auth/roles';
 import * as teamApi from '../../../common/api/teamApi';

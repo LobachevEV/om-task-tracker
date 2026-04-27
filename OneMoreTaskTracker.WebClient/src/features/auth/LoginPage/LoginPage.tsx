@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { login as apiLogin } from '../../../common/api/authApi';
 import { LanguageSwitcher } from '../../../common/components/LanguageSwitcher';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../../../common/auth/AuthContext';
 import '../AuthPages.css';
 
 export function LoginPage() {

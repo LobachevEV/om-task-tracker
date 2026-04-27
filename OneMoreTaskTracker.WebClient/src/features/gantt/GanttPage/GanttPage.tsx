@@ -6,7 +6,7 @@ import {
   type CSSProperties,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../auth/AuthContext';
+import { useAuth } from '../../../common/auth/AuthContext';
 import { Spinner, Button, Callout } from '../../../common/ds';
 import { isUserRole, type UserRole } from '../../../common/auth/roles';
 import type {

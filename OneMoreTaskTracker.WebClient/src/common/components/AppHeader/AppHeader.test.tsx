@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AppHeader } from './AppHeader';
-import { AuthProvider } from '../../../features/auth/AuthContext';
+import { AuthProvider } from '../../../common/auth/AuthContext';
 import { AUTH_KEY, type UserRole } from '../../auth/auth';
 
 function seedAuth(role: UserRole, email = `${role.toLowerCase()}@example.com`) {

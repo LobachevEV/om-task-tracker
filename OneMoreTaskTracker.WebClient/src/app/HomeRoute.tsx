@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../features/auth/AuthContext';
+import { useAuth } from '../common/auth/AuthContext';
 
 /**
  * Role-aware redirect mounted at `/`. Managers land on `/plan`; everyone else

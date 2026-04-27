@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../../features/auth/AuthContext';
+import { useAuth } from '../../../common/auth/AuthContext';
 import { ROLE_BADGE_CLASS } from '../../auth/roles';
 import { LanguageSwitcher } from '../LanguageSwitcher';
 import './AppHeader.css';

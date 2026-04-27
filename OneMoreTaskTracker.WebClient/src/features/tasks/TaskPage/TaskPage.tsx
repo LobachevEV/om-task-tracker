@@ -7,7 +7,7 @@ import {ShortcutLegend} from '../../../common/components/ShortcutLegend';
 import {Spinner} from '../../../common/components/Spinner';
 import {STATE_CLASS} from '../../../common/constants/taskConstants';
 import {useKeyboardShortcut} from '../../../common/hooks/useKeyboardShortcut';
-import {useAuth} from '../../auth/AuthContext';
+import {useAuth} from '../../../common/auth/AuthContext';
 import type {Task, TaskState} from '../../../common/types/task';
 import {IntegrationIcon, SVG_PATHS} from '../IntegrationIcon';
 import {deriveIntegrations} from '../integrationStatus';
