@@ -11,7 +11,11 @@
   font-variant-numeric: tabular-nums;
 }
 
-.gantt-stage-row[data-active='true'] {
+/* Active tint only applies to the planned, in-progress stage. `data-active`
+ * still reflects `isCurrent` for accessibility / consumers, but ghost rows
+ * (unplanned stages — e.g. LiveRelease on a 0/5-planned feature) must not
+ * get the amber band; that paints "work in progress" where there is none. */
+.gantt-stage-row[data-status='current'] {
   background: var(--accent-dim);
 }
 

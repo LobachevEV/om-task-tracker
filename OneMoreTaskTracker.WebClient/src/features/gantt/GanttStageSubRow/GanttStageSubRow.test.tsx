@@ -96,6 +96,32 @@ describe('GanttStageSubRow', () => {
     expect(dtr).toHaveAttribute('data-overdue', 'true');
   });
 
+  it('does not stamp data-status="current" on a ghost stage even when isCurrent (no amber band on unplanned LiveRelease)', () => {
+    // Regression: a feature in state=LiveRelease with 0/5 stages planned
+    // (e.g. "Legacy API sunset") used to paint a yellow band across the
+    // whole LiveRelease sub-row because the CSS keyed on data-active=true.
+    // The active tint must only apply when the stage actually has a plan
+    // (data-status='current'); ghost stages must read data-status='ghost'.
+    const unplannedShipped = { ...UNSCHEDULED_FEATURE, state: 'LiveRelease' as const };
+    const bars = computeStageBars(win, unplannedShipped, FIXTURE_TODAY, DAY_PX);
+    const live = bars.find((b) => b.stage === 'LiveRelease')!;
+    expect(live.isCurrent).toBe(true);
+    expect(live.status).toBe('ghost');
+    render(
+      <GanttStageSubRow
+        feature={unplannedShipped}
+        seg={live}
+        today={FIXTURE_TODAY}
+        resolvePerformer={resolverFor([])}
+        index={4}
+        onOpenStage={vi.fn()}
+      />,
+    );
+    const row = screen.getByTestId(`stage-subrow-${unplannedShipped.id}-LiveRelease`);
+    expect(row.getAttribute('data-status')).toBe('ghost');
+    expect(row.getAttribute('data-active')).toBe('true');
+  });
+
   it('renders DTR as `✓` for the completed LiveRelease stage of a shipped feature', () => {
     const bars = computeStageBars(win, SHIPPED_FEATURE, FIXTURE_TODAY, DAY_PX);
     const live = bars.find((b) => b.stage === 'LiveRelease')!;
