@@ -11,14 +11,14 @@ export default defineConfig({
   plugins: [react()],
   test: {
     globals: true,
-    setupFiles: ['./src/test/setup.ts'],
+    setupFiles: ['./tests/setup.ts'],
     projects: [
       {
         extends: true,
         test: {
           name: 'unit',
           environment: 'jsdom',
-          include: ['src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
+          include: ['tests/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
         },
       },
       {
