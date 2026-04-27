@@ -1,25 +1,56 @@
-import { useCallback, useMemo, useState, type CSSProperties } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type CSSProperties,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/AuthContext';
 import { Spinner, Button, Callout } from '../../../shared/ds';
 import { isUserRole, type UserRole } from '../../../shared/auth/roles';
-import type { FeatureSummary, MiniTeamMember } from '../../../shared/types/feature';
+import type {
+  FeatureSummary,
+  MiniTeamMember,
+} from '../../../shared/types/feature';
 import type { TeamRosterMember } from '../../../shared/api/teamApi';
-import { FeatureDrawer } from '../FeatureDrawer';
+import { GanttChunkStripe } from '../GanttChunkStripe';
+import { GanttDateHeader } from '../GanttDateHeader';
 import { GanttEmpty } from '../GanttEmpty';
 import { GanttFeatureRow } from '../GanttFeatureRow';
-import { GanttTimeline } from '../GanttTimeline';
+import { GanttGoToDate } from '../GanttGoToDate';
+import { GanttTimelineScroller } from '../GanttTimelineScroller';
 import { GanttToolbar } from '../GanttToolbar';
 import { CreateFeatureDialog } from '../CreateFeatureDialog';
 import { usePlanFeatures } from '../usePlanFeatures';
 import { useTeamRoster } from '../useTeamRoster';
 import { useGanttLayout, type GanttLane } from '../useGanttLayout';
 import { useGanttPageState, type GanttPageState } from '../useGanttPageState';
-import { ZOOM_DAYS } from '../ganttMath';
-import { useOptimisticFeatureMutation } from '../InlineEditors';
+import {
+  useGanttTimelineScroll,
+  type ScrollChunkRequest,
+} from '../useGanttTimelineScroll';
+import type { ZoomLevel } from '../ganttMath';
+import { useFeatureMutationCallbacks } from '../InlineEditors';
 import './GanttPage.css';
 
 const PLACEHOLDER_ROLE: MiniTeamMember['role'] = 'FrontendDeveloper';
+
+const DAY_PX_BY_ZOOM: Readonly<Record<ZoomLevel, number>> = {
+  week: 48,
+  twoWeeks: 32,
+  month: 24,
+};
+
+const INITIAL_VIEWPORT_DAYS = 60;
+const INITIAL_HALF_WINDOW_DAYS = 30;
+const CHUNK_DAYS = 14;
+/**
+ * Width of the sticky leading column on every row (lead/team/title gutter).
+ * Date columns and segment bars start at scroller-x = GUTTER_WIDTH_PX so they
+ * share the same coordinate space; must match `--gantt-gutter-width` in CSS.
+ */
+const GUTTER_WIDTH_PX = 280;
 
 function toMiniMember(row: TeamRosterMember): MiniTeamMember {
   return {
@@ -30,13 +61,10 @@ function toMiniMember(row: TeamRosterMember): MiniTeamMember {
   };
 }
 
-// Synthetic stand-in when a feature references a user that is no longer in the
-// roster (e.g. removed manager/dev). email is intentionally non-deliverable —
-// it is only ever rendered, never sent.
 function placeholderMember(userId: number): MiniTeamMember {
   return {
     userId,
-    email: `user-${userId}@placeholder`,
+    email: null,
     displayName: `#${userId}`,
     role: PLACEHOLDER_ROLE,
   };
@@ -65,6 +93,8 @@ export interface GanttPageInternalProps {
    * Supplied by `usePlanFeatures.applyFeatureUpdate`.
    */
   onFeatureUpdated: (next: FeatureSummary) => void;
+  /** Chunk-fetch callback wired into the scrollable timeline. */
+  loadChunk: (req: ScrollChunkRequest) => Promise<unknown>;
 }
 
 interface UnscheduledSectionProps {
@@ -109,13 +139,45 @@ export function GanttPageInternal({
   onRetry,
   state,
   onFeatureUpdated,
+  loadChunk,
 }: GanttPageInternalProps) {
   const { t } = useTranslation('gantt');
   const [createOpen, setCreateOpen] = useState(false);
+  const [goToOpen, setGoToOpen] = useState(false);
 
-  const layout = useGanttLayout({ features, today: state.today, zoom: state.zoom });
+  const dayPx = DAY_PX_BY_ZOOM[state.zoom];
   const isManager = role === 'Manager';
-  const mutations = useOptimisticFeatureMutation({ onApplied: onFeatureUpdated });
+  const mutations = useFeatureMutationCallbacks({ onApplied: onFeatureUpdated });
+
+  const trailingStripeWidthPx = CHUNK_DAYS * dayPx;
+
+  const scroll = useGanttTimelineScroll({
+    today: state.today,
+    dayPx,
+    gutterPx: GUTTER_WIDTH_PX,
+    initialViewportDays: INITIAL_VIEWPORT_DAYS,
+    initialHalfWindowDays: INITIAL_HALF_WINDOW_DAYS,
+    chunkDays: CHUNK_DAYS,
+    loadChunk,
+  });
+  const {
+    attachScroller,
+    loadedRange,
+    isFetchingTrailing,
+    loadError,
+    scrollToToday,
+    scrollToDate,
+    retryFailedChunk,
+    todayPx: todayPxInner,
+    totalWidthPx,
+  } = scroll;
+
+  const layout = useGanttLayout({
+    features,
+    today: state.today,
+    loadedRange,
+    dayPx,
+  });
 
   const rosterById = useMemo(() => {
     const map = new Map<number, MiniTeamMember>();
@@ -128,18 +190,73 @@ export function GanttPageInternal({
     [rosterById],
   );
 
+  const resolvePerformer = useCallback(
+    (id: number | null | undefined): MiniTeamMember | undefined =>
+      id == null ? undefined : rosterById.get(id),
+    [rosterById],
+  );
+
+  const handleOpenStage = useCallback(
+    (featureId: number) => state.toggleFeatureExpanded(featureId),
+    [state],
+  );
+
   const handleCreated = useCallback(
     (id: number) => {
       setCreateOpen(false);
-      state.openFeature(id);
+      state.toggleFeatureExpanded(id);
       onRetry();
     },
     [state, onRetry],
   );
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'g' || e.key === 'G')) {
+        const target = e.target as HTMLElement | null;
+        if (
+          target &&
+          (target.tagName === 'INPUT' ||
+            target.tagName === 'TEXTAREA' ||
+            target.isContentEditable)
+        ) {
+          return;
+        }
+        e.preventDefault();
+        setGoToOpen((prev) => !prev);
+      } else if (e.key === 'Escape' && goToOpen) {
+        setGoToOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [goToOpen]);
+
+  const handleGoToSubmit = useCallback(
+    (iso: string) => {
+      setGoToOpen(false);
+      void scrollToDate(iso);
+    },
+    [scrollToDate],
+  );
+
   const hasAnyFeatures = layout.lanes.length + layout.unscheduled.length > 0;
 
-  const pageStyle = { '--day-count': String(ZOOM_DAYS[state.zoom]) } as CSSProperties;
+  const showTrailingStripe = isFetchingTrailing || loadError?.direction === 'trailing';
+  const effectiveTrailingPx = showTrailingStripe ? trailingStripeWidthPx : 0;
+  const lanesInlinePx = GUTTER_WIDTH_PX + totalWidthPx;
+  const contentWidthPx = lanesInlinePx + effectiveTrailingPx;
+  const todayPxAbs = todayPxInner + GUTTER_WIDTH_PX;
+
+  const pageStyle = useMemo<CSSProperties>(
+    () => ({
+      ['--day-px']: `${dayPx}px`,
+      ['--gantt-cushion-width']: `${effectiveTrailingPx}px`,
+      ['--gantt-loaded-width']: `${totalWidthPx}px`,
+      ['--gantt-today-px']: `${todayPxAbs}px`,
+    }) as CSSProperties,
+    [dayPx, effectiveTrailingPx, totalWidthPx, todayPxAbs],
+  );
 
   return (
     <main className="gantt-page" style={pageStyle} data-testid="gantt-page">
@@ -199,65 +316,100 @@ export function GanttPageInternal({
         />
       ) : (
         <section className="gantt-page__timeline-wrap">
-          <GanttTimeline window={layout.window} zoom={state.zoom} todayPercent={layout.todayPercent} />
-          <div className="gantt-page__lanes" role="list">
-            {layout.todayPercent != null ? (
+          <GanttTimelineScroller
+            ref={attachScroller}
+            contentWidthPx={contentWidthPx}
+            todayPx={todayPxAbs}
+            onJumpToToday={scrollToToday}
+          >
+            <div
+              className="gantt-page__header-row"
+              style={{ inlineSize: `${contentWidthPx}px` }}
+            >
               <div
-                className="gantt-page__today-hairline"
-                role="separator"
-                aria-label={t('legend.todayAt', {
-                  defaultValue: 'Today {{date}}',
-                  date: state.today,
-                })}
-                style={
-                  {
-                    ['--today-percent' as string]: String(layout.todayPercent),
-                  } as CSSProperties
-                }
+                className="gantt-page__header-flank gantt-page__header-flank--leading"
+                style={{ inlineSize: `${GUTTER_WIDTH_PX}px` }}
+                aria-hidden="true"
               />
-            ) : null}
-            {layout.lanes.map((lane: GanttLane) => {
-              const lead = resolveMember(lane.feature.leadUserId);
-              // Summary view knows only the lead; task-assignee resolution requires
-              // FeatureDetail (lazy), so the mini-team fills in once the drawer opens.
-              const miniTeam = [lead];
-              const expanded = state.expandedFeatureIds.has(lane.feature.id);
-              return (
-                <GanttFeatureRow
-                  key={lane.feature.id}
-                  feature={lane.feature}
-                  bar={lane.bar}
-                  stageBars={lane.stageBars}
-                  window={layout.window}
-                  today={state.today}
-                  lead={lead}
-                  miniTeam={miniTeam}
-                  variant={lane.variant}
-                  expanded={expanded}
-                  onToggleExpand={() => state.toggleFeatureExpanded(lane.feature.id)}
-                  onOpen={() => state.openFeature(lane.feature.id)}
-                  onOpenStage={(stage) => state.openFeature(lane.feature.id, stage)}
-                  resolvePerformer={(id) =>
-                    id == null ? undefined : rosterById.get(id)
-                  }
-                  canEdit={isManager}
-                  mutations={isManager ? mutations : undefined}
-                  roster={isManager ? rawRoster : undefined}
+              <GanttDateHeader
+                loadedRange={loadedRange}
+                today={state.today}
+                dayPx={dayPx}
+                className="gantt-page__date-header"
+              />
+              {showTrailingStripe ? (
+                <div
+                  className="gantt-page__header-flank"
+                  style={{ inlineSize: `${trailingStripeWidthPx}px` }}
+                  aria-hidden="true"
                 />
-              );
-            })}
-          </div>
+              ) : null}
+            </div>
+
+            <div
+              className="gantt-page__today-hairline"
+              role="separator"
+              aria-label={t('legend.todayAt', {
+                defaultValue: 'Today {{date}}',
+                date: state.today,
+              })}
+              style={{ insetInlineStart: `${todayPxAbs}px` }}
+            />
+
+            <div className="gantt-page__lanes-row">
+              <div
+                className="gantt-page__lanes"
+                role="list"
+                style={{ inlineSize: `${lanesInlinePx}px` }}
+              >
+                {layout.lanes.map((lane: GanttLane) => {
+                  const lead = resolveMember(lane.feature.leadUserId);
+                  const expanded = state.expandedFeatureIds.has(lane.feature.id);
+                  return (
+                    <GanttFeatureRow
+                      key={lane.feature.id}
+                      feature={lane.feature}
+                      stageBars={lane.stageBars}
+                      bar={lane.bar}
+                      today={state.today}
+                      lead={lead}
+                      variant={lane.variant}
+                      expanded={expanded}
+                      onToggleExpand={state.toggleFeatureExpanded}
+                      onOpenStage={handleOpenStage}
+                      resolvePerformer={resolvePerformer}
+                      canEdit={isManager}
+                      mutations={isManager ? mutations : undefined}
+                      roster={isManager ? rawRoster : undefined}
+                    />
+                  );
+                })}
+              </div>
+
+              {showTrailingStripe ? (
+                <GanttChunkStripe
+                  side="trailing"
+                  mode={isFetchingTrailing ? 'loading' : 'failed'}
+                  widthPx={trailingStripeWidthPx}
+                  onRetry={
+                    loadError?.direction === 'trailing' ? retryFailedChunk : undefined
+                  }
+                />
+              ) : null}
+            </div>
+          </GanttTimelineScroller>
+
           <UnscheduledSection
             features={layout.unscheduled}
-            onOpen={state.openFeature}
+            onOpen={state.toggleFeatureExpanded}
           />
         </section>
       )}
 
-      <FeatureDrawer
-        featureId={state.selectedFeatureId}
-        onClose={state.closeFeature}
-        canEdit={isManager}
+      <GanttGoToDate
+        open={goToOpen}
+        onSubmit={handleGoToSubmit}
+        onClose={() => setGoToOpen(false)}
       />
 
       {isManager ? (
@@ -275,7 +427,6 @@ const ANONYMOUS_ROLE: UserRole = 'FrontendDeveloper';
 
 export function GanttPage() {
   const { user } = useAuth();
-  // All hooks must execute unconditionally; we gate rendering, not hook calls.
   const role: UserRole = user?.role ?? ANONYMOUS_ROLE;
   const state = useGanttPageState(role);
   const features = usePlanFeatures({
@@ -287,6 +438,19 @@ export function GanttPage() {
   const rosterMembers = useMemo<MiniTeamMember[]>(
     () => (roster.data ?? []).map(toMiniMember),
     [roster.data],
+  );
+
+  // Adapt usePlanFeatures.loadChunk to the scroll-hook signature, which
+  // requires an AbortSignal and ignores the returned rows.
+  const loadChunk = useCallback(
+    async (req: ScrollChunkRequest) => {
+      await features.loadChunk({
+        windowStart: req.windowStart,
+        windowEnd: req.windowEnd,
+        signal: req.signal,
+      });
+    },
+    [features],
   );
 
   if (!user) return null;
@@ -305,6 +469,7 @@ export function GanttPage() {
       onRetry={features.refetch}
       state={state}
       onFeatureUpdated={features.applyFeatureUpdate}
+      loadChunk={loadChunk}
     />
   );
 }

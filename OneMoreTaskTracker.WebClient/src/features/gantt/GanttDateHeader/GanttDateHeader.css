@@ -1,0 +1,131 @@
+/* Three-band sticky date header for the scrollable Gantt timeline.
+ * - Row 1: month + year band, sticky to the leading edge of the visible viewport.
+ * - Row 2: day-of-month numerals (today highlighted in --accent).
+ * - Row 3: single-letter weekday glyph (M T W T F S S in EN).
+ * Mondays / months / weekends rely on data-attributes + 1px borders or a
+ * 1.5%-darker tint. */
+
+.gantt-date-header {
+  --gantt-month-band-h: 24px;
+  --gantt-day-band-h: 38px;
+  position: relative;
+  block-size: calc(var(--gantt-month-band-h) + var(--gantt-day-band-h));
+  border-block-end: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  user-select: none;
+}
+
+/* MONTH / YEAR band */
+
+.gantt-date-header__month-band {
+  position: relative;
+  block-size: var(--gantt-month-band-h);
+  inline-size: 100%;
+  border-block-end: 1px solid var(--border);
+}
+
+.gantt-date-header__month-cell {
+  position: absolute;
+  inset-block: 0;
+  display: flex;
+  align-items: center;
+  padding-inline-start: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  /* Each month cell starts at its own day boundary; a 1px left edge
+     visually parses the month seam without a heavy grid. */
+  border-inline-start: 1px solid var(--border-strong);
+}
+
+.gantt-date-header__month-cell:first-child {
+  border-inline-start: none;
+}
+
+.gantt-date-header__month-label {
+  position: sticky;
+  /* Stick to the leading edge of the scroll viewport so the label stays
+     readable as the user pans through a long month. */
+  inset-inline-start: 6px;
+}
+
+/* DAY band */
+
+.gantt-date-header__day-band {
+  position: relative;
+  block-size: var(--gantt-day-band-h);
+  inline-size: 100%;
+  display: grid;
+  grid-template-columns: repeat(var(--day-count, 1), var(--day-px, 32px));
+}
+
+.gantt-date-header__day-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-block: 4px;
+  font-family: var(--font-mono, var(--font-sans));
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  line-height: 1.1;
+  color: var(--text-muted);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Weekly hairline — Mondays gain a 1px border-left at half opacity.
+ * 1px is the maximum allowed by the UX hard-bans. */
+.gantt-date-header__day-cell--week-start {
+  border-inline-start: 1px solid
+    color-mix(in oklch, var(--border) 60%, transparent);
+}
+
+/* Month seam — a stronger 1px line. Overrides the week hairline when both
+ * apply (first day of a month that is also a Monday). */
+.gantt-date-header__day-cell--month-start {
+  border-inline-start: 1px solid var(--border-strong);
+}
+
+/* Weekend tint — imperceptibly darker so weeks visually parse. */
+.gantt-date-header__day-cell--weekend {
+  background: color-mix(in oklch, var(--surface) 97%, var(--bg));
+}
+
+/* Today's numeral burns in --accent; rest of the day cell stays muted. */
+.gantt-date-header__day-cell--today .gantt-date-header__day-num {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.gantt-date-header__day-num {
+  font-size: 13px;
+  line-height: 1;
+  color: var(--text);
+}
+
+.gantt-date-header__weekday {
+  margin-block-start: 2px;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: var(--text-dim, var(--text-muted));
+  text-transform: uppercase;
+}
+
+/* High-contrast / forced-colors mode */
+@media (forced-colors: active) {
+  .gantt-date-header__day-cell--today .gantt-date-header__day-num {
+    color: LinkText;
+  }
+  .gantt-date-header__day-cell--week-start,
+  .gantt-date-header__day-cell--month-start {
+    border-inline-start-color: GrayText;
+  }
+}

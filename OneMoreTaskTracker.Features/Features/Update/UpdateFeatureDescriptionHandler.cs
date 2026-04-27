@@ -6,10 +6,7 @@ using OneMoreTaskTracker.Proto.Features.UpdateFeatureDescriptionCommand;
 
 namespace OneMoreTaskTracker.Features.Features.Update;
 
-// Inline-edit per-field PATCH handler for `description`.
-// Contract: api-contract.md § "PATCH /api/plan/features/{id}/description".
-// Empty string → null (matches feature.Description nullable semantics).
-// NEVER log the raw description (PII); log only length.
+// PII: log only length, never the raw description text.
 public sealed class UpdateFeatureDescriptionHandler(
     FeaturesDbContext db,
     ILogger<UpdateFeatureDescriptionHandler> logger) : FeatureDescriptionUpdater.FeatureDescriptionUpdaterBase
@@ -25,8 +22,6 @@ public sealed class UpdateFeatureDescriptionHandler(
         if (raw.Length > DescriptionMaxLength)
             throw new RpcException(new Status(StatusCode.InvalidArgument, "description too long"));
 
-        // Trim trailing whitespace only (leading whitespace preserved for indented
-        // markdown-free plaintext per api-contract.md); empty after trim → null.
         var trimmed = raw.TrimEnd();
         string? normalized = string.IsNullOrWhiteSpace(trimmed) ? null : trimmed;
 
@@ -38,7 +33,7 @@ public sealed class UpdateFeatureDescriptionHandler(
         if (request.CallerUserId <= 0 || feature.ManagerUserId != request.CallerUserId)
             throw new RpcException(new Status(StatusCode.PermissionDenied, "Not the feature owner"));
 
-        if (request.ExpectedVersion > 0 && request.ExpectedVersion != feature.Version)
+        if (request.HasExpectedVersion && request.ExpectedVersion != feature.Version)
             throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));
 
         var versionBefore = feature.Version;
@@ -57,8 +52,6 @@ public sealed class UpdateFeatureDescriptionHandler(
             throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));
         }
 
-        // PII-safe log: length only, never the raw text (see backend-plan.md
-        // § Observability and backend-eval-contract.md §73 description_length).
         var descriptionLength = feature.Description?.Length ?? 0;
         logger.LogInformation(
             "Feature inline edit applied: feature_id={FeatureId} field=description description_length={DescriptionLength} description_len_before={Before} description_len_after={After} actor_user_id={ActorUserId} version_before={V0} version_after={V1}",

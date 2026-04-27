@@ -56,16 +56,3 @@
   transform: translateX(-0.5px);
 }
 
-.gantt-timeline__today-label {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--accent);
-  background: color-mix(in oklch, var(--bg) 80%, transparent);
-  padding: 1px 4px;
-  border-radius: 3px;
-  pointer-events: none;
-  white-space: nowrap;
-}

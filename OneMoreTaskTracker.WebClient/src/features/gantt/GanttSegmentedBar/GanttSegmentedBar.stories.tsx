@@ -16,6 +16,7 @@ const members = Object.values(MINI_TEAM_MEMBERS) as MiniTeamMember[];
 const resolve = (id: number | null | undefined): MiniTeamMember | undefined =>
   id == null ? undefined : members.find((m) => m.userId === id);
 const win = windowForZoom(FIXTURE_TODAY, 'month');
+const DAY_PX = 32;
 
 const meta: Meta<typeof GanttSegmentedBar> = {
   title: 'features/gantt/GanttSegmentedBar',
@@ -46,7 +47,7 @@ type Story = StoryObj<typeof GanttSegmentedBar>;
 export const FullyPlannedActiveTesting: Story = {
   args: {
     feature: MINI_TEAM_FEATURE,
-    stageBars: computeStageBars(win, MINI_TEAM_FEATURE, FIXTURE_TODAY),
+    stageBars: computeStageBars(win, MINI_TEAM_FEATURE, FIXTURE_TODAY, DAY_PX),
     today: FIXTURE_TODAY,
     resolvePerformer: resolve,
     onOpenStage: () => undefined,
@@ -56,7 +57,7 @@ export const FullyPlannedActiveTesting: Story = {
 export const OverdueDevelopment: Story = {
   args: {
     feature: OVERDUE_FEATURE,
-    stageBars: computeStageBars(win, OVERDUE_FEATURE, FIXTURE_TODAY),
+    stageBars: computeStageBars(win, OVERDUE_FEATURE, FIXTURE_TODAY, DAY_PX),
     today: FIXTURE_TODAY,
     resolvePerformer: resolve,
     onOpenStage: () => undefined,
@@ -66,7 +67,7 @@ export const OverdueDevelopment: Story = {
 export const ShippedLiveRelease: Story = {
   args: {
     feature: SHIPPED_FEATURE,
-    stageBars: computeStageBars(win, SHIPPED_FEATURE, FIXTURE_TODAY),
+    stageBars: computeStageBars(win, SHIPPED_FEATURE, FIXTURE_TODAY, DAY_PX),
     today: FIXTURE_TODAY,
     resolvePerformer: resolve,
     onOpenStage: () => undefined,
@@ -76,7 +77,7 @@ export const ShippedLiveRelease: Story = {
 export const UnplannedGhost: Story = {
   args: {
     feature: UNSCHEDULED_FEATURE,
-    stageBars: computeStageBars(win, UNSCHEDULED_FEATURE, FIXTURE_TODAY),
+    stageBars: computeStageBars(win, UNSCHEDULED_FEATURE, FIXTURE_TODAY, DAY_PX),
     today: FIXTURE_TODAY,
     resolvePerformer: resolve,
     onOpenStage: () => undefined,

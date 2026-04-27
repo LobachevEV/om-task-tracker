@@ -42,7 +42,7 @@ function PageHarness({
       (state as unknown as { today: string }).today = FIXTURE_TODAY;
     }
     if (initialSelectedFeatureId != null) {
-      state.openFeature(initialSelectedFeatureId);
+      state.toggleFeatureExpanded(initialSelectedFeatureId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -61,6 +61,7 @@ function PageHarness({
       onRetry={() => {}}
       state={state}
       onFeatureUpdated={() => {}}
+      loadChunk={async () => {}}
     />
   );
 }

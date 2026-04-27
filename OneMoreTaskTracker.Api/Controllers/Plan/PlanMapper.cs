@@ -1,3 +1,5 @@
+using OneMoreTaskTracker.Api.Controllers.Plan.Feature;
+using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
 using OneMoreTaskTracker.Proto.Features;
 using OneMoreTaskTracker.Proto.Users;
 using CreateFeatureDto = OneMoreTaskTracker.Proto.Features.CreateFeatureCommand.FeatureDto;
@@ -11,7 +13,7 @@ using UpdateStageOwnerDto = OneMoreTaskTracker.Proto.Features.UpdateStageOwnerCo
 using UpdateStagePlannedStartDto = OneMoreTaskTracker.Proto.Features.UpdateStagePlannedStartCommand.FeatureDto;
 using UpdateStagePlannedEndDto = OneMoreTaskTracker.Proto.Features.UpdateStagePlannedEndCommand.FeatureDto;
 
-namespace OneMoreTaskTracker.Api.Controllers;
+namespace OneMoreTaskTracker.Api.Controllers.Plan;
 
 internal static class PlanMapper
 {
@@ -41,11 +43,6 @@ internal static class PlanMapper
         _                => FeatureState.CsApproving
     };
 
-    // Lenient parser — accepts any case (e.g. `development`, `DEVELOPMENT`,
-    // `Development`) and canonicalises to the proto enum value.
-    // backend-eval-contract.md §3 requires `/stages/development/owner` to
-    // resolve identically to `/stages/Development/owner`. Returns false only
-    // when the input does not match any FeatureState name.
     internal static bool TryParseStage(string raw, out FeatureState stage)
     {
         if (string.IsNullOrWhiteSpace(raw))
@@ -54,17 +51,13 @@ internal static class PlanMapper
             return false;
         }
 
-        // Reject pure-numeric inputs (e.g. "3"); Enum.TryParse would otherwise
-        // accept them via the underlying-int parse path. The wire contract
-        // names stages by canonical PascalCase only.
+        // Reject numeric input — Enum.TryParse would otherwise accept underlying-int values.
         if (char.IsDigit(raw[0]) || raw[0] == '-' || raw[0] == '+')
         {
             stage = default;
             return false;
         }
 
-        // ignoreCase=true accepts both PascalCase and lowercase wire values;
-        // Enum.IsDefined guards against numeric values that bypass the rules.
         if (Enum.TryParse<FeatureState>(raw, ignoreCase: true, out var parsed)
             && Enum.IsDefined(typeof(FeatureState), parsed))
         {
@@ -74,6 +67,25 @@ internal static class PlanMapper
 
         stage = default;
         return false;
+    }
+
+    // Pre-check at the gateway so the friendly copy reaches the FE rather than
+    // being generalised to "Invalid request data" by GrpcExceptionMiddleware.
+    internal const int MinReleaseYear = 2000;
+    internal const int MaxReleaseYear = 2100;
+
+    internal static string? ValidateOptionalReleaseDate(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+            return null;
+
+        if (!DateOnly.TryParseExact(raw, "yyyy-MM-dd", out var date))
+            return "Date must be YYYY-MM-DD";
+
+        if (date.Year < MinReleaseYear || date.Year > MaxReleaseYear)
+            return "Use a real release date";
+
+        return null;
     }
 
     internal static MiniTeamMemberResponse BuildMiniTeamMember(
@@ -129,9 +141,6 @@ internal static class PlanMapper
         BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
             f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
 
-    // Overloads for the per-field inline-edit Dtos (each carries its own
-    // FeatureDto C# type; see FeatureMappingConfig). Kept alongside the four
-    // legacy overloads so controllers pick the right mapping without casts.
     internal static FeatureSummaryResponse MapSummary(
         UpdateFeatureTitleDto f,
         IReadOnlyDictionary<int, List<int>> tasksByFeature,

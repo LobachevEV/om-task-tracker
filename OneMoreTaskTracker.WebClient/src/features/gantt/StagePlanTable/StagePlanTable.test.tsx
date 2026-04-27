@@ -8,7 +8,7 @@ import { __resetTeamRosterCache } from '../useTeamRoster';
 
 const ROSTER: TeamRosterMember[] = Object.values(MINI_TEAM_MEMBERS).map((m) => ({
   userId: m.userId,
-  email: m.email,
+  email: m.email ?? '',
   role: m.role,
   displayName: m.displayName,
   isSelf: false,

@@ -23,13 +23,6 @@ using UpdateStagePlannedEndDto = OneMoreTaskTracker.Proto.Features.UpdateStagePl
 
 namespace OneMoreTaskTracker.Api.Tests.Controllers;
 
-// Gateway-level integration tests for the five per-field inline-edit PATCH
-// endpoints. Covers:
-//   - happy path per endpoint (200 + forwarded proto request shape)
-//   - unauthenticated (401) and non-manager role (403)
-//   - malformed payloads (400) — empty title, unknown stage, negative owner id
-//   - upstream PermissionDenied bubbles through the gateway middleware as 403
-//   - If-Match header forwarding
 public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactory factory)
     : IClassFixture<TasksControllerWebApplicationFactory>
 {
@@ -51,9 +44,6 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
     private string DevToken(int userId = 2) =>
         _factory.GenerateToken(userId, "dev@example.com", Roles.FrontendDeveloper);
 
-    // Roster stub used by UpdateStageOwner (gateway-side roster membership
-    // defense per api-contract.md §3). Returns a roster containing the
-    // manager + the listed teammate ids as simple members.
     private void StubRoster(int managerUserId, params int[] teammateUserIds)
     {
         var response = new GetTeamRosterResponse
@@ -160,9 +150,6 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
         {
             Content = JsonBody(new { title = "Renamed" })
         };
-        // RFC 7232 strong ETag grammar requires quoted-string syntax; the
-        // gateway's ParseIfMatch strips surrounding quotes so either form works
-        // server-side, but HttpClient validates the header per the spec.
         request.Headers.TryAddWithoutValidation("If-Match", "\"7\"");
 
         var response = await client.SendAsync(request);
@@ -381,7 +368,6 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
         captured.StageOwnerUserId.Should().Be(42);
 
         var body = await response.Content.ReadAsStringAsync();
-        // stageVersion is exposed on the stagePlans[] entries in FeatureSummary.
         body.Should().Contain("\"stageVersion\":1");
     }
 
@@ -439,8 +425,6 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
     {
         var client = ClientWithToken(ManagerToken());
 
-        // Gateway-side reject: 0 means "unassign" via `null`; an explicit
-        // negative id is malformed.
         var response = await client.PatchAsync("/api/plan/features/1/stages/Development/owner",
             JsonBody(new { stageOwnerUserId = -5 }));
 
@@ -461,13 +445,9 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
     [Fact]
     public async Task UpdateStageOwner_IdNotOnRoster_Returns400WithRosterMessage()
     {
-        // api-contract.md §3: positive stageOwnerUserId MUST be on the caller's
-        // roster. Gateway fails fast with "Pick a teammate from the list" and
-        // never reaches the Features service (closes the rogue-id attack).
         var client = ClientWithToken(ManagerToken(userId: 1));
         StubRoster(1, 2, 3);
-        // The substitute is shared across tests via IClassFixture; scope the
-        // "no call was made" assertion to this test's invocations only.
+        // Substitute is shared across the IClassFixture — capture the baseline call count.
         _factory.MockStageOwnerUpdater.ClearReceivedCalls();
 
         var response = await client.PatchAsync("/api/plan/features/1/stages/Development/owner",
@@ -477,7 +457,6 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
         var body = await response.Content.ReadAsStringAsync();
         body.Should().Contain("Pick a teammate from the list");
 
-        // Features service must NOT have been invoked for a failed roster check.
         _factory.MockStageOwnerUpdater.DidNotReceive().UpdateAsync(
             Arg.Any<UpdateStageOwnerRequest>(),
             Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>());
@@ -525,9 +504,7 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
     [Fact]
     public async Task UpdateStageOwner_NullOwner_SkipsRosterCheckAndClears()
     {
-        // Clearing the assignment (null) MUST not require a roster call —
-        // there's nothing to verify. Stub the roster with zero teammates; the
-        // Features service still receives stageOwnerUserId=0.
+        // Clearing the assignment skips the roster check; empty stub proves no membership lookup happens.
         var client = ClientWithToken(ManagerToken(userId: 1));
         StubRoster(managerUserId: 1);
         UpdateStageOwnerRequest? captured = null;
@@ -567,10 +544,6 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
     [Fact]
     public async Task UpdateStageOwner_UpstreamAlreadyExists_Returns409WithConflictBody()
     {
-        // Extended error envelope (api-contract.md § "Error Envelope"): when
-        // the Features service reports a version conflict, the gateway surfaces
-        // 409 with both `error` and the structured `conflict.currentVersion`
-        // so the FE can decide between replay and hard-reload.
         var client = ClientWithToken(ManagerToken(userId: 1));
         StubRoster(1, 42);
         _factory.MockStageOwnerUpdater
@@ -658,6 +631,127 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
+    [Fact]
+    public async Task UpdateStagePlannedStart_PreYear2000Date_Returns400WithFriendlyCopy()
+    {
+        var client = ClientWithToken(ManagerToken());
+        _factory.MockStagePlannedStartUpdater.ClearReceivedCalls();
+
+        var response = await client.PatchAsync("/api/plan/features/1/stages/Development/planned-start",
+            JsonBody(new { plannedStart = "1999-12-31" }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().Contain("Use a real release date");
+
+        _factory.MockStagePlannedStartUpdater.DidNotReceive().UpdateAsync(
+            Arg.Any<UpdateStagePlannedStartRequest>(),
+            Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task UpdateStagePlannedEnd_PostYear2100Date_Returns400WithFriendlyCopy()
+    {
+        var client = ClientWithToken(ManagerToken());
+        _factory.MockStagePlannedEndUpdater.ClearReceivedCalls();
+
+        var response = await client.PatchAsync("/api/plan/features/1/stages/Development/planned-end",
+            JsonBody(new { plannedEnd = "2200-01-01" }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().Contain("Use a real release date");
+
+        _factory.MockStagePlannedEndUpdater.DidNotReceive().UpdateAsync(
+            Arg.Any<UpdateStagePlannedEndRequest>(),
+            Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task UpdateTitle_WithExplicitZeroIfMatch_ForwardsHasFlagAndZero()
+    {
+        var client = ClientWithToken(ManagerToken());
+        UpdateFeatureTitleRequest? captured = null;
+        _factory.MockFeatureTitleUpdater
+            .UpdateAsync(Arg.Do<UpdateFeatureTitleRequest>(r => captured = r),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(TitleDto()));
+
+        var request = new HttpRequestMessage(HttpMethod.Patch, "/api/plan/features/1/title")
+        {
+            Content = JsonBody(new { title = "Renamed" })
+        };
+        request.Headers.TryAddWithoutValidation("If-Match", "0");
+
+        var response = await client.SendAsync(request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        captured!.HasExpectedVersion.Should().BeTrue();
+        captured.ExpectedVersion.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task UpdateTitle_WithoutIfMatch_DoesNotSetHasExpectedVersion()
+    {
+        var client = ClientWithToken(ManagerToken());
+        UpdateFeatureTitleRequest? captured = null;
+        _factory.MockFeatureTitleUpdater
+            .UpdateAsync(Arg.Do<UpdateFeatureTitleRequest>(r => captured = r),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(TitleDto()));
+
+        var response = await client.PatchAsync("/api/plan/features/1/title",
+            JsonBody(new { title = "Renamed" }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        captured!.HasExpectedVersion.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task UpdateStageOwner_WithExplicitZeroIfMatch_ForwardsHasFlagAndZero()
+    {
+        var client = ClientWithToken(ManagerToken(userId: 1));
+        StubRoster(1, 42);
+        UpdateStageOwnerRequest? captured = null;
+        _factory.MockStageOwnerUpdater
+            .UpdateAsync(Arg.Do<UpdateStageOwnerRequest>(r => captured = r),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new UpdateStageOwnerDto
+            {
+                Id = 1,
+                Title = "X",
+                Description = string.Empty,
+                State = FeatureState.Development,
+                PlannedStart = string.Empty,
+                PlannedEnd = string.Empty,
+                LeadUserId = 1,
+                ManagerUserId = 1,
+                CreatedAt = DateTime.UtcNow.ToString("O"),
+                UpdatedAt = DateTime.UtcNow.ToString("O"),
+                Version = 2,
+                StagePlans =
+                {
+                    ProtoPlan(FeatureState.CsApproving),
+                    new FeatureStagePlan { Stage = FeatureState.Development, PlannedStart = "", PlannedEnd = "", PerformerUserId = 42, Version = 1 },
+                    ProtoPlan(FeatureState.Testing),
+                    ProtoPlan(FeatureState.EthalonTesting),
+                    ProtoPlan(FeatureState.LiveRelease),
+                }
+            }));
+
+        var request = new HttpRequestMessage(HttpMethod.Patch, "/api/plan/features/1/stages/Development/owner")
+        {
+            Content = JsonBody(new { stageOwnerUserId = 42 })
+        };
+        request.Headers.TryAddWithoutValidation("If-Match", "0");
+
+        var response = await client.SendAsync(request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        captured!.HasExpectedStageVersion.Should().BeTrue();
+        captured.ExpectedStageVersion.Should().Be(0);
+    }
+
     // -------- Stage Planned End --------
 
     [Fact]
@@ -709,10 +803,6 @@ public sealed class InlineEditEndpointsTests(TasksControllerWebApplicationFactor
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
-    // Regression: BE-002-03 — case-insensitive stage path segment.
-    // Previously `stages/development/owner` returned 400 because TryParseStage
-    // was a case-sensitive switch over PascalCase names. backend-eval-contract
-    // §3 requires the lowercase form to canonicalise to the same FeatureState.
     [Fact]
     public async Task UpdateStageOwner_LowercaseStageInPath_CanonicalisesAndForwardsAsDevelopment()
     {

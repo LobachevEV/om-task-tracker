@@ -14,7 +14,7 @@ import type { TeamRosterMember } from '../../../shared/api/teamApi';
 /**
  * Typeahead combobox for assigning a per-stage performer.
  *
- * Keyboard contract (from design-brief §6):
+ * Keyboard contract:
  * - Typing filters the roster by `displayName` / `email` (case-insensitive).
  * - `Enter` commits the highlighted option (or the exact match if nothing
  *   is highlighted).
@@ -25,7 +25,7 @@ import type { TeamRosterMember } from '../../../shared/api/teamApi';
  * Display contract: the dropdown renders `"Name · Role"`; the closed input
  * shows the display name alone so the column stays scannable.
  *
- * Stale performer (design-brief §5): when `value` is set but the performer is
+ * Stale performer: when `value` is set but the performer is
  * no longer on the roster (both the injected roster AND the resolved
  * `performer` detail payload come back null) the combobox renders a neutral
  * outline avatar + `"Name · removed"` copy + a `Reassign` link. This keeps
@@ -47,7 +47,7 @@ export interface StagePerformerComboboxProps {
   /**
    * Optional resolved performer mini-member from `FeatureDetail.stagePlans[i].performer`.
    * Distinguishes "unassigned" (value=null && performer=null) from "stale"
-   * (value!=null && performer=null), per api-contract.md + brief §5.
+   * (value!=null && performer=null).
    */
   performer?: MiniTeamMember | null;
 }

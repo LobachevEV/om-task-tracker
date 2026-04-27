@@ -16,7 +16,9 @@ message UpdateStagePlannedStartRequest {
   // FeatureStagePlan.planned_start empty-string = null convention).
   string       planned_start          = 3;
   int32        caller_user_id         = 4;
-  int32        expected_stage_version = 5;
+  // `optional` so the wire can distinguish missing-header (advisory mode)
+  // from `If-Match: 0`. Absent → last-write-wins; present + mismatch → 409.
+  optional int32 expected_stage_version = 5;
 }
 
 message FeatureDto {

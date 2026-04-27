@@ -29,16 +29,29 @@ function jsonHeaders(ifMatch?: number): Record<string, string> {
   return headers;
 }
 
+export interface ListFeaturesParams {
+  scope?: FeatureScope;
+  state?: FeatureState;
+  /** Inclusive ISO yyyy-MM-dd; pairs with `windowEnd`. */
+  windowStart?: string;
+  /** Inclusive ISO yyyy-MM-dd; pairs with `windowStart`. */
+  windowEnd?: string;
+  /** Optional AbortSignal — caller cancels stale chunk fetches on fast pan. */
+  signal?: AbortSignal;
+}
+
 export async function listFeatures(
-  params: { scope?: FeatureScope; state?: FeatureState } = {},
+  params: ListFeaturesParams = {},
 ): Promise<FeatureSummary[]> {
   const query = new URLSearchParams();
   if (params.scope) query.set('scope', params.scope);
   if (params.state) query.set('state', params.state);
+  if (params.windowStart) query.set('windowStart', params.windowStart);
+  if (params.windowEnd) query.set('windowEnd', params.windowEnd);
   const qs = query.toString();
   const response = await fetch(
     `${API_BASE_URL}/api/plan/features${qs ? `?${qs}` : ''}`,
-    { headers: authHeaders() },
+    { headers: authHeaders(), signal: params.signal },
   );
   const data = await handleResponse<unknown>(response);
   return featureSummaryListSchema.parse(data);

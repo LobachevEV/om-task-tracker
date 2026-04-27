@@ -15,7 +15,9 @@ message UpdateFeatureDescriptionRequest {
   // feature.Description nullable semantics).
   string description      = 2;
   int32  caller_user_id   = 3;
-  int32  expected_version = 4;
+  // `optional` so the wire can distinguish missing-header (advisory mode)
+  // from `If-Match: 0`. Absent → last-write-wins; present + mismatch → 409.
+  optional int32 expected_version = 4;
 }
 
 message FeatureDto {

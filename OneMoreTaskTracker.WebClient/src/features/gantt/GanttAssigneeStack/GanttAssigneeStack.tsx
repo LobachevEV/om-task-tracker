@@ -33,9 +33,6 @@ export function GanttAssigneeStack({
   }
 
   if (members.length === 1) {
-    // UX-001-06: the "Solo" chip was redundant with the 5/5 planned counter and
-    // the expanded view — every row showed it when a lead stood alone. Dropped
-    // in iteration 2 to reclaim gutter space for side + dates + DTR.
     const only = members[0];
     return (
       <div className={rootClass} role="group" aria-label={ariaLabel}>

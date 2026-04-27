@@ -2,6 +2,7 @@ import { useMemo, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FeatureState, FeatureSummary, MiniTeamMember } from '../../../shared/types/feature';
 import { FEATURE_STATE_CSS } from '../stateConfig';
+import type { BarGeometryPx } from '../ganttMath';
 import type { StageBarGeometry } from '../ganttStageGeometry';
 import './GanttSegmentedBar.css';
 
@@ -14,11 +15,13 @@ export interface GanttSegmentedBarProps {
   /** Click handler — opens the drawer at the given stage. */
   onOpenStage: (stage: FeatureState) => void;
   /**
-   * Lane-level context: `noPlan` / `outOfWindow` render a ghost lane with the
-   * 'Not planned yet' label (or similar) instead of dim segments. Defaults to
-   * `planned` when the lane has bar geometry.
+   * Lane-level context: `noPlan` renders a ghost lane with the 'Not planned
+   * yet' label instead of dim segments. Defaults to `planned` when the lane
+   * has bar geometry.
    */
-  laneVariant?: 'planned' | 'noPlan' | 'outOfWindow';
+  laneVariant?: 'planned' | 'noPlan';
+  /** Feature-level span; rendered as a summary bar when all stages are ghost. */
+  summaryBar?: BarGeometryPx | null;
 }
 
 interface SegmentLabelParams {
@@ -47,15 +50,23 @@ export function GanttSegmentedBar({
   resolvePerformer,
   onOpenStage,
   laneVariant = 'planned',
+  summaryBar,
 }: GanttSegmentedBarProps) {
   const { t } = useTranslation('gantt');
 
-  // Is the feature fully unplanned? → the entire bar becomes a dashed ghost block.
   const allGhost = useMemo(
     () => stageBars.every((s) => s.status === 'ghost'),
     [stageBars],
   );
   const isGhostLane = allGhost || laneVariant !== 'planned';
+  const showSummaryBar = isGhostLane && summaryBar != null && summaryBar.widthPx > 0;
+
+  const summaryStyle = summaryBar
+    ? ({
+        ['--summary-left' as string]: `${summaryBar.leftPx}px`,
+        ['--summary-width' as string]: `${summaryBar.widthPx}px`,
+      } as CSSProperties)
+    : undefined;
 
   return (
     <div
@@ -66,11 +77,17 @@ export function GanttSegmentedBar({
       role="group"
       aria-label={t('segmentedBar.ariaLabel', { title: feature.title })}
     >
-      {isGhostLane ? (
+      {showSummaryBar ? (
+        <div
+          className="gantt-seg-bar__summary"
+          style={summaryStyle}
+          data-testid="segmented-bar-summary"
+          aria-hidden="true"
+        />
+      ) : null}
+      {isGhostLane && !showSummaryBar ? (
         <span className="gantt-seg-bar__empty-label" aria-hidden="true">
-          {laneVariant === 'outOfWindow'
-            ? t('row.outOfWindow', { defaultValue: 'Outside this window' })
-            : t('row.notPlannedYet')}
+          {t('row.notPlannedYet')}
         </span>
       ) : null}
       {stageBars.map((seg, index) => {
@@ -90,8 +107,8 @@ export function GanttSegmentedBar({
                 : t('segmentedBar.status.upcoming');
 
         const style = {
-          ['--seg-left' as string]: geometry ? String(geometry.leftPercent) : '0',
-          ['--seg-width' as string]: geometry ? String(geometry.widthPercent) : '0',
+          ['--seg-left' as string]: geometry ? `${geometry.leftPx}px` : '0px',
+          ['--seg-width' as string]: geometry ? `${geometry.widthPx}px` : '0px',
           ['--seg-color' as string]: `var(${cssVar})`,
         } as CSSProperties;
 

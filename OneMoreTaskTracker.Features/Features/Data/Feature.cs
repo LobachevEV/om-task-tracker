@@ -8,8 +8,7 @@ public class Feature
     public int State { get; set; } = (int)FeatureState.CsApproving;
 
     // Derived server-side (see StagePlanUpserter.RecomputeFeatureDates) from the
-    // min/max of non-null stage dates. They are no longer independently editable
-    // through the REST layer — api-contract.md v1.
+    // min/max of non-null stage dates. Not independently editable via REST.
     public DateOnly? PlannedStart { get; set; }
     public DateOnly? PlannedEnd { get; set; }
 
@@ -24,10 +23,9 @@ public class Feature
     // composite unique index on (FeatureId, Stage)).
     public List<FeatureStagePlan> StagePlans { get; init; } = [];
 
-    // Monotonically-increasing row version used as an optimistic-concurrency
-    // token (see api-contract.md § "Optimistic Concurrency"). Bumped by every
-    // feature-scoped PATCH (title/description) and by every stage-scoped PATCH
-    // so the FE can detect "updated by someone else" and reconcile. EF Core's
-    // IsConcurrencyToken mapping lives in FeaturesDbContext.OnModelCreating.
+    // Optimistic-concurrency token bumped by every feature-scoped and
+    // stage-scoped PATCH so clients can detect "updated by someone else" and
+    // reconcile. EF Core's IsConcurrencyToken mapping lives in
+    // FeaturesDbContext.OnModelCreating.
     public int Version { get; set; }
 }

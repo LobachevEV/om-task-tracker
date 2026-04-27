@@ -1,59 +1,52 @@
 import { useMemo } from 'react';
 import type { FeatureSummary } from '../../shared/types/feature';
 import {
-  barGeometry,
-  todayPercent as computeTodayPercent,
-  windowForZoom,
-  type BarGeometry,
+  barGeometryPx,
+  dateToPixel,
+  daysBetween,
+  type BarGeometryPx,
   type DateWindow,
-  type ZoomLevel,
 } from './ganttMath';
 import { computeStageBars, type StageBarGeometry } from './ganttStageGeometry';
 
-export type GanttLaneVariant = 'planned' | 'noPlan' | 'outOfWindow';
+export type GanttLaneVariant = 'planned' | 'noPlan';
 
 export interface GanttLane {
   feature: FeatureSummary;
   /**
-   * Summary-bar geometry. Null when the feature has no derivable window
-   * inside the current viewport (no dates at all, or the planned range falls
-   * entirely outside the window). The row still renders as a ghost lane so
-   * the manager can see "this feature exists but has no plan yet" or
-   * "overdue before the window starts" without it silently disappearing.
+   * Summary-bar geometry (px-based against `loadedRange.start`). Null when the
+   * feature has no derivable plan inside the loaded range. The row still
+   * renders as a ghost lane so the manager can see "this feature exists but
+   * has no plan yet" without it silently disappearing.
    */
-  bar: BarGeometry | null;
+  bar: BarGeometryPx | null;
   /** Per-stage geometry, always length 5 (one per FEATURE_STATES entry). */
   stageBars: StageBarGeometry[];
   /**
    * Why the feature is rendered the way it is:
-   *  - `planned`      → bar fits inside the window, render normally.
-   *  - `noPlan`       → no stagePlan has any date; render a ghost summary bar
-   *                     labelled "Not planned yet".
-   *  - `outOfWindow`  → the feature IS planned but falls outside the current
-   *                     window (e.g. a feature that went overdue before the
-   *                     window's start). Render a ghost lane so it remains
-   *                     triageable.
+   *  - `planned` → bar fits inside the loaded range, render normally.
+   *  - `noPlan`  → no stagePlan has any date; render a ghost summary bar
+   *                labelled "Not planned yet".
    */
   variant: GanttLaneVariant;
 }
 
 export interface GanttLayout {
-  window: DateWindow;
+  loadedRange: DateWindow;
   lanes: GanttLane[];
-  /**
-   * Features intentionally hidden from the main schedule (e.g. legacy dataset
-   * without `stagePlans`). Every feature in-scope for the stage-timeline view
-   * ends up in `lanes` so the manager never loses a row silently.
-   */
+  /** Features with no plan rows yet (legacy or freshly-created). */
   unscheduled: FeatureSummary[];
-  /** 0..100, or null when today is outside the window. */
-  todayPercent: number | null;
+  /** Px offset of `today` from `loadedRange.start`. Null when today is outside the loaded range. */
+  todayPx: number | null;
+  /** Total px width of the date axis ( = daysBetween(start, end) * dayPx ). */
+  totalWidthPx: number;
 }
 
 export interface UseGanttLayoutArgs {
   features: FeatureSummary[];
   today: string;
-  zoom: ZoomLevel;
+  loadedRange: DateWindow;
+  dayPx: number;
 }
 
 function featureHasAnyPlannedDate(feature: FeatureSummary): boolean {
@@ -63,38 +56,64 @@ function featureHasAnyPlannedDate(feature: FeatureSummary): boolean {
   );
 }
 
+function planOverlapsRange(
+  feature: FeatureSummary,
+  range: DateWindow,
+): boolean {
+  if (feature.plannedStart == null && feature.plannedEnd == null) return false;
+  const start = feature.plannedStart ?? feature.plannedEnd!;
+  const end = feature.plannedEnd ?? feature.plannedStart!;
+  // half-open range: [range.start, range.end)
+  if (daysBetween(end, range.start) > 0) return false;
+  if (daysBetween(range.end, start) >= 0) return false;
+  return true;
+}
+
 export function useGanttLayout(args: UseGanttLayoutArgs): GanttLayout {
-  const { features, today, zoom } = args;
+  const { features, today, loadedRange, dayPx } = args;
   return useMemo<GanttLayout>(() => {
-    const window = windowForZoom(today, zoom);
     const lanes: GanttLane[] = [];
     const unscheduled: FeatureSummary[] = [];
     for (const feature of features) {
-      const bar = barGeometry(window, {
-        start: feature.plannedStart,
-        end: feature.plannedEnd,
-      });
       const hasPlan = featureHasAnyPlannedDate(feature);
-      let variant: GanttLaneVariant;
-      if (bar != null) {
-        variant = 'planned';
-      } else if (!hasPlan) {
-        variant = 'noPlan';
-      } else {
-        variant = 'outOfWindow';
+      if (!hasPlan) {
+        // Render as ghost lane — it still matters to the manager.
+        lanes.push({
+          feature,
+          bar: null,
+          stageBars: computeStageBars(loadedRange, feature, today, dayPx),
+          variant: 'noPlan',
+        });
+        continue;
       }
+      // Drop features whose plan does not overlap the loaded range — chunk
+      // virtualization keeps the DOM small. Re-mounted on next chunk fetch.
+      if (!planOverlapsRange(feature, loadedRange)) continue;
+      const bar = barGeometryPx(
+        loadedRange,
+        { start: feature.plannedStart, end: feature.plannedEnd },
+        dayPx,
+      );
       lanes.push({
         feature,
         bar,
-        stageBars: computeStageBars(window, feature, today),
-        variant,
+        stageBars: computeStageBars(loadedRange, feature, today, dayPx),
+        variant: 'planned',
       });
     }
+    const totalDays = daysBetween(loadedRange.start, loadedRange.end);
+    const totalWidthPx = totalDays * dayPx;
+    const todayDelta = daysBetween(loadedRange.start, today);
+    const todayPx =
+      todayDelta < 0 || todayDelta >= totalDays
+        ? null
+        : dateToPixel(loadedRange.start, today, dayPx);
     return {
-      window,
+      loadedRange,
       lanes,
       unscheduled,
-      todayPercent: computeTodayPercent(window, today),
+      todayPx,
+      totalWidthPx,
     };
-  }, [features, today, zoom]);
+  }, [features, today, loadedRange, dayPx]);
 }

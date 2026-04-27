@@ -1,6 +1,7 @@
 import { useCallback, useRef, type KeyboardEvent } from 'react';
 import { useInlineFieldEditor } from './useInlineFieldEditor';
 import type { InlineEditorError } from './InlineEditorError';
+import { InlineCellError } from './InlineCellError';
 import './InlineEditors.css';
 
 export interface InlineTextCellProps {
@@ -8,7 +9,7 @@ export interface InlineTextCellProps {
   value: string;
   /** Commit handler — throw on failure so the cell can roll back. */
   onSave: (next: string) => Promise<void>;
-  /** Accessible label; must carry field + feature/stage context per brief §7. */
+  /** Accessible label; must carry field + feature/stage context. */
   ariaLabel: string;
   /** Optional per-field validator. Return null when OK, else the inline message. */
   validate?: (next: string) => string | null;
@@ -32,17 +33,7 @@ export interface InlineTextCellProps {
 
 /**
  * Single-line inline text editor — feature title cell in the summary row.
- *
- * Keyboard contract (design brief §6):
- *  - `Enter` commits and stays on the cell.
- *  - `Tab` / `Shift+Tab` commits and moves to the next focusable element
- *    (browser-native; we just rely on `blur` to fire `commit`).
- *  - `Esc` reverts to the committed value; focus stays on the cell.
- *
- * Visual contract (iter 1 skeleton): a plain `<input>` takes the cell width,
- * shows a bottom hairline, and flashes `--accent-dim` on success. Design
- * polish (dotted hover underline, chevrons, viewport-flipping pickers) is
- * Phase B.
+ * Enter commits, Esc reverts, Tab/blur commits via the browser default.
  */
 export function InlineTextCell({
   value,
@@ -62,12 +53,8 @@ export function InlineTextCell({
     onSave,
     validate,
     buildAnnouncement,
+    onAnnounce,
   });
-
-  // Relay announcements to the parent's aria-live region.
-  if (onAnnounce && editor.announcement) {
-    queueMicrotask(() => onAnnounce(editor.announcement));
-  }
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
@@ -110,21 +97,12 @@ export function InlineTextCell({
         onKeyDown={handleKeyDown}
         data-testid={testId ? `${testId}-input` : undefined}
       />
-      <InlineCellMessage error={editor.error} />
-    </span>
-  );
-}
-
-function InlineCellMessage({ error }: { error: InlineEditorError | null }) {
-  if (!error) return null;
-  return (
-    <span
-      className="inline-cell__error"
-      role="alert"
-      data-kind={error.kind}
-      data-testid="inline-cell-error"
-    >
-      {error.message}
+      <InlineCellError
+        error={editor.error}
+        onRetry={() => void editor.retry()}
+        onRevert={editor.cancel}
+        rejectedValueLabel={editor.lastRejectedLabel}
+      />
     </span>
   );
 }

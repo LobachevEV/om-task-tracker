@@ -18,10 +18,10 @@ export interface BarGeometry {
   clampedRight: boolean;
 }
 
-const ISO_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+export const ISO_DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 export function parseIsoDate(iso: string): Date {
-  const m = ISO_RE.exec(iso);
+  const m = ISO_DATE_RE.exec(iso);
   if (!m) throw new Error(`Invalid ISO date: ${iso}`);
   const y = Number(m[1]);
   const mo = Number(m[2]);
@@ -117,4 +117,96 @@ export function todayPercent(window: DateWindow, today: string): number | null {
   const delta = daysBetween(window.start, today);
   if (delta < 0 || delta >= totalDays) return null;
   return (delta / totalDays) * 100;
+}
+
+/**
+ * Px-based geometry primitives — used by the scrollable Gantt where the date
+ * axis lives in a single horizontally-scrolling element of width
+ * `dayCount * dayPx`. Both endpoints are inclusive ISO yyyy-MM-dd.
+ */
+export interface BarGeometryPx {
+  leftPx: number;
+  widthPx: number;
+  clampedLeft: boolean;
+  clampedRight: boolean;
+}
+
+export function dateToPixel(rangeStart: string, iso: string, dayPx: number): number {
+  return daysBetween(rangeStart, iso) * dayPx;
+}
+
+export function pixelToDate(rangeStart: string, px: number, dayPx: number): string {
+  if (dayPx <= 0) throw new Error('dayPx must be > 0');
+  return addDays(rangeStart, Math.floor(px / dayPx));
+}
+
+/**
+ * Px-positioned bar inside a `range` with the given `dayPx`. Same null
+ * semantics as `barGeometry`: returns null when fully outside, both
+ * endpoints null, or end < start.
+ */
+export function barGeometryPx(
+  range: DateWindow,
+  planned: { start: string | null; end: string | null },
+  dayPx: number,
+): BarGeometryPx | null {
+  const totalDays = daysBetween(range.start, range.end);
+  if (totalDays <= 0) return null;
+
+  let plannedStart = planned.start;
+  let plannedEnd = planned.end;
+  if (plannedStart == null && plannedEnd == null) return null;
+  if (plannedStart == null) plannedStart = plannedEnd;
+  if (plannedEnd == null) plannedEnd = plannedStart;
+  if (daysBetween(plannedStart!, plannedEnd!) < 0) return null;
+
+  const startDelta = daysBetween(range.start, plannedStart!);
+  const endDelta = daysBetween(range.start, plannedEnd!) + 1;
+
+  if (endDelta <= 0) return null;
+  if (startDelta >= totalDays) return null;
+
+  const clampedLeft = startDelta < 0;
+  const clampedRight = endDelta > totalDays;
+  const clippedStart = Math.max(startDelta, 0);
+  const clippedEnd = Math.min(endDelta, totalDays);
+
+  return {
+    leftPx: clippedStart * dayPx,
+    widthPx: (clippedEnd - clippedStart) * dayPx,
+    clampedLeft,
+    clampedRight,
+  };
+}
+
+/**
+ * Initial symmetric loaded range centered on `today`, half-open `[start, end)`.
+ * Spans `[today - halfWindowDays, today + halfWindowDays + 1)`.
+ */
+export function loadedRangeAroundToday(
+  today: string,
+  halfWindowDays: number,
+): DateWindow {
+  const half = Math.max(0, halfWindowDays);
+  return { start: addDays(today, -half), end: addDays(today, half + 1) };
+}
+
+export type ChunkDirection = 'leading' | 'trailing';
+
+/**
+ * Next chunk window to fetch on edge-pan; half-open `[start, end)`.
+ * Caller merges into the loaded range.
+ */
+export function chunkRange(
+  direction: ChunkDirection,
+  loaded: DateWindow,
+  chunkDays: number,
+): DateWindow {
+  const days = Math.max(1, chunkDays);
+  if (direction === 'leading') {
+    const start = addDays(loaded.start, -days);
+    return { start, end: loaded.start };
+  }
+  const start = loaded.end;
+  return { start, end: addDays(loaded.end, days) };
 }

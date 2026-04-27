@@ -1,4 +1,3 @@
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using OneMoreTaskTracker.Api.Auth;
@@ -19,6 +18,7 @@ using OneMoreTaskTracker.Proto.Tasks.GetTaskQuery;
 using OneMoreTaskTracker.Proto.Tasks.ListTasksQuery;
 using OneMoreTaskTracker.Proto.Tasks.TaskAggregateQuery;
 using OneMoreTaskTracker.Proto.Users;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -137,4 +137,7 @@ app.MapControllers();
 
 app.Run();
 
-public partial class Program { }
+namespace OneMoreTaskTracker.Api
+{
+    public partial class Program { }
+}

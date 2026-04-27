@@ -9,7 +9,7 @@ import {
   SOLO_FEATURE,
   UNSCHEDULED_FEATURE,
 } from '../__fixtures__/FeatureFixtures';
-import { barGeometry, windowForZoom } from '../ganttMath';
+import { windowForZoom } from '../ganttMath';
 import { computeStageBars } from '../ganttStageGeometry';
 import type { MiniTeamMember } from '../../../shared/types/feature';
 
@@ -20,6 +20,7 @@ const resolve = (id: number | null | undefined): MiniTeamMember | undefined =>
 
 const monthWindow = windowForZoom(FIXTURE_TODAY, 'month');
 const weekWindow = windowForZoom(FIXTURE_TODAY, 'week');
+const DAY_PX = 32;
 
 const meta: Meta<typeof GanttFeatureRow> = {
   title: 'Plan/Primitives/GanttFeatureRow',
@@ -27,11 +28,9 @@ const meta: Meta<typeof GanttFeatureRow> = {
   parameters: { layout: 'padded' },
   tags: ['autodocs'],
   args: {
-    onOpen: fn(),
     onOpenStage: fn(),
     onToggleExpand: fn(),
     today: FIXTURE_TODAY,
-    window: monthWindow,
     resolvePerformer: resolve,
   },
   decorators: [
@@ -55,11 +54,7 @@ type Story = StoryObj<typeof GanttFeatureRow>;
 export const SoloOwner: Story = {
   args: {
     feature: SOLO_FEATURE,
-    bar: barGeometry(monthWindow, {
-      start: SOLO_FEATURE.plannedStart,
-      end: SOLO_FEATURE.plannedEnd,
-    }),
-    stageBars: computeStageBars(monthWindow, SOLO_FEATURE, FIXTURE_TODAY),
+    stageBars: computeStageBars(monthWindow, SOLO_FEATURE, FIXTURE_TODAY, DAY_PX),
     lead: fe,
     miniTeam: [fe],
     expanded: false,
@@ -69,11 +64,7 @@ export const SoloOwner: Story = {
 export const MiniTeam: Story = {
   args: {
     feature: MINI_TEAM_FEATURE,
-    bar: barGeometry(monthWindow, {
-      start: MINI_TEAM_FEATURE.plannedStart,
-      end: MINI_TEAM_FEATURE.plannedEnd,
-    }),
-    stageBars: computeStageBars(monthWindow, MINI_TEAM_FEATURE, FIXTURE_TODAY),
+    stageBars: computeStageBars(monthWindow, MINI_TEAM_FEATURE, FIXTURE_TODAY, DAY_PX),
     lead: be,
     miniTeam: [be, fe, qa],
     expanded: false,
@@ -83,11 +74,7 @@ export const MiniTeam: Story = {
 export const Expanded: Story = {
   args: {
     feature: MINI_TEAM_FEATURE,
-    bar: barGeometry(monthWindow, {
-      start: MINI_TEAM_FEATURE.plannedStart,
-      end: MINI_TEAM_FEATURE.plannedEnd,
-    }),
-    stageBars: computeStageBars(monthWindow, MINI_TEAM_FEATURE, FIXTURE_TODAY),
+    stageBars: computeStageBars(monthWindow, MINI_TEAM_FEATURE, FIXTURE_TODAY, DAY_PX),
     lead: be,
     miniTeam: [be, fe, qa],
     expanded: true,
@@ -97,11 +84,7 @@ export const Expanded: Story = {
 export const Overdue: Story = {
   args: {
     feature: OVERDUE_FEATURE,
-    bar: barGeometry(monthWindow, {
-      start: OVERDUE_FEATURE.plannedStart,
-      end: OVERDUE_FEATURE.plannedEnd,
-    }),
-    stageBars: computeStageBars(monthWindow, OVERDUE_FEATURE, FIXTURE_TODAY),
+    stageBars: computeStageBars(monthWindow, OVERDUE_FEATURE, FIXTURE_TODAY, DAY_PX),
     lead: be,
     miniTeam: [be, fe],
     expanded: false,
@@ -111,8 +94,7 @@ export const Overdue: Story = {
 export const Unscheduled: Story = {
   args: {
     feature: UNSCHEDULED_FEATURE,
-    bar: null,
-    stageBars: computeStageBars(monthWindow, UNSCHEDULED_FEATURE, FIXTURE_TODAY),
+    stageBars: computeStageBars(monthWindow, UNSCHEDULED_FEATURE, FIXTURE_TODAY, DAY_PX),
     lead: fe,
     miniTeam: [fe],
     expanded: false,
@@ -128,7 +110,6 @@ export const ClampedBoth: Story = {
       plannedStart: '2026-01-01',
       plannedEnd: '2026-12-31',
     },
-    bar: barGeometry(weekWindow, { start: '2026-01-01', end: '2026-12-31' }),
     stageBars: computeStageBars(
       weekWindow,
       {
@@ -137,8 +118,8 @@ export const ClampedBoth: Story = {
         plannedEnd: '2026-12-31',
       },
       FIXTURE_TODAY,
+      DAY_PX,
     ),
-    window: weekWindow,
     lead: be,
     miniTeam: [be, fe, qa],
     expanded: false,

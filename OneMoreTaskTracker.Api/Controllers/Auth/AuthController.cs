@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using OneMoreTaskTracker.Api.Auth;
 using OneMoreTaskTracker.Proto.Users;
 
-namespace OneMoreTaskTracker.Api.Controllers;
+namespace OneMoreTaskTracker.Api.Controllers.Auth;
 
 [ApiController]
 [Route("api/auth")]

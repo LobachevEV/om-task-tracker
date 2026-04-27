@@ -1,4 +1,4 @@
-namespace OneMoreTaskTracker.Api.Controllers;
+namespace OneMoreTaskTracker.Api.Controllers.Tasks;
 
 public record TaskDetailResponse(
     string JiraId,

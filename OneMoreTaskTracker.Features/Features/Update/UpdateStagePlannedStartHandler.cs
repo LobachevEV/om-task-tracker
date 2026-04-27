@@ -7,10 +7,6 @@ using ProtoFeatureState = OneMoreTaskTracker.Proto.Features.FeatureState;
 
 namespace OneMoreTaskTracker.Features.Features.Update;
 
-// Inline-edit per-field PATCH handler for a single stage's planned_start.
-// Contract: api-contract.md § "PATCH /api/plan/features/{id}/stages/{stage}/planned-start".
-// Reuses StagePlanUpserter.RecomputeFeatureDates so derived Feature.PlannedStart
-// stays in the same transaction as the stage row mutation.
 public sealed class UpdateStagePlannedStartHandler(
     FeaturesDbContext db,
     ILogger<UpdateStagePlannedStartHandler> logger) : StagePlannedStartUpdater.StagePlannedStartUpdaterBase
@@ -37,16 +33,11 @@ public sealed class UpdateStagePlannedStartHandler(
         var plan = feature.StagePlans.FirstOrDefault(sp => sp.Stage == stageOrdinal)
                    ?? throw new RpcException(new Status(StatusCode.NotFound, $"stage {request.Stage} not found"));
 
-        if (request.ExpectedStageVersion > 0 && request.ExpectedStageVersion != plan.Version)
+        if (request.HasExpectedStageVersion && request.ExpectedStageVersion != plan.Version)
             throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(plan.Version)));
 
-        // Per-row invariant: start <= end when both present.
         FeatureValidation.ValidateDateOrder(parsed, plan.PlannedEnd);
 
-        // Cross-stage chronological-order check: build a snapshot with the
-        // tentative new value for the mutated stage, then walk neighbour pairs
-        // (api-contract.md §4 "Cross-stage chronological order"). Failure
-        // throws FailedPrecondition → 422 with `{ conflict: { kind, with } }`.
         var snapshots = feature.StagePlans
             .Select(sp => sp.Stage == stageOrdinal
                 ? new StagePlanSnapshot(sp.Stage, parsed, sp.PlannedEnd)
@@ -62,8 +53,6 @@ public sealed class UpdateStagePlannedStartHandler(
         plan.Version = stageVersionBefore + 1;
         plan.UpdatedAt = DateTime.UtcNow;
 
-        // Recompute derived feature dates in the same unit of work so the FE sees
-        // consistent min/max summary values in the response.
         StagePlanUpserter.RecomputeFeatureDates(feature);
         feature.Version = featureVersionBefore + 1;
         feature.UpdatedAt = plan.UpdatedAt;

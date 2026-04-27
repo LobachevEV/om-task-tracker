@@ -20,14 +20,6 @@
   min-width: 0;
 }
 
-.gantt-toolbar__eyebrow {
-  font-family: var(--font-mono, monospace);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
 .gantt-toolbar__title {
   font-size: 18px;
   font-weight: 600;
@@ -56,17 +48,9 @@
   gap: 6px;
 }
 
-.gantt-toolbar__select {
-  background: var(--surface-2, var(--surface));
-  color: var(--text);
-  border: 1px solid var(--border-strong);
-  border-radius: 6px;
-  padding: 4px 8px;
-  font-size: 13px;
-}
-
 .gantt-toolbar__zoom-button--active,
-.gantt-toolbar__scope-button--active {
+.gantt-toolbar__scope-button--active,
+.gantt-toolbar__state-button--active {
   background: var(--surface-2, color-mix(in oklch, var(--surface) 80%, var(--text)));
   color: var(--text-strong, var(--text));
   border-color: var(--border-strong);

@@ -1,6 +1,6 @@
 using OneMoreTaskTracker.Proto.Tasks;
 
-namespace OneMoreTaskTracker.Api.Controllers;
+namespace OneMoreTaskTracker.Api.Controllers.Tasks;
 
 internal static class TasksMapper
 {

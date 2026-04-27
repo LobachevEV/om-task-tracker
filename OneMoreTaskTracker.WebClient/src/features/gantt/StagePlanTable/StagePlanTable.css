@@ -379,7 +379,7 @@
   color: color-mix(in oklch, var(--accent) 70%, var(--text-muted));
 }
 
-/* Container queries — brief §4 responsive behaviour. */
+/* Container queries — responsive behaviour. */
 @container (max-width: 720px) {
   .stage-plan__row {
     grid-template-columns: minmax(0, 38fr) minmax(0, 22fr) minmax(0, 22fr) minmax(0, 18fr);

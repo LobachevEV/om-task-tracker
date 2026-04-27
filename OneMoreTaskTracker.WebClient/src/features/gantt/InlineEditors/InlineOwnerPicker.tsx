@@ -4,6 +4,7 @@ import type { TeamRosterMember } from '../../../shared/api/teamApi';
 import { useInlineFieldEditor } from './useInlineFieldEditor';
 import type { InlineEditorError } from './InlineEditorError';
 import { InlineCellChevron } from './InlineCellChevron';
+import { InlineCellError } from './InlineCellError';
 import './InlineEditors.css';
 
 export interface InlineOwnerPickerProps {
@@ -38,10 +39,8 @@ function rosterMatches(m: TeamRosterMember, q: string): boolean {
 }
 
 /**
- * Per-stage owner cell. Click / focus opens an anchored listbox; typing
- * filters; arrow keys + Enter select. Iter 1 skeleton — anchoring is
- * static (below the cell); viewport-edge flipping + refetch-on-open land
- * in Phase B.
+ * Per-stage owner cell. Click/focus opens an anchored listbox; typing
+ * filters; arrow keys + Enter select.
  */
 export function InlineOwnerPicker({
   value,
@@ -62,19 +61,16 @@ export function InlineOwnerPicker({
     committed: value,
     onSave,
     buildAnnouncement,
+    onAnnounce,
+    formatRejectedLabel: (next) => resolveOwnerLabel(next, roster),
   });
-
-  if (onAnnounce && editor.announcement) {
-    queueMicrotask(() => onAnnounce(editor.announcement));
-  }
 
   const [query, setQuery] = useState<string>(displayName ?? '');
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
 
-  // Sync the filter text when the committed value changes (e.g. after save).
-  // Use a state-tracking pattern (not a ref read during render) to satisfy
-  // the React Compiler strict lint.
+  // Resync filter text on committed-value change via a tracked-state pattern
+  // (no ref read during render) — required by the React Compiler strict lint.
   const [trackedValue, setTrackedValue] = useState<number | null>(value);
   if (trackedValue !== value) {
     setTrackedValue(value);
@@ -104,9 +100,8 @@ export function InlineOwnerPicker({
   const commitUser = useCallback(
     async (userId: number | null) => {
       setOpen(false);
-      // `commit(override)` bypasses the stale-draft captured-by-closure
-      // problem: the hook validates + saves the exact value the picker
-      // selected without waiting for React's state propagation.
+      // commit(override) saves the picked id without waiting for setDraft
+      // to propagate through React's state queue.
       try {
         await editor.commit(userId);
       } finally {
@@ -264,21 +259,21 @@ export function InlineOwnerPicker({
           )}
         </ul>
       ) : null}
-      <InlineCellMessage error={editor.error} />
+      <InlineCellError
+        error={editor.error}
+        onRetry={() => void editor.retry()}
+        onRevert={editor.cancel}
+        rejectedValueLabel={editor.lastRejectedLabel}
+      />
     </div>
   );
 }
 
-function InlineCellMessage({ error }: { error: InlineEditorError | null }) {
-  if (!error) return null;
-  return (
-    <span
-      className="inline-cell__error"
-      role="alert"
-      data-kind={error.kind}
-      data-testid="inline-cell-error"
-    >
-      {error.message}
-    </span>
-  );
+function resolveOwnerLabel(
+  userId: number | null | undefined,
+  roster: readonly TeamRosterMember[],
+): string | null {
+  if (userId == null) return null;
+  const match = roster.find((m) => m.userId === userId);
+  return match?.displayName ?? null;
 }

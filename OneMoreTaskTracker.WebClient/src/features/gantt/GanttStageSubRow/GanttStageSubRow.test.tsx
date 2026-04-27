@@ -16,6 +16,7 @@ import type { MiniTeamMember } from '../../../shared/types/feature';
 
 const { fe, be, qa, mg } = MINI_TEAM_MEMBERS;
 const win = windowForZoom(FIXTURE_TODAY, 'month');
+const DAY_PX = 32;
 
 function resolverFor(members: MiniTeamMember[]) {
   const byId = new Map(members.map((m) => [m.userId, m]));
@@ -29,7 +30,7 @@ describe('GanttStageSubRow', () => {
   });
 
   it('renders owner name and a Side badge when the stage has a performer', () => {
-    const bars = computeStageBars(win, MINI_TEAM_FEATURE, FIXTURE_TODAY);
+    const bars = computeStageBars(win, MINI_TEAM_FEATURE, FIXTURE_TODAY, DAY_PX);
     const testingSeg = bars.find((b) => b.stage === 'Testing')!;
     render(
       <GanttStageSubRow
@@ -46,7 +47,7 @@ describe('GanttStageSubRow', () => {
   });
 
   it('renders an "Unassigned" owner + no side badge when performer is null', () => {
-    const bars = computeStageBars(win, UNSCHEDULED_FEATURE, FIXTURE_TODAY);
+    const bars = computeStageBars(win, UNSCHEDULED_FEATURE, FIXTURE_TODAY, DAY_PX);
     const seg = bars[0];
     render(
       <GanttStageSubRow
@@ -63,7 +64,7 @@ describe('GanttStageSubRow', () => {
   });
 
   it('renders DTR as `—` for unplanned stages', () => {
-    const bars = computeStageBars(win, UNSCHEDULED_FEATURE, FIXTURE_TODAY);
+    const bars = computeStageBars(win, UNSCHEDULED_FEATURE, FIXTURE_TODAY, DAY_PX);
     render(
       <GanttStageSubRow
         feature={UNSCHEDULED_FEATURE}
@@ -78,7 +79,7 @@ describe('GanttStageSubRow', () => {
   });
 
   it('renders DTR with leading minus when the stage is overdue', () => {
-    const bars = computeStageBars(win, OVERDUE_FEATURE, FIXTURE_TODAY);
+    const bars = computeStageBars(win, OVERDUE_FEATURE, FIXTURE_TODAY, DAY_PX);
     const dev = bars.find((b) => b.stage === 'Development')!;
     render(
       <GanttStageSubRow
@@ -95,8 +96,34 @@ describe('GanttStageSubRow', () => {
     expect(dtr).toHaveAttribute('data-overdue', 'true');
   });
 
+  it('does not stamp data-status="current" on a ghost stage even when isCurrent (no amber band on unplanned LiveRelease)', () => {
+    // Regression: a feature in state=LiveRelease with 0/5 stages planned
+    // (e.g. "Legacy API sunset") used to paint a yellow band across the
+    // whole LiveRelease sub-row because the CSS keyed on data-active=true.
+    // The active tint must only apply when the stage actually has a plan
+    // (data-status='current'); ghost stages must read data-status='ghost'.
+    const unplannedShipped = { ...UNSCHEDULED_FEATURE, state: 'LiveRelease' as const };
+    const bars = computeStageBars(win, unplannedShipped, FIXTURE_TODAY, DAY_PX);
+    const live = bars.find((b) => b.stage === 'LiveRelease')!;
+    expect(live.isCurrent).toBe(true);
+    expect(live.status).toBe('ghost');
+    render(
+      <GanttStageSubRow
+        feature={unplannedShipped}
+        seg={live}
+        today={FIXTURE_TODAY}
+        resolvePerformer={resolverFor([])}
+        index={4}
+        onOpenStage={vi.fn()}
+      />,
+    );
+    const row = screen.getByTestId(`stage-subrow-${unplannedShipped.id}-LiveRelease`);
+    expect(row.getAttribute('data-status')).toBe('ghost');
+    expect(row.getAttribute('data-active')).toBe('true');
+  });
+
   it('renders DTR as `✓` for the completed LiveRelease stage of a shipped feature', () => {
-    const bars = computeStageBars(win, SHIPPED_FEATURE, FIXTURE_TODAY);
+    const bars = computeStageBars(win, SHIPPED_FEATURE, FIXTURE_TODAY, DAY_PX);
     const live = bars.find((b) => b.stage === 'LiveRelease')!;
     render(
       <GanttStageSubRow
@@ -112,7 +139,7 @@ describe('GanttStageSubRow', () => {
   });
 
   it('renders "<name> · removed" without throwing when the performer id is stale', () => {
-    const bars = computeStageBars(win, MINI_TEAM_FEATURE, FIXTURE_TODAY);
+    const bars = computeStageBars(win, MINI_TEAM_FEATURE, FIXTURE_TODAY, DAY_PX);
     const dev = bars.find((b) => b.stage === 'Development')!;
     render(
       <GanttStageSubRow

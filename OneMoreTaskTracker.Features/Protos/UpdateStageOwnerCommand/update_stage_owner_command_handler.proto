@@ -9,9 +9,9 @@ service StageOwnerUpdater {
   rpc Update (UpdateStageOwnerRequest) returns (FeatureDto);
 }
 
-// Role-prefixed `stage_owner_user_id` matches the new per-field wire vocabulary
-// (see api-contract.md § "Naming evolution"). The legacy
-// FeatureStagePlan.performer_user_id on the READ contract is untouched.
+// Role-prefixed `stage_owner_user_id` matches the per-field wire vocabulary.
+// The legacy FeatureStagePlan.performer_user_id on the READ contract is
+// untouched.
 message UpdateStageOwnerRequest {
   int32        feature_id             = 1;
   FeatureState stage                  = 2;
@@ -20,7 +20,9 @@ message UpdateStageOwnerRequest {
   int32        stage_owner_user_id    = 3;
   int32        caller_user_id         = 4;
   // Stage-scoped optimistic-concurrency token (FeatureStagePlan.Version).
-  int32        expected_stage_version = 5;
+  // `optional` so the wire can distinguish missing-header (advisory mode)
+  // from `If-Match: 0`. Absent → last-write-wins; present + mismatch → 409.
+  optional int32 expected_stage_version = 5;
 }
 
 message FeatureDto {

@@ -38,7 +38,6 @@ app.MapGrpcService<CreateFeatureHandler>();
 app.MapGrpcService<UpdateFeatureHandler>();
 app.MapGrpcService<ListFeaturesHandler>();
 app.MapGrpcService<GetFeatureHandler>();
-// Per-field PATCH handlers for the Gantt inline-edit feature (backend-plan.md).
 app.MapGrpcService<UpdateFeatureTitleHandler>();
 app.MapGrpcService<UpdateFeatureDescriptionHandler>();
 app.MapGrpcService<UpdateStageOwnerHandler>();

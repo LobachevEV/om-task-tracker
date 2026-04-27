@@ -35,10 +35,13 @@
     "/api/plan/features": {
       "get": {
         "summary": "List features visible to the caller.",
+        "description": "Optional `windowStart` / `windowEnd` query params (ISO yyyy-MM-dd) constrain results to features whose plan overlaps the window. Window semantics: `windowStart` is inclusive on `plannedEnd`; `windowEnd` is exclusive on `plannedStart`; features with null `plannedStart` and/or `plannedEnd` are always included. Bad date format or `windowStart > windowEnd` returns 400 `Invalid request data` and the upstream gRPC service is NOT called.",
         "tags": ["plan"],
         "parameters": [
           { "name": "scope", "in": "query", "required": false, "schema": { "type": "string", "enum": ["mine", "all"] } },
-          { "name": "state", "in": "query", "required": false, "schema": { "$ref": "#/components/schemas/FeatureState" } }
+          { "name": "state", "in": "query", "required": false, "schema": { "$ref": "#/components/schemas/FeatureState" } },
+          { "name": "windowStart", "in": "query", "required": false, "description": "ISO yyyy-MM-dd. Inclusive on plannedEnd.", "schema": { "type": "string", "format": "date" } },
+          { "name": "windowEnd", "in": "query", "required": false, "description": "ISO yyyy-MM-dd. Exclusive on plannedStart.", "schema": { "type": "string", "format": "date" } }
         ],
         "responses": {
           "200": {
@@ -49,6 +52,7 @@
               }
             }
           },
+          "400": { "$ref": "#/components/responses/BadRequest" },
           "401": { "$ref": "#/components/responses/Unauthorized" }
         }
       },
@@ -366,7 +370,7 @@
             "description": "Structured conflict context. Absent when the upstream did not supply one.",
             "required": ["kind"],
             "properties": {
-              "kind": { "type": "string", "enum": ["version", "overlap", "order", "rangeInvalid"] },
+              "kind": { "type": "string", "enum": ["version", "overlap"] },
               "currentVersion": { "type": "integer", "format": "int32", "description": "Server's current version (kind='version')." },
               "with": { "$ref": "#/components/schemas/FeatureState" }
             }

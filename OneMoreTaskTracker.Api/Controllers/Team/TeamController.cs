@@ -1,12 +1,12 @@
-using System.Security.Claims;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OneMoreTaskTracker.Api.Auth;
 using OneMoreTaskTracker.Proto.Tasks.TaskAggregateQuery;
 using OneMoreTaskTracker.Proto.Users;
+using System.Security.Claims;
 
-namespace OneMoreTaskTracker.Api.Controllers;
+namespace OneMoreTaskTracker.Api.Controllers.Team;
 
 [ApiController]
 [Route("api/team/members")]

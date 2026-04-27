@@ -14,13 +14,16 @@ public static class DevFeatureSeeder
     private const int DaveBackendUserId    = 5;
     private const int EveQaUserId          = 6;
 
-    // Exactly three fixture variants exercise the three stage-plan states the
-    // FE needs to render on day one (backend-plan.md § Seed / Fixture Data):
+    // Four fixture variants:
     //   A — fully planned (all 5 stages populated with dates + performers)
     //   B — partially planned (first 2 stages populated)
     //   C — empty (all 5 rows present, all dates null, performer = 0)
+    //   D — legacy drift: no stage dates, but Feature.PlannedStart/PlannedEnd
+    //       hold extreme values (simulates the back-compat write path in
+    //       UpdateFeatureHandler that bypasses stage-derived recompute).
+    //       Bounds query MUST ignore this feature; only stages contribute.
     // Derived Feature.PlannedStart/PlannedEnd are computed from the stage dates
-    // so seeded rows exercise the same derivation logic as the Update handler.
+    // unless LegacyPlannedStart/End override them (variant D).
     private static readonly SeedFeature[] Features =
     [
         new(
@@ -62,6 +65,21 @@ public static class DevFeatureSeeder
                 new(FeatureState.EthalonTesting, null, null, 0),
                 new(FeatureState.LiveRelease,    null, null, 0),
             ]),
+        new(
+            Title:               "Drift fixture (legacy dates only)",
+            Description:         "Feature-level PlannedStart/End set far outside the planned-stage range; no stage dates. Verifies bounds query ignores feature-level legacy values.",
+            State:               FeatureState.CsApproving,
+            LeadUserId:          SeededManagerUserId,
+            StagePlans:
+            [
+                new(FeatureState.CsApproving,    null, null, 0),
+                new(FeatureState.Development,    null, null, 0),
+                new(FeatureState.Testing,        null, null, 0),
+                new(FeatureState.EthalonTesting, null, null, 0),
+                new(FeatureState.LiveRelease,    null, null, 0),
+            ],
+            LegacyPlannedStart:  new DateOnly(2020, 01, 01),
+            LegacyPlannedEnd:    new DateOnly(2030, 12, 31)),
     ];
 
     public static async Task SeedAsync(FeaturesDbContext dbContext, CancellationToken cancellationToken = default)
@@ -84,8 +102,8 @@ public static class DevFeatureSeeder
                 Title         = f.Title,
                 Description   = f.Description,
                 State         = (int)f.State,
-                PlannedStart  = populatedStarts.Count > 0 ? populatedStarts.Min() : null,
-                PlannedEnd    = populatedEnds.Count   > 0 ? populatedEnds.Max()   : null,
+                PlannedStart  = f.LegacyPlannedStart ?? (populatedStarts.Count > 0 ? populatedStarts.Min() : null),
+                PlannedEnd    = f.LegacyPlannedEnd   ?? (populatedEnds.Count   > 0 ? populatedEnds.Max()   : null),
                 LeadUserId    = f.LeadUserId,
                 ManagerUserId = SeededManagerUserId,
                 CreatedAt     = now,
@@ -116,7 +134,9 @@ public static class DevFeatureSeeder
         string Description,
         FeatureState State,
         int LeadUserId,
-        SeedStagePlan[] StagePlans);
+        SeedStagePlan[] StagePlans,
+        DateOnly? LegacyPlannedStart = null,
+        DateOnly? LegacyPlannedEnd   = null);
 
     private readonly record struct SeedStagePlan(
         FeatureState Stage,

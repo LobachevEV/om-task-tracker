@@ -5,25 +5,7 @@ import { toInlineEditorError, type InlineEditorError } from './InlineEditorError
 /**
  * State-machine for a single inline-edit cell (title, description, owner,
  * or a stage date). Keeps optimistic/rollback semantics consistent across
- * every editor so the Evaluator sees identical behaviour at every cell.
- *
- * Usage:
- *
- *   const editor = useInlineFieldEditor({
- *     committed: feature.title,
- *     onSave: async (next) => {
- *       const updated = await planApi.updateFeatureTitle(id, { title: next });
- *       onFeatureUpdated(updated);  // page-level reconciliation
- *     },
- *     validate: (next) => next.trim() === '' ? "Title can't be empty" : null,
- *   });
- *
- *   <input
- *     value={editor.draft}
- *     onChange={(e) => editor.setDraft(e.currentTarget.value)}
- *     onBlur={editor.commit}
- *     onKeyDown={editor.handleKeyDown}
- *   />
+ * every editor.
  *
  * Invariants:
  * - `draft` mirrors the committed value whenever the input is NOT being
@@ -45,10 +27,21 @@ export interface UseInlineFieldEditorOptions<T> {
   isEqual?: (a: T, b: T) => boolean;
   /**
    * Produce the screen-reader announcement after a successful commit or an
-   * error. Called AFTER the mutation resolves. Return an empty string to
-   * skip announcement. When omitted the hook emits no announcements.
+   * error. Return an empty string to skip announcement.
    */
   buildAnnouncement?: (outcome: 'saved' | 'error', committed: T, error: InlineEditorError | null) => string;
+  /**
+   * Relay an announcement string to a parent `aria-live` region. Called
+   * once per outcome (so identical consecutive announcements still fire,
+   * unlike a state-keyed effect would).
+   */
+  onAnnounce?: (message: string) => void;
+  /**
+   * Project a rejected value to the user-facing label shown next to the
+   * Retry button. When omitted, uses `String(value)` for non-null values
+   * and `null` for null/undefined.
+   */
+  formatRejectedLabel?: (value: T) => string | null;
 }
 
 /** Duration of the accept-flash background pulse (ms). */
@@ -68,6 +61,26 @@ export interface UseInlineFieldEditorResult<T> {
   commit: (override?: T) => Promise<void>;
   /** Restore `draft` to `committed` (Esc semantics). */
   cancel: () => void;
+  /**
+   * Re-attempt the most recent rejected commit. No-op when nothing was
+   * rejected. Lets the user recover from a transient network/conflict
+   * failure without retyping the value.
+   */
+  retry: () => Promise<void>;
+  /** True when the most recent commit was rejected and is pending retry. */
+  hasRejection: boolean;
+  /**
+   * The value that was rejected. Meaningful only when `hasRejection` is
+   * true; otherwise `null`. Read alongside `hasRejection` rather than
+   * treating `null` as "no rejection" — `null` is a legitimate rejected
+   * payload (e.g. unassigning an owner).
+   */
+  lastRejectedValue: T | null;
+  /**
+   * The user-facing label for the rejected value, projected via
+   * `formatRejectedLabel` if supplied. Null when nothing is rejected.
+   */
+  lastRejectedLabel: string | null;
   /** Current lifecycle status — drives CSS `data-status`. */
   status: InlineEditorStatus;
   /** Last commit error if `status === 'error'`, else null. */
@@ -76,41 +89,44 @@ export interface UseInlineFieldEditorResult<T> {
   enterEdit: () => void;
   /**
    * True for ~120ms after a successful commit. Drives the accept-flash CSS
-   * (`data-flash="true"`). Respects `prefers-reduced-motion: reduce` —
-   * caller can guard with `matchMedia` if needed.
+   * (`data-flash="true"`). Respects `prefers-reduced-motion: reduce`.
    */
   flashing: boolean;
-  /**
-   * Human-readable announcement after a transition. Drives the
-   * per-row `aria-live="polite"` region. Empty string when nothing to
-   * announce. Callers provide the text via `onCommitAnnouncement`.
-   */
-  announcement: string;
 }
 
+const reducedMotionQuery =
+  typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)')
+    : null;
+
 function prefersReducedMotion(): boolean {
-  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
-  try {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  } catch {
-    return false;
-  }
+  return reducedMotionQuery?.matches ?? false;
+}
+
+function defaultRejectedLabel<T>(value: T): string | null {
+  if (value == null) return null;
+  return String(value);
 }
 
 export function useInlineFieldEditor<T>(
   options: UseInlineFieldEditorOptions<T>,
 ): UseInlineFieldEditorResult<T> {
-  const { committed, onSave, validate, isEqual = Object.is, buildAnnouncement } = options;
+  const {
+    committed,
+    onSave,
+    validate,
+    isEqual = Object.is,
+    buildAnnouncement,
+    onAnnounce,
+    formatRejectedLabel,
+  } = options;
   const [status, setStatus] = useState<InlineEditorStatus>('idle');
   const [error, setError] = useState<InlineEditorError | null>(null);
   const [flashing, setFlashing] = useState<boolean>(false);
-  const [announcement, setAnnouncement] = useState<string>('');
+  const [lastRejectedDraft, setLastRejectedDraft] = useState<{ value: T } | null>(null);
 
-  // Local draft state, keyed by the render-time `committed` value for the
-  // idle-resync case. Using `useState` as a "controlled/uncontrolled mix"
-  // here would require a dangerous setState-in-effect; instead we derive
-  // the draft during render when the parent's source-of-truth changes while
-  // the editor is idle. This is the documented React pattern for "adjusting
+  // Local draft state, derived during render against `committed` for the
+  // idle-resync case. This is the documented React pattern for "adjusting
   // state while rendering" (see React docs: You Might Not Need An Effect).
   const [trackedCommitted, setTrackedCommitted] = useState<T>(committed);
   const [draft, setDraftState] = useState<T>(committed);
@@ -125,10 +141,41 @@ export function useInlineFieldEditor<T>(
     lastCommittedRef.current = committed;
   }, [committed]);
 
+  // Keep callbacks fresh without retriggering `commit`'s identity. The
+  // hook calls `onAnnounce` directly so identical consecutive messages
+  // still fire (a state-keyed effect would dedupe them).
+  const onAnnounceRef = useRef(onAnnounce);
+  const buildAnnouncementRef = useRef(buildAnnouncement);
+  useEffect(() => {
+    onAnnounceRef.current = onAnnounce;
+    buildAnnouncementRef.current = buildAnnouncement;
+  });
+
+  const flashTimeoutRef = useRef<number | null>(null);
+  useEffect(() => {
+    return () => {
+      if (flashTimeoutRef.current != null) {
+        window.clearTimeout(flashTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const announce = useCallback(
+    (outcome: 'saved' | 'error', value: T, err: InlineEditorError | null) => {
+      const build = buildAnnouncementRef.current;
+      const relay = onAnnounceRef.current;
+      if (!build || !relay) return;
+      const text = build(outcome, value, err);
+      if (text) relay(text);
+    },
+    [],
+  );
+
   const setDraft = useCallback((next: T) => {
     setDraftState(next);
     setStatus((s) => (s === 'error' ? 'editing' : s));
     setError((prev) => (prev == null ? prev : null));
+    setLastRejectedDraft((prev) => (prev == null ? prev : null));
   }, []);
 
   const enterEdit = useCallback(() => {
@@ -139,13 +186,13 @@ export function useInlineFieldEditor<T>(
     setDraftState(lastCommittedRef.current);
     setStatus('idle');
     setError(null);
+    setLastRejectedDraft(null);
   }, []);
 
   const commit = useCallback(
     async (override?: T) => {
       if (status === 'pending') return;
       const next = override === undefined ? draft : override;
-      // Reflect the override in local draft so callers / tests can read it.
       if (override !== undefined) setDraftState(override);
       if (isEqual(next, lastCommittedRef.current)) {
         setStatus('idle');
@@ -166,29 +213,55 @@ export function useInlineFieldEditor<T>(
       setError(null);
       try {
         await onSave(next);
-        // `committed` will update via parent; we defensively snap idle here.
         setStatus('idle');
+        setLastRejectedDraft((prev) => (prev === null ? prev : null));
+        if (flashTimeoutRef.current != null) {
+          window.clearTimeout(flashTimeoutRef.current);
+          flashTimeoutRef.current = null;
+        }
         if (!prefersReducedMotion()) {
           setFlashing(true);
-          window.setTimeout(() => setFlashing(false), ACCEPT_FLASH_MS);
+          flashTimeoutRef.current = window.setTimeout(() => {
+            setFlashing(false);
+            flashTimeoutRef.current = null;
+          }, ACCEPT_FLASH_MS);
         }
-        if (buildAnnouncement) {
-          const text = buildAnnouncement('saved', next, null);
-          if (text) setAnnouncement(text);
-        }
+        announce('saved', next, null);
       } catch (err: unknown) {
         const normalised = toInlineEditorError(err);
         setError(normalised);
         setStatus('error');
+        setLastRejectedDraft({ value: next });
         setDraftState(lastCommittedRef.current);
-        if (buildAnnouncement) {
-          const text = buildAnnouncement('error', lastCommittedRef.current, normalised);
-          if (text) setAnnouncement(text);
-        }
+        announce('error', lastCommittedRef.current, normalised);
       }
     },
-    [draft, isEqual, onSave, status, validate, buildAnnouncement],
+    [announce, draft, isEqual, onSave, status, validate],
   );
 
-  return { draft, setDraft, commit, cancel, status, error, enterEdit, flashing, announcement };
+  const retry = useCallback(async () => {
+    if (lastRejectedDraft === null) return;
+    await commit(lastRejectedDraft.value);
+  }, [commit, lastRejectedDraft]);
+
+  const hasRejection = lastRejectedDraft !== null;
+  const lastRejectedValue = lastRejectedDraft ? lastRejectedDraft.value : null;
+  const lastRejectedLabel = lastRejectedDraft
+    ? (formatRejectedLabel ?? defaultRejectedLabel)(lastRejectedDraft.value)
+    : null;
+
+  return {
+    draft,
+    setDraft,
+    commit,
+    cancel,
+    retry,
+    hasRejection,
+    lastRejectedValue,
+    lastRejectedLabel,
+    status,
+    error,
+    enterEdit,
+    flashing,
+  };
 }

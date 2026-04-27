@@ -3,9 +3,9 @@ import { FEATURE_STATES } from '../../shared/types/feature';
 import { FEATURE_STATE_ORDER } from './stateConfig';
 import {
   addDays,
-  barGeometry,
+  barGeometryPx,
   daysBetween,
-  type BarGeometry,
+  type BarGeometryPx,
   type DateWindow,
 } from './ganttMath';
 
@@ -14,14 +14,14 @@ export type StageBarStatus = 'completed' | 'current' | 'upcoming' | 'ghost';
 export interface StageBarGeometry {
   stage: FeatureState;
   /** Null for ghost segments (stage has null dates → no real geometry). */
-  bar: BarGeometry | null;
+  bar: BarGeometryPx | null;
   /**
    * Ghost geometry used only for rendering placement when `bar` is null.
    * Anchored abutting the previous stage with a 3-day default width, or
-   * to the window start for leading unplanned stages. Never used when a
-   * real `bar` is present.
+   * to the loaded-range start for leading unplanned stages. Never used
+   * when a real `bar` is present.
    */
-  ghost: BarGeometry | null;
+  ghost: BarGeometryPx | null;
   isCurrent: boolean;
   isOverdue: boolean;
   isCompleted: boolean;
@@ -67,23 +67,25 @@ function statusOf(opts: {
 /**
  * Compute a StageBarGeometry per entry in `feature.stagePlans`, preserving
  * canonical order. Each entry carries either a real `bar` (via
- * `barGeometry`) OR a `ghost` placeholder anchored in the window.
+ * `barGeometryPx`) OR a `ghost` placeholder anchored in the loaded range.
  *
  * Pure function — no side effects, no I/O.
  */
 export function computeStageBars(
-  window: DateWindow,
+  loadedRange: DateWindow,
   feature: FeatureSummary,
   today: string,
+  dayPx: number,
 ): StageBarGeometry[] {
   // Build an anchor pointer so ghost segments can be placed against the
-  // previous stage's planned end (or the window start for leading ghosts).
-  let ghostAnchor: string = window.start;
+  // previous stage's planned end (or the range start for leading ghosts).
+  let ghostAnchor: string = loadedRange.start;
   const out: StageBarGeometry[] = [];
   // Iterate in canonical order regardless of input order — the contract guarantees
   // order, but defensive iteration keeps us resilient.
+  const planByStage = new Map(feature.stagePlans.map((p) => [p.stage, p]));
   for (const stage of FEATURE_STATES) {
-    const plan = feature.stagePlans.find((p) => p.stage === stage);
+    const plan = planByStage.get(stage);
     if (plan == null) {
       // Contract says length 5 — if we ever miss one, render a ghost.
       const ghostStart = ghostAnchor;
@@ -91,7 +93,7 @@ export function computeStageBars(
       out.push({
         stage,
         bar: null,
-        ghost: barGeometry(window, { start: ghostStart, end: ghostEnd }),
+        ghost: barGeometryPx(loadedRange, { start: ghostStart, end: ghostEnd }, dayPx),
         isCurrent: stage === feature.state,
         isOverdue: false,
         isCompleted: false,
@@ -105,12 +107,16 @@ export function computeStageBars(
     }
 
     const hasAnyDate = plan.plannedStart != null || plan.plannedEnd != null;
-    const bar = barGeometry(window, { start: plan.plannedStart, end: plan.plannedEnd });
+    const bar = barGeometryPx(
+      loadedRange,
+      { start: plan.plannedStart, end: plan.plannedEnd },
+      dayPx,
+    );
     if (hasAnyDate) {
       // Plan has real dates — compute status flags from the contract, even
-      // when the geometry falls outside the visible window (the caller
-      // still needs accurate completion/overdue/current flags for the
-      // info panel and the expanded sub-row list).
+      // when the geometry falls outside the loaded range (the caller still
+      // needs accurate completion/overdue/current flags for the info panel
+      // and the expanded sub-row list).
       if (plan.plannedEnd != null) {
         ghostAnchor = plan.plannedEnd;
       }
@@ -129,7 +135,7 @@ export function computeStageBars(
     }
 
     // No real dates — render a ghost segment anchored against the previous
-    // stage's end (or the window start for leading unplanned stages).
+    // stage's end (or the range start for leading unplanned stages).
     const ghostStart = ghostAnchor;
     const ghostEnd = addDays(ghostAnchor, GHOST_DEFAULT_SPAN_DAYS);
     ghostAnchor = ghostEnd;
@@ -137,7 +143,7 @@ export function computeStageBars(
     out.push({
       stage,
       bar: null,
-      ghost: barGeometry(window, { start: ghostStart, end: ghostEnd }),
+      ghost: barGeometryPx(loadedRange, { start: ghostStart, end: ghostEnd }, dayPx),
       isCurrent,
       isOverdue: false,
       isCompleted: false,

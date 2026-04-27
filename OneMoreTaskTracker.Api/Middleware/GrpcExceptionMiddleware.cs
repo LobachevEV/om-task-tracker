@@ -9,8 +9,7 @@ public class GrpcExceptionMiddleware(RequestDelegate next, ILogger<GrpcException
 
     // Handlers in the Features service encode extra conflict context after a
     // pipe delimiter in Status.Detail so the gateway can surface it as the
-    // contract-declared `conflict` object (api-contract.md § "Error Envelope").
-    // Example detail payloads:
+    // contract-declared `conflict` object. Example detail payloads:
     //   "Updated by someone else|conflict={\"kind\":\"version\",\"currentVersion\":3}"
     //   "Stage order violation|conflict={\"kind\":\"overlap\",\"with\":\"Development\"}"
     private const string ConflictMarker = "|conflict=";

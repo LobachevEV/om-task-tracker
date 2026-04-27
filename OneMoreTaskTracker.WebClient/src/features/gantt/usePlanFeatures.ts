@@ -1,13 +1,25 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as planApi from '../../shared/api/planApi';
+import type { ListFeaturesParams } from '../../shared/api/planApi';
 import type { FeatureScope, FeatureState, FeatureSummary } from '../../shared/types/feature';
 import { useRefetchOnFocus } from '../../shared/hooks/useRefetchOnFocus';
 
 export interface UsePlanFeaturesParams {
   scope?: FeatureScope;
   state?: FeatureState;
+  /** Initial windowStart sent on the first auto-load (chunk fetches override per call). */
+  initialWindowStart?: string;
+  /** Initial windowEnd sent on the first auto-load. */
+  initialWindowEnd?: string;
   /** Injection seam — defaults to `planApi.listFeatures`. */
-  fetcher?: (params: { scope?: FeatureScope; state?: FeatureState }) => Promise<FeatureSummary[]>;
+  fetcher?: (params: ListFeaturesParams) => Promise<FeatureSummary[]>;
+}
+
+export interface ChunkFetchOptions {
+  windowStart: string;
+  windowEnd: string;
+  /** Optional AbortSignal — caller cancels stale chunk fetches on fast pan. */
+  signal?: AbortSignal;
 }
 
 export interface UsePlanFeaturesResult {
@@ -15,6 +27,14 @@ export interface UsePlanFeaturesResult {
   loading: boolean;
   error: Error | null;
   refetch: () => void;
+  /**
+   * Fetch a date-window chunk and merge results into the cache. The cache
+   * key is `scope|state` only — window is NOT part of the key, so each
+   * chunk UPSERTs by feature id. Returns the rows from this chunk for
+   * direct callers; the global `data` exposed by the hook reflects the
+   * merged superset.
+   */
+  loadChunk: (opts: ChunkFetchOptions) => Promise<FeatureSummary[]>;
   /**
    * Replace a single row in the local feature list with the authoritative
    * `FeatureSummary` returned from a per-field inline-edit PATCH. The
@@ -31,8 +51,27 @@ function cacheKey(params: { scope?: FeatureScope; state?: FeatureState }): strin
   return `${params.scope ?? '-'}|${params.state ?? '-'}`;
 }
 
-const featuresCache = new Map<string, FeatureSummary[]>();
+/**
+ * Module-level cache. Outer key is `scope|state`; inner Map is keyed by
+ * feature id. Chunk responses MERGE — they never overwrite the whole list.
+ */
+const featuresCache = new Map<string, Map<number, FeatureSummary>>();
 const inFlight = new Map<string, Promise<FeatureSummary[]>>();
+
+function snapshotList(key: string): FeatureSummary[] | null {
+  const m = featuresCache.get(key);
+  if (!m) return null;
+  return Array.from(m.values());
+}
+
+function mergeChunkIntoCache(key: string, rows: FeatureSummary[]): FeatureSummary[] {
+  const existing = featuresCache.get(key) ?? new Map<number, FeatureSummary>();
+  for (const row of rows) {
+    existing.set(row.id, row);
+  }
+  featuresCache.set(key, existing);
+  return Array.from(existing.values());
+}
 
 /**
  * Test helper — clears the module-level cache so each test starts clean.
@@ -44,24 +83,32 @@ export function __resetPlanFeaturesCache(): void {
 }
 
 export function usePlanFeatures(params: UsePlanFeaturesParams): UsePlanFeaturesResult {
-  const { scope, state, fetcher = planApi.listFeatures } = params;
+  const {
+    scope,
+    state,
+    initialWindowStart,
+    initialWindowEnd,
+    fetcher = planApi.listFeatures,
+  } = params;
   const key = cacheKey({ scope, state });
-  const [data, setData] = useState<FeatureSummary[] | null>(() => featuresCache.get(key) ?? null);
+  const [data, setData] = useState<FeatureSummary[] | null>(() => snapshotList(key));
   const [loading, setLoading] = useState<boolean>(() => !featuresCache.has(key));
   const [error, setError] = useState<Error | null>(null);
   const [refetchToken, setRefetchToken] = useState(0);
   const [trackedKey, setTrackedKey] = useState<string>(key);
   const activeKeyRef = useRef<string>(key);
+  const fetcherRef = useRef(fetcher);
+  useEffect(() => {
+    fetcherRef.current = fetcher;
+  }, [fetcher]);
 
   // Resync state during render when the cache key changes. This is the
-  // React-idiomatic "adjusting state while rendering" pattern and avoids
-  // an in-effect setState (which the React Compiler lint flags as a
-  // cascading-render risk).
+  // React-idiomatic "adjusting state while rendering" pattern.
   if (trackedKey !== key) {
     setTrackedKey(key);
-    const cached = featuresCache.get(key);
-    setData(cached ?? null);
-    setLoading(!cached);
+    const snap = snapshotList(key);
+    setData(snap);
+    setLoading(snap == null);
     setError(null);
   }
 
@@ -73,23 +120,30 @@ export function usePlanFeatures(params: UsePlanFeaturesParams): UsePlanFeaturesR
 
   useEffect(() => {
     activeKeyRef.current = key;
-    const cached = featuresCache.get(key);
-    if (cached) {
-      // Already hydrated from cache during render (above). No-op here.
+    const snap = snapshotList(key);
+    if (snap) {
+      // Already hydrated from cache during render. No-op.
       return;
     }
 
     let cancelled = false;
 
     const existing = inFlight.get(key);
-    const promise = existing ?? fetcher({ scope, state });
+    const promise =
+      existing ??
+      fetcherRef.current({
+        scope,
+        state,
+        windowStart: initialWindowStart,
+        windowEnd: initialWindowEnd,
+      });
     if (!existing) inFlight.set(key, promise);
 
     promise
       .then((rows) => {
         if (cancelled || activeKeyRef.current !== key) return;
-        featuresCache.set(key, rows);
-        setData(rows);
+        const merged = mergeChunkIntoCache(key, rows);
+        setData(merged);
         setLoading(false);
       })
       .catch((err: unknown) => {
@@ -104,9 +158,31 @@ export function usePlanFeatures(params: UsePlanFeaturesParams): UsePlanFeaturesR
     return () => {
       cancelled = true;
     };
-  }, [key, scope, state, fetcher, refetchToken]);
+  }, [key, scope, state, initialWindowStart, initialWindowEnd, refetchToken]);
 
   useRefetchOnFocus(error != null, refetch, loading);
+
+  const loadChunk = useCallback(
+    async (opts: ChunkFetchOptions): Promise<FeatureSummary[]> => {
+      const rows = await fetcherRef.current({
+        scope,
+        state,
+        windowStart: opts.windowStart,
+        windowEnd: opts.windowEnd,
+        signal: opts.signal,
+      });
+      // Only merge if this hook still tracks the same scope/state — guards
+      // against late-arriving responses for a now-stale scope.
+      if (activeKeyRef.current === key) {
+        const merged = mergeChunkIntoCache(key, rows);
+        setData(merged);
+      } else {
+        mergeChunkIntoCache(key, rows);
+      }
+      return rows;
+    },
+    [key, scope, state],
+  );
 
   const applyFeatureUpdate = useCallback(
     (next: FeatureSummary) => {
@@ -119,14 +195,9 @@ export function usePlanFeatures(params: UsePlanFeaturesParams): UsePlanFeaturesR
           return next;
         });
         if (!changed) return prev;
-        // Keep the module cache in sync so a remount doesn't re-hydrate
-        // with the stale row.
         const cached = featuresCache.get(key);
-        if (cached) {
-          featuresCache.set(
-            key,
-            cached.map((row) => (row.id === next.id ? next : row)),
-          );
+        if (cached && cached.has(next.id)) {
+          cached.set(next.id, next);
         }
         return replaced;
       });
@@ -134,5 +205,5 @@ export function usePlanFeatures(params: UsePlanFeaturesParams): UsePlanFeaturesR
     [key],
   );
 
-  return { data, loading, error, refetch, applyFeatureUpdate };
+  return { data, loading, error, refetch, loadChunk, applyFeatureUpdate };
 }

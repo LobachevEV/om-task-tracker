@@ -96,16 +96,6 @@
   color: var(--danger);
 }
 
-.gantt-row__overdue-badge {
-  color: var(--danger);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding-inline: 6px;
-  border: 1px solid var(--danger);
-  border-radius: 2px;
-}
-
 .gantt-row__lead {
   font-size: 11px;
   color: var(--text-muted);
