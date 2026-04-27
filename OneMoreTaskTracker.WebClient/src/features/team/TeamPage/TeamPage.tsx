@@ -1,16 +1,16 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/AuthContext';
-import { isDeveloperRole } from '../../../shared/auth/roles';
-import type { UserRole } from '../../../shared/auth/roles';
-import * as teamApi from '../../../shared/api/teamApi';
-import type { TeamRosterMember } from '../../../shared/api/teamApi';
+import { isDeveloperRole } from '../../../common/auth/roles';
+import type { UserRole } from '../../../common/auth/roles';
+import * as teamApi from '../../../common/api/teamApi';
+import type { TeamRosterMember } from '../../../common/api/teamApi';
 import { InviteRow } from '../InviteRow';
 import type { DeveloperRole } from '../InviteRow';
 import { Roster } from '../Roster';
 import { StateBarLegend } from '../StateBarLegend';
-import { ConfirmDialog } from '../../../shared/components/ConfirmDialog';
-import { Button, Callout } from '../../../shared/ds';
+import { ConfirmDialog } from '../../../common/components/ConfirmDialog';
+import { Button, Callout } from '../../../common/ds';
 import { sortRoster } from '../sort';
 import './TeamPage.css';
 

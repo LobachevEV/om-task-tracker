@@ -1,4 +1,4 @@
-import type { MiniTeamMember } from '../../shared/types/feature';
+import type { MiniTeamMember } from '../../common/types/feature';
 
 /**
  * Side tag vocabulary used on the Gantt stage timeline. Derived from the

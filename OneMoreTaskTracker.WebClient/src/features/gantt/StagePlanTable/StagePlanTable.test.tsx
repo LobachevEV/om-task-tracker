@@ -3,7 +3,7 @@ import { render, renderHook, screen } from '@testing-library/react';
 import { StagePlanTable } from './StagePlanTable';
 import { useStagePlanForm } from '../useStagePlanForm';
 import { emptyStagePlans, buildStagePlans, MINI_TEAM_MEMBERS } from '../__fixtures__/FeatureFixtures';
-import type { TeamRosterMember } from '../../../shared/api/teamApi';
+import type { TeamRosterMember } from '../../../common/api/teamApi';
 import { __resetTeamRosterCache } from '../useTeamRoster';
 
 const ROSTER: TeamRosterMember[] = Object.values(MINI_TEAM_MEMBERS).map((m) => ({

@@ -6,6 +6,13 @@ riderModule.iml
 .idea/
 publish/
 
+# Rider per-user solution settings
+*.DotSettings.user
+
+# WebClient runs `npm install` at the repo root for IDE tooling.
+# The WebClient subdir has its own node_modules ignore.
+/node_modules/
+
 # Environment — never commit real env files
 .env
 .env.local

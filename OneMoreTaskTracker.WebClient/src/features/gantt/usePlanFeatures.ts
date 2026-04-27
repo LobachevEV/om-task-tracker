@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import * as planApi from '../../shared/api/planApi';
-import type { ListFeaturesParams } from '../../shared/api/planApi';
-import type { FeatureScope, FeatureState, FeatureSummary } from '../../shared/types/feature';
-import { useRefetchOnFocus } from '../../shared/hooks/useRefetchOnFocus';
+import * as planApi from '../../common/api/planApi';
+import type { ListFeaturesParams } from '../../common/api/planApi';
+import type { FeatureScope, FeatureState, FeatureSummary } from '../../common/types/feature';
+import { useRefetchOnFocus } from '../../common/hooks/useRefetchOnFocus';
 
 export interface UsePlanFeaturesParams {
   scope?: FeatureScope;

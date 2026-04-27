@@ -1,4 +1,4 @@
-import { ApiError, type InlineEditConflict } from '../../../shared/api/ApiError';
+import { ApiError, type InlineEditConflict } from '../../../common/api/ApiError';
 
 /**
  * Normalised per-cell error surfaced to the inline editor.

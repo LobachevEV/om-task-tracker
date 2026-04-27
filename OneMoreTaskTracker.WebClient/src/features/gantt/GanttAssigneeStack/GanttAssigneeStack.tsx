@@ -1,5 +1,5 @@
-import { Avatar, Badge, type AvatarTone } from '../../../shared/ds';
-import type { MiniTeamMember } from '../../../shared/types/feature';
+import { Avatar, Badge, type AvatarTone } from '../../../common/ds';
+import type { MiniTeamMember } from '../../../common/types/feature';
 import './GanttAssigneeStack.css';
 
 export interface GanttAssigneeStackProps {

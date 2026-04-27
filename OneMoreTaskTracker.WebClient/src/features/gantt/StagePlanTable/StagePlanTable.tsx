@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { FeatureState, FeatureStagePlan } from '../../../shared/types/feature';
+import type { FeatureState, FeatureStagePlan } from '../../../common/types/feature';
 import { StagePlanRow } from '../StagePlanRow';
 import type { ContinuityHint, UseStagePlanFormResult } from '../useStagePlanForm';
 import { useTeamRoster } from '../useTeamRoster';
-import type { TeamRosterMember } from '../../../shared/api/teamApi';
+import type { TeamRosterMember } from '../../../common/api/teamApi';
 import './StagePlanTable.css';
 
 export interface StagePlanTableProps {

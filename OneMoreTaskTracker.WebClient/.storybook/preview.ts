@@ -3,7 +3,7 @@ import type React from 'react';
 import { I18nextProvider } from 'react-i18next';
 import type { Decorator, Preview } from '@storybook/react-vite';
 
-import i18n from '../src/i18n/config';
+import i18n from '../src/common/i18n/config';
 import '../src/index.css';
 import './fonts.css';
 

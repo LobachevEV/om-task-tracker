@@ -3,9 +3,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import TeamPage from './TeamPage';
 import { AuthProvider } from '../../auth/AuthContext';
-import * as teamApi from '../../../shared/api/teamApi';
+import * as teamApi from '../../../common/api/teamApi';
 
-vi.mock('../../../shared/api/teamApi');
+vi.mock('../../../common/api/teamApi');
 
 const createMember = (
   userId: number,

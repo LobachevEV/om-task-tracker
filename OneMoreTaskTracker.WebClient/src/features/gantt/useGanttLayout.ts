@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { FeatureSummary } from '../../shared/types/feature';
+import type { FeatureSummary } from '../../common/types/feature';
 import {
   barGeometryPx,
   dateToPixel,

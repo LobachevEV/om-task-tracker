@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../../i18n/config';
+import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../../common/i18n/config';
 import './LanguageSwitcher.css';
 
 function isSupported(lang: string | undefined): lang is SupportedLanguage {

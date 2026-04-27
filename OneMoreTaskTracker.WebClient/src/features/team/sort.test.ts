@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { sortRoster } from './sort';
-import type { TeamRosterMember } from '../../shared/api/teamApi';
+import type { TeamRosterMember } from '../../common/api/teamApi';
 
 const createMember = (
   userId: number,

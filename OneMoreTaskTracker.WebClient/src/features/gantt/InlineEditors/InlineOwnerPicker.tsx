@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { TeamRosterMember } from '../../../shared/api/teamApi';
+import type { TeamRosterMember } from '../../../common/api/teamApi';
 import { useInlineFieldEditor } from './useInlineFieldEditor';
 import type { InlineEditorError } from './InlineEditorError';
 import { InlineCellChevron } from './InlineCellChevron';

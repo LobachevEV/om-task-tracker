@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ROLE_LABEL_SHORT } from '../../../shared/auth/roles';
-import type { UserRole } from '../../../shared/auth/roles';
+import { ROLE_LABEL_SHORT } from '../../../common/auth/roles';
+import type { UserRole } from '../../../common/auth/roles';
 import './InviteRow.css';
 
 export type DeveloperRole = 'FrontendDeveloper' | 'BackendDeveloper' | 'Qa';

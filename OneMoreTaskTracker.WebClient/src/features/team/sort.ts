@@ -1,4 +1,4 @@
-import type { TeamRosterMember } from '../../shared/api/teamApi';
+import type { TeamRosterMember } from '../../common/api/teamApi';
 
 /**
  * Sort a roster with the self row pinned first, others sorted by lastActive DESC (nulls last),

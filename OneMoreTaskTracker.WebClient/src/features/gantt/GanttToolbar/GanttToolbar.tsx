@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Kbd } from '../../../shared/ds';
-import type { FeatureScope, FeatureState } from '../../../shared/types/feature';
-import type { UserRole } from '../../../shared/auth/auth';
+import { Button, Kbd } from '../../../common/ds';
+import type { FeatureScope, FeatureState } from '../../../common/types/feature';
+import type { UserRole } from '../../../common/auth/auth';
 import { ZOOM_DAYS, type ZoomLevel } from '../ganttMath';
 import { FEATURE_STATE_ENTRIES } from '../stateConfig';
 import { GanttLegend } from '../GanttLegend';

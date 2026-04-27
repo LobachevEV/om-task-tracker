@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 import { beforeEach, vi } from 'vitest';
-import i18n from '../i18n/config';
+import i18n from '../common/i18n/config';
 
 beforeEach(async () => {
   if (i18n.language !== 'ru') {

@@ -7,13 +7,13 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../auth/AuthContext';
-import { Spinner, Button, Callout } from '../../../shared/ds';
-import { isUserRole, type UserRole } from '../../../shared/auth/roles';
+import { Spinner, Button, Callout } from '../../../common/ds';
+import { isUserRole, type UserRole } from '../../../common/auth/roles';
 import type {
   FeatureSummary,
   MiniTeamMember,
-} from '../../../shared/types/feature';
-import type { TeamRosterMember } from '../../../shared/api/teamApi';
+} from '../../../common/types/feature';
+import type { TeamRosterMember } from '../../../common/api/teamApi';
 import { GanttChunkStripe } from '../GanttChunkStripe';
 import { GanttDateHeader } from '../GanttDateHeader';
 import { GanttEmpty } from '../GanttEmpty';

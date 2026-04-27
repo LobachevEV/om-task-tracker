@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import type { AuthState, UserRole } from '../../../shared/auth/auth';
+import type { AuthState, UserRole } from '../../../common/auth/auth';
 
 export interface AuthContextValue {
   user: AuthState | null;

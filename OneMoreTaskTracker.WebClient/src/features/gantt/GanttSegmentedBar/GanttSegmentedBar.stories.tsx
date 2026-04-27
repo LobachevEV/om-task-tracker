@@ -10,7 +10,7 @@ import {
 } from '../__fixtures__/FeatureFixtures';
 import { windowForZoom } from '../ganttMath';
 import { computeStageBars } from '../ganttStageGeometry';
-import type { MiniTeamMember } from '../../../shared/types/feature';
+import type { MiniTeamMember } from '../../../common/types/feature';
 
 const members = Object.values(MINI_TEAM_MEMBERS) as MiniTeamMember[];
 const resolve = (id: number | null | undefined): MiniTeamMember | undefined =>

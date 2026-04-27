@@ -4,8 +4,8 @@ import type {
   FeatureState,
   FeatureSummary,
   MiniTeamMember,
-} from '../../../shared/types/feature';
-import type { TeamRosterMember } from '../../../shared/api/teamApi';
+} from '../../../common/types/feature';
+import type { TeamRosterMember } from '../../../common/api/teamApi';
 import { GanttAssigneeStack } from '../GanttAssigneeStack';
 import { daysBetween, type BarGeometryPx } from '../ganttMath';
 import type { StageBarGeometry } from '../ganttStageGeometry';

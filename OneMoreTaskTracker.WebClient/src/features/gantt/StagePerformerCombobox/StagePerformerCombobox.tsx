@@ -8,8 +8,8 @@ import {
   type KeyboardEvent,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { MiniTeamMember } from '../../../shared/types/feature';
-import type { TeamRosterMember } from '../../../shared/api/teamApi';
+import type { MiniTeamMember } from '../../../common/types/feature';
+import type { TeamRosterMember } from '../../../common/api/teamApi';
 
 /**
  * Typeahead combobox for assigning a per-stage performer.

@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import type { AuthState, UserRole } from '../../../shared/auth/auth';
-import { clearAuth, getAuth, setAuth } from '../../../shared/auth/auth';
+import type { AuthState, UserRole } from '../../../common/auth/auth';
+import { clearAuth, getAuth, setAuth } from '../../../common/auth/auth';
 import { AuthContext } from './AuthContextValue';
 
 export function AuthProvider({ children }: { children: ReactNode }) {

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { GanttAssigneeStack } from './GanttAssigneeStack';
 import { MINI_TEAM_MEMBERS } from '../__fixtures__/FeatureFixtures';
-import type { MiniTeamMember } from '../../../shared/types/feature';
+import type { MiniTeamMember } from '../../../common/types/feature';
 
 const { qa, fe, be, mg } = MINI_TEAM_MEMBERS;
 

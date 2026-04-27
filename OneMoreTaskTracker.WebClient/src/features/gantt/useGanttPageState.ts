@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
-import type { UserRole } from '../../shared/auth/auth';
-import type { FeatureScope, FeatureState } from '../../shared/types/feature';
+import type { UserRole } from '../../common/auth/auth';
+import type { FeatureScope, FeatureState } from '../../common/types/feature';
 import { ZOOM_DAYS, type ZoomLevel } from './ganttMath';
 import { toIsoDate } from './ganttMath';
 

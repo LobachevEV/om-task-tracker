@@ -2,8 +2,8 @@ import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { login as apiLogin } from '../../../shared/api/authApi';
-import { LanguageSwitcher } from '../../../shared/components/LanguageSwitcher';
+import { login as apiLogin } from '../../../common/api/authApi';
+import { LanguageSwitcher } from '../../../common/components/LanguageSwitcher';
 import { useAuth } from '../AuthContext';
 import '../AuthPages.css';
 

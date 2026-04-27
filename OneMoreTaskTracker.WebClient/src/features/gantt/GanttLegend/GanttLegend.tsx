@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '../../../shared/ds';
+import { Button } from '../../../common/ds';
 import { FEATURE_STATE_ENTRIES } from '../stateConfig';
 import './GanttLegend.css';
 

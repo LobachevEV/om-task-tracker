@@ -1,8 +1,8 @@
 /**
  * Design system barrel.
  *
- * Components wrap the existing CSS primitives in `src/styles/primitives/*`
- * and extend them with typed React APIs. Import from `@/shared/ds` in app
+ * Components wrap the existing CSS primitives in `src/common/styles/primitives/*`
+ * and extend them with typed React APIs. Import from `@/common/ds` in app
  * code — never import sub-paths directly.
  */
 

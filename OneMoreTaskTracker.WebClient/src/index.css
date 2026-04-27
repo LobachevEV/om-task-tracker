@@ -4,15 +4,15 @@
  * Layer 3: shared primitives (shell, button, field, card, role-badge).
  * Component styles are colocated and imported from their TSX files. */
 
-@import './styles/tokens.css';
-@import './styles/typography.css';
-@import './styles/theme.css';
-@import './styles/reset.css';
-@import './styles/primitives/shell.css';
-@import './styles/primitives/button.css';
-@import './styles/primitives/field.css';
-@import './styles/primitives/card.css';
-@import './styles/primitives/avatar.css';
-@import './styles/primitives/role-badge.css';
-@import './styles/primitives/dialog.css';
-@import './styles/primitives/a11y.css';
+@import './common/styles/tokens.css';
+@import './common/styles/typography.css';
+@import './common/styles/theme.css';
+@import './common/styles/reset.css';
+@import './common/styles/primitives/shell.css';
+@import './common/styles/primitives/button.css';
+@import './common/styles/primitives/field.css';
+@import './common/styles/primitives/card.css';
+@import './common/styles/primitives/avatar.css';
+@import './common/styles/primitives/role-badge.css';
+@import './common/styles/primitives/dialog.css';
+@import './common/styles/primitives/a11y.css';

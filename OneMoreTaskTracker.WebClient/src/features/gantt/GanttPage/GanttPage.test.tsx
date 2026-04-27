@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { I18nextProvider } from 'react-i18next';
-import i18n from '../../../i18n/config';
+import i18n from '../../../common/i18n/config';
 import { GanttPageInternal } from './GanttPage';
 import {
   ALL_FEATURES,
@@ -10,8 +10,8 @@ import {
   SOLO_FEATURE,
 } from '../__fixtures__/FeatureFixtures';
 import { useGanttPageState } from '../useGanttPageState';
-import type { MiniTeamMember } from '../../../shared/types/feature';
-import type { UserRole } from '../../../shared/auth/auth';
+import type { MiniTeamMember } from '../../../common/types/feature';
+import type { UserRole } from '../../../common/auth/auth';
 
 const ROSTER: MiniTeamMember[] = [
   MINI_TEAM_MEMBERS.mg,

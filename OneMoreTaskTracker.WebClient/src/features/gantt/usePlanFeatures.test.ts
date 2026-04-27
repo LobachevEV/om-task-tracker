@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { __resetPlanFeaturesCache, usePlanFeatures } from './usePlanFeatures';
-import type { FeatureSummary } from '../../shared/types/feature';
-import type { ListFeaturesParams } from '../../shared/api/planApi';
+import type { FeatureSummary } from '../../common/types/feature';
+import type { ListFeaturesParams } from '../../common/api/planApi';
 
 type Fetcher = (params: ListFeaturesParams) => Promise<FeatureSummary[]>;
 

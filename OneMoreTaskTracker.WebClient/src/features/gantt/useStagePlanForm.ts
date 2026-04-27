@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useReducer } from 'react';
-import { FEATURE_STATES, type FeatureState, type FeatureStagePlan } from '../../shared/types/feature';
+import { FEATURE_STATES, type FeatureState, type FeatureStagePlan } from '../../common/types/feature';
 
 /**
  * Draft state for the 5-row stage plan table.
