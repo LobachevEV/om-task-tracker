@@ -1,17 +1,16 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../../common/auth/AuthContext';
-import { isDeveloperRole } from '../../../common/auth/roles';
-import type { UserRole } from '../../../common/auth/roles';
-import * as teamApi from '../../../common/api/teamApi';
-import type { TeamRosterMember } from '../../../common/api/teamApi';
-import { InviteRow } from '../InviteRow';
-import type { DeveloperRole } from '../InviteRow';
-import { Roster } from '../Roster';
-import { StateBarLegend } from '../StateBarLegend';
-import { ConfirmDialog } from '../../../common/components/ConfirmDialog';
-import { Button, Callout } from '../../../common/ds';
-import { sortRoster } from '../sort';
+import { useAuth } from '../../common/auth/AuthContext';
+import { isDeveloperRole } from '../../common/auth/roles';
+import type { UserRole } from '../../common/auth/roles';
+import * as teamApi from '../../common/api/teamApi';
+import type { DeveloperRole, TeamRosterMember } from '../../common/api/teamApi';
+import { InviteRow } from './components/InviteRow';
+import { Roster } from './components/Roster';
+import { StateBarLegend } from './components/StateBarLegend';
+import { ConfirmDialog } from '../../common/components/ConfirmDialog';
+import { Button, Callout } from '../../common/ds';
+import { sortRoster } from './sort';
 import './TeamPage.css';
 
 const TOAST_AUTO_DISMISS_MS = 30_000;

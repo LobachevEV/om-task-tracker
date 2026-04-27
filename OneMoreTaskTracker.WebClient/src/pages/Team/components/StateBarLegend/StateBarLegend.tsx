@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { TEAM_STATE_ENTRIES } from '../stateConfig';
+import { TEAM_STATE_ENTRIES } from '../../stateConfig';
 import './StateBarLegend.css';
 
 export function StateBarLegend() {

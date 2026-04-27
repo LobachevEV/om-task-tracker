@@ -2,9 +2,9 @@ import { useTranslation } from 'react-i18next';
 import { RoleBadge } from '../RoleBadge';
 import { StateBar } from '../StateBar';
 import { RowMenu } from '../RowMenu';
-import { formatLastActive } from '../time';
-import { isUserRole, type UserRole } from '../../../common/auth/roles';
-import type { TeamRosterMember } from '../../../common/api/teamApi';
+import { formatLastActive } from '../../time';
+import { isUserRole, type UserRole } from '../../../../common/auth/roles';
+import type { TeamRosterMember } from '../../../../common/api/teamApi';
 import './Roster.css';
 
 const ROLE_AVATAR_CLASS: Record<UserRole, string> = {

@@ -1,5 +1,6 @@
 import { API_BASE_URL, authHeaders, handleResponse } from './httpClient';
-import type { DeveloperRole } from '../../features/team/InviteRow';
+
+export type DeveloperRole = 'FrontendDeveloper' | 'BackendDeveloper' | 'Qa';
 
 export interface InviteMemberResponse {
   userId: number;

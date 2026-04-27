@@ -5,7 +5,7 @@ import {ProtectedRoute} from '../../common/auth/ProtectedRoute';
 import {RegisterPage} from '../../pages/Register';
 import {TaskDetailPage} from '../../features/tasks/TaskDetailPage';
 import {TaskPage} from '../../features/tasks/TaskPage';
-import TeamPage from '../../features/team/TeamPage';
+import TeamPage from '../../pages/Team';
 import {GanttPage} from '../../features/gantt/GanttPage';
 import {HomeRoute} from '../HomeRoute';
 import {ErrorBoundary} from '../../common/components/ErrorBoundary';
