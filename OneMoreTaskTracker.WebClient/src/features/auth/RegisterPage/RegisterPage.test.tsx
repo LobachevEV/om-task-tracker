@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { RegisterPage } from './RegisterPage';
-import { AuthProvider } from '../AuthContext';
+import { AuthProvider } from '../../../common/auth/AuthContext';
 import * as authApi from '../../../common/api/authApi';
 
 vi.mock('../../../common/api/authApi');

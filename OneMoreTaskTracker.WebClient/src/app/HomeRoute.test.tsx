@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { HomeRoute } from './HomeRoute';
-import { AuthProvider } from '../features/auth/AuthContext';
+import { AuthProvider } from '../common/auth/AuthContext';
 import { AUTH_KEY, type UserRole } from '../common/auth/auth';
 
 function seedAuth(role: UserRole | null) {

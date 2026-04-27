@@ -1,7 +1,7 @@
 import {BrowserRouter, Route, Routes} from 'react-router-dom';
-import {AuthProvider} from '../../features/auth/AuthContext';
+import {AuthProvider} from '../../common/auth/AuthContext';
 import {LoginPage} from '../../features/auth/LoginPage';
-import {ProtectedRoute} from '../../features/auth/ProtectedRoute';
+import {ProtectedRoute} from '../../common/auth/ProtectedRoute';
 import {RegisterPage} from '../../features/auth/RegisterPage';
 import {TaskDetailPage} from '../../features/tasks/TaskDetailPage';
 import {TaskPage} from '../../features/tasks/TaskPage';
