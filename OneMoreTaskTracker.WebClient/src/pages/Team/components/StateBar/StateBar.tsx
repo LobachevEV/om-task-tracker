@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import type { StateMix } from '../../../common/api/teamApi';
-import { TEAM_STATE_ENTRIES } from '../stateConfig';
+import type { StateMix } from '../../../../common/api/teamApi';
+import { TEAM_STATE_ENTRIES } from '../../stateConfig';
 import './StateBar.css';
 
 interface StateBarProps {

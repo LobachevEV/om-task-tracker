@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import TeamPage from './TeamPage';
-import { AuthProvider } from '../../../common/auth/AuthContext';
-import * as teamApi from '../../../common/api/teamApi';
+import { AuthProvider } from '../../common/auth/AuthContext';
+import * as teamApi from '../../common/api/teamApi';
 
-vi.mock('../../../common/api/teamApi');
+vi.mock('../../common/api/teamApi');
 
 const createMember = (
   userId: number,
