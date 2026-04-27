@@ -130,20 +130,7 @@ public class FeaturesController(
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var managerUserId = User.GetUserId();
-        var leadUserId = body.LeadUserId.GetValueOrDefault() > 0
-            ? body.LeadUserId!.Value
-            : managerUserId;
-
-        var request = new CreateFeatureRequest
-        {
-            Title = body.Title,
-            Description = body.Description ?? string.Empty,
-            LeadUserId = leadUserId,
-            ManagerUserId = managerUserId,
-            PlannedStart = body.PlannedStart ?? string.Empty,
-            PlannedEnd = body.PlannedEnd ?? string.Empty
-        };
+        var request = CreateFeatureRequestFactory.From(body, User.GetUserId());
 
         var created = await featureCreator.CreateAsync(request, cancellationToken: ct);
         return Ok(PlanMapper.MapSummary(created, PlanRequestHelpers.EmptyTasks, logger));
@@ -159,43 +146,41 @@ public class FeaturesController(
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var callerUserId = User.GetUserId();
+        var request = UpdateFeatureRequestFactory.From(id, body, User.GetUserId());
 
-        var request = new UpdateFeatureRequest
-        {
-            Id = id,
-            Title = body.Title ?? string.Empty,
-            Description = body.Description ?? string.Empty,
-            PlannedStart = body.PlannedStart ?? string.Empty,
-            PlannedEnd = body.PlannedEnd ?? string.Empty,
-            LeadUserId = body.LeadUserId.GetValueOrDefault(),
-            State = PlanMapper.ParseState(body.State),
-            CallerUserId = callerUserId,
-        };
-
-        if (body.StagePlans is not null)
-        {
-            if (body.StagePlans.Count != ExpectedStageCount)
-                return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
-
-            var seenStages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var sp in body.StagePlans)
-            {
-                if (string.IsNullOrEmpty(sp.Stage) || !PlanMapper.TryParseStage(sp.Stage, out var protoStage) || !seenStages.Add(sp.Stage))
-                    return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
-
-                request.StagePlans.Add(new ProtoFeatureStagePlan
-                {
-                    Stage           = protoStage,
-                    PlannedStart    = sp.PlannedStart ?? string.Empty,
-                    PlannedEnd      = sp.PlannedEnd   ?? string.Empty,
-                    PerformerUserId = sp.PerformerUserId is { } p and > 0 ? p : 0,
-                });
-            }
-        }
+        if (TryAppendStagePlans(request, body.StagePlans) is { } stageError)
+            return stageError;
 
         var updated = await featureUpdater.UpdateAsync(request, cancellationToken: ct);
         return Ok(PlanMapper.MapSummary(updated, PlanRequestHelpers.EmptyTasks, logger));
+    }
+
+    private ActionResult? TryAppendStagePlans(
+        UpdateFeatureRequest request,
+        IReadOnlyList<Stages.StagePlanPayload>? stagePlans)
+    {
+        if (stagePlans is null)
+            return null;
+
+        if (stagePlans.Count != ExpectedStageCount)
+            return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
+
+        var seenStages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var sp in stagePlans)
+        {
+            if (string.IsNullOrEmpty(sp.Stage) || !PlanMapper.TryParseStage(sp.Stage, out var protoStage) || !seenStages.Add(sp.Stage))
+                return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
+
+            request.StagePlans.Add(new ProtoFeatureStagePlan
+            {
+                Stage           = protoStage,
+                PlannedStart    = sp.PlannedStart ?? string.Empty,
+                PlannedEnd      = sp.PlannedEnd   ?? string.Empty,
+                PerformerUserId = sp.PerformerUserId is { } p and > 0 ? p : 0,
+            });
+        }
+
+        return null;
     }
 
     private StagePlanDetailResponse BuildDetailStagePlan(
@@ -205,29 +190,7 @@ public class FeaturesController(
         int managerUserId)
     {
         var performerUserId = sp.PerformerUserId > 0 ? (int?)sp.PerformerUserId : null;
-        MiniTeamMemberResponse? performer = null;
-
-        if (performerUserId is int pid)
-        {
-            if (roster.TryGetValue(pid, out var member))
-            {
-                performer = new MiniTeamMemberResponse(
-                    member.UserId,
-                    member.Email,
-                    PlanMapper.ExtractDisplayName(member.Email),
-                    member.Role);
-            }
-            else
-            {
-                // Stale id: emit performer:null (not a placeholder); id stays on the wire.
-                logger.LogWarning(
-                    "Stage performer {PerformerUserId} not on manager {ManagerUserId}'s roster (feature {FeatureId}, stage {Stage})",
-                    pid,
-                    managerUserId,
-                    featureId,
-                    sp.Stage);
-            }
-        }
+        var performer = ResolvePerformer(performerUserId, roster, featureId, managerUserId, sp.Stage);
 
         return new StagePlanDetailResponse(
             PlanMapper.MapState(sp.Stage, logger),
@@ -236,5 +199,32 @@ public class FeaturesController(
             performerUserId,
             performer,
             sp.Version);
+    }
+
+    private MiniTeamMemberResponse? ResolvePerformer(
+        int? performerUserId,
+        IReadOnlyDictionary<int, TeamRosterMember> roster,
+        int featureId,
+        int managerUserId,
+        FeatureState stage)
+    {
+        if (performerUserId is not int pid)
+            return null;
+
+        if (roster.TryGetValue(pid, out var member))
+            return new MiniTeamMemberResponse(
+                member.UserId,
+                member.Email,
+                PlanMapper.ExtractDisplayName(member.Email),
+                member.Role);
+
+        // Stale id: emit performer:null (not a placeholder); id stays on the wire.
+        logger.LogWarning(
+            "Stage performer {PerformerUserId} not on manager {ManagerUserId}'s roster (feature {FeatureId}, stage {Stage})",
+            pid,
+            managerUserId,
+            featureId,
+            stage);
+        return null;
     }
 }
