@@ -31,6 +31,9 @@ using (var scope = app.Services.CreateScope())
         await DevFeatureSeeder.SeedAsync(featuresDb);
 }
 
+if (args.Contains("--migrate"))
+    return;
+
 if (app.Environment.IsDevelopment())
     app.MapGrpcReflectionService();
 

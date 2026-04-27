@@ -72,6 +72,9 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
     scope.ServiceProvider.GetRequiredService<TasksDbContext>().Database.Migrate();
 
+if (args.Contains("--migrate"))
+    return;
+
 if (app.Environment.IsDevelopment())
     app.MapGrpcReflectionService();
 
