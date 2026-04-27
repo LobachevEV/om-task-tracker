@@ -1,13 +1,11 @@
 import { API_BASE_URL, authHeaders, handleResponse } from './httpClient';
 import {
-  featureBoundsSchema,
   featureDetailSchema,
   featureSummaryListSchema,
   featureSummarySchema,
 } from './schemas';
 import type {
   CreateFeaturePayload,
-  FeatureBounds,
   FeatureDetail,
   FeatureScope,
   FeatureState,
@@ -57,17 +55,6 @@ export async function listFeatures(
   );
   const data = await handleResponse<unknown>(response);
   return featureSummaryListSchema.parse(data);
-}
-
-export async function getFeatureBounds(
-  options: { signal?: AbortSignal } = {},
-): Promise<FeatureBounds> {
-  const response = await fetch(`${API_BASE_URL}/api/plan/features/bounds`, {
-    headers: authHeaders(),
-    signal: options.signal,
-  });
-  const data = await handleResponse<unknown>(response);
-  return featureBoundsSchema.parse(data);
 }
 
 export async function getFeature(id: number): Promise<FeatureDetail> {
@@ -222,7 +209,6 @@ export async function updateStagePlannedEnd(
 
 export type {
   CreateFeaturePayload,
-  FeatureBounds,
   FeatureDetail,
   FeatureScope,
   FeatureState,

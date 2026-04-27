@@ -9,7 +9,6 @@ using Microsoft.IdentityModel.Tokens;
 using NSubstitute;
 using OneMoreTaskTracker.Api.Auth;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
-using OneMoreTaskTracker.Proto.Features.GetFeatureBoundsQuery;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
@@ -62,9 +61,6 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
 
     public FeatureGetter.FeatureGetterClient MockFeatureGetter { get; } =
         Substitute.For<FeatureGetter.FeatureGetterClient>();
-
-    public BoundsGetter.BoundsGetterClient MockBoundsGetter { get; } =
-        Substitute.For<BoundsGetter.BoundsGetterClient>();
 
     public FeatureTitleUpdater.FeatureTitleUpdaterClient MockFeatureTitleUpdater { get; } =
         Substitute.For<FeatureTitleUpdater.FeatureTitleUpdaterClient>();
@@ -119,7 +115,6 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
                 d.ServiceType == typeof(FeatureUpdater.FeatureUpdaterClient) ||
                 d.ServiceType == typeof(FeaturesLister.FeaturesListerClient) ||
                 d.ServiceType == typeof(FeatureGetter.FeatureGetterClient) ||
-                d.ServiceType == typeof(BoundsGetter.BoundsGetterClient) ||
                 d.ServiceType == typeof(FeatureTitleUpdater.FeatureTitleUpdaterClient) ||
                 d.ServiceType == typeof(FeatureDescriptionUpdater.FeatureDescriptionUpdaterClient) ||
                 d.ServiceType == typeof(StageOwnerUpdater.StageOwnerUpdaterClient) ||
@@ -141,7 +136,6 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
             services.AddSingleton(MockFeatureUpdater);
             services.AddSingleton(MockFeaturesLister);
             services.AddSingleton(MockFeatureGetter);
-            services.AddSingleton(MockBoundsGetter);
             services.AddSingleton(MockFeatureTitleUpdater);
             services.AddSingleton(MockFeatureDescriptionUpdater);
             services.AddSingleton(MockStageOwnerUpdater);

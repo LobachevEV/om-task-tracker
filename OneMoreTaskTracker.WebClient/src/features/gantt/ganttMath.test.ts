@@ -4,10 +4,9 @@ import {
   barGeometry,
   barGeometryPx,
   chunkRange,
-  clampToBounds,
   dateToPixel,
   daysBetween,
-  loadedRangeFromBuffer,
+  loadedRangeAroundToday,
   mondayOf,
   parseIsoDate,
   pixelToDate,
@@ -208,66 +207,33 @@ describe('barGeometryPx', () => {
   });
 });
 
-describe('loadedRangeFromBuffer', () => {
-  it('expands by bufferDays on each side of today plus viewportDays', () => {
-    const r = loadedRangeFromBuffer('2026-04-21', 30, 30);
+describe('loadedRangeAroundToday', () => {
+  it('spans halfWindowDays on each side of today, half-open', () => {
+    const r = loadedRangeAroundToday('2026-04-21', 30);
     expect(r.start).toBe('2026-03-22');
-    expect(daysBetween(r.start, r.end)).toBe(90);
+    expect(r.end).toBe('2026-05-22');
+    expect(daysBetween(r.start, r.end)).toBe(61);
   });
-  it('handles zero buffer', () => {
-    const r = loadedRangeFromBuffer('2026-04-21', 14, 0);
+  it('handles zero half-window (single day)', () => {
+    const r = loadedRangeAroundToday('2026-04-21', 0);
     expect(r.start).toBe('2026-04-21');
-    expect(daysBetween(r.start, r.end)).toBe(14);
+    expect(r.end).toBe('2026-04-22');
+    expect(daysBetween(r.start, r.end)).toBe(1);
   });
 });
 
 describe('chunkRange', () => {
   const loaded = { start: '2026-04-20', end: '2026-04-27' };
   it('leading direction prepends a chunk before the loaded range', () => {
-    expect(chunkRange('leading', loaded, 7)).toEqual({
-      start: '2026-04-13',
+    expect(chunkRange('leading', loaded, 14)).toEqual({
+      start: '2026-04-06',
       end: '2026-04-20',
     });
   });
   it('trailing direction appends a chunk after the loaded range', () => {
-    expect(chunkRange('trailing', loaded, 7)).toEqual({
+    expect(chunkRange('trailing', loaded, 14)).toEqual({
       start: '2026-04-27',
-      end: '2026-05-04',
+      end: '2026-05-11',
     });
-  });
-});
-
-describe('clampToBounds', () => {
-  const range = { start: '2026-01-01', end: '2026-12-31' };
-  it('clips overflow past the latest end + cushion', () => {
-    const r = clampToBounds(
-      range,
-      { earliestPlannedStart: '2026-04-01', latestPlannedEnd: '2026-06-30' },
-      14,
-    );
-    expect(r.start).toBe('2026-03-18'); // 2026-04-01 - 14
-    expect(r.end).toBe('2026-07-15'); // 2026-06-30 + 14 + 1 (half-open)
-  });
-  it('leaves a side untouched when its bound is null', () => {
-    const r = clampToBounds(
-      range,
-      { earliestPlannedStart: null, latestPlannedEnd: '2026-06-30' },
-      14,
-    );
-    expect(r.start).toBe('2026-01-01');
-    expect(r.end).toBe('2026-07-15');
-  });
-  it('returns input when bounds are both null', () => {
-    expect(
-      clampToBounds(range, { earliestPlannedStart: null, latestPlannedEnd: null }, 14),
-    ).toEqual(range);
-  });
-  it('does not invert when range is fully outside bounds (left)', () => {
-    const r = clampToBounds(
-      { start: '2027-01-01', end: '2027-02-01' },
-      { earliestPlannedStart: '2026-04-01', latestPlannedEnd: '2026-06-30' },
-      14,
-    );
-    expect(daysBetween(r.start, r.end)).toBeGreaterThan(0);
   });
 });

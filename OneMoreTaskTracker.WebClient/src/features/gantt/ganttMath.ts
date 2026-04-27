@@ -180,25 +180,22 @@ export function barGeometryPx(
 }
 
 /**
- * Initial loaded range: `bufferDays` on each side of `today` plus the visible
- * `viewportDays` itself. Result is half-open `[start, end)`.
+ * Initial symmetric loaded range centered on `today`, half-open `[start, end)`.
+ * Spans `[today - halfWindowDays, today + halfWindowDays + 1)`.
  */
-export function loadedRangeFromBuffer(
+export function loadedRangeAroundToday(
   today: string,
-  viewportDays: number,
-  bufferDays: number,
+  halfWindowDays: number,
 ): DateWindow {
-  const span = Math.max(1, viewportDays + bufferDays * 2);
-  const start = addDays(today, -bufferDays);
-  return { start, end: addDays(start, span) };
+  const half = Math.max(0, halfWindowDays);
+  return { start: addDays(today, -half), end: addDays(today, half + 1) };
 }
 
 export type ChunkDirection = 'leading' | 'trailing';
 
 /**
- * Compute the next chunk window to fetch when the user pans toward an edge.
- * Returns the chunk's own [start, end) (also half-open). Caller merges into
- * the loaded range.
+ * Next chunk window to fetch on edge-pan; half-open `[start, end)`.
+ * Caller merges into the loaded range.
  */
 export function chunkRange(
   direction: ChunkDirection,
@@ -212,34 +209,4 @@ export function chunkRange(
   }
   const start = loaded.end;
   return { start, end: addDays(loaded.end, days) };
-}
-
-/**
- * Clip `range` so it does not extend past
- * `[bounds.earliestPlannedStart - cushion, bounds.latestPlannedEnd + cushion + 1)`
- * — this prevents loading unbounded empty space past the global plan edges.
- * Either bound may be null (no data yet); the corresponding side is left as-is.
- */
-export function clampToBounds(
-  range: DateWindow,
-  bounds: { earliestPlannedStart: string | null; latestPlannedEnd: string | null },
-  cushionDays: number,
-): DateWindow {
-  let { start, end } = range;
-  const cushion = Math.max(0, cushionDays);
-  if (bounds.earliestPlannedStart) {
-    const min = addDays(bounds.earliestPlannedStart, -cushion);
-    // Pull start forward (later) if it sits before the cushion.
-    if (daysBetween(start, min) > 0) start = min;
-  }
-  if (bounds.latestPlannedEnd) {
-    // bounds.latestPlannedEnd is inclusive; treat as +1 for half-open end.
-    const max = addDays(bounds.latestPlannedEnd, cushion + 1);
-    // Pull end backward (earlier) if it sits past the cushion.
-    if (daysBetween(max, end) > 0) end = max;
-  }
-  if (daysBetween(start, end) <= 0) {
-    end = addDays(start, 1);
-  }
-  return { start, end };
 }

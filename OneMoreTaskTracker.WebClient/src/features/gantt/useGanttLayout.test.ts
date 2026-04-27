@@ -7,12 +7,12 @@ import {
   SOLO_FEATURE,
   UNSCHEDULED_FEATURE,
 } from './__fixtures__/FeatureFixtures';
-import { loadedRangeFromBuffer } from './ganttMath';
+import { loadedRangeAroundToday } from './ganttMath';
 import { useGanttLayout } from './useGanttLayout';
 
 const DAY_PX = 32;
-const WIDE_RANGE = loadedRangeFromBuffer(FIXTURE_TODAY, 30, 60);
-const NARROW_RANGE = loadedRangeFromBuffer(FIXTURE_TODAY, 7, 0);
+const WIDE_RANGE = loadedRangeAroundToday(FIXTURE_TODAY, 75);
+const NARROW_RANGE = loadedRangeAroundToday(FIXTURE_TODAY, 3);
 
 describe('useGanttLayout', () => {
   it('returns an empty layout for an empty features list', () => {

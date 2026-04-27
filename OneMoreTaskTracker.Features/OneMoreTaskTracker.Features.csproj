@@ -85,11 +85,5 @@
       <ProtoRoot>Protos</ProtoRoot>
       <AdditionalImportDirs>Protos</AdditionalImportDirs>
     </Protobuf>
-    <Protobuf Include="Protos\GetFeatureBoundsQuery\get_feature_bounds_query_handler.proto">
-      <GrpcServices>Server</GrpcServices>
-      <Access>Public</Access>
-      <ProtoRoot>Protos</ProtoRoot>
-      <AdditionalImportDirs>Protos</AdditionalImportDirs>
-    </Protobuf>
   </ItemGroup>
 </Project>

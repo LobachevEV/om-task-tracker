@@ -57,7 +57,6 @@ function Harness({
       state={state}
       onFeatureUpdated={() => {}}
       loadChunk={async () => {}}
-      bounds={null}
     />
   );
 }

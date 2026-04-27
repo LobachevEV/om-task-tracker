@@ -79,34 +79,6 @@
         }
       }
     },
-    "/api/plan/features/bounds": {
-      "get": {
-        "summary": "Dataset-wide earliest planned start and latest planned end for the caller's visible features.",
-        "description": "Used by the Gantt to render the hard-bound cushions at dataset extents. Both fields are nullable when the caller's dataset has no planned dates (purely-unscheduled or empty); empty dataset still returns 200 (NOT 404). The FE applies the ±30-day cushion client-side. `scope` and `state` are accepted for parity with the list endpoint but are ignored at the service layer in v1; bounds always reflect the caller's full manager-visible dataset.",
-        "tags": ["plan"],
-        "parameters": [
-          { "name": "scope", "in": "query", "required": false, "schema": { "type": "string", "enum": ["mine", "all"] } },
-          { "name": "state", "in": "query", "required": false, "schema": { "$ref": "#/components/schemas/FeatureState" } }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "headers": {
-              "Cache-Control": {
-                "description": "private, max-age=10 — bounds are slow-moving but the FE re-fetches on focus and after date-bearing inline edits.",
-                "schema": { "type": "string" }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/FeatureBounds" }
-              }
-            }
-          },
-          "401": { "$ref": "#/components/responses/Unauthorized" }
-        }
-      }
-    },
     "/api/plan/features/{id}": {
       "parameters": [
         { "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } }
@@ -489,15 +461,6 @@
             "description": "Always length 5, canonical FeatureState order. Performer is id-only on list rows."
           },
           "version": { "type": "integer", "format": "int32", "description": "Monotonically-increasing row version used as an optimistic-concurrency token. Bumped by every inline-edit PATCH." }
-        }
-      },
-      "FeatureBounds": {
-        "type": "object",
-        "description": "Dataset-wide planned-date extents for the caller's visible features. Both fields are nullable when the dataset has no planned dates.",
-        "required": ["earliestPlannedStart", "latestPlannedEnd"],
-        "properties": {
-          "earliestPlannedStart": { "type": "string", "format": "date", "nullable": true, "description": "Minimum non-null plannedStart across the caller's visible features." },
-          "latestPlannedEnd":     { "type": "string", "format": "date", "nullable": true, "description": "Maximum non-null plannedEnd across the caller's visible features." }
         }
       },
       "FeatureDetail": {

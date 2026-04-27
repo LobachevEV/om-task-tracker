@@ -2,9 +2,8 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import {
   addDays,
   chunkRange,
-  clampToBounds,
   daysBetween,
-  loadedRangeFromBuffer,
+  loadedRangeAroundToday,
   type ChunkDirection,
   type DateWindow,
 } from './ganttMath';
@@ -26,16 +25,12 @@ export interface UseGanttTimelineScrollParams {
    * actual today column there, not the gutter.
    */
   gutterPx?: number;
-  /** Initial visible width in days (used for loadedRange seed; overridden by scroller geometry once mounted). */
+  /** Initial visible width in days (used for viewport-fallback math). */
   initialViewportDays: number;
-  /** How many days of pre/post buffer around `today` to prefetch on first mount. */
-  initialBufferDays: number;
-  /** Days per leading/trailing chunk fetch. */
+  /** Half-window in days around `today` for the initial loaded range. */
+  initialHalfWindowDays: number;
+  /** Days per leading/trailing edge-prefetch chunk. */
   chunkDays: number;
-  /** Days of cushion past the global bounds before clamping prevents further pan. */
-  cushionDays: number;
-  /** Global plan bounds — when null, no clamp. */
-  bounds: { earliestPlannedStart: string | null; latestPlannedEnd: string | null } | null;
   /** Caller's chunk fetcher (e.g. usePlanFeatures.loadChunk). */
   loadChunk: (req: ScrollChunkRequest) => Promise<void> | Promise<unknown>;
 }
@@ -54,10 +49,6 @@ export interface ScrollState {
   loadError: { direction: ChunkDirection; error: Error } | null;
   /** Scrolls `today` to leading 1/3 of the viewport. */
   scrollToToday: (behavior?: ScrollBehavior) => void;
-  /** Scrolls to the earliest planned date (or first column when bounds unknown). */
-  scrollToStart: (behavior?: ScrollBehavior) => void;
-  /** Scrolls to the latest planned date (or last column when bounds unknown). */
-  scrollToEnd: (behavior?: ScrollBehavior) => void;
   /** Pans to a specific date (snaps to its day column at viewport leading 1/3). */
   scrollToDate: (iso: string, behavior?: ScrollBehavior) => Promise<void>;
   /** Retry a failed leading/trailing chunk. */
@@ -79,15 +70,13 @@ export function useGanttTimelineScroll(
     dayPx,
     gutterPx = 0,
     initialViewportDays,
-    initialBufferDays,
+    initialHalfWindowDays,
     chunkDays,
-    cushionDays,
-    bounds,
     loadChunk,
   } = params;
 
   const [loadedRange, setLoadedRange] = useState<DateWindow>(() =>
-    loadedRangeFromBuffer(today, initialViewportDays, initialBufferDays),
+    loadedRangeAroundToday(today, initialHalfWindowDays),
   );
   const [isFetchingLeading, setIsFetchingLeading] = useState(false);
   const [isFetchingTrailing, setIsFetchingTrailing] = useState(false);
@@ -133,10 +122,7 @@ export function useGanttTimelineScroll(
   const fetchChunk = useCallback(
     async (direction: ChunkDirection) => {
       const chunk = chunkRange(direction, loadedRange, chunkDays);
-      const clamped = bounds
-        ? clampToBounds(chunk, bounds, cushionDays)
-        : chunk;
-      if (daysBetween(clamped.start, clamped.end) <= 0) return;
+      if (daysBetween(chunk.start, chunk.end) <= 0) return;
 
       const ref = direction === 'leading' ? leadingAbortRef : trailingAbortRef;
       ref.current?.abort();
@@ -147,19 +133,19 @@ export function useGanttTimelineScroll(
       setLoadError((prev) => (prev?.direction === direction ? null : prev));
       try {
         await loadChunkRef.current({
-          windowStart: clamped.start,
-          windowEnd: addDays(clamped.end, -1),
+          windowStart: chunk.start,
+          windowEnd: addDays(chunk.end, -1),
           signal: ac.signal,
         });
         if (ac.signal.aborted) return;
         setLoadedRange((prev) => {
           if (direction === 'leading') {
             const newStart =
-              daysBetween(clamped.start, prev.start) > 0 ? clamped.start : prev.start;
+              daysBetween(chunk.start, prev.start) > 0 ? chunk.start : prev.start;
             return { start: newStart, end: prev.end };
           }
           const newEnd =
-            daysBetween(prev.end, clamped.end) > 0 ? clamped.end : prev.end;
+            daysBetween(prev.end, chunk.end) > 0 ? chunk.end : prev.end;
           return { start: prev.start, end: newEnd };
         });
       } catch (err: unknown) {
@@ -174,7 +160,7 @@ export function useGanttTimelineScroll(
         }
       }
     },
-    [loadedRange, chunkDays, bounds, cushionDays],
+    [loadedRange, chunkDays],
   );
 
   // Edge-prefetch on scroll. Throttled via requestAnimationFrame to avoid
@@ -190,20 +176,10 @@ export function useGanttTimelineScroll(
       const leadingThresholdPx = gutterPx + EDGE_PREFETCH_DAYS * dayPx;
       const trailingThresholdPx = sw - cw - EDGE_PREFETCH_DAYS * dayPx;
       if (sl < leadingThresholdPx && !isFetchingLeading) {
-        const atBoundsStart =
-          bounds?.earliestPlannedStart != null &&
-          daysBetween(loadedRange.start, addDays(bounds.earliestPlannedStart, -cushionDays)) >= 0;
-        if (!atBoundsStart) {
-          void fetchChunk('leading');
-        }
+        void fetchChunk('leading');
       }
       if (sl > trailingThresholdPx && !isFetchingTrailing) {
-        const atBoundsEnd =
-          bounds?.latestPlannedEnd != null &&
-          daysBetween(addDays(bounds.latestPlannedEnd, cushionDays + 1), loadedRange.end) >= 0;
-        if (!atBoundsEnd) {
-          void fetchChunk('trailing');
-        }
+        void fetchChunk('trailing');
       }
     };
     const onScroll = () => {
@@ -225,10 +201,6 @@ export function useGanttTimelineScroll(
     fetchChunk,
     isFetchingLeading,
     isFetchingTrailing,
-    bounds,
-    cushionDays,
-    loadedRange.start,
-    loadedRange.end,
   ]);
 
   const respectMotionPref = (behavior?: ScrollBehavior): ScrollBehavior => {
@@ -250,36 +222,6 @@ export function useGanttTimelineScroll(
     [scrollerEl, todayPx, gutterPx, dayPx, initialViewportDays],
   );
 
-  const scrollToStart = useCallback(
-    (behavior?: ScrollBehavior) => {
-      const el = scrollerEl;
-      if (!el) return;
-      const target = bounds?.earliestPlannedStart
-        ? Math.max(0, daysBetween(loadedRange.start, bounds.earliestPlannedStart) * dayPx + gutterPx)
-        : 0;
-      el.scrollTo({ left: target, behavior: respectMotionPref(behavior) });
-    },
-    [scrollerEl, bounds, loadedRange.start, dayPx, gutterPx],
-  );
-
-  const scrollToEnd = useCallback(
-    (behavior?: ScrollBehavior) => {
-      const el = scrollerEl;
-      if (!el) return;
-      const viewportPx = el.clientWidth;
-      const target = bounds?.latestPlannedEnd
-        ? Math.max(
-            0,
-            daysBetween(loadedRange.start, bounds.latestPlannedEnd) * dayPx +
-              gutterPx -
-              Math.floor(viewportPx * (1 - TODAY_LEAD_FRACTION)),
-          )
-        : el.scrollWidth - viewportPx;
-      el.scrollTo({ left: target, behavior: respectMotionPref(behavior) });
-    },
-    [scrollerEl, bounds, loadedRange.start, dayPx, gutterPx],
-  );
-
   const scrollToDate = useCallback(
     async (iso: string, behavior?: ScrollBehavior): Promise<void> => {
       if (!isWithinRange(iso, loadedRange)) {
@@ -289,17 +231,16 @@ export function useGanttTimelineScroll(
           direction === 'leading'
             ? { start: addDays(iso, -chunkDays), end: loadedRange.end }
             : { start: loadedRange.start, end: addDays(iso, chunkDays + 1) };
-        const clamped = bounds ? clampToBounds(expandTo, bounds, cushionDays) : expandTo;
         const ac = new AbortController();
         try {
           if (direction === 'leading') setIsFetchingLeading(true);
           else setIsFetchingTrailing(true);
           await loadChunkRef.current({
-            windowStart: clamped.start,
-            windowEnd: addDays(clamped.end, -1),
+            windowStart: expandTo.start,
+            windowEnd: addDays(expandTo.end, -1),
             signal: ac.signal,
           });
-          setLoadedRange(clamped);
+          setLoadedRange(expandTo);
         } catch (err: unknown) {
           const e = err instanceof Error ? err : new Error(String(err));
           if (e.name !== 'AbortError') {
@@ -322,7 +263,7 @@ export function useGanttTimelineScroll(
       );
       el.scrollTo({ left: target, behavior: respectMotionPref(behavior) });
     },
-    [scrollerEl, loadedRange, chunkDays, bounds, cushionDays, dayPx, gutterPx, initialViewportDays],
+    [scrollerEl, loadedRange, chunkDays, dayPx, gutterPx, initialViewportDays],
   );
 
   const retryFailedChunk = useCallback(() => {
@@ -343,9 +284,6 @@ export function useGanttTimelineScroll(
       if (e.key === 'Home' && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
         e.preventDefault();
         scrollToToday('auto');
-      } else if (e.key === 'End' && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
-        e.preventDefault();
-        scrollToEnd('auto');
       } else if (e.key === 'PageDown') {
         e.preventDefault();
         el.scrollBy({ left: el.clientWidth * 0.9, behavior: respectMotionPref() });
@@ -362,7 +300,7 @@ export function useGanttTimelineScroll(
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [scrollerEl, dayPx, scrollToToday, scrollToEnd]);
+  }, [scrollerEl, dayPx, scrollToToday]);
 
   return {
     loadedRange,
@@ -374,8 +312,6 @@ export function useGanttTimelineScroll(
     isFetchingTrailing,
     loadError,
     scrollToToday,
-    scrollToStart,
-    scrollToEnd,
     scrollToDate,
     retryFailedChunk,
   };

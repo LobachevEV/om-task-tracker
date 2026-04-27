@@ -65,31 +65,28 @@ describe('useGanttTimelineScroll', () => {
   const TODAY = '2026-04-25';
   const DAY_PX = 32;
   const VIEWPORT_DAYS = 30;
-  const BUFFER_DAYS = 60;
-  const CHUNK_DAYS = 30;
-  const CUSHION_DAYS = 14;
+  const HALF_WINDOW_DAYS = 60;
+  const CHUNK_DAYS = 14;
 
-  it('seeds loadedRange from buffer + viewport and computes Home/End math at leading 1/3', () => {
+  it('seeds a symmetric loadedRange around today and computes Home math at leading 1/3', () => {
     const loadChunk = vi.fn().mockResolvedValue(undefined);
     const { result } = renderHook(() =>
       useGanttTimelineScroll({
         today: TODAY,
         dayPx: DAY_PX,
         initialViewportDays: VIEWPORT_DAYS,
-        initialBufferDays: BUFFER_DAYS,
+        initialHalfWindowDays: HALF_WINDOW_DAYS,
         chunkDays: CHUNK_DAYS,
-        cushionDays: CUSHION_DAYS,
-        bounds: null,
         loadChunk,
       }),
     );
 
-    // Buffer days = 60 → loadedRange.start = today - 60 days.
-    // todayPx = 60 days * 32 px = 1920 px
+    // halfWindow = 60 → loadedRange.start = today - 60 days,
+    // loadedRange.end = today + 60 + 1 (half-open) → span = 121 days.
     expect(result.current.loadedRange.start).toBe('2026-02-24');
+    expect(result.current.loadedRange.end).toBe('2026-06-25');
     expect(result.current.todayPx).toBe(60 * DAY_PX);
-    // Span = viewport(30) + 2*buffer(60) = 150 days
-    expect(result.current.totalWidthPx).toBe(150 * DAY_PX);
+    expect(result.current.totalWidthPx).toBe(121 * DAY_PX);
     // initialScrollLeft anchors today at leading 1/3 of viewport.
     // viewportPx = 30 * 32 = 960 → 1/3 = 320 → target = 1920 - 320 = 1600
     expect(result.current.initialScrollLeft).toBe(1920 - Math.floor(960 / 3));
@@ -104,10 +101,8 @@ describe('useGanttTimelineScroll', () => {
         today: TODAY,
         dayPx: DAY_PX,
         initialViewportDays: VIEWPORT_DAYS,
-        initialBufferDays: BUFFER_DAYS,
+        initialHalfWindowDays: HALF_WINDOW_DAYS,
         chunkDays: CHUNK_DAYS,
-        cushionDays: CUSHION_DAYS,
-        bounds: null,
         loadChunk,
       }),
     );
@@ -149,10 +144,8 @@ describe('useGanttTimelineScroll', () => {
         today: TODAY,
         dayPx: DAY_PX,
         initialViewportDays: VIEWPORT_DAYS,
-        initialBufferDays: BUFFER_DAYS,
+        initialHalfWindowDays: HALF_WINDOW_DAYS,
         chunkDays: CHUNK_DAYS,
-        cushionDays: CUSHION_DAYS,
-        bounds: null,
         loadChunk,
       }),
     );
@@ -205,10 +198,8 @@ describe('useGanttTimelineScroll', () => {
         today: TODAY,
         dayPx: DAY_PX,
         initialViewportDays: VIEWPORT_DAYS,
-        initialBufferDays: BUFFER_DAYS,
+        initialHalfWindowDays: HALF_WINDOW_DAYS,
         chunkDays: CHUNK_DAYS,
-        cushionDays: CUSHION_DAYS,
-        bounds: null,
         loadChunk,
       }),
     );
@@ -237,26 +228,18 @@ describe('useGanttTimelineScroll', () => {
     document.body.removeChild(el);
   });
 
-  it('does not prefetch past leading bounds + cushion', async () => {
+  it('continues to prefetch indefinitely past the loaded range (unbounded scroll)', async () => {
+    // Each scroll-edge tick that lands us within EDGE_PREFETCH_DAYS of an
+    // edge spawns another chunk; with no bounds the hook does NOT clamp
+    // and the user can keep panning into empty cells forever.
     const loadChunk = vi.fn(async () => undefined);
-    // The initial loadedRange.start = today - 60 days = 2026-02-24. The
-    // bounds-prefetch guard fires when `loadedRange.start <= earliest -
-    // cushion`, so picking earliest = 2026-03-15 (cushion 14 → 2026-03-01,
-    // i.e. AFTER loadedRange.start) means we are already past the bounds
-    // guard and prefetching must be a no-op.
-    const bounds = {
-      earliestPlannedStart: '2026-03-15',
-      latestPlannedEnd: '2026-12-31',
-    };
     const { result } = renderHook(() =>
       useGanttTimelineScroll({
         today: TODAY,
         dayPx: DAY_PX,
         initialViewportDays: VIEWPORT_DAYS,
-        initialBufferDays: BUFFER_DAYS,
+        initialHalfWindowDays: HALF_WINDOW_DAYS,
         chunkDays: CHUNK_DAYS,
-        cushionDays: CUSHION_DAYS,
-        bounds,
         loadChunk,
       }),
     );
@@ -272,11 +255,7 @@ describe('useGanttTimelineScroll', () => {
       await flushRaf();
     });
 
-    // Wait one tick to be sure no fetch was kicked off.
-    await act(async () => {
-      await new Promise((r) => setTimeout(r, 10));
-    });
-    expect(loadChunk).not.toHaveBeenCalled();
+    await waitFor(() => expect(loadChunk).toHaveBeenCalled());
     document.body.removeChild(el);
   });
 
@@ -287,10 +266,8 @@ describe('useGanttTimelineScroll', () => {
         today: TODAY,
         dayPx: DAY_PX,
         initialViewportDays: VIEWPORT_DAYS,
-        initialBufferDays: BUFFER_DAYS,
+        initialHalfWindowDays: HALF_WINDOW_DAYS,
         chunkDays: CHUNK_DAYS,
-        cushionDays: CUSHION_DAYS,
-        bounds: null,
         loadChunk,
       }),
     );
@@ -311,19 +288,13 @@ describe('useGanttTimelineScroll', () => {
 
   it('Home keyboard shortcut scrolls to today (anchored at leading 1/3 of viewport)', async () => {
     const loadChunk = vi.fn().mockResolvedValue(undefined);
-    const bounds = {
-      earliestPlannedStart: '2026-03-01',
-      latestPlannedEnd: '2026-12-31',
-    };
     const { result } = renderHook(() =>
       useGanttTimelineScroll({
         today: TODAY,
         dayPx: DAY_PX,
         initialViewportDays: VIEWPORT_DAYS,
-        initialBufferDays: BUFFER_DAYS,
+        initialHalfWindowDays: HALF_WINDOW_DAYS,
         chunkDays: CHUNK_DAYS,
-        cushionDays: CUSHION_DAYS,
-        bounds,
         loadChunk,
       }),
     );
@@ -344,43 +315,6 @@ describe('useGanttTimelineScroll', () => {
     document.body.removeChild(el);
   });
 
-  it('End keyboard shortcut scrolls to bounds.latestPlannedEnd when known', async () => {
-    const loadChunk = vi.fn().mockResolvedValue(undefined);
-    const bounds = {
-      earliestPlannedStart: '2026-02-24',
-      latestPlannedEnd: '2026-05-01', // inside the loaded range (start=2026-02-24, span 150 days)
-    };
-    const { result } = renderHook(() =>
-      useGanttTimelineScroll({
-        today: TODAY,
-        dayPx: DAY_PX,
-        initialViewportDays: VIEWPORT_DAYS,
-        initialBufferDays: BUFFER_DAYS,
-        chunkDays: CHUNK_DAYS,
-        cushionDays: CUSHION_DAYS,
-        bounds,
-        loadChunk,
-      }),
-    );
-    const VIEWPORT_PX = VIEWPORT_DAYS * DAY_PX; // 960
-    const el = makeScrollerEl({ clientWidth: VIEWPORT_PX, scrollWidth: 5000 });
-    document.body.appendChild(el);
-    await act(async () => {
-      result.current.attachScroller(el);
-    });
-    el.scrollLeft = 0;
-
-    act(() => {
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'End' }));
-    });
-
-    // latestPlannedEnd is at +66 days (Feb 24 → May 1) = 66 * 32 = 2112 px.
-    // scrollToEnd parks the date at viewport's trailing 2/3, so
-    // target = 2112 - viewport*(1 - 1/3) = 2112 - 640 = 1472.
-    expect(el.scrollLeft).toBe(2112 - Math.floor(VIEWPORT_PX * (2 / 3)));
-    document.body.removeChild(el);
-  });
-
   it('PageDown / PageUp scroll by 90% of the viewport width', async () => {
     const loadChunk = vi.fn().mockResolvedValue(undefined);
     const { result } = renderHook(() =>
@@ -388,10 +322,8 @@ describe('useGanttTimelineScroll', () => {
         today: TODAY,
         dayPx: DAY_PX,
         initialViewportDays: VIEWPORT_DAYS,
-        initialBufferDays: BUFFER_DAYS,
+        initialHalfWindowDays: HALF_WINDOW_DAYS,
         chunkDays: CHUNK_DAYS,
-        cushionDays: CUSHION_DAYS,
-        bounds: null,
         loadChunk,
       }),
     );
@@ -422,10 +354,8 @@ describe('useGanttTimelineScroll', () => {
         today: TODAY,
         dayPx: DAY_PX,
         initialViewportDays: VIEWPORT_DAYS,
-        initialBufferDays: BUFFER_DAYS,
+        initialHalfWindowDays: HALF_WINDOW_DAYS,
         chunkDays: CHUNK_DAYS,
-        cushionDays: CUSHION_DAYS,
-        bounds: null,
         loadChunk,
       }),
     );
@@ -454,10 +384,8 @@ describe('useGanttTimelineScroll', () => {
         today: TODAY,
         dayPx: DAY_PX,
         initialViewportDays: VIEWPORT_DAYS,
-        initialBufferDays: BUFFER_DAYS,
+        initialHalfWindowDays: HALF_WINDOW_DAYS,
         chunkDays: CHUNK_DAYS,
-        cushionDays: CUSHION_DAYS,
-        bounds: null,
         loadChunk,
       }),
     );
@@ -500,10 +428,8 @@ describe('useGanttTimelineScroll', () => {
         today: TODAY,
         dayPx: DAY_PX,
         initialViewportDays: VIEWPORT_DAYS,
-        initialBufferDays: BUFFER_DAYS,
+        initialHalfWindowDays: HALF_WINDOW_DAYS,
         chunkDays: CHUNK_DAYS,
-        cushionDays: CUSHION_DAYS,
-        bounds: null,
         loadChunk,
       }),
     );
@@ -532,10 +458,8 @@ describe('useGanttTimelineScroll', () => {
         today: TODAY,
         dayPx: DAY_PX,
         initialViewportDays: VIEWPORT_DAYS,
-        initialBufferDays: BUFFER_DAYS,
+        initialHalfWindowDays: HALF_WINDOW_DAYS,
         chunkDays: CHUNK_DAYS,
-        cushionDays: CUSHION_DAYS,
-        bounds: null,
         loadChunk,
       }),
     );

@@ -159,12 +159,3 @@ export const featureDetailSchema = z.object({
   /** Always length 5 — see api-contract.md. */
   stagePlans: z.array(detailStagePlanSchema).length(5),
 });
-
-/**
- * Global planning bounds. Mirrors api-contract.md `FeatureBounds`.
- * Either field is null when no features have planned dates yet.
- */
-export const featureBoundsSchema = z.object({
-  earliestPlannedStart: isoDateOrNull,
-  latestPlannedEnd: isoDateOrNull,
-});

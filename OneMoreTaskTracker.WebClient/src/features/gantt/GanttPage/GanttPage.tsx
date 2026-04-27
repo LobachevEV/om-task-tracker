@@ -10,7 +10,6 @@ import { useAuth } from '../../auth/AuthContext';
 import { Spinner, Button, Callout } from '../../../shared/ds';
 import { isUserRole, type UserRole } from '../../../shared/auth/roles';
 import type {
-  FeatureBounds,
   FeatureSummary,
   MiniTeamMember,
 } from '../../../shared/types/feature';
@@ -25,7 +24,6 @@ import { GanttToolbar } from '../GanttToolbar';
 import { CreateFeatureDialog } from '../CreateFeatureDialog';
 import { usePlanFeatures } from '../usePlanFeatures';
 import { useTeamRoster } from '../useTeamRoster';
-import { useFeatureBounds } from '../useFeatureBounds';
 import { useGanttLayout, type GanttLane } from '../useGanttLayout';
 import { useGanttPageState, type GanttPageState } from '../useGanttPageState';
 import {
@@ -45,9 +43,8 @@ const DAY_PX_BY_ZOOM: Readonly<Record<ZoomLevel, number>> = {
 };
 
 const INITIAL_VIEWPORT_DAYS = 60;
-const INITIAL_BUFFER_DAYS = 30;
-const CHUNK_DAYS = 30;
-const CUSHION_DAYS = 30;
+const INITIAL_HALF_WINDOW_DAYS = 30;
+const CHUNK_DAYS = 14;
 /**
  * Width of the sticky leading column on every row (lead/team/title gutter).
  * Date columns and segment bars start at scroller-x = GUTTER_WIDTH_PX so they
@@ -98,8 +95,6 @@ export interface GanttPageInternalProps {
   onFeatureUpdated: (next: FeatureSummary) => void;
   /** Chunk-fetch callback wired into the scrollable timeline. */
   loadChunk: (req: ScrollChunkRequest) => Promise<unknown>;
-  /** Global plan bounds used to clamp the scrollable range. */
-  bounds: FeatureBounds | null;
 }
 
 interface UnscheduledSectionProps {
@@ -145,7 +140,6 @@ export function GanttPageInternal({
   state,
   onFeatureUpdated,
   loadChunk,
-  bounds,
 }: GanttPageInternalProps) {
   const { t } = useTranslation('gantt');
   const [createOpen, setCreateOpen] = useState(false);
@@ -155,17 +149,15 @@ export function GanttPageInternal({
   const isManager = role === 'Manager';
   const mutations = useFeatureMutationCallbacks({ onApplied: onFeatureUpdated });
 
-  const cushionWidthPx = CUSHION_DAYS * dayPx;
+  const trailingStripeWidthPx = CHUNK_DAYS * dayPx;
 
   const scroll = useGanttTimelineScroll({
     today: state.today,
     dayPx,
     gutterPx: GUTTER_WIDTH_PX,
     initialViewportDays: INITIAL_VIEWPORT_DAYS,
-    initialBufferDays: INITIAL_BUFFER_DAYS,
+    initialHalfWindowDays: INITIAL_HALF_WINDOW_DAYS,
     chunkDays: CHUNK_DAYS,
-    cushionDays: CUSHION_DAYS,
-    bounds,
     loadChunk,
   });
   const {
@@ -251,7 +243,7 @@ export function GanttPageInternal({
   const hasAnyFeatures = layout.lanes.length + layout.unscheduled.length > 0;
 
   const showTrailingStripe = isFetchingTrailing || loadError?.direction === 'trailing';
-  const effectiveTrailingPx = showTrailingStripe ? cushionWidthPx : 0;
+  const effectiveTrailingPx = showTrailingStripe ? trailingStripeWidthPx : 0;
   const lanesInlinePx = GUTTER_WIDTH_PX + totalWidthPx;
   const contentWidthPx = lanesInlinePx + effectiveTrailingPx;
   const todayPxAbs = todayPxInner + GUTTER_WIDTH_PX;
@@ -348,7 +340,7 @@ export function GanttPageInternal({
               {showTrailingStripe ? (
                 <div
                   className="gantt-page__header-flank"
-                  style={{ inlineSize: `${cushionWidthPx}px` }}
+                  style={{ inlineSize: `${trailingStripeWidthPx}px` }}
                   aria-hidden="true"
                 />
               ) : null}
@@ -398,7 +390,7 @@ export function GanttPageInternal({
                 <GanttChunkStripe
                   side="trailing"
                   mode={isFetchingTrailing ? 'loading' : 'failed'}
-                  widthPx={cushionWidthPx}
+                  widthPx={trailingStripeWidthPx}
                   onRetry={
                     loadError?.direction === 'trailing' ? retryFailedChunk : undefined
                   }
@@ -441,7 +433,6 @@ export function GanttPage() {
     scope: state.scope,
     state: state.stateFilter === 'all' ? undefined : state.stateFilter,
   });
-  const boundsResult = useFeatureBounds();
   const roster = useTeamRoster();
 
   const rosterMembers = useMemo<MiniTeamMember[]>(
@@ -479,7 +470,6 @@ export function GanttPage() {
       state={state}
       onFeatureUpdated={features.applyFeatureUpdate}
       loadChunk={loadChunk}
-      bounds={boundsResult.bounds}
     />
   );
 }

@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using OneMoreTaskTracker.Features.Features.Bounds;
 using OneMoreTaskTracker.Features.Features.Create;
 using OneMoreTaskTracker.Features.Features.Data;
 using OneMoreTaskTracker.Features.Features.Get;
@@ -39,8 +38,6 @@ app.MapGrpcService<CreateFeatureHandler>();
 app.MapGrpcService<UpdateFeatureHandler>();
 app.MapGrpcService<ListFeaturesHandler>();
 app.MapGrpcService<GetFeatureHandler>();
-app.MapGrpcService<GetFeatureBoundsHandler>();
-// Per-field PATCH handlers for the Gantt inline-edit feature (backend-plan.md).
 app.MapGrpcService<UpdateFeatureTitleHandler>();
 app.MapGrpcService<UpdateFeatureDescriptionHandler>();
 app.MapGrpcService<UpdateStageOwnerHandler>();
