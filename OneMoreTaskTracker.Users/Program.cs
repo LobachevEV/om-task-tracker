@@ -28,6 +28,9 @@ using (var scope = app.Services.CreateScope())
         await DevDataSeeder.SeedAsync(dbContext);
 }
 
+if (args.Contains("--migrate"))
+    return;
+
 if (app.Environment.IsDevelopment())
     app.MapGrpcReflectionService();
 
