@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../tests/OneMoreTaskTracker.Features.Tests/OneMoreTaskTracker.Features.Tests.csproj" />
+  <Project Path="OneMoreTaskTracker.Features.csproj" />
+</Solution>
