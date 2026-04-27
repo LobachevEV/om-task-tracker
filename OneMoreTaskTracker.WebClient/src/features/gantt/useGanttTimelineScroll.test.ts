@@ -228,6 +228,85 @@ describe('useGanttTimelineScroll', () => {
     document.body.removeChild(el);
   });
 
+  it('compensates scrollLeft after a leading prefetch so the user stays anchored to the same calendar date', async () => {
+    // Regression: previously, a leading-direction extension grew the DOM on
+    // the leading side but the browser preserved the user's numeric
+    // scrollLeft. The user remained under the EDGE_PREFETCH_DAYS threshold,
+    // and the very next scroll tick fired another fetch — runaway loop that
+    // prepended "a couple of years in milliseconds".
+    const loadChunk = vi.fn(async () => undefined);
+    const { result } = renderHook(() =>
+      useGanttTimelineScroll({
+        today: TODAY,
+        dayPx: DAY_PX,
+        initialViewportDays: VIEWPORT_DAYS,
+        initialHalfWindowDays: HALF_WINDOW_DAYS,
+        chunkDays: CHUNK_DAYS,
+        loadChunk,
+      }),
+    );
+    const el = makeScrollerEl({ clientWidth: VIEWPORT_DAYS * DAY_PX, scrollWidth: 5000 });
+    document.body.appendChild(el);
+    await act(async () => {
+      result.current.attachScroller(el);
+    });
+
+    // Park near the leading edge. After the initial-anchor layout effect
+    // applies, simulate the user panning to the leading edge.
+    el.scrollLeft = 200;
+    await act(async () => {
+      el.dispatchEvent(new Event('scroll'));
+      await flushRaf();
+    });
+    await waitFor(() => expect(loadChunk).toHaveBeenCalledTimes(1));
+
+    // Once setLoadedRange commits the new (earlier) start, scrollLeft must
+    // be bumped by CHUNK_DAYS * DAY_PX so the user is no longer under the
+    // edge-prefetch threshold (otherwise the next tick fires another fetch).
+    await waitFor(() => {
+      expect(el.scrollLeft).toBe(200 + CHUNK_DAYS * DAY_PX);
+    });
+    document.body.removeChild(el);
+  });
+
+  it('does not bump scrollLeft when the trailing edge extends', async () => {
+    // Trailing extensions append to the right; scrollLeft must NOT change.
+    const loadChunk = vi.fn(async () => undefined);
+    const { result } = renderHook(() =>
+      useGanttTimelineScroll({
+        today: TODAY,
+        dayPx: DAY_PX,
+        initialViewportDays: VIEWPORT_DAYS,
+        initialHalfWindowDays: HALF_WINDOW_DAYS,
+        chunkDays: CHUNK_DAYS,
+        loadChunk,
+      }),
+    );
+    // scrollWidth must be > clientWidth for trailing-edge math (sw - cw)
+    // to land within the prefetch window.
+    const el = makeScrollerEl({ clientWidth: VIEWPORT_DAYS * DAY_PX, scrollWidth: 5000 });
+    document.body.appendChild(el);
+    await act(async () => {
+      result.current.attachScroller(el);
+    });
+
+    // Pan to the trailing edge.
+    el.scrollLeft = 5000 - VIEWPORT_DAYS * DAY_PX; // sw - cw
+    await act(async () => {
+      el.dispatchEvent(new Event('scroll'));
+      await flushRaf();
+    });
+    await waitFor(() => expect(loadChunk).toHaveBeenCalledTimes(1));
+
+    const beforeStart = result.current.loadedRange.start;
+    await waitFor(() => {
+      expect(result.current.loadedRange.end).not.toBe('2026-06-25');
+    });
+    expect(result.current.loadedRange.start).toBe(beforeStart);
+    expect(el.scrollLeft).toBe(5000 - VIEWPORT_DAYS * DAY_PX);
+    document.body.removeChild(el);
+  });
+
   it('continues to prefetch indefinitely past the loaded range (unbounded scroll)', async () => {
     // Each scroll-edge tick that lands us within EDGE_PREFETCH_DAYS of an
     // edge spawns another chunk; with no bounds the hook does NOT clamp

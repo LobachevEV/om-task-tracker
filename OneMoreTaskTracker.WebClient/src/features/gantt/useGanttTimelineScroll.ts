@@ -93,6 +93,12 @@ export function useGanttTimelineScroll(
   // Element identity — a boolean would skip re-anchoring when the page
   // swaps in a fresh scroller (e.g. filter-driven remount).
   const initialScrollAppliedForRef = useRef<HTMLDivElement | null>(null);
+  // Tracks the previous loadedRange.start so leading-side extensions can
+  // compensate scrollLeft (anchor the user to the same calendar date).
+  // Without this, a leading prefetch grows the DOM but scrollLeft stays
+  // numerically the same, the user stays under the prefetch threshold,
+  // and the next scroll tick fires another fetch — runaway loop.
+  const prevLoadedStartRef = useRef(loadedRange.start);
 
   useEffect(() => {
     loadChunkRef.current = loadChunk;
@@ -118,6 +124,20 @@ export function useGanttTimelineScroll(
     scrollerEl.scrollLeft = initialScrollLeft;
     initialScrollAppliedForRef.current = scrollerEl;
   }, [scrollerEl, initialScrollLeft]);
+
+  useLayoutEffect(() => {
+    const prev = prevLoadedStartRef.current;
+    const curr = loadedRange.start;
+    if (prev === curr) return;
+    prevLoadedStartRef.current = curr;
+    const el = scrollerEl;
+    if (!el) return;
+    if (initialScrollAppliedForRef.current !== el) return;
+    const addedLeadingDays = daysBetween(curr, prev);
+    if (addedLeadingDays > 0) {
+      el.scrollLeft += addedLeadingDays * dayPx;
+    }
+  }, [loadedRange.start, scrollerEl, dayPx]);
 
   const fetchChunk = useCallback(
     async (direction: ChunkDirection) => {
