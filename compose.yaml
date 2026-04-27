@@ -152,7 +152,10 @@ services:
     ports:
       - "8080:80"
     environment:
-      API_BASE_URL: /api
+      # Same-origin: every callsite already prefixes "/api/...", and nginx
+      # proxies that path to the api service. A non-empty value here would
+      # double the prefix (e.g. /api/api/auth/login → 404).
+      API_BASE_URL: ""
     depends_on:
       api:
         condition: service_started
