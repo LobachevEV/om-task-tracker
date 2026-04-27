@@ -1,4 +1,4 @@
-import type { IntegrationKind } from '../integrationStatus';
+import type { IntegrationKind } from '../../integrationStatus';
 
 /**
  * Monoline 14x14 SVG path data for each integration icon. Extracted from the
