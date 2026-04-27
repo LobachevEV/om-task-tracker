@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { deriveIntegrations } from '../integrationStatus';
-import type { Task } from '../../../common/types/task';
+import { deriveIntegrations } from './integrationStatus';
+import type { Task } from '../../common/types/task';
 
 describe('deriveIntegrations', () => {
   it('returns jira waiting indicator for NotStarted state', () => {

@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { moveTask } from '../../../common/api/tasksApi';
-import { ConfirmDialog } from '../../../common/components/ConfirmDialog';
-import { Spinner } from '../../../common/components/Spinner';
-import { STATE_CLASS, STATE_STEPS } from '../../../common/constants/taskConstants';
-import { useKeyboardShortcut } from '../../../common/hooks/useKeyboardShortcut';
-import { useTaskDetail } from '../../../common/hooks/useTaskDetail';
+import { moveTask } from '../../common/api/tasksApi';
+import { ConfirmDialog } from '../../common/components/ConfirmDialog';
+import { Spinner } from '../../common/components/Spinner';
+import { STATE_CLASS, STATE_STEPS } from '../../common/constants/taskConstants';
+import { useKeyboardShortcut } from '../../common/hooks/useKeyboardShortcut';
+import { useTaskDetail } from '../../common/hooks/useTaskDetail';
 import './TaskDetailPage.css';
 
 export function TaskDetailPage() {
