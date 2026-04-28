@@ -137,6 +137,14 @@
       <CompileOutputs>True</CompileOutputs>
       <Generator>MSBuild:Compile</Generator>
     </Protobuf>
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\UpdateFeatureLeadCommand\update_feature_lead_command_handler.proto">
+      <GrpcServices>Client</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
+      <CompileOutputs>True</CompileOutputs>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
     <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\UpdateStageOwnerCommand\update_stage_owner_command_handler.proto">
       <GrpcServices>Client</GrpcServices>
       <Access>Public</Access>

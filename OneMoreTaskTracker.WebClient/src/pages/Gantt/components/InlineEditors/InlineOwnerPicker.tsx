@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TeamRosterMember } from '../../../../common/api/teamApi';
+import { Avatar, roleToAvatarTone } from '../../../../common/ds';
 import { useInlineFieldEditor } from './useInlineFieldEditor';
 import type { InlineEditorError } from './InlineEditorError';
 import { InlineCellChevron } from './InlineCellChevron';
@@ -26,6 +27,7 @@ export interface InlineOwnerPickerProps {
   onAnnounce?: (message: string) => void;
   /** Build the announcement message. */
   buildAnnouncement?: (outcome: 'saved' | 'error', value: number | null, error: InlineEditorError | null) => string;
+  clearable?: boolean;
 }
 
 function rosterMatches(m: TeamRosterMember, q: string): boolean {
@@ -52,6 +54,7 @@ export function InlineOwnerPicker({
   testId,
   onAnnounce,
   buildAnnouncement,
+  clearable = true,
 }: InlineOwnerPickerProps) {
   const { t } = useTranslation('gantt');
   const rootRef = useRef<HTMLDivElement>(null);
@@ -69,11 +72,14 @@ export function InlineOwnerPicker({
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
 
-  // Resync filter text on committed-value change via a tracked-state pattern
-  // (no ref read during render) — required by the React Compiler strict lint.
   const [trackedValue, setTrackedValue] = useState<number | null>(value);
+  const [trackedDisplayName, setTrackedDisplayName] = useState<string | null>(displayName);
   if (trackedValue !== value) {
     setTrackedValue(value);
+    setTrackedDisplayName(displayName);
+    setQuery(displayName ?? '');
+  } else if (trackedDisplayName !== displayName && editor.status === 'idle' && !open) {
+    setTrackedDisplayName(displayName);
     setQuery(displayName ?? '');
   }
 
@@ -159,10 +165,21 @@ export function InlineOwnerPicker({
     [commitUser, displayName, editor, filtered, highlight, open, readOnly],
   );
 
+  const selectedMember = value == null ? null : (roster.find((m) => m.userId === value) ?? null);
+
   if (readOnly) {
     return (
-      <span className="inline-cell inline-cell--read" data-testid={testId}>
-        {displayName ?? t('row.unassigned')}
+      <span className="inline-cell inline-cell--read inline-cell--owner" data-testid={testId}>
+        {selectedMember ? (
+          <Avatar
+            className="inline-cell__avatar"
+            name={selectedMember.displayName}
+            size="sm"
+            tone={roleToAvatarTone(selectedMember.role)}
+            aria-hidden="true"
+          />
+        ) : null}
+        <span>{displayName ?? t('row.unassigned')}</span>
       </span>
     );
   }
@@ -176,6 +193,15 @@ export function InlineOwnerPicker({
       data-flash={editor.flashing ? 'true' : undefined}
       data-testid={testId}
     >
+      {selectedMember ? (
+        <Avatar
+          className="inline-cell__avatar"
+          name={selectedMember.displayName}
+          size="sm"
+          tone={roleToAvatarTone(selectedMember.role)}
+          aria-hidden="true"
+        />
+      ) : null}
       <input
         ref={inputRef}
         type="text"
@@ -209,7 +235,7 @@ export function InlineOwnerPicker({
           {t('row.unassigned')}
         </span>
       ) : null}
-      {value != null ? (
+      {value != null && clearable ? (
         <button
           type="button"
           className="inline-cell__clear"
@@ -250,6 +276,13 @@ export function InlineOwnerPicker({
                   }}
                   onMouseEnter={() => setHighlight(idx)}
                 >
+                  <Avatar
+                    className="inline-cell__avatar"
+                    name={m.displayName}
+                    size="sm"
+                    tone={roleToAvatarTone(m.role)}
+                    aria-hidden="true"
+                  />
                   <span className="inline-cell__listbox-name">{m.displayName}</span>
                   <span className="inline-cell__listbox-sep">·</span>
                   <span className="inline-cell__listbox-role">{m.role}</span>

@@ -41,7 +41,11 @@ export function InlineCellError({
       data-kind={error.kind}
       data-testid={testId}
     >
-      <span className="inline-cell__error-text" data-testid={`${testId}-text`}>
+      <span
+        className="inline-cell__error-text"
+        data-testid={`${testId}-text`}
+        title={message}
+      >
         {message}
       </span>
       {(showRetry || showRevert) && (

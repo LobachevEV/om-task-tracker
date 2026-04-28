@@ -7,6 +7,7 @@ import type {
 
 export interface FeatureMutationCallbacks {
   saveTitle: (featureId: number, nextTitle: string, version: number) => Promise<void>;
+  saveLead: (featureId: number, next: number, version: number) => Promise<void>;
   saveStageOwner: (
     featureId: number,
     stage: FeatureState,
@@ -42,6 +43,18 @@ export function useFeatureMutationCallbacks(
       const updated = await planApi.updateFeatureTitle(
         featureId,
         { title: nextTitle },
+        version,
+      );
+      onApplied(updated);
+    },
+    [onApplied],
+  );
+
+  const saveLead = useCallback<FeatureMutationCallbacks['saveLead']>(
+    async (featureId, next, version) => {
+      const updated = await planApi.updateFeatureLead(
+        featureId,
+        { leadUserId: next },
         version,
       );
       onApplied(updated);
@@ -95,10 +108,11 @@ export function useFeatureMutationCallbacks(
   return useMemo(
     () => ({
       saveTitle,
+      saveLead,
       saveStageOwner,
       saveStagePlannedStart,
       saveStagePlannedEnd,
     }),
-    [saveTitle, saveStageOwner, saveStagePlannedStart, saveStagePlannedEnd],
+    [saveTitle, saveLead, saveStageOwner, saveStagePlannedStart, saveStagePlannedEnd],
   );
 }

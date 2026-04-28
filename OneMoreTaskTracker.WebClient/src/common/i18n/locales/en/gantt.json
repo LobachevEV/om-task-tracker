@@ -139,6 +139,7 @@
   },
   "inlineEdit": {
     "titleAria": "Feature title: {{title}}",
+    "leadAria": "Lead for \"{{title}}\"",
     "ownerAria": "Owner for {{stage}} stage of \"{{title}}\"",
     "plannedStartAria": "Planned start for {{stage}} stage of \"{{title}}\"",
     "plannedEndAria": "Planned end for {{stage}} stage of \"{{title}}\"",
@@ -161,6 +162,8 @@
     "announce": {
       "titleSaved": "Feature title saved.",
       "titleError": "Feature title change was rejected.",
+      "leadSaved": "Feature lead saved.",
+      "leadError": "Feature lead change was rejected.",
       "ownerSaved": "{{stage}} stage owner saved.",
       "ownerError": "{{stage}} stage owner change was rejected.",
       "startSaved": "{{stage}} planned start saved.",

@@ -7,6 +7,7 @@ using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.UpdateFeatureDescriptionCommand;
+using OneMoreTaskTracker.Proto.Features.UpdateFeatureLeadCommand;
 using OneMoreTaskTracker.Proto.Features.UpdateFeatureTitleCommand;
 using OneMoreTaskTracker.Proto.Features.UpdateStageOwnerCommand;
 using OneMoreTaskTracker.Proto.Features.UpdateStagePlannedEndCommand;
@@ -116,6 +117,9 @@ builder.Services
 
 builder.Services
     .AddGrpcClient<FeatureDescriptionUpdater.FeatureDescriptionUpdaterClient>(o => o.Address = new Uri(featuresServiceAddress));
+
+builder.Services
+    .AddGrpcClient<FeatureLeadUpdater.FeatureLeadUpdaterClient>(o => o.Address = new Uri(featuresServiceAddress));
 
 builder.Services
     .AddGrpcClient<StageOwnerUpdater.StageOwnerUpdaterClient>(o => o.Address = new Uri(featuresServiceAddress));

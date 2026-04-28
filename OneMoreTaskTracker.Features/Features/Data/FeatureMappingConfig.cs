@@ -7,6 +7,7 @@ using ListDto = OneMoreTaskTracker.Proto.Features.ListFeaturesQuery.FeatureDto;
 using GetDto = OneMoreTaskTracker.Proto.Features.GetFeatureQuery.FeatureDto;
 using UpdateTitleDto = OneMoreTaskTracker.Proto.Features.UpdateFeatureTitleCommand.FeatureDto;
 using UpdateDescriptionDto = OneMoreTaskTracker.Proto.Features.UpdateFeatureDescriptionCommand.FeatureDto;
+using UpdateLeadDto = OneMoreTaskTracker.Proto.Features.UpdateFeatureLeadCommand.FeatureDto;
 using UpdateStageOwnerDto = OneMoreTaskTracker.Proto.Features.UpdateStageOwnerCommand.FeatureDto;
 using UpdateStagePlannedStartDto = OneMoreTaskTracker.Proto.Features.UpdateStagePlannedStartCommand.FeatureDto;
 using UpdateStagePlannedEndDto = OneMoreTaskTracker.Proto.Features.UpdateStagePlannedEndCommand.FeatureDto;
@@ -137,6 +138,14 @@ public static class FeatureMappingConfig
             .Map(d => d.CreatedAt,      s => s.CreatedAt.ToString("O"))
             .Map(d => d.UpdatedAt,      s => s.UpdatedAt.ToString("O"))
             .Map(d => d.Version,        s => s.Version);
+
+        TypeAdapterConfig<Feature, UpdateLeadDto>.NewConfig()
+            .Map(d => d.Description,    s => s.Description ?? string.Empty)
+            .Map(d => d.State,          s => (ProtoFeatureState)s.State)
+            .Map(d => d.PlannedStart,   s => s.PlannedStart == null ? string.Empty : s.PlannedStart.Value.ToString("yyyy-MM-dd"))
+            .Map(d => d.PlannedEnd,     s => s.PlannedEnd   == null ? string.Empty : s.PlannedEnd.Value.ToString("yyyy-MM-dd"))
+            .Map(d => d.CreatedAt,      s => s.CreatedAt.ToString("O"))
+            .Map(d => d.UpdatedAt,      s => s.UpdatedAt.ToString("O"));
 
         TypeAdapterConfig<Feature, UpdateStagePlannedStartDto>.NewConfig()
             .Map(d => d.Id,             s => s.Id)

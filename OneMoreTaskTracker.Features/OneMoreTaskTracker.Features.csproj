@@ -67,6 +67,12 @@
       <ProtoRoot>Protos</ProtoRoot>
       <AdditionalImportDirs>Protos</AdditionalImportDirs>
     </Protobuf>
+    <Protobuf Include="Protos\UpdateFeatureLeadCommand\update_feature_lead_command_handler.proto">
+      <GrpcServices>Server</GrpcServices>
+      <Access>Public</Access>
+      <ProtoRoot>Protos</ProtoRoot>
+      <AdditionalImportDirs>Protos</AdditionalImportDirs>
+    </Protobuf>
     <Protobuf Include="Protos\UpdateStageOwnerCommand\update_stage_owner_command_handler.proto">
       <GrpcServices>Server</GrpcServices>
       <Access>Public</Access>

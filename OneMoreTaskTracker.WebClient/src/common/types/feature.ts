@@ -108,6 +108,9 @@ export interface UpdateFeatureTitlePayload {
 export interface UpdateFeatureDescriptionPayload {
   description: string | null;
 }
+export interface UpdateFeatureLeadPayload {
+  leadUserId: number;
+}
 export interface UpdateStageOwnerPayload {
   stageOwnerUserId: number | null;
 }
