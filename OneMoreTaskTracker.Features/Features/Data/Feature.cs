@@ -28,4 +28,37 @@ public class Feature
     // reconcile. EF Core's IsConcurrencyToken mapping lives in
     // FeaturesDbContext.OnModelCreating.
     public int Version { get; set; }
+
+    public void RenameTitle(string newTitle, DateTime now)
+    {
+        if (newTitle is null) throw new ArgumentNullException(nameof(newTitle));
+        Title = newTitle;
+        Version += 1;
+        UpdatedAt = now;
+    }
+
+    public void SetDescription(string? newDescription, DateTime now)
+    {
+        Description = newDescription;
+        Version += 1;
+        UpdatedAt = now;
+    }
+
+    public void AssignLead(int leadUserId, DateTime now)
+    {
+        LeadUserId = leadUserId;
+        Version += 1;
+        UpdatedAt = now;
+    }
+
+    public void RecordStageEdit(DateTime now)
+    {
+        Version += 1;
+        UpdatedAt = now;
+    }
+
+    public void Touch(DateTime now)
+    {
+        UpdatedAt = now;
+    }
 }

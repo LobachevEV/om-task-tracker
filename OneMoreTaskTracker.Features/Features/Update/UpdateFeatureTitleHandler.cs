@@ -36,9 +36,7 @@ public sealed class UpdateFeatureTitleHandler(
 
         var before = feature.Title;
         var versionBefore = feature.Version;
-        feature.Title = trimmedTitle;
-        feature.Version = versionBefore + 1;
-        feature.UpdatedAt = DateTime.UtcNow;
+        feature.RenameTitle(trimmedTitle, DateTime.UtcNow);
 
         try
         {

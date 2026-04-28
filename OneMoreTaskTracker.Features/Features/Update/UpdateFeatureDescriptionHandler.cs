@@ -38,9 +38,7 @@ public sealed class UpdateFeatureDescriptionHandler(
 
         var versionBefore = feature.Version;
         var lenBefore = feature.Description?.Length ?? 0;
-        feature.Description = normalized;
-        feature.Version = versionBefore + 1;
-        feature.UpdatedAt = DateTime.UtcNow;
+        feature.SetDescription(normalized, DateTime.UtcNow);
 
         try
         {

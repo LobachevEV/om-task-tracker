@@ -38,13 +38,10 @@ public sealed class UpdateStageOwnerHandler(
         var newOwner = request.StageOwnerUserId > 0 ? request.StageOwnerUserId : 0;
         var ownerBefore = plan.PerformerUserId;
         var stageVersionBefore = plan.Version;
-        var featureVersionBefore = feature.Version;
 
-        plan.PerformerUserId = newOwner;
-        plan.Version = stageVersionBefore + 1;
-        plan.UpdatedAt = DateTime.UtcNow;
-        feature.Version = featureVersionBefore + 1;
-        feature.UpdatedAt = plan.UpdatedAt;
+        var now = DateTime.UtcNow;
+        plan.AssignOwner(newOwner, now);
+        feature.RecordStageEdit(now);
 
         try
         {

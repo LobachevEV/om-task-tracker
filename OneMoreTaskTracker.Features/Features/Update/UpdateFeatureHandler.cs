@@ -52,7 +52,7 @@ public class UpdateFeatureHandler(FeaturesDbContext db) : FeatureUpdater.Feature
             FeatureValidation.ValidateDateOrder(feature.PlannedStart, feature.PlannedEnd);
         }
 
-        feature.UpdatedAt = now;
+        feature.Touch(now);
 
         await db.SaveChangesAsync(context.CancellationToken);
 

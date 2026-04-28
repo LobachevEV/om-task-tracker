@@ -31,9 +31,7 @@ public sealed class UpdateFeatureLeadHandler(
 
         var before = feature.LeadUserId;
         var versionBefore = feature.Version;
-        feature.LeadUserId = request.LeadUserId;
-        feature.Version = versionBefore + 1;
-        feature.UpdatedAt = DateTime.UtcNow;
+        feature.AssignLead(request.LeadUserId, DateTime.UtcNow);
 
         try
         {

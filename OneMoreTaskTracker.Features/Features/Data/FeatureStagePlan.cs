@@ -26,4 +26,30 @@ public class FeatureStagePlan
     // § "Optimistic Concurrency"). Bumped by every stage-scoped PATCH (owner,
     // planned-start, planned-end). Exposed via StagePlanDetail.stageVersion.
     public int Version { get; set; }
+
+    public void AssignOwner(int ownerUserId, DateTime now)
+    {
+        PerformerUserId = ownerUserId;
+        Version += 1;
+        UpdatedAt = now;
+    }
+
+    public void SetPlannedStart(DateOnly? plannedStart, DateTime now)
+    {
+        PlannedStart = plannedStart;
+        Version += 1;
+        UpdatedAt = now;
+    }
+
+    public void SetPlannedEnd(DateOnly? plannedEnd, DateTime now)
+    {
+        PlannedEnd = plannedEnd;
+        Version += 1;
+        UpdatedAt = now;
+    }
+
+    public void Touch(DateTime now)
+    {
+        UpdatedAt = now;
+    }
 }

@@ -47,15 +47,12 @@ public sealed class UpdateStagePlannedEndHandler(
 
         var endBefore = plan.PlannedEnd;
         var stageVersionBefore = plan.Version;
-        var featureVersionBefore = feature.Version;
 
-        plan.PlannedEnd = parsed;
-        plan.Version = stageVersionBefore + 1;
-        plan.UpdatedAt = DateTime.UtcNow;
+        var now = DateTime.UtcNow;
+        plan.SetPlannedEnd(parsed, now);
 
         StagePlanUpserter.RecomputeFeatureDates(feature);
-        feature.Version = featureVersionBefore + 1;
-        feature.UpdatedAt = plan.UpdatedAt;
+        feature.RecordStageEdit(now);
 
         try
         {
