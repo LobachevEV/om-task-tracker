@@ -8,14 +8,12 @@ const meta: Meta<typeof GanttToolbar> = {
   parameters: { layout: 'fullscreen' },
   tags: ['autodocs'],
   args: {
-    role: 'Manager',
     zoom: 'twoWeeks',
     scope: 'all',
     stateFilter: 'all',
     onZoomChange: fn(),
     onScopeChange: fn(),
     onStateFilterChange: fn(),
-    onNewFeature: fn(),
   },
   decorators: [
     (Story) => (
@@ -29,18 +27,18 @@ export default meta;
 
 type Story = StoryObj<typeof GanttToolbar>;
 
-export const ManagerDefault: Story = {
-  args: { role: 'Manager', zoom: 'twoWeeks', scope: 'all', stateFilter: 'all' },
+export const Default: Story = {
+  args: { zoom: 'twoWeeks', scope: 'all', stateFilter: 'all' },
 };
 
-export const NonManager: Story = {
-  args: { role: 'FrontendDeveloper', zoom: 'twoWeeks', scope: 'mine', stateFilter: 'all', onNewFeature: undefined },
+export const MineScope: Story = {
+  args: { zoom: 'twoWeeks', scope: 'mine', stateFilter: 'all' },
 };
 
 export const MonthZoom: Story = {
-  args: { role: 'Manager', zoom: 'month', scope: 'all', stateFilter: 'all' },
+  args: { zoom: 'month', scope: 'all', stateFilter: 'all' },
 };
 
 export const FiltersApplied: Story = {
-  args: { role: 'Manager', zoom: 'week', scope: 'mine', stateFilter: 'Development' },
+  args: { zoom: 'week', scope: 'mine', stateFilter: 'Development' },
 };

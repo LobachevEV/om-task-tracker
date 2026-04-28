@@ -14,6 +14,7 @@ import type {
   MiniTeamMember,
 } from '../../common/types/feature';
 import type { TeamRosterMember } from '../../common/api/teamApi';
+import { AddFeatureRow } from './components/AddFeatureRow';
 import { GanttChunkStripe } from './components/GanttChunkStripe';
 import { GanttDateHeader } from './components/GanttDateHeader';
 import { GanttEmpty } from './components/GanttEmpty';
@@ -21,7 +22,6 @@ import { GanttFeatureRow } from './components/GanttFeatureRow';
 import { GanttGoToDate } from './components/GanttGoToDate';
 import { GanttTimelineScroller } from './components/GanttTimelineScroller';
 import { GanttToolbar } from './components/GanttToolbar';
-import { CreateFeatureDialog } from './components/CreateFeatureDialog';
 import { usePlanFeatures } from './usePlanFeatures';
 import { useTeamRoster } from './useTeamRoster';
 import { useGanttLayout, type GanttLane } from './useGanttLayout';
@@ -142,7 +142,6 @@ export function GanttPageInternal({
   loadChunk,
 }: GanttPageInternalProps) {
   const { t } = useTranslation('gantt');
-  const [createOpen, setCreateOpen] = useState(false);
   const [goToOpen, setGoToOpen] = useState(false);
 
   const dayPx = DAY_PX_BY_ZOOM[state.zoom];
@@ -202,9 +201,8 @@ export function GanttPageInternal({
   );
 
   const handleCreated = useCallback(
-    (id: number) => {
-      setCreateOpen(false);
-      state.toggleFeatureExpanded(id);
+    (feature: FeatureSummary) => {
+      state.toggleFeatureExpanded(feature.id);
       onRetry();
     },
     [state, onRetry],
@@ -253,23 +251,27 @@ export function GanttPageInternal({
       ['--day-px']: `${dayPx}px`,
       ['--gantt-cushion-width']: `${effectiveTrailingPx}px`,
       ['--gantt-loaded-width']: `${totalWidthPx}px`,
+      ['--gantt-lanes-width']: `${lanesInlinePx}px`,
+      ['--gantt-content-width']: `${contentWidthPx}px`,
       ['--gantt-today-px']: `${todayPxAbs}px`,
     }) as CSSProperties,
-    [dayPx, effectiveTrailingPx, totalWidthPx, todayPxAbs],
+    [dayPx, effectiveTrailingPx, totalWidthPx, lanesInlinePx, contentWidthPx, todayPxAbs],
   );
 
   return (
     <main className="gantt-page" style={pageStyle} data-testid="gantt-page">
       <GanttToolbar
-        role={role}
         zoom={state.zoom}
         scope={state.scope}
         stateFilter={state.stateFilter}
         onZoomChange={state.setZoom}
         onScopeChange={state.setScope}
         onStateFilterChange={state.setStateFilter}
-        onNewFeature={isManager ? () => setCreateOpen(true) : undefined}
       />
+
+      <div className="gantt-page__narrow-notice" role="note">
+        {t('narrowViewport.notice')}
+      </div>
 
       {rosterError ? (
         <Callout
@@ -310,10 +312,7 @@ export function GanttPageInternal({
           </Callout>
         </div>
       ) : !hasAnyFeatures ? (
-        <GanttEmpty
-          canCreate={isManager}
-          onCreate={isManager ? () => setCreateOpen(true) : undefined}
-        />
+        <GanttEmpty isManager={isManager} onCreated={handleCreated} />
       ) : (
         <section className="gantt-page__timeline-wrap">
           <GanttTimelineScroller
@@ -322,13 +321,9 @@ export function GanttPageInternal({
             todayPx={todayPxAbs}
             onJumpToToday={scrollToToday}
           >
-            <div
-              className="gantt-page__header-row"
-              style={{ inlineSize: `${contentWidthPx}px` }}
-            >
+            <div className="gantt-page__header-row">
               <div
                 className="gantt-page__header-flank gantt-page__header-flank--leading"
-                style={{ inlineSize: `${GUTTER_WIDTH_PX}px` }}
                 aria-hidden="true"
               />
               <GanttDateHeader
@@ -339,8 +334,7 @@ export function GanttPageInternal({
               />
               {showTrailingStripe ? (
                 <div
-                  className="gantt-page__header-flank"
-                  style={{ inlineSize: `${trailingStripeWidthPx}px` }}
+                  className="gantt-page__header-flank gantt-page__header-flank--trailing"
                   aria-hidden="true"
                 />
               ) : null}
@@ -348,20 +342,15 @@ export function GanttPageInternal({
 
             <div
               className="gantt-page__today-hairline"
-              role="separator"
-              aria-label={t('legend.todayAt', {
-                defaultValue: 'Today {{date}}',
-                date: state.today,
-              })}
-              style={{ insetInlineStart: `${todayPxAbs}px` }}
+              aria-hidden="true"
             />
 
             <div className="gantt-page__lanes-row">
               <div
                 className="gantt-page__lanes"
                 role="list"
-                style={{ inlineSize: `${lanesInlinePx}px` }}
               >
+                {isManager ? <AddFeatureRow onCreated={handleCreated} /> : null}
                 {layout.lanes.map((lane: GanttLane) => {
                   const lead = resolveMember(lane.feature.leadUserId);
                   const expanded = state.expandedFeatureIds.has(lane.feature.id);
@@ -411,14 +400,6 @@ export function GanttPageInternal({
         onSubmit={handleGoToSubmit}
         onClose={() => setGoToOpen(false)}
       />
-
-      {isManager ? (
-        <CreateFeatureDialog
-          open={createOpen}
-          onClose={() => setCreateOpen(false)}
-          onCreated={(feature) => handleCreated(feature.id)}
-        />
-      ) : null}
     </main>
   );
 }

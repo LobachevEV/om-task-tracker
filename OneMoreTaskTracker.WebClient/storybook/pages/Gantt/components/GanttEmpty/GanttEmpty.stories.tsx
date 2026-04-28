@@ -8,12 +8,12 @@ const meta: Meta<typeof GanttEmpty> = {
   parameters: { layout: 'centered' },
   tags: ['autodocs'],
   args: {
-    onCreate: fn(),
+    onCreated: fn(),
   },
 };
 export default meta;
 
 type Story = StoryObj<typeof GanttEmpty>;
 
-export const WithCTA: Story = { args: { canCreate: true } };
-export const WithoutCTA: Story = { args: { canCreate: false, onCreate: undefined } };
+export const Manager: Story = { args: { isManager: true } };
+export const NonManager: Story = { args: { isManager: false } };

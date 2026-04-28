@@ -1,0 +1,231 @@
+/*
+ * AddFeatureRow
+ *
+ * `--row` variant: mounts as the first child of `.gantt-page__lanes`. Mirrors
+ * the grid + sticky-gutter shape of `.gantt-row` so it aligns with feature
+ * rows below. Lane side stays empty.
+ *
+ * `--standalone` variant: mounts inside `.gantt-empty`. No grid, no sticky;
+ * a centered, max-width affordance.
+ */
+
+.add-feature-row {
+  position: relative;
+}
+
+/* ---------- row variant ---------- */
+
+.add-feature-row--row {
+  display: grid;
+  grid-template-columns: var(--gantt-gutter-width, 280px) 1fr;
+  align-items: stretch;
+  min-block-size: 48px;
+  border-block-end: 1px solid var(--border);
+}
+
+.add-feature-row--row .add-feature-row__ghost,
+.add-feature-row--row .add-feature-row__form {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 2;
+  box-sizing: border-box;
+  inline-size: var(--gantt-gutter-width, 280px);
+  background: var(--surface);
+  border-inline-end: 1px solid var(--border);
+}
+
+/* ---------- standalone variant ---------- */
+
+.add-feature-row--standalone {
+  inline-size: min(360px, 100%);
+  margin-block-start: var(--space-4, 16px);
+}
+
+.add-feature-row--standalone .add-feature-row__ghost,
+.add-feature-row--standalone .add-feature-row__form {
+  background: var(--surface);
+  border-radius: 8px;
+  inline-size: 100%;
+}
+
+/* ---------- ghost (idle) ---------- */
+
+.add-feature-row__ghost {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  color: var(--text-muted);
+  block-size: 100%;
+  transition:
+    color 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Inset dashed outline drawn as a pseudo so it doesn't fight the row's
+ * own border-block-end and doesn't shift on hover (border-style only). */
+.add-feature-row__ghost::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 6px;
+  pointer-events: none;
+  transition: border-color 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.add-feature-row__ghost:hover {
+  color: var(--text);
+  background: color-mix(in oklch, var(--surface) 92%, var(--text));
+}
+
+.add-feature-row__ghost:hover::before {
+  border-color: var(--text-muted);
+}
+
+.add-feature-row__ghost:focus-visible {
+  outline: none;
+  color: var(--text);
+}
+
+.add-feature-row__ghost:focus-visible::before {
+  border: 2px solid var(--accent);
+  inset: 4px;
+}
+
+.add-feature-row__plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 16px;
+  block-size: 16px;
+  font-size: 16px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+
+.add-feature-row__ghost-label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+
+/* ---------- editing ---------- */
+
+.add-feature-row__form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 14px;
+  block-size: 100%;
+}
+
+.add-feature-row__form:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.add-feature-row__field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.add-feature-row__form .add-feature-row__plus {
+  color: var(--text);
+}
+
+.add-feature-row__input {
+  all: unset;
+  flex: 1 1 auto;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text);
+  background: transparent;
+  caret-color: var(--accent);
+  min-inline-size: 0;
+  text-overflow: ellipsis;
+}
+
+.add-feature-row__input::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.add-feature-row__field[data-submitting] .add-feature-row__input {
+  color: var(--text-muted);
+}
+
+.add-feature-row__spinner {
+  flex: 0 0 auto;
+  inline-size: 12px;
+  block-size: 12px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in oklch, var(--accent) 40%, transparent);
+  border-block-start-color: var(--accent);
+  animation: add-feature-row-spin 720ms linear infinite;
+}
+
+@keyframes add-feature-row-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.add-feature-row__message {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  min-block-size: 14px;
+  line-height: 1.2;
+}
+
+.add-feature-row__message--error {
+  color: var(--danger);
+}
+
+.add-feature-row__submit-sr {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- success pulse ---------- */
+
+.add-feature-row--pulse .add-feature-row__form {
+  animation: add-feature-row-pulse 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes add-feature-row-pulse {
+  0% {
+    background: color-mix(in oklch, var(--accent) 14%, var(--surface));
+  }
+  100% {
+    background: var(--surface);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .add-feature-row__ghost,
+  .add-feature-row__ghost::before {
+    transition: none;
+  }
+  .add-feature-row__spinner {
+    animation: none;
+  }
+  .add-feature-row--pulse .add-feature-row__form {
+    animation: none;
+  }
+}

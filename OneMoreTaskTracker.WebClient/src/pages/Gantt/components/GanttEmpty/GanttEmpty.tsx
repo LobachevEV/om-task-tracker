@@ -1,13 +1,14 @@
 import { useTranslation } from 'react-i18next';
-import { Button } from '../../../../common/ds';
+import type { FeatureSummary } from '../../../../common/types/feature';
+import { AddFeatureRow } from '../AddFeatureRow';
 import './GanttEmpty.css';
 
 export interface GanttEmptyProps {
-  canCreate: boolean;
-  onCreate?: () => void;
+  isManager: boolean;
+  onCreated: (feature: FeatureSummary) => void;
 }
 
-export function GanttEmpty({ canCreate, onCreate }: GanttEmptyProps) {
+export function GanttEmpty({ isManager, onCreated }: GanttEmptyProps) {
   const { t } = useTranslation('gantt');
 
   return (
@@ -26,10 +27,8 @@ export function GanttEmpty({ canCreate, onCreate }: GanttEmptyProps) {
       </svg>
       <h3 className="gantt-empty__title">{t('empty.title')}</h3>
       <p className="gantt-empty__body">{t('empty.body')}</p>
-      {canCreate && onCreate ? (
-        <Button type="button" variant="primary" onClick={onCreate}>
-          + {t('toolbar.newFeature')}
-        </Button>
+      {isManager ? (
+        <AddFeatureRow variant="standalone" onCreated={onCreated} />
       ) : null}
     </div>
   );
