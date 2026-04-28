@@ -12,6 +12,7 @@ import type {
   FeatureSummary,
   UpdateFeaturePayload,
   UpdateFeatureDescriptionPayload,
+  UpdateFeatureLeadPayload,
   UpdateFeatureTitlePayload,
   UpdateStageOwnerPayload,
   UpdateStagePlannedEndPayload,
@@ -153,6 +154,20 @@ export async function updateFeatureDescription(
   return featureSummarySchema.parse(data);
 }
 
+export async function updateFeatureLead(
+  id: number,
+  payload: UpdateFeatureLeadPayload,
+  ifMatchVersion?: number,
+): Promise<FeatureSummary> {
+  const response = await fetch(`${API_BASE_URL}/api/plan/features/${id}/lead`, {
+    method: 'PATCH',
+    headers: jsonHeaders(ifMatchVersion),
+    body: JSON.stringify(payload),
+  });
+  const data = await handleResponse<unknown>(response);
+  return featureSummarySchema.parse(data);
+}
+
 export async function updateStageOwner(
   featureId: number,
   stage: FeatureState,
@@ -215,6 +230,7 @@ export type {
   FeatureSummary,
   UpdateFeaturePayload,
   UpdateFeatureDescriptionPayload,
+  UpdateFeatureLeadPayload,
   UpdateFeatureTitlePayload,
   UpdateStageOwnerPayload,
   UpdateStagePlannedEndPayload,

@@ -1,3 +1,4 @@
+import { ZodError } from 'zod';
 import { ApiError, type InlineEditConflict } from '../../../../common/api/ApiError';
 
 /**
@@ -27,6 +28,7 @@ export interface InlineEditorError {
 const CONFLICT_FALLBACK = 'Updated by someone else — refresh row to see latest.';
 const VALIDATION_FALLBACK = 'This value was rejected.';
 const NETWORK_FALLBACK = "Couldn't save. Retry?";
+const PARSE_FALLBACK = "Couldn't read server response. Retry?";
 
 function pickMessage(raw: string | undefined, fallback: string): string {
   const trimmed = raw?.trim();
@@ -57,6 +59,9 @@ export function toInlineEditorError(err: unknown): InlineEditorError {
       message: pickMessage(err.message, NETWORK_FALLBACK),
       conflict: err.conflict,
     };
+  }
+  if (err instanceof ZodError) {
+    return { kind: 'network', message: PARSE_FALLBACK, conflict: null };
   }
   const rawMessage = err instanceof Error ? err.message : String(err);
   return { kind: 'network', message: pickMessage(rawMessage, NETWORK_FALLBACK), conflict: null };

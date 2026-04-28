@@ -9,6 +9,7 @@ using ProtoFeatureStagePlan = OneMoreTaskTracker.Proto.Features.FeatureStagePlan
 using UpdateFeatureDto = OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand.FeatureDto;
 using UpdateFeatureTitleDto = OneMoreTaskTracker.Proto.Features.UpdateFeatureTitleCommand.FeatureDto;
 using UpdateFeatureDescriptionDto = OneMoreTaskTracker.Proto.Features.UpdateFeatureDescriptionCommand.FeatureDto;
+using UpdateFeatureLeadDto = OneMoreTaskTracker.Proto.Features.UpdateFeatureLeadCommand.FeatureDto;
 using UpdateStageOwnerDto = OneMoreTaskTracker.Proto.Features.UpdateStageOwnerCommand.FeatureDto;
 using UpdateStagePlannedStartDto = OneMoreTaskTracker.Proto.Features.UpdateStagePlannedStartCommand.FeatureDto;
 using UpdateStagePlannedEndDto = OneMoreTaskTracker.Proto.Features.UpdateStagePlannedEndCommand.FeatureDto;
@@ -150,6 +151,13 @@ internal static class PlanMapper
 
     internal static FeatureSummaryResponse MapSummary(
         UpdateFeatureDescriptionDto f,
+        IReadOnlyDictionary<int, List<int>> tasksByFeature,
+        ILogger logger) =>
+        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
+            f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
+
+    internal static FeatureSummaryResponse MapSummary(
+        UpdateFeatureLeadDto f,
         IReadOnlyDictionary<int, List<int>> tasksByFeature,
         ILogger logger) =>
         BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,

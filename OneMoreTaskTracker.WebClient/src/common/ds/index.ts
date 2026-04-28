@@ -23,6 +23,7 @@ export type { CalloutProps, CalloutTone, CalloutLayout } from './Callout/Callout
 
 export { Avatar } from './Avatar/Avatar';
 export type { AvatarProps, AvatarSize, AvatarTone } from './Avatar/Avatar';
+export { roleToAvatarTone } from './Avatar/role-tone';
 
 export { Spinner } from '../components/Spinner/Spinner';
 

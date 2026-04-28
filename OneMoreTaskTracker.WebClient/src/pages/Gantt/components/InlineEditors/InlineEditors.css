@@ -76,6 +76,25 @@
  * so the combobox value is visible at rest. */
 .inline-cell--owner {
   min-inline-size: 14ch;
+  gap: 6px;
+}
+
+.inline-cell--owner .inline-cell__avatar {
+  inline-size: 18px;
+  block-size: 18px;
+  font-size: 9px;
+  flex: 0 0 auto;
+}
+
+.inline-cell__listbox-option .inline-cell__avatar {
+  inline-size: 20px;
+  block-size: 20px;
+  font-size: 9px;
+  flex: 0 0 auto;
+}
+
+.inline-cell__listbox-option {
+  align-items: center;
 }
 
 /* ------------- Accept flash ------------- */
@@ -127,24 +146,33 @@
   position: absolute;
   inset-block-start: 100%;
   inset-inline-start: 0;
+  inset-inline-end: 0;
   margin-block-start: 2px;
   color: var(--danger);
   font-size: 11px;
   line-height: 1.2;
-  white-space: nowrap;
-  max-inline-size: 360px;
-  z-index: 1;
+  z-index: 2;
   display: inline-flex;
   align-items: baseline;
   gap: 6px;
+  background: var(--surface);
+  padding: 2px 4px;
+  border-radius: 3px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 30%);
+  max-inline-size: 100%;
+  min-inline-size: 0;
 }
 
 .inline-cell__error-text {
+  flex: 1 1 auto;
+  min-inline-size: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .inline-cell__error-actions {
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: baseline;
   gap: 4px;

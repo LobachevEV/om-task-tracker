@@ -1,4 +1,4 @@
-import { Avatar, Badge, type AvatarTone } from '../../../../common/ds';
+import { Avatar, Badge, roleToAvatarTone } from '../../../../common/ds';
 import type { MiniTeamMember } from '../../../../common/types/feature';
 import './GanttAssigneeStack.css';
 
@@ -8,13 +8,6 @@ export interface GanttAssigneeStackProps {
   'aria-label': string;
   className?: string;
 }
-
-const ROLE_TO_TONE: Record<MiniTeamMember['role'], AvatarTone> = {
-  Manager: 'manager',
-  FrontendDeveloper: 'frontend',
-  BackendDeveloper: 'backend',
-  Qa: 'qa',
-};
 
 export function GanttAssigneeStack({
   members,
@@ -40,7 +33,7 @@ export function GanttAssigneeStack({
           <Avatar
             name={only.displayName}
             size="sm"
-            tone={ROLE_TO_TONE[only.role]}
+            tone={roleToAvatarTone(only.role)}
             title={only.displayName}
           />
         </div>
@@ -59,7 +52,7 @@ export function GanttAssigneeStack({
             key={m.userId}
             name={m.displayName}
             size="sm"
-            tone={ROLE_TO_TONE[m.role]}
+            tone={roleToAvatarTone(m.role)}
             title={m.displayName}
           />
         ))}

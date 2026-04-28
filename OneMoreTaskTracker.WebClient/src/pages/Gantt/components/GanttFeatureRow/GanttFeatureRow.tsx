@@ -6,7 +6,6 @@ import type {
   MiniTeamMember,
 } from '../../../../common/types/feature';
 import type { TeamRosterMember } from '../../../../common/api/teamApi';
-import { GanttAssigneeStack } from '../GanttAssigneeStack';
 import { daysBetween, type BarGeometryPx } from '../../ganttMath';
 import type { StageBarGeometry } from '../../ganttStageGeometry';
 import { featureIsOverdue, plannedStageCount } from '../../ganttStageGeometry';
@@ -15,6 +14,7 @@ import { GanttStageSubRow } from '../GanttStageSubRow';
 import type { GanttLaneVariant } from '../../useGanttLayout';
 import {
   InlineLiveRegion,
+  InlineOwnerPicker,
   InlineTextCell,
   type FeatureMutationCallbacks,
 } from '../InlineEditors';
@@ -27,8 +27,6 @@ export interface GanttFeatureRowProps {
   bar?: BarGeometryPx | null;
   today: string;
   lead: MiniTeamMember;
-  /** Optional override for the assignee stack — defaults to `[lead]`. */
-  miniTeam?: MiniTeamMember[];
   /**
    * Why this lane renders the way it does. `planned` is the normal case;
    * `noPlan` and `outOfWindow` render a ghost lane so the manager still sees
@@ -77,7 +75,6 @@ function GanttFeatureRowInner({
   bar,
   today,
   lead,
-  miniTeam,
   variant = 'planned',
   expanded,
   onToggleExpand,
@@ -136,6 +133,17 @@ function GanttFeatureRowInner({
           })
         : t('inlineEdit.announce.titleError', {
             defaultValue: 'Feature title change was rejected.',
+          }),
+    [t],
+  );
+  const buildLeadAnnouncement = useCallback(
+    (outcome: 'saved' | 'error') =>
+      outcome === 'saved'
+        ? t('inlineEdit.announce.leadSaved', {
+            defaultValue: 'Feature lead saved.',
+          })
+        : t('inlineEdit.announce.leadError', {
+            defaultValue: 'Feature lead change was rejected.',
           }),
     [t],
   );
@@ -207,7 +215,28 @@ function GanttFeatureRowInner({
             )}
           </div>
           <div className="gantt-row__lead">
-            {t('row.lead')}: {lead.displayName}
+            <span className="gantt-row__lead-label">{t('row.lead')}:</span>
+            {inlineEnabled && mutations != null && roster ? (
+              <InlineOwnerPicker
+                value={feature.leadUserId}
+                displayName={lead.displayName}
+                roster={roster}
+                clearable={false}
+                ariaLabel={t('inlineEdit.leadAria', {
+                  defaultValue: 'Lead for "{{title}}"',
+                  title: feature.title,
+                })}
+                testId={`feature-lead-editor-${feature.id}`}
+                onSave={async (next) => {
+                  if (next == null) return;
+                  await mutations.saveLead(feature.id, next, feature.version ?? 0);
+                }}
+                onAnnounce={handleAnnounce}
+                buildAnnouncement={buildLeadAnnouncement}
+              />
+            ) : (
+              <span className="gantt-row__lead-value">{lead.displayName}</span>
+            )}
           </div>
           <div className="gantt-row__meta">
             {variant === 'noPlan' ? (
@@ -236,7 +265,6 @@ function GanttFeatureRowInner({
               {t('row.plannedCounter', { planned, total: totalStages })}
             </span>
           </div>
-          <GanttAssigneeStack members={miniTeam ?? [lead]} aria-label={t('row.team')} />
         </div>
 
         <div className="gantt-row__lane" data-variant={variant}>

@@ -36,6 +36,12 @@
   overflow: hidden;
 }
 
+.gantt-stage-row__gutter:has(.inline-cell[data-open='true']),
+.gantt-stage-row__gutter:has(.inline-cell[data-status='editing']) {
+  overflow: visible;
+  z-index: var(--z-popover);
+}
+
 .gantt-stage-row__trigger {
   all: unset;
   cursor: pointer;
