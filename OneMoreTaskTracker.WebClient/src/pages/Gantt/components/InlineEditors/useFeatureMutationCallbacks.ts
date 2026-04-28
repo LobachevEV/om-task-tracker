@@ -40,11 +40,10 @@ export function useFeatureMutationCallbacks(
 
   const saveTitle = useCallback<FeatureMutationCallbacks['saveTitle']>(
     async (featureId, nextTitle, version) => {
-      const updated = await planApi.updateFeatureTitle(
-        featureId,
-        { title: nextTitle },
-        version,
-      );
+      const updated = await planApi.patchFeature(featureId, {
+        title: nextTitle,
+        expectedVersion: version,
+      });
       onApplied(updated);
     },
     [onApplied],
@@ -52,11 +51,10 @@ export function useFeatureMutationCallbacks(
 
   const saveLead = useCallback<FeatureMutationCallbacks['saveLead']>(
     async (featureId, next, version) => {
-      const updated = await planApi.updateFeatureLead(
-        featureId,
-        { leadUserId: next },
-        version,
-      );
+      const updated = await planApi.patchFeature(featureId, {
+        leadUserId: next,
+        expectedVersion: version,
+      });
       onApplied(updated);
     },
     [onApplied],
@@ -64,12 +62,10 @@ export function useFeatureMutationCallbacks(
 
   const saveStageOwner = useCallback<FeatureMutationCallbacks['saveStageOwner']>(
     async (featureId, stage, next, stageVersion) => {
-      const updated = await planApi.updateStageOwner(
-        featureId,
-        stage,
-        { stageOwnerUserId: next },
-        stageVersion,
-      );
+      const updated = await planApi.patchFeatureStage(featureId, stage, {
+        stageOwnerUserId: next,
+        expectedStageVersion: stageVersion,
+      });
       onApplied(updated);
     },
     [onApplied],
@@ -79,12 +75,10 @@ export function useFeatureMutationCallbacks(
     FeatureMutationCallbacks['saveStagePlannedStart']
   >(
     async (featureId, stage, next, stageVersion) => {
-      const updated = await planApi.updateStagePlannedStart(
-        featureId,
-        stage,
-        { plannedStart: next },
-        stageVersion,
-      );
+      const updated = await planApi.patchFeatureStage(featureId, stage, {
+        plannedStart: next,
+        expectedStageVersion: stageVersion,
+      });
       onApplied(updated);
     },
     [onApplied],
@@ -94,12 +88,10 @@ export function useFeatureMutationCallbacks(
     FeatureMutationCallbacks['saveStagePlannedEnd']
   >(
     async (featureId, stage, next, stageVersion) => {
-      const updated = await planApi.updateStagePlannedEnd(
-        featureId,
-        stage,
-        { plannedEnd: next },
-        stageVersion,
-      );
+      const updated = await planApi.patchFeatureStage(featureId, stage, {
+        plannedEnd: next,
+        expectedStageVersion: stageVersion,
+      });
       onApplied(updated);
     },
     [onApplied],

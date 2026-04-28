@@ -10,6 +10,8 @@ import type {
   FeatureScope,
   FeatureState,
   FeatureSummary,
+  PatchFeaturePayload,
+  PatchFeatureStagePayload,
   UpdateFeaturePayload,
   UpdateFeatureDescriptionPayload,
   UpdateFeatureLeadPayload,
@@ -116,15 +118,48 @@ export async function detachTask(
 }
 
 /**
- * Inline-edit per-field PATCH callers (api-contract.md v1).
- *
- * Each call mirrors exactly one endpoint under `/api/plan/features/{id}/…`.
- * The response is always a refreshed `FeatureSummary` so the Gantt can
- * reconcile derived fields (plannedStart/plannedEnd/state) in one hop.
- *
- * The optional `ifMatchVersion` parameter is forwarded as an `If-Match`
- * header — required once the FE ships the concurrency UX (phase B of
- * feature-plan.md); tolerated as missing in iter 1 per the contract.
+ * Sparse PATCH for `/api/plan/features/{id}`. Pass only the fields the user
+ * actually changed; the version token is forwarded as `If-Match` (and also
+ * as `expectedVersion` in the body for client-explicit concurrency).
+ */
+export async function patchFeature(
+  id: number,
+  body: PatchFeaturePayload,
+): Promise<FeatureSummary> {
+  const response = await fetch(`${API_BASE_URL}/api/plan/features/${id}`, {
+    method: 'PATCH',
+    headers: jsonHeaders(body.expectedVersion),
+    body: JSON.stringify(body),
+  });
+  const data = await handleResponse<unknown>(response);
+  return featureSummarySchema.parse(data);
+}
+
+/**
+ * Sparse PATCH for `/api/plan/features/{id}/stages/{stage}`. Pass only the
+ * fields the user actually changed; the stage-version token is forwarded as
+ * `If-Match` and as `expectedStageVersion` in the body.
+ */
+export async function patchFeatureStage(
+  featureId: number,
+  stage: FeatureState,
+  body: PatchFeatureStagePayload,
+): Promise<FeatureSummary> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/plan/features/${featureId}/stages/${stage}`,
+    {
+      method: 'PATCH',
+      headers: jsonHeaders(body.expectedStageVersion),
+      body: JSON.stringify(body),
+    },
+  );
+  const data = await handleResponse<unknown>(response);
+  return featureSummarySchema.parse(data);
+}
+
+/**
+ * @deprecated Use {@link patchFeature} with `{ title, expectedVersion }`. The
+ * per-field PATCH endpoints are scheduled for deletion in slice (f).
  */
 export async function updateFeatureTitle(
   id: number,
@@ -140,6 +175,9 @@ export async function updateFeatureTitle(
   return featureSummarySchema.parse(data);
 }
 
+/**
+ * @deprecated Use {@link patchFeature} with `{ description, expectedVersion }`.
+ */
 export async function updateFeatureDescription(
   id: number,
   payload: UpdateFeatureDescriptionPayload,
@@ -154,6 +192,9 @@ export async function updateFeatureDescription(
   return featureSummarySchema.parse(data);
 }
 
+/**
+ * @deprecated Use {@link patchFeature} with `{ leadUserId, expectedVersion }`.
+ */
 export async function updateFeatureLead(
   id: number,
   payload: UpdateFeatureLeadPayload,
@@ -168,6 +209,10 @@ export async function updateFeatureLead(
   return featureSummarySchema.parse(data);
 }
 
+/**
+ * @deprecated Use {@link patchFeatureStage} with
+ * `{ stageOwnerUserId, expectedStageVersion }`.
+ */
 export async function updateStageOwner(
   featureId: number,
   stage: FeatureState,
@@ -186,6 +231,10 @@ export async function updateStageOwner(
   return featureSummarySchema.parse(data);
 }
 
+/**
+ * @deprecated Use {@link patchFeatureStage} with
+ * `{ plannedStart, expectedStageVersion }`.
+ */
 export async function updateStagePlannedStart(
   featureId: number,
   stage: FeatureState,
@@ -204,6 +253,10 @@ export async function updateStagePlannedStart(
   return featureSummarySchema.parse(data);
 }
 
+/**
+ * @deprecated Use {@link patchFeatureStage} with
+ * `{ plannedEnd, expectedStageVersion }`.
+ */
 export async function updateStagePlannedEnd(
   featureId: number,
   stage: FeatureState,
@@ -228,6 +281,8 @@ export type {
   FeatureScope,
   FeatureState,
   FeatureSummary,
+  PatchFeaturePayload,
+  PatchFeatureStagePayload,
   UpdateFeaturePayload,
   UpdateFeatureDescriptionPayload,
   UpdateFeatureLeadPayload,

@@ -121,4 +121,28 @@ export interface UpdateStagePlannedEndPayload {
   plannedEnd: string | null;
 }
 
+/**
+ * Sparse PATCH payload for `PATCH /api/plan/features/{id}` — every field is
+ * optional; only the fields the user actually changed should be sent. The
+ * gateway forks on `stagePlans is null` (the bulk replace path is reached
+ * via `UpdateFeaturePayload.stagePlans`).
+ */
+export interface PatchFeaturePayload {
+  title?: string;
+  description?: string | null;
+  leadUserId?: number;
+  expectedVersion?: number;
+}
+
+/**
+ * Sparse PATCH payload for `PATCH /api/plan/features/{id}/stages/{stage}` —
+ * every field is optional. `stageOwnerUserId === null` clears the owner.
+ */
+export interface PatchFeatureStagePayload {
+  stageOwnerUserId?: number | null;
+  plannedStart?: string | null;
+  plannedEnd?: string | null;
+  expectedStageVersion?: number;
+}
+
 export type FeatureScope = 'all' | 'mine';

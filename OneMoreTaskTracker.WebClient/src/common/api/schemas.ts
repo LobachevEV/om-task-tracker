@@ -142,6 +142,26 @@ export const updateStagePlannedEndPayloadSchema = z.object({
   plannedEnd: isoDateOrNull,
 });
 
+/**
+ * Sparse PATCH request schemas for the consolidated endpoints. Every field is
+ * optional; callers send only the fields the user actually changed plus the
+ * version token. The gateway returns a refreshed `FeatureSummary` validated
+ * via `featureSummarySchema`.
+ */
+export const patchFeatureRequestSchema = z.object({
+  title: z.string().min(1).max(200).optional(),
+  description: z.string().max(4000).nullable().optional(),
+  leadUserId: z.number().int().positive().optional(),
+  expectedVersion: z.number().int().nonnegative().optional(),
+});
+
+export const patchFeatureStageRequestSchema = z.object({
+  stageOwnerUserId: z.number().int().positive().nullable().optional(),
+  plannedStart: isoDateOrNull.optional(),
+  plannedEnd: isoDateOrNull.optional(),
+  expectedStageVersion: z.number().int().nonnegative().optional(),
+});
+
 export const featureSummaryListSchema = z.array(featureSummarySchema);
 
 const attachedTaskSchema = z.object({
