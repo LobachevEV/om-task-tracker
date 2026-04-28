@@ -7,6 +7,7 @@ using OneMoreTaskTracker.Proto.Features;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
+using OneMoreTaskTracker.Proto.Features.PatchFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
 using OneMoreTaskTracker.Proto.Users;
 using ProtoFeatureStagePlan = OneMoreTaskTracker.Proto.Features.FeatureStagePlan;
@@ -19,6 +20,7 @@ namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature;
 public class FeaturesController(
     FeatureCreator.FeatureCreatorClient featureCreator,
     FeatureUpdater.FeatureUpdaterClient featureUpdater,
+    FeaturePatcher.FeaturePatcherClient featurePatcher,
     FeaturesLister.FeaturesListerClient featuresLister,
     FeatureGetter.FeatureGetterClient featureGetter,
     UserService.UserServiceClient userService,
@@ -116,10 +118,14 @@ public class FeaturesController(
     public async Task<ActionResult<FeatureSummaryResponse>> Update(
         int id,
         [FromBody] UpdateFeaturePayload body,
+        [FromHeader(Name = "If-Match")] string? ifMatch,
         CancellationToken ct)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
+
+        if (body.StagePlans is null)
+            return await PatchSparseAsync(id, body, ifMatch, ct);
 
         var request = UpdateFeatureRequestFactory.From(id, body, User.GetUserId());
 
@@ -128,6 +134,49 @@ public class FeaturesController(
 
         var updated = await featureUpdater.UpdateAsync(request, cancellationToken: ct);
         return Ok(PlanMapper.MapSummary(updated, PlanRequestHelpers.EmptyTasks, logger));
+    }
+
+    private async Task<ActionResult<FeatureSummaryResponse>> PatchSparseAsync(
+        int id,
+        UpdateFeaturePayload body,
+        string? ifMatch,
+        CancellationToken ct)
+    {
+        var callerUserId = User.GetUserId();
+
+        if (body.LeadUserId is { } leadUserId)
+        {
+            if (leadUserId < 1)
+                return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
+
+            var roster = await userService.LoadRosterForManagerAsync(callerUserId, logger, ct);
+            if (!roster.ContainsKey(leadUserId))
+                return BadRequest(new { error = "Pick a teammate from the list" });
+        }
+
+        var headerVersion = PlanRequestHelpers.ParseIfMatch(ifMatch, logger);
+        var expectedVersion = body.ExpectedVersion ?? headerVersion;
+
+        var request = new PatchFeatureRequest
+        {
+            Id = id,
+            CallerUserId = callerUserId,
+        };
+
+        if (body.Title is not null)
+            request.Title = body.Title;
+
+        if (body.Description is not null)
+            request.Description = body.Description;
+
+        if (body.LeadUserId is { } lead)
+            request.LeadUserId = lead;
+
+        if (expectedVersion.HasValue)
+            request.ExpectedVersion = expectedVersion.Value;
+
+        var dto = await featurePatcher.PatchAsync(request, cancellationToken: ct);
+        return Ok(PlanMapper.MapSummary(dto, PlanRequestHelpers.EmptyTasks, logger));
     }
 
     private ActionResult? TryAppendStagePlans(

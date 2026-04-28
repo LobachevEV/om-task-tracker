@@ -10,4 +10,5 @@ public record UpdateFeaturePayload(
     string? PlannedStart,
     string? PlannedEnd,
     string? State,
-    IReadOnlyList<StagePlanPayload>? StagePlans);
+    IReadOnlyList<StagePlanPayload>? StagePlans,
+    int? ExpectedVersion = null);

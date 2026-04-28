@@ -10,6 +10,7 @@ using OneMoreTaskTracker.Api.Tests.Infra;
 using OneMoreTaskTracker.Proto.Features;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
+using OneMoreTaskTracker.Proto.Features.PatchFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
 using OneMoreTaskTracker.Proto.Tasks.ListTasksQuery;
 using OneMoreTaskTracker.Proto.Users;
@@ -17,6 +18,7 @@ using Xunit;
 using GetFeatureDto = OneMoreTaskTracker.Proto.Features.GetFeatureQuery.FeatureDto;
 using UpdateFeatureDto = OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand.FeatureDto;
 using ListFeatureDto = OneMoreTaskTracker.Proto.Features.ListFeaturesQuery.FeatureDto;
+using PatchFeatureDto = OneMoreTaskTracker.Proto.Features.PatchFeatureCommand.FeatureDto;
 
 namespace OneMoreTaskTracker.Api.Tests.Controllers;
 
@@ -61,6 +63,29 @@ public sealed class PlanControllerStagePlansTests(TasksControllerWebApplicationF
             PerformerUserId = performer,
         };
 
+    private static PatchFeatureDto FiveRowPatchDto(int id = 1, int managerUserId = 1, int leadUserId = 1) =>
+        new()
+        {
+            Id = id,
+            Title = "F",
+            Description = string.Empty,
+            State = FeatureState.Development,
+            PlannedStart = "2026-05-01",
+            PlannedEnd = "2026-06-15",
+            LeadUserId = leadUserId,
+            ManagerUserId = managerUserId,
+            CreatedAt = DateTime.UtcNow.ToString("O"),
+            UpdatedAt = DateTime.UtcNow.ToString("O"),
+            StagePlans =
+            {
+                ProtoPlan(FeatureState.CsApproving,    "2026-05-01", "2026-05-10", 4),
+                ProtoPlan(FeatureState.Development,    "2026-05-11", "2026-06-01", 2),
+                ProtoPlan(FeatureState.Testing),
+                ProtoPlan(FeatureState.EthalonTesting, "2026-06-05", "2026-06-10", 6),
+                ProtoPlan(FeatureState.LiveRelease,    "2026-06-12", "2026-06-15", 1),
+            }
+        };
+
     private static UpdateFeatureDto FiveRowUpdateDto(int id = 1, int managerUserId = 1, int leadUserId = 1) =>
         new()
         {
@@ -85,22 +110,25 @@ public sealed class PlanControllerStagePlansTests(TasksControllerWebApplicationF
         };
 
     [Fact]
-    public async Task UpdateFeature_StagePlansNull_DoesNotSendAnyStagePlansOnWire()
+    public async Task UpdateFeature_StagePlansNull_RoutesToSparsePatchHandler()
     {
         var client = ClientWithToken(ManagerToken());
 
-        UpdateFeatureRequest? captured = null;
-        _factory.MockFeatureUpdater
-            .UpdateAsync(Arg.Do<UpdateFeatureRequest>(r => captured = r),
+        PatchFeatureRequest? captured = null;
+        _factory.MockFeaturePatcher
+            .PatchAsync(Arg.Do<PatchFeatureRequest>(r => captured = r),
                 Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
-            .Returns(GrpcTestHelpers.UnaryCall(FiveRowUpdateDto()));
+            .Returns(GrpcTestHelpers.UnaryCall(FiveRowPatchDto()));
 
         var response = await client.PatchAsync("/api/plan/features/1",
             JsonBody(new { title = "Renamed" }));
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         captured.Should().NotBeNull();
-        captured!.StagePlans.Should().BeEmpty("omitted stagePlans means do-not-touch");
+        captured!.HasTitle.Should().BeTrue();
+        captured.Title.Should().Be("Renamed");
+        captured.HasDescription.Should().BeFalse();
+        captured.HasLeadUserId.Should().BeFalse();
     }
 
     [Fact]
@@ -375,9 +403,9 @@ public sealed class PlanControllerStagePlansTests(TasksControllerWebApplicationF
         // service's response via the mock and assert the gateway surfaces 403.
         var client = ClientWithToken(ManagerToken(userId: 42));
 
-        UpdateFeatureRequest? captured = null;
-        _factory.MockFeatureUpdater
-            .UpdateAsync(Arg.Do<UpdateFeatureRequest>(r => captured = r),
+        PatchFeatureRequest? captured = null;
+        _factory.MockFeaturePatcher
+            .PatchAsync(Arg.Do<PatchFeatureRequest>(r => captured = r),
                 Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
             .Returns(_ => throw new RpcException(new Status(StatusCode.PermissionDenied, "Not the feature owner")));
 
@@ -402,11 +430,11 @@ public sealed class PlanControllerStagePlansTests(TasksControllerWebApplicationF
         const int callerId = 77;
         var client = ClientWithToken(ManagerToken(userId: callerId));
 
-        UpdateFeatureRequest? captured = null;
-        _factory.MockFeatureUpdater
-            .UpdateAsync(Arg.Do<UpdateFeatureRequest>(r => captured = r),
+        PatchFeatureRequest? captured = null;
+        _factory.MockFeaturePatcher
+            .PatchAsync(Arg.Do<PatchFeatureRequest>(r => captured = r),
                 Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
-            .Returns(GrpcTestHelpers.UnaryCall(FiveRowUpdateDto(managerUserId: callerId, leadUserId: callerId)));
+            .Returns(GrpcTestHelpers.UnaryCall(FiveRowPatchDto(managerUserId: callerId, leadUserId: callerId)));
 
         var response = await client.PatchAsync("/api/plan/features/1",
             JsonBody(new { title = "Renamed" }));

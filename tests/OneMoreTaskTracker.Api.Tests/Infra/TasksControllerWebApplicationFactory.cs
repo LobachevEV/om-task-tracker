@@ -11,6 +11,8 @@ using OneMoreTaskTracker.Api.Auth;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
+using OneMoreTaskTracker.Proto.Features.PatchFeatureCommand;
+using OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand;
 using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.UpdateFeatureDescriptionCommand;
 using OneMoreTaskTracker.Proto.Features.UpdateFeatureTitleCommand;
@@ -77,6 +79,12 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
     public StagePlannedEndUpdater.StagePlannedEndUpdaterClient MockStagePlannedEndUpdater { get; } =
         Substitute.For<StagePlannedEndUpdater.StagePlannedEndUpdaterClient>();
 
+    public FeaturePatcher.FeaturePatcherClient MockFeaturePatcher { get; } =
+        Substitute.For<FeaturePatcher.FeaturePatcherClient>();
+
+    public FeatureStagePatcher.FeatureStagePatcherClient MockFeatureStagePatcher { get; } =
+        Substitute.For<FeatureStagePatcher.FeatureStagePatcherClient>();
+
     public string GenerateToken(int userId, string email, string role, int? managerId = null)
     {
         using var scope = Services.CreateScope();
@@ -119,7 +127,9 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
                 d.ServiceType == typeof(FeatureDescriptionUpdater.FeatureDescriptionUpdaterClient) ||
                 d.ServiceType == typeof(StageOwnerUpdater.StageOwnerUpdaterClient) ||
                 d.ServiceType == typeof(StagePlannedStartUpdater.StagePlannedStartUpdaterClient) ||
-                d.ServiceType == typeof(StagePlannedEndUpdater.StagePlannedEndUpdaterClient)
+                d.ServiceType == typeof(StagePlannedEndUpdater.StagePlannedEndUpdaterClient) ||
+                d.ServiceType == typeof(FeaturePatcher.FeaturePatcherClient) ||
+                d.ServiceType == typeof(FeatureStagePatcher.FeatureStagePatcherClient)
             ).ToList();
 
             foreach (var descriptor in descriptors)
@@ -141,6 +151,8 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
             services.AddSingleton(MockStageOwnerUpdater);
             services.AddSingleton(MockStagePlannedStartUpdater);
             services.AddSingleton(MockStagePlannedEndUpdater);
+            services.AddSingleton(MockFeaturePatcher);
+            services.AddSingleton(MockFeatureStagePatcher);
 
             services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
             {

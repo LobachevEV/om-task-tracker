@@ -5,6 +5,8 @@ using OneMoreTaskTracker.Api.Middleware;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
+using OneMoreTaskTracker.Proto.Features.PatchFeatureCommand;
+using OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand;
 using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.UpdateFeatureDescriptionCommand;
 using OneMoreTaskTracker.Proto.Features.UpdateFeatureLeadCommand;
@@ -129,6 +131,12 @@ builder.Services
 
 builder.Services
     .AddGrpcClient<StagePlannedEndUpdater.StagePlannedEndUpdaterClient>(o => o.Address = new Uri(featuresServiceAddress));
+
+builder.Services
+    .AddGrpcClient<FeaturePatcher.FeaturePatcherClient>(o => o.Address = new Uri(featuresServiceAddress));
+
+builder.Services
+    .AddGrpcClient<FeatureStagePatcher.FeatureStagePatcherClient>(o => o.Address = new Uri(featuresServiceAddress));
 
 var app = builder.Build();
 

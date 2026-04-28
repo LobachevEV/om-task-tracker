@@ -169,6 +169,22 @@
       <CompileOutputs>True</CompileOutputs>
       <Generator>MSBuild:Compile</Generator>
     </Protobuf>
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\PatchFeatureCommand\patch_feature_command_handler.proto">
+      <GrpcServices>Client</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
+      <CompileOutputs>True</CompileOutputs>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\PatchFeatureStageCommand\patch_feature_stage_command_handler.proto">
+      <GrpcServices>Client</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
+      <CompileOutputs>True</CompileOutputs>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
   </ItemGroup>
   <ItemGroup>
     <Protobuf Include="..\OneMoreTaskTracker.Users\Protos\user_service.proto">

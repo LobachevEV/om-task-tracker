@@ -13,6 +13,8 @@ using UpdateFeatureLeadDto = OneMoreTaskTracker.Proto.Features.UpdateFeatureLead
 using UpdateStageOwnerDto = OneMoreTaskTracker.Proto.Features.UpdateStageOwnerCommand.FeatureDto;
 using UpdateStagePlannedStartDto = OneMoreTaskTracker.Proto.Features.UpdateStagePlannedStartCommand.FeatureDto;
 using UpdateStagePlannedEndDto = OneMoreTaskTracker.Proto.Features.UpdateStagePlannedEndCommand.FeatureDto;
+using PatchFeatureDto = OneMoreTaskTracker.Proto.Features.PatchFeatureCommand.FeatureDto;
+using PatchFeatureStageDto = OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand.FeatureDto;
 
 namespace OneMoreTaskTracker.Api.Controllers.Plan;
 
@@ -179,6 +181,20 @@ internal static class PlanMapper
 
     internal static FeatureSummaryResponse MapSummary(
         UpdateStagePlannedEndDto f,
+        IReadOnlyDictionary<int, List<int>> tasksByFeature,
+        ILogger logger) =>
+        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
+            f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
+
+    internal static FeatureSummaryResponse MapSummary(
+        PatchFeatureDto f,
+        IReadOnlyDictionary<int, List<int>> tasksByFeature,
+        ILogger logger) =>
+        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
+            f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
+
+    internal static FeatureSummaryResponse MapSummary(
+        PatchFeatureStageDto f,
         IReadOnlyDictionary<int, List<int>> tasksByFeature,
         ILogger logger) =>
         BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
