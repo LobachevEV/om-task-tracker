@@ -56,7 +56,6 @@ export const SoloOwner: Story = {
     feature: SOLO_FEATURE,
     stageBars: computeStageBars(monthWindow, SOLO_FEATURE, FIXTURE_TODAY, DAY_PX),
     lead: fe,
-    miniTeam: [fe],
     expanded: false,
   },
 };
@@ -66,7 +65,6 @@ export const MiniTeam: Story = {
     feature: MINI_TEAM_FEATURE,
     stageBars: computeStageBars(monthWindow, MINI_TEAM_FEATURE, FIXTURE_TODAY, DAY_PX),
     lead: be,
-    miniTeam: [be, fe, qa],
     expanded: false,
   },
 };
@@ -76,7 +74,6 @@ export const Expanded: Story = {
     feature: MINI_TEAM_FEATURE,
     stageBars: computeStageBars(monthWindow, MINI_TEAM_FEATURE, FIXTURE_TODAY, DAY_PX),
     lead: be,
-    miniTeam: [be, fe, qa],
     expanded: true,
   },
 };
@@ -86,7 +83,6 @@ export const Overdue: Story = {
     feature: OVERDUE_FEATURE,
     stageBars: computeStageBars(monthWindow, OVERDUE_FEATURE, FIXTURE_TODAY, DAY_PX),
     lead: be,
-    miniTeam: [be, fe],
     expanded: false,
   },
 };
@@ -96,7 +92,6 @@ export const Unscheduled: Story = {
     feature: UNSCHEDULED_FEATURE,
     stageBars: computeStageBars(monthWindow, UNSCHEDULED_FEATURE, FIXTURE_TODAY, DAY_PX),
     lead: fe,
-    miniTeam: [fe],
     expanded: false,
   },
 };
@@ -121,7 +116,6 @@ export const ClampedBoth: Story = {
       DAY_PX,
     ),
     lead: be,
-    miniTeam: [be, fe, qa],
     expanded: false,
   },
 };
