@@ -52,11 +52,6 @@ public sealed class PatchFeatureHandler(
         if (request.HasExpectedVersion && request.ExpectedVersion != feature.Version)
             throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));
 
-        var versionBefore = feature.Version;
-        var titleLenBefore = feature.Title.Length;
-        var descriptionLenBefore = feature.Description?.Length ?? 0;
-        var leadBefore = feature.LeadUserId;
-
         var now = DateTime.UtcNow;
         var anyMutation = false;
 
@@ -91,19 +86,15 @@ public sealed class PatchFeatureHandler(
             }
 
             logger.LogInformation(
-                "Feature patch applied: feature_id={FeatureId} fields_title={HasTitle} fields_description={HasDescription} fields_lead={HasLead} title_len_before={TitleBefore} title_len_after={TitleAfter} description_len_before={DescBefore} description_len_after={DescAfter} lead_before={LeadBefore} lead_after={LeadAfter} actor_user_id={ActorUserId} version_before={V0} version_after={V1}",
+                "Feature patch applied: feature_id={FeatureId} fields_title={HasTitle} fields_description={HasDescription} fields_lead={HasLead} title_len={TitleLen} description_len={DescLen} lead={Lead} actor_user_id={ActorUserId} version={Version}",
                 feature.Id,
                 request.HasTitle,
                 request.HasDescription,
                 request.HasLeadUserId,
-                titleLenBefore,
                 feature.Title.Length,
-                descriptionLenBefore,
                 feature.Description?.Length ?? 0,
-                leadBefore,
                 feature.LeadUserId,
                 request.CallerUserId,
-                versionBefore,
                 feature.Version);
         }
 

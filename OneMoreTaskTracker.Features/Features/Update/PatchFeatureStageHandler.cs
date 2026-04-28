@@ -56,12 +56,6 @@ public sealed class PatchFeatureStageHandler(
             FeatureValidation.ValidateStageOrder(snapshots, stageOrdinal);
         }
 
-        var ownerBefore = plan.PerformerUserId;
-        var startBefore = plan.PlannedStart;
-        var endBefore = plan.PlannedEnd;
-        var stageVersionBefore = plan.Version;
-        var featureVersionBefore = feature.Version;
-
         var now = DateTime.UtcNow;
         var anyMutation = false;
 
@@ -102,22 +96,17 @@ public sealed class PatchFeatureStageHandler(
             }
 
             logger.LogInformation(
-                "Feature stage patch applied: feature_id={FeatureId} stage={Stage} fields_owner={HasOwner} fields_planned_start={HasStart} fields_planned_end={HasEnd} owner_before={OwnerBefore} owner_after={OwnerAfter} start_before={StartBefore} start_after={StartAfter} end_before={EndBefore} end_after={EndAfter} actor_user_id={ActorUserId} stage_version_before={SV0} stage_version_after={SV1} feature_version_before={FV0} feature_version_after={FV1}",
+                "Feature stage patch applied: feature_id={FeatureId} stage={Stage} fields_owner={HasOwner} fields_planned_start={HasStart} fields_planned_end={HasEnd} owner={Owner} start={Start} end={End} actor_user_id={ActorUserId} stage_version={StageVersion} feature_version={FeatureVersion}",
                 feature.Id,
                 request.Stage,
                 request.HasStageOwnerUserId,
                 request.HasPlannedStart,
                 request.HasPlannedEnd,
-                ownerBefore,
                 plan.PerformerUserId,
-                startBefore,
                 plan.PlannedStart,
-                endBefore,
                 plan.PlannedEnd,
                 request.CallerUserId,
-                stageVersionBefore,
                 plan.Version,
-                featureVersionBefore,
                 feature.Version);
         }
 
