@@ -12,6 +12,7 @@ using UpdateStageOwnerDto = OneMoreTaskTracker.Proto.Features.UpdateStageOwnerCo
 using UpdateStagePlannedStartDto = OneMoreTaskTracker.Proto.Features.UpdateStagePlannedStartCommand.FeatureDto;
 using UpdateStagePlannedEndDto = OneMoreTaskTracker.Proto.Features.UpdateStagePlannedEndCommand.FeatureDto;
 using PatchDto = OneMoreTaskTracker.Proto.Features.PatchFeatureCommand.FeatureDto;
+using PatchStageDto = OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand.FeatureDto;
 
 namespace OneMoreTaskTracker.Features.Features.Data;
 
@@ -175,6 +176,19 @@ public static class FeatureMappingConfig
             .Map(d => d.Version,        s => s.Version);
 
         TypeAdapterConfig<Feature, PatchDto>.NewConfig()
+            .Map(d => d.Id,             s => s.Id)
+            .Map(d => d.Title,          s => s.Title)
+            .Map(d => d.Description,    s => s.Description ?? string.Empty)
+            .Map(d => d.State,          s => (ProtoFeatureState)s.State)
+            .Map(d => d.PlannedStart,   s => s.PlannedStart == null ? string.Empty : s.PlannedStart.Value.ToString("yyyy-MM-dd"))
+            .Map(d => d.PlannedEnd,     s => s.PlannedEnd   == null ? string.Empty : s.PlannedEnd.Value.ToString("yyyy-MM-dd"))
+            .Map(d => d.LeadUserId,     s => s.LeadUserId)
+            .Map(d => d.ManagerUserId,  s => s.ManagerUserId)
+            .Map(d => d.CreatedAt,      s => s.CreatedAt.ToString("O"))
+            .Map(d => d.UpdatedAt,      s => s.UpdatedAt.ToString("O"))
+            .Map(d => d.Version,        s => s.Version);
+
+        TypeAdapterConfig<Feature, PatchStageDto>.NewConfig()
             .Map(d => d.Id,             s => s.Id)
             .Map(d => d.Title,          s => s.Title)
             .Map(d => d.Description,    s => s.Description ?? string.Empty)
