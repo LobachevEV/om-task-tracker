@@ -47,6 +47,7 @@ app.MapGrpcService<UpdateFeatureLeadHandler>();
 app.MapGrpcService<UpdateStageOwnerHandler>();
 app.MapGrpcService<UpdateStagePlannedStartHandler>();
 app.MapGrpcService<UpdateStagePlannedEndHandler>();
+app.MapGrpcService<PatchFeatureHandler>();
 
 app.Run();
 
