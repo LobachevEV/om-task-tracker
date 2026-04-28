@@ -1,6 +1,5 @@
 using Grpc.Core;
 using OneMoreTaskTracker.Features.Features.Update;
-using ProtoFeatureState = OneMoreTaskTracker.Proto.Features.FeatureState;
 
 namespace OneMoreTaskTracker.Features.Features.Data;
 
@@ -8,15 +7,6 @@ public static class FeatureValidation
 {
     private const int MinYear = 2000;
     private const int MaxYear = 2100;
-
-    private static readonly int[] CanonicalStageOrdinals =
-    [
-        (int)FeatureState.CsApproving,
-        (int)FeatureState.Development,
-        (int)FeatureState.Testing,
-        (int)FeatureState.EthalonTesting,
-        (int)FeatureState.LiveRelease,
-    ];
 
     private static readonly string[] CanonicalStageNames =
     [
@@ -75,32 +65,7 @@ public static class FeatureValidation
         ordinal >= 0 && ordinal < CanonicalStageNames.Length
             ? CanonicalStageNames[ordinal]
             : ordinal.ToString();
-
-    public static void ValidateStagePlans(IReadOnlyList<StagePlanInput> inputs)
-    {
-        if (inputs.Count != CanonicalStageOrdinals.Length)
-            throw new RpcException(new Status(StatusCode.InvalidArgument,
-                $"stage_plans must contain exactly {CanonicalStageOrdinals.Length} entries"));
-
-        var seen = new HashSet<int>();
-        foreach (var input in inputs)
-        {
-            if (!Enum.IsDefined(typeof(ProtoFeatureState), input.Stage))
-                throw new RpcException(new Status(StatusCode.InvalidArgument, "stage_plans entry has an unknown stage value"));
-
-            if (!seen.Add((int)input.Stage))
-                throw new RpcException(new Status(StatusCode.InvalidArgument, "stage_plans contains duplicate stage values"));
-
-            ValidateDateOrder(input.PlannedStart, input.PlannedEnd);
-        }
-    }
 }
-
-public readonly record struct StagePlanInput(
-    ProtoFeatureState Stage,
-    DateOnly? PlannedStart,
-    DateOnly? PlannedEnd,
-    int PerformerUserId);
 
 public readonly record struct StagePlanSnapshot(
     int Ordinal,

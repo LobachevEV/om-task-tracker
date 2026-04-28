@@ -6,13 +6,6 @@ using CreateFeatureDto = OneMoreTaskTracker.Proto.Features.CreateFeatureCommand.
 using GetFeatureDto = OneMoreTaskTracker.Proto.Features.GetFeatureQuery.FeatureDto;
 using ListFeatureDto = OneMoreTaskTracker.Proto.Features.ListFeaturesQuery.FeatureDto;
 using ProtoFeatureStagePlan = OneMoreTaskTracker.Proto.Features.FeatureStagePlan;
-using UpdateFeatureDto = OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand.FeatureDto;
-using UpdateFeatureTitleDto = OneMoreTaskTracker.Proto.Features.UpdateFeatureTitleCommand.FeatureDto;
-using UpdateFeatureDescriptionDto = OneMoreTaskTracker.Proto.Features.UpdateFeatureDescriptionCommand.FeatureDto;
-using UpdateFeatureLeadDto = OneMoreTaskTracker.Proto.Features.UpdateFeatureLeadCommand.FeatureDto;
-using UpdateStageOwnerDto = OneMoreTaskTracker.Proto.Features.UpdateStageOwnerCommand.FeatureDto;
-using UpdateStagePlannedStartDto = OneMoreTaskTracker.Proto.Features.UpdateStagePlannedStartCommand.FeatureDto;
-using UpdateStagePlannedEndDto = OneMoreTaskTracker.Proto.Features.UpdateStagePlannedEndCommand.FeatureDto;
 using PatchFeatureDto = OneMoreTaskTracker.Proto.Features.PatchFeatureCommand.FeatureDto;
 using PatchFeatureStageDto = OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand.FeatureDto;
 
@@ -124,13 +117,6 @@ internal static class PlanMapper
             f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
 
     internal static FeatureSummaryResponse MapSummary(
-        UpdateFeatureDto f,
-        IReadOnlyDictionary<int, List<int>> tasksByFeature,
-        ILogger logger) =>
-        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
-            f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
-
-    internal static FeatureSummaryResponse MapSummary(
         ListFeatureDto f,
         IReadOnlyDictionary<int, List<int>> tasksByFeature,
         ILogger logger) =>
@@ -139,48 +125,6 @@ internal static class PlanMapper
 
     internal static FeatureSummaryResponse MapSummary(
         GetFeatureDto f,
-        IReadOnlyDictionary<int, List<int>> tasksByFeature,
-        ILogger logger) =>
-        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
-            f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
-
-    internal static FeatureSummaryResponse MapSummary(
-        UpdateFeatureTitleDto f,
-        IReadOnlyDictionary<int, List<int>> tasksByFeature,
-        ILogger logger) =>
-        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
-            f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
-
-    internal static FeatureSummaryResponse MapSummary(
-        UpdateFeatureDescriptionDto f,
-        IReadOnlyDictionary<int, List<int>> tasksByFeature,
-        ILogger logger) =>
-        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
-            f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
-
-    internal static FeatureSummaryResponse MapSummary(
-        UpdateFeatureLeadDto f,
-        IReadOnlyDictionary<int, List<int>> tasksByFeature,
-        ILogger logger) =>
-        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
-            f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
-
-    internal static FeatureSummaryResponse MapSummary(
-        UpdateStageOwnerDto f,
-        IReadOnlyDictionary<int, List<int>> tasksByFeature,
-        ILogger logger) =>
-        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
-            f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
-
-    internal static FeatureSummaryResponse MapSummary(
-        UpdateStagePlannedStartDto f,
-        IReadOnlyDictionary<int, List<int>> tasksByFeature,
-        ILogger logger) =>
-        BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,
-            f.LeadUserId, f.ManagerUserId, f.StagePlans, f.Version, tasksByFeature, logger);
-
-    internal static FeatureSummaryResponse MapSummary(
-        UpdateStagePlannedEndDto f,
         IReadOnlyDictionary<int, List<int>> tasksByFeature,
         ILogger logger) =>
         BuildSummary(f.Id, f.Title, f.Description, f.State, f.PlannedStart, f.PlannedEnd,

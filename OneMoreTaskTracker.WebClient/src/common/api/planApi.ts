@@ -12,13 +12,6 @@ import type {
   FeatureSummary,
   PatchFeaturePayload,
   PatchFeatureStagePayload,
-  UpdateFeaturePayload,
-  UpdateFeatureDescriptionPayload,
-  UpdateFeatureLeadPayload,
-  UpdateFeatureTitlePayload,
-  UpdateStageOwnerPayload,
-  UpdateStagePlannedEndPayload,
-  UpdateStagePlannedStartPayload,
 } from '../types/feature';
 
 function jsonHeaders(ifMatch?: number): Record<string, string> {
@@ -80,19 +73,6 @@ export async function createFeature(
   return featureSummarySchema.parse(data);
 }
 
-export async function updateFeature(
-  id: number,
-  payload: UpdateFeaturePayload,
-): Promise<FeatureSummary> {
-  const response = await fetch(`${API_BASE_URL}/api/plan/features/${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
-    body: JSON.stringify(payload),
-  });
-  const data = await handleResponse<unknown>(response);
-  return featureSummarySchema.parse(data);
-}
-
 export async function attachTask(
   featureId: number,
   jiraId: string,
@@ -117,11 +97,6 @@ export async function detachTask(
   return featureSummarySchema.parse(data);
 }
 
-/**
- * Sparse PATCH for `/api/plan/features/{id}`. Pass only the fields the user
- * actually changed; the version token is forwarded as `If-Match` (and also
- * as `expectedVersion` in the body for client-explicit concurrency).
- */
 export async function patchFeature(
   id: number,
   body: PatchFeaturePayload,
@@ -135,11 +110,6 @@ export async function patchFeature(
   return featureSummarySchema.parse(data);
 }
 
-/**
- * Sparse PATCH for `/api/plan/features/{id}/stages/{stage}`. Pass only the
- * fields the user actually changed; the stage-version token is forwarded as
- * `If-Match` and as `expectedStageVersion` in the body.
- */
 export async function patchFeatureStage(
   featureId: number,
   stage: FeatureState,
@@ -157,124 +127,6 @@ export async function patchFeatureStage(
   return featureSummarySchema.parse(data);
 }
 
-/**
- * @deprecated Use {@link patchFeature} with `{ title, expectedVersion }`. The
- * per-field PATCH endpoints are scheduled for deletion in slice (f).
- */
-export async function updateFeatureTitle(
-  id: number,
-  payload: UpdateFeatureTitlePayload,
-  ifMatchVersion?: number,
-): Promise<FeatureSummary> {
-  const response = await fetch(`${API_BASE_URL}/api/plan/features/${id}/title`, {
-    method: 'PATCH',
-    headers: jsonHeaders(ifMatchVersion),
-    body: JSON.stringify(payload),
-  });
-  const data = await handleResponse<unknown>(response);
-  return featureSummarySchema.parse(data);
-}
-
-/**
- * @deprecated Use {@link patchFeature} with `{ description, expectedVersion }`.
- */
-export async function updateFeatureDescription(
-  id: number,
-  payload: UpdateFeatureDescriptionPayload,
-  ifMatchVersion?: number,
-): Promise<FeatureSummary> {
-  const response = await fetch(`${API_BASE_URL}/api/plan/features/${id}/description`, {
-    method: 'PATCH',
-    headers: jsonHeaders(ifMatchVersion),
-    body: JSON.stringify(payload),
-  });
-  const data = await handleResponse<unknown>(response);
-  return featureSummarySchema.parse(data);
-}
-
-/**
- * @deprecated Use {@link patchFeature} with `{ leadUserId, expectedVersion }`.
- */
-export async function updateFeatureLead(
-  id: number,
-  payload: UpdateFeatureLeadPayload,
-  ifMatchVersion?: number,
-): Promise<FeatureSummary> {
-  const response = await fetch(`${API_BASE_URL}/api/plan/features/${id}/lead`, {
-    method: 'PATCH',
-    headers: jsonHeaders(ifMatchVersion),
-    body: JSON.stringify(payload),
-  });
-  const data = await handleResponse<unknown>(response);
-  return featureSummarySchema.parse(data);
-}
-
-/**
- * @deprecated Use {@link patchFeatureStage} with
- * `{ stageOwnerUserId, expectedStageVersion }`.
- */
-export async function updateStageOwner(
-  featureId: number,
-  stage: FeatureState,
-  payload: UpdateStageOwnerPayload,
-  ifMatchStageVersion?: number,
-): Promise<FeatureSummary> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/plan/features/${featureId}/stages/${stage}/owner`,
-    {
-      method: 'PATCH',
-      headers: jsonHeaders(ifMatchStageVersion),
-      body: JSON.stringify(payload),
-    },
-  );
-  const data = await handleResponse<unknown>(response);
-  return featureSummarySchema.parse(data);
-}
-
-/**
- * @deprecated Use {@link patchFeatureStage} with
- * `{ plannedStart, expectedStageVersion }`.
- */
-export async function updateStagePlannedStart(
-  featureId: number,
-  stage: FeatureState,
-  payload: UpdateStagePlannedStartPayload,
-  ifMatchStageVersion?: number,
-): Promise<FeatureSummary> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/plan/features/${featureId}/stages/${stage}/planned-start`,
-    {
-      method: 'PATCH',
-      headers: jsonHeaders(ifMatchStageVersion),
-      body: JSON.stringify(payload),
-    },
-  );
-  const data = await handleResponse<unknown>(response);
-  return featureSummarySchema.parse(data);
-}
-
-/**
- * @deprecated Use {@link patchFeatureStage} with
- * `{ plannedEnd, expectedStageVersion }`.
- */
-export async function updateStagePlannedEnd(
-  featureId: number,
-  stage: FeatureState,
-  payload: UpdateStagePlannedEndPayload,
-  ifMatchStageVersion?: number,
-): Promise<FeatureSummary> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/plan/features/${featureId}/stages/${stage}/planned-end`,
-    {
-      method: 'PATCH',
-      headers: jsonHeaders(ifMatchStageVersion),
-      body: JSON.stringify(payload),
-    },
-  );
-  const data = await handleResponse<unknown>(response);
-  return featureSummarySchema.parse(data);
-}
-
 export type {
   CreateFeaturePayload,
   FeatureDetail,
@@ -283,11 +135,4 @@ export type {
   FeatureSummary,
   PatchFeaturePayload,
   PatchFeatureStagePayload,
-  UpdateFeaturePayload,
-  UpdateFeatureDescriptionPayload,
-  UpdateFeatureLeadPayload,
-  UpdateFeatureTitlePayload,
-  UpdateStageOwnerPayload,
-  UpdateStagePlannedEndPayload,
-  UpdateStagePlannedStartPayload,
 } from '../types/feature';

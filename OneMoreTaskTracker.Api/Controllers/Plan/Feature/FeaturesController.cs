@@ -8,7 +8,6 @@ using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureCommand;
-using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
 using OneMoreTaskTracker.Proto.Users;
 using ProtoFeatureStagePlan = OneMoreTaskTracker.Proto.Features.FeatureStagePlan;
 
@@ -19,14 +18,12 @@ namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature;
 [Route("api/plan/features")]
 public class FeaturesController(
     FeatureCreator.FeatureCreatorClient featureCreator,
-    FeatureUpdater.FeatureUpdaterClient featureUpdater,
     FeaturePatcher.FeaturePatcherClient featurePatcher,
     FeaturesLister.FeaturesListerClient featuresLister,
     FeatureGetter.FeatureGetterClient featureGetter,
     UserService.UserServiceClient userService,
     ILogger<FeaturesController> logger) : ControllerBase
 {
-    private const int ExpectedStageCount = 5;
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<FeatureSummaryResponse>>> List(
@@ -124,24 +121,6 @@ public class FeaturesController(
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        if (body.StagePlans is null)
-            return await PatchSparseAsync(id, body, ifMatch, ct);
-
-        var request = UpdateFeatureRequestFactory.From(id, body, User.GetUserId());
-
-        if (TryAppendStagePlans(request, body.StagePlans) is { } stageError)
-            return stageError;
-
-        var updated = await featureUpdater.UpdateAsync(request, cancellationToken: ct);
-        return Ok(PlanMapper.MapSummary(updated, PlanRequestHelpers.EmptyTasks, logger));
-    }
-
-    private async Task<ActionResult<FeatureSummaryResponse>> PatchSparseAsync(
-        int id,
-        UpdateFeaturePayload body,
-        string? ifMatch,
-        CancellationToken ct)
-    {
         var callerUserId = User.GetUserId();
 
         if (body.LeadUserId is { } leadUserId)
@@ -177,34 +156,6 @@ public class FeaturesController(
 
         var dto = await featurePatcher.PatchAsync(request, cancellationToken: ct);
         return Ok(PlanMapper.MapSummary(dto, PlanRequestHelpers.EmptyTasks, logger));
-    }
-
-    private ActionResult? TryAppendStagePlans(
-        UpdateFeatureRequest request,
-        IReadOnlyList<Stages.StagePlanPayload>? stagePlans)
-    {
-        if (stagePlans is null)
-            return null;
-
-        if (stagePlans.Count != ExpectedStageCount)
-            return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
-
-        var seenStages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var sp in stagePlans)
-        {
-            if (string.IsNullOrEmpty(sp.Stage) || !PlanMapper.TryParseStage(sp.Stage, out var protoStage) || !seenStages.Add(sp.Stage))
-                return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
-
-            request.StagePlans.Add(new ProtoFeatureStagePlan
-            {
-                Stage           = protoStage,
-                PlannedStart    = sp.PlannedStart ?? string.Empty,
-                PlannedEnd      = sp.PlannedEnd   ?? string.Empty,
-                PerformerUserId = sp.PerformerUserId is { } p and > 0 ? p : 0,
-            });
-        }
-
-        return null;
     }
 
     private StagePlanDetailResponse BuildDetailStagePlan(

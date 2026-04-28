@@ -5,7 +5,6 @@ import {
   detachTask,
   getFeature,
   listFeatures,
-  updateFeature,
 } from '../../../src/common/api/planApi';
 import { featureSummarySchema } from '../../../src/common/api/schemas';
 import { setAuth } from '../../../src/common/auth/auth';
@@ -125,23 +124,6 @@ describe('createFeature', () => {
         method: 'POST',
         headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ title: 'X' }),
-      }),
-    );
-  });
-});
-
-describe('updateFeature', () => {
-  it('sends PATCH /api/plan/features/{id} with JSON body', async () => {
-    mockFetch.mockResolvedValueOnce(makeResponse(200, sampleSummary));
-
-    await updateFeature(42, { state: 'Development' });
-
-    expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/plan/features/42'),
-      expect.objectContaining({
-        method: 'PATCH',
-        headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ state: 'Development' }),
       }),
     );
   });

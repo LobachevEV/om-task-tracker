@@ -12,8 +12,6 @@ public sealed class FeatureAggregateTests
         Description = "desc",
         LeadUserId = 1,
         ManagerUserId = 2,
-        Version = 7,
-        UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
     };
 
     [Fact]

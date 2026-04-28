@@ -9,12 +9,6 @@ using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand;
-using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
-using OneMoreTaskTracker.Proto.Features.UpdateFeatureDescriptionCommand;
-using OneMoreTaskTracker.Proto.Features.UpdateFeatureTitleCommand;
-using OneMoreTaskTracker.Proto.Features.UpdateStageOwnerCommand;
-using OneMoreTaskTracker.Proto.Features.UpdateStagePlannedEndCommand;
-using OneMoreTaskTracker.Proto.Features.UpdateStagePlannedStartCommand;
 using OneMoreTaskTracker.Proto.Tasks;
 using OneMoreTaskTracker.Proto.Tasks.AttachTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.CreateTaskCommand;
@@ -56,14 +50,8 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
                 d.ServiceType == typeof(TaskMover.TaskMoverClient) ||
                 d.ServiceType == typeof(TaskFeatureLinker.TaskFeatureLinkerClient) ||
                 d.ServiceType == typeof(FeatureCreator.FeatureCreatorClient) ||
-                d.ServiceType == typeof(FeatureUpdater.FeatureUpdaterClient) ||
                 d.ServiceType == typeof(FeaturesLister.FeaturesListerClient) ||
                 d.ServiceType == typeof(FeatureGetter.FeatureGetterClient) ||
-                d.ServiceType == typeof(FeatureTitleUpdater.FeatureTitleUpdaterClient) ||
-                d.ServiceType == typeof(FeatureDescriptionUpdater.FeatureDescriptionUpdaterClient) ||
-                d.ServiceType == typeof(StageOwnerUpdater.StageOwnerUpdaterClient) ||
-                d.ServiceType == typeof(StagePlannedStartUpdater.StagePlannedStartUpdaterClient) ||
-                d.ServiceType == typeof(StagePlannedEndUpdater.StagePlannedEndUpdaterClient) ||
                 d.ServiceType == typeof(FeaturePatcher.FeaturePatcherClient) ||
                 d.ServiceType == typeof(FeatureStagePatcher.FeatureStagePatcherClient)
             ).ToList();
@@ -78,14 +66,8 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
             services.AddSingleton(Substitute.For<TaskMover.TaskMoverClient>());
             services.AddSingleton(Substitute.For<TaskFeatureLinker.TaskFeatureLinkerClient>());
             services.AddSingleton(Substitute.For<FeatureCreator.FeatureCreatorClient>());
-            services.AddSingleton(Substitute.For<FeatureUpdater.FeatureUpdaterClient>());
             services.AddSingleton(Substitute.For<FeaturesLister.FeaturesListerClient>());
             services.AddSingleton(Substitute.For<FeatureGetter.FeatureGetterClient>());
-            services.AddSingleton(Substitute.For<FeatureTitleUpdater.FeatureTitleUpdaterClient>());
-            services.AddSingleton(Substitute.For<FeatureDescriptionUpdater.FeatureDescriptionUpdaterClient>());
-            services.AddSingleton(Substitute.For<StageOwnerUpdater.StageOwnerUpdaterClient>());
-            services.AddSingleton(Substitute.For<StagePlannedStartUpdater.StagePlannedStartUpdaterClient>());
-            services.AddSingleton(Substitute.For<StagePlannedEndUpdater.StagePlannedEndUpdaterClient>());
             services.AddSingleton(Substitute.For<FeaturePatcher.FeaturePatcherClient>());
             services.AddSingleton(Substitute.For<FeatureStagePatcher.FeatureStagePatcherClient>());
         });

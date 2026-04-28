@@ -13,12 +13,6 @@ using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand;
-using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
-using OneMoreTaskTracker.Proto.Features.UpdateFeatureDescriptionCommand;
-using OneMoreTaskTracker.Proto.Features.UpdateFeatureTitleCommand;
-using OneMoreTaskTracker.Proto.Features.UpdateStageOwnerCommand;
-using OneMoreTaskTracker.Proto.Features.UpdateStagePlannedEndCommand;
-using OneMoreTaskTracker.Proto.Features.UpdateStagePlannedStartCommand;
 using OneMoreTaskTracker.Proto.Tasks;
 using OneMoreTaskTracker.Proto.Tasks.AttachTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.CreateTaskCommand;
@@ -55,29 +49,11 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
     public FeatureCreator.FeatureCreatorClient MockFeatureCreator { get; } =
         Substitute.For<FeatureCreator.FeatureCreatorClient>();
 
-    public FeatureUpdater.FeatureUpdaterClient MockFeatureUpdater { get; } =
-        Substitute.For<FeatureUpdater.FeatureUpdaterClient>();
-
     public FeaturesLister.FeaturesListerClient MockFeaturesLister { get; } =
         Substitute.For<FeaturesLister.FeaturesListerClient>();
 
     public FeatureGetter.FeatureGetterClient MockFeatureGetter { get; } =
         Substitute.For<FeatureGetter.FeatureGetterClient>();
-
-    public FeatureTitleUpdater.FeatureTitleUpdaterClient MockFeatureTitleUpdater { get; } =
-        Substitute.For<FeatureTitleUpdater.FeatureTitleUpdaterClient>();
-
-    public FeatureDescriptionUpdater.FeatureDescriptionUpdaterClient MockFeatureDescriptionUpdater { get; } =
-        Substitute.For<FeatureDescriptionUpdater.FeatureDescriptionUpdaterClient>();
-
-    public StageOwnerUpdater.StageOwnerUpdaterClient MockStageOwnerUpdater { get; } =
-        Substitute.For<StageOwnerUpdater.StageOwnerUpdaterClient>();
-
-    public StagePlannedStartUpdater.StagePlannedStartUpdaterClient MockStagePlannedStartUpdater { get; } =
-        Substitute.For<StagePlannedStartUpdater.StagePlannedStartUpdaterClient>();
-
-    public StagePlannedEndUpdater.StagePlannedEndUpdaterClient MockStagePlannedEndUpdater { get; } =
-        Substitute.For<StagePlannedEndUpdater.StagePlannedEndUpdaterClient>();
 
     public FeaturePatcher.FeaturePatcherClient MockFeaturePatcher { get; } =
         Substitute.For<FeaturePatcher.FeaturePatcherClient>();
@@ -120,14 +96,8 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
                 d.ServiceType == typeof(TaskAggregateQuery.TaskAggregateQueryClient) ||
                 d.ServiceType == typeof(TaskFeatureLinker.TaskFeatureLinkerClient) ||
                 d.ServiceType == typeof(FeatureCreator.FeatureCreatorClient) ||
-                d.ServiceType == typeof(FeatureUpdater.FeatureUpdaterClient) ||
                 d.ServiceType == typeof(FeaturesLister.FeaturesListerClient) ||
                 d.ServiceType == typeof(FeatureGetter.FeatureGetterClient) ||
-                d.ServiceType == typeof(FeatureTitleUpdater.FeatureTitleUpdaterClient) ||
-                d.ServiceType == typeof(FeatureDescriptionUpdater.FeatureDescriptionUpdaterClient) ||
-                d.ServiceType == typeof(StageOwnerUpdater.StageOwnerUpdaterClient) ||
-                d.ServiceType == typeof(StagePlannedStartUpdater.StagePlannedStartUpdaterClient) ||
-                d.ServiceType == typeof(StagePlannedEndUpdater.StagePlannedEndUpdaterClient) ||
                 d.ServiceType == typeof(FeaturePatcher.FeaturePatcherClient) ||
                 d.ServiceType == typeof(FeatureStagePatcher.FeatureStagePatcherClient)
             ).ToList();
@@ -143,14 +113,8 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
             services.AddSingleton(MockTaskAggregateQuery);
             services.AddSingleton(MockTaskFeatureLinker);
             services.AddSingleton(MockFeatureCreator);
-            services.AddSingleton(MockFeatureUpdater);
             services.AddSingleton(MockFeaturesLister);
             services.AddSingleton(MockFeatureGetter);
-            services.AddSingleton(MockFeatureTitleUpdater);
-            services.AddSingleton(MockFeatureDescriptionUpdater);
-            services.AddSingleton(MockStageOwnerUpdater);
-            services.AddSingleton(MockStagePlannedStartUpdater);
-            services.AddSingleton(MockStagePlannedEndUpdater);
             services.AddSingleton(MockFeaturePatcher);
             services.AddSingleton(MockFeatureStagePatcher);
 

@@ -42,8 +42,8 @@ public class CreateFeatureHandler(FeaturesDbContext db) : FeatureCreator.Feature
             LeadUserId    = request.LeadUserId > 0 ? request.LeadUserId : request.ManagerUserId,
             ManagerUserId = request.ManagerUserId,
             CreatedAt     = now,
-            UpdatedAt     = now,
         };
+        feature.Touch(now);
 
         // Materialize 5 empty stage plans as part of the same SaveChanges call
         // so the feature + its stage rows land atomically (EF Core batches the
@@ -51,15 +51,16 @@ public class CreateFeatureHandler(FeaturesDbContext db) : FeatureCreator.Feature
         // (unassigned) matching the proto3 scalar default on the wire.
         foreach (var stage in CanonicalStageOrdinals)
         {
-            feature.StagePlans.Add(new FeatureStagePlan
+            var plan = new FeatureStagePlan
             {
                 Stage           = stage,
                 PlannedStart    = null,
                 PlannedEnd      = null,
                 PerformerUserId = 0,
                 CreatedAt       = now,
-                UpdatedAt       = now,
-            });
+            };
+            plan.Touch(now);
+            feature.StagePlans.Add(plan);
         }
 
         db.Features.Add(feature);

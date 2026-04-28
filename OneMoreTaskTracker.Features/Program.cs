@@ -38,15 +38,8 @@ if (app.Environment.IsDevelopment())
     app.MapGrpcReflectionService();
 
 app.MapGrpcService<CreateFeatureHandler>();
-app.MapGrpcService<UpdateFeatureHandler>();
 app.MapGrpcService<ListFeaturesHandler>();
 app.MapGrpcService<GetFeatureHandler>();
-app.MapGrpcService<UpdateFeatureTitleHandler>();
-app.MapGrpcService<UpdateFeatureDescriptionHandler>();
-app.MapGrpcService<UpdateFeatureLeadHandler>();
-app.MapGrpcService<UpdateStageOwnerHandler>();
-app.MapGrpcService<UpdateStagePlannedStartHandler>();
-app.MapGrpcService<UpdateStagePlannedEndHandler>();
 app.MapGrpcService<PatchFeatureHandler>();
 app.MapGrpcService<PatchFeatureStageHandler>();
 

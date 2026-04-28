@@ -20,12 +20,12 @@ public class FeatureStagePlan
     public int PerformerUserId { get; set; }
 
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; private set; } = DateTime.UtcNow;
 
     // Per-stage optimistic-concurrency token (see api-contract.md
     // § "Optimistic Concurrency"). Bumped by every stage-scoped PATCH (owner,
     // planned-start, planned-end). Exposed via StagePlanDetail.stageVersion.
-    public int Version { get; set; }
+    public int Version { get; private set; }
 
     public void AssignOwner(int ownerUserId, DateTime now)
     {

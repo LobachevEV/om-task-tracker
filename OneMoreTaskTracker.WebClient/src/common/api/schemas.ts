@@ -117,32 +117,6 @@ export const featureSummarySchema = z.object({
 });
 
 /**
- * Per-field inline-edit request-body schemas. These are not used for the
- * response (all five endpoints return a full `FeatureSummary`) — they exist
- * so the inline editors can validate their outgoing payload shape ahead of
- * the network call, mirroring the gateway's own validation.
- */
-export const updateFeatureTitlePayloadSchema = z.object({
-  title: z.string().min(1).max(200),
-});
-
-export const updateFeatureDescriptionPayloadSchema = z.object({
-  description: z.string().max(4000).nullable(),
-});
-
-export const updateStageOwnerPayloadSchema = z.object({
-  stageOwnerUserId: z.number().int().positive().nullable(),
-});
-
-export const updateStagePlannedStartPayloadSchema = z.object({
-  plannedStart: isoDateOrNull,
-});
-
-export const updateStagePlannedEndPayloadSchema = z.object({
-  plannedEnd: isoDateOrNull,
-});
-
-/**
  * Sparse PATCH request schemas for the consolidated endpoints. Every field is
  * optional; callers send only the fields the user actually changed plus the
  * version token. The gateway returns a refreshed `FeatureSummary` validated

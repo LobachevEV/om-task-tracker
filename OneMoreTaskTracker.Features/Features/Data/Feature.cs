@@ -16,7 +16,7 @@ public class Feature
     public int ManagerUserId { get; set; }
 
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; private set; } = DateTime.UtcNow;
 
     // Cascade-delete configured in FeaturesDbContext.OnModelCreating. Always
     // exactly 5 rows per feature (materialized on create + guaranteed by the
@@ -27,7 +27,7 @@ public class Feature
     // stage-scoped PATCH so clients can detect "updated by someone else" and
     // reconcile. EF Core's IsConcurrencyToken mapping lives in
     // FeaturesDbContext.OnModelCreating.
-    public int Version { get; set; }
+    public int Version { get; private set; }
 
     public void RenameTitle(string newTitle, DateTime now)
     {

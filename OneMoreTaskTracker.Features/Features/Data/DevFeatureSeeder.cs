@@ -107,20 +107,21 @@ public static class DevFeatureSeeder
                 LeadUserId    = f.LeadUserId,
                 ManagerUserId = SeededManagerUserId,
                 CreatedAt     = now,
-                UpdatedAt     = now,
             };
+            feature.Touch(now);
 
             foreach (var sp in f.StagePlans)
             {
-                feature.StagePlans.Add(new FeatureStagePlan
+                var plan = new FeatureStagePlan
                 {
                     Stage           = (int)sp.Stage,
                     PlannedStart    = sp.PlannedStart,
                     PlannedEnd      = sp.PlannedEnd,
                     PerformerUserId = sp.PerformerUserId,
                     CreatedAt       = now,
-                    UpdatedAt       = now,
-                });
+                };
+                plan.Touch(now);
+                feature.StagePlans.Add(plan);
             }
 
             dbContext.Features.Add(feature);

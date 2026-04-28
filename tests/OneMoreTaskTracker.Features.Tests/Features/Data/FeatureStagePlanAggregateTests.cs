@@ -13,8 +13,6 @@ public sealed class FeatureStagePlanAggregateTests
         PerformerUserId = 5,
         PlannedStart = new DateOnly(2026, 4, 1),
         PlannedEnd = new DateOnly(2026, 4, 30),
-        Version = 3,
-        UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
     };
 
     [Fact]

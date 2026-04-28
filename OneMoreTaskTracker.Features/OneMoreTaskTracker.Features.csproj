@@ -37,12 +37,6 @@
       <ProtoRoot>Protos</ProtoRoot>
       <AdditionalImportDirs>Protos</AdditionalImportDirs>
     </Protobuf>
-    <Protobuf Include="Protos\UpdateFeatureCommand\update_feature_command_handler.proto">
-      <GrpcServices>Server</GrpcServices>
-      <Access>Public</Access>
-      <ProtoRoot>Protos</ProtoRoot>
-      <AdditionalImportDirs>Protos</AdditionalImportDirs>
-    </Protobuf>
     <Protobuf Include="Protos\ListFeaturesQuery\list_features_query_handler.proto">
       <GrpcServices>Server</GrpcServices>
       <Access>Public</Access>
@@ -50,42 +44,6 @@
       <AdditionalImportDirs>Protos</AdditionalImportDirs>
     </Protobuf>
     <Protobuf Include="Protos\GetFeatureQuery\get_feature_query_handler.proto">
-      <GrpcServices>Server</GrpcServices>
-      <Access>Public</Access>
-      <ProtoRoot>Protos</ProtoRoot>
-      <AdditionalImportDirs>Protos</AdditionalImportDirs>
-    </Protobuf>
-    <Protobuf Include="Protos\UpdateFeatureTitleCommand\update_feature_title_command_handler.proto">
-      <GrpcServices>Server</GrpcServices>
-      <Access>Public</Access>
-      <ProtoRoot>Protos</ProtoRoot>
-      <AdditionalImportDirs>Protos</AdditionalImportDirs>
-    </Protobuf>
-    <Protobuf Include="Protos\UpdateFeatureDescriptionCommand\update_feature_description_command_handler.proto">
-      <GrpcServices>Server</GrpcServices>
-      <Access>Public</Access>
-      <ProtoRoot>Protos</ProtoRoot>
-      <AdditionalImportDirs>Protos</AdditionalImportDirs>
-    </Protobuf>
-    <Protobuf Include="Protos\UpdateFeatureLeadCommand\update_feature_lead_command_handler.proto">
-      <GrpcServices>Server</GrpcServices>
-      <Access>Public</Access>
-      <ProtoRoot>Protos</ProtoRoot>
-      <AdditionalImportDirs>Protos</AdditionalImportDirs>
-    </Protobuf>
-    <Protobuf Include="Protos\UpdateStageOwnerCommand\update_stage_owner_command_handler.proto">
-      <GrpcServices>Server</GrpcServices>
-      <Access>Public</Access>
-      <ProtoRoot>Protos</ProtoRoot>
-      <AdditionalImportDirs>Protos</AdditionalImportDirs>
-    </Protobuf>
-    <Protobuf Include="Protos\UpdateStagePlannedStartCommand\update_stage_planned_start_command_handler.proto">
-      <GrpcServices>Server</GrpcServices>
-      <Access>Public</Access>
-      <ProtoRoot>Protos</ProtoRoot>
-      <AdditionalImportDirs>Protos</AdditionalImportDirs>
-    </Protobuf>
-    <Protobuf Include="Protos\UpdateStagePlannedEndCommand\update_stage_planned_end_command_handler.proto">
       <GrpcServices>Server</GrpcServices>
       <Access>Public</Access>
       <ProtoRoot>Protos</ProtoRoot>

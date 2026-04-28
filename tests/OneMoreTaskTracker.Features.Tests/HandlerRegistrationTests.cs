@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Grpc.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using OneMoreTaskTracker.Features.Features.Create;
 using OneMoreTaskTracker.Features.Features.Data;
 using OneMoreTaskTracker.Features.Features.Get;
@@ -9,7 +10,7 @@ using OneMoreTaskTracker.Features.Features.Update;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
-using OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand;
+using OneMoreTaskTracker.Proto.Features.PatchFeatureCommand;
 using Xunit;
 
 namespace OneMoreTaskTracker.Features.Tests;
@@ -39,11 +40,11 @@ public sealed class HandlerRegistrationTests
     }
 
     [Fact]
-    public async Task UpdateFeatureHandler_ReturnsNotFoundForUnknownId()
+    public async Task PatchFeatureHandler_ReturnsNotFoundForUnknownId()
     {
-        var handler = new UpdateFeatureHandler(NewDb());
+        var handler = new PatchFeatureHandler(NewDb(), NullLogger<PatchFeatureHandler>.Instance);
 
-        var act = () => handler.Update(new UpdateFeatureRequest { Id = 999, Title = "x" }, TestServerCallContext.Create());
+        var act = () => handler.Patch(new PatchFeatureRequest { Id = 999, Title = "x" }, TestServerCallContext.Create());
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.NotFound);

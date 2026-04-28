@@ -89,43 +89,9 @@ export interface CreateFeaturePayload {
   leadUserId?: number;
 }
 
-export interface UpdateFeaturePayload {
-  title?: string;
-  description?: string | null;
-  leadUserId?: number;
-  state?: FeatureState;
-  /** Exactly 5 entries when provided (contract rule). Omit to leave plans untouched. */
-  stagePlans?: FeatureStagePlan[];
-}
-
-/**
- * Per-field inline-edit payloads. Each mirrors exactly one
- * `PATCH /api/plan/features/{id}/...` endpoint — keep names in lockstep.
- */
-export interface UpdateFeatureTitlePayload {
-  title: string;
-}
-export interface UpdateFeatureDescriptionPayload {
-  description: string | null;
-}
-export interface UpdateFeatureLeadPayload {
-  leadUserId: number;
-}
-export interface UpdateStageOwnerPayload {
-  stageOwnerUserId: number | null;
-}
-export interface UpdateStagePlannedStartPayload {
-  plannedStart: string | null;
-}
-export interface UpdateStagePlannedEndPayload {
-  plannedEnd: string | null;
-}
-
 /**
  * Sparse PATCH payload for `PATCH /api/plan/features/{id}` — every field is
- * optional; only the fields the user actually changed should be sent. The
- * gateway forks on `stagePlans is null` (the bulk replace path is reached
- * via `UpdateFeaturePayload.stagePlans`).
+ * optional; only the fields the user actually changed should be sent.
  */
 export interface PatchFeaturePayload {
   title?: string;
