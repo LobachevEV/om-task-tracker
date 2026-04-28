@@ -251,9 +251,11 @@ export function GanttPageInternal({
       ['--day-px']: `${dayPx}px`,
       ['--gantt-cushion-width']: `${effectiveTrailingPx}px`,
       ['--gantt-loaded-width']: `${totalWidthPx}px`,
+      ['--gantt-lanes-width']: `${lanesInlinePx}px`,
+      ['--gantt-content-width']: `${contentWidthPx}px`,
       ['--gantt-today-px']: `${todayPxAbs}px`,
     }) as CSSProperties,
-    [dayPx, effectiveTrailingPx, totalWidthPx, todayPxAbs],
+    [dayPx, effectiveTrailingPx, totalWidthPx, lanesInlinePx, contentWidthPx, todayPxAbs],
   );
 
   return (
@@ -266,6 +268,10 @@ export function GanttPageInternal({
         onScopeChange={state.setScope}
         onStateFilterChange={state.setStateFilter}
       />
+
+      <div className="gantt-page__narrow-notice" role="note">
+        {t('narrowViewport.notice')}
+      </div>
 
       {rosterError ? (
         <Callout
@@ -315,13 +321,9 @@ export function GanttPageInternal({
             todayPx={todayPxAbs}
             onJumpToToday={scrollToToday}
           >
-            <div
-              className="gantt-page__header-row"
-              style={{ inlineSize: `${contentWidthPx}px` }}
-            >
+            <div className="gantt-page__header-row">
               <div
                 className="gantt-page__header-flank gantt-page__header-flank--leading"
-                style={{ inlineSize: `${GUTTER_WIDTH_PX}px` }}
                 aria-hidden="true"
               />
               <GanttDateHeader
@@ -332,8 +334,7 @@ export function GanttPageInternal({
               />
               {showTrailingStripe ? (
                 <div
-                  className="gantt-page__header-flank"
-                  style={{ inlineSize: `${trailingStripeWidthPx}px` }}
+                  className="gantt-page__header-flank gantt-page__header-flank--trailing"
                   aria-hidden="true"
                 />
               ) : null}
@@ -341,19 +342,13 @@ export function GanttPageInternal({
 
             <div
               className="gantt-page__today-hairline"
-              role="separator"
-              aria-label={t('legend.todayAt', {
-                defaultValue: 'Today {{date}}',
-                date: state.today,
-              })}
-              style={{ insetInlineStart: `${todayPxAbs}px` }}
+              aria-hidden="true"
             />
 
             <div className="gantt-page__lanes-row">
               <div
                 className="gantt-page__lanes"
                 role="list"
-                style={{ inlineSize: `${lanesInlinePx}px` }}
               >
                 {isManager ? <AddFeatureRow onCreated={handleCreated} /> : null}
                 {layout.lanes.map((lane: GanttLane) => {

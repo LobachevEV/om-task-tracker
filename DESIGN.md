@@ -64,12 +64,12 @@ rounded:
   square: "6px"
   dialog: "10px"
 spacing:
-  xs: "4px"
-  sm: "8px"
-  md: "12px"
-  lg: "16px"
-  xl: "24px"
-  "2xl": "32px"
+  "1": "4px"
+  "2": "8px"
+  "3": "12px"
+  "4": "16px"
+  "6": "24px"
+  "8": "32px"
 components:
   button-primary:
     backgroundColor: "{colors.accent}"
@@ -320,5 +320,5 @@ Pill-shape `999px`, `2px 8px` padding, `label` typography. Variants are state-ke
 - **No identical card grids.** Same-sized cards with icon + heading + text repeated endlessly is the AI slop tell.
 - **No modal as the first answer to "create something".** `CreateFeatureDialog` was removed for a reason.
 - **No nested cards.** Always wrong. Promote the inner card to a row, or remove the outer one.
-- **No em dashes in copy.** Use commas, colons, semicolons, periods, or parentheses.
+- **No em dashes in narrative copy.** Use commas, colons, semicolons, periods, or parentheses. Carve-outs: numeric date/time ranges (`14 May — 30 May`) and Russian predicate-binding idioms (`Enter — добавить`, `Ctrl+G — перейти`) where the em-dash is the native typographic mark.
 - **No restated headings.** Subtitles that paraphrase the title are noise.

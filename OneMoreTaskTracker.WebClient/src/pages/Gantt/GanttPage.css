@@ -13,16 +13,39 @@
   color: var(--text);
 }
 
+/* Loading and error placeholders. Asymmetric padding (taller than wide)
+ * pushes the spinner / callout off the toolbar without floating dead-centre
+ * — the page already has a 56px header above. */
 .gantt-page__centered {
   flex: 1 1 auto;
   display: grid;
   place-items: center;
-  padding: var(--space-10, 40px) var(--space-6, 24px);
-  gap: var(--space-3, 12px);
+  padding-block: var(--space-8);
+  padding-inline: var(--space-6);
 }
 
 .gantt-page > .ds-callout--banner {
   flex: 0 0 auto;
+}
+
+/* Narrow-viewport notice. Hidden above 720px (the timeline's own breakpoint).
+ * Below it, surfaces a one-line hint explaining that the Gantt is wider than
+ * the viewport and how to navigate. CSS-only — costs zero JS. */
+.gantt-page__narrow-notice {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .gantt-page__narrow-notice {
+    display: block;
+    flex: 0 0 auto;
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface-2);
+    border-block-end: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+    line-height: 1.4;
+  }
 }
 
 .gantt-page__timeline-wrap {
@@ -36,8 +59,6 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2, 8px);
-  padding-block-end: var(--space-6, 24px);
 }
 
 /* Sticky 3-band date header sits at the top of the scrollable inner content.
@@ -50,6 +71,7 @@
   flex-direction: row;
   background: var(--surface);
   border-block-end: 1px solid var(--border);
+  inline-size: var(--gantt-content-width);
 }
 
 .gantt-page__header-flank {
@@ -64,6 +86,11 @@
   inset-inline-start: 0;
   z-index: 1;
   border-inline-end: 1px solid var(--border);
+  inline-size: var(--gantt-gutter-width);
+}
+
+.gantt-page__header-flank--trailing {
+  inline-size: var(--gantt-cushion-width);
 }
 
 .gantt-page__date-header {
@@ -81,7 +108,6 @@
   inline-size: 1px;
   inset-inline-start: var(--gantt-today-px, 0px);
   background: var(--accent);
-  opacity: 0.55;
   pointer-events: none;
   z-index: 2;
 }
@@ -94,6 +120,9 @@
   flex-direction: row;
   align-items: stretch;
   position: relative;
+  /* Gives the last lane breathing room before the unscheduled separator,
+   * without bloating each row. Pairs with the section's own block padding. */
+  padding-block-end: var(--space-2);
 }
 
 .gantt-page__lanes {
@@ -101,19 +130,25 @@
   display: flex;
   flex-direction: column;
   flex: 0 0 auto;
+  inline-size: var(--gantt-lanes-width);
 }
 
+/* Unscheduled section: clean hairline separator, generous block padding so
+ * the band reads as its own zone, not a grafted footer. Solid border, never
+ * dashed — dashed dividers are decoration. */
 .gantt-page__unscheduled {
-  padding: var(--space-4, 16px) var(--space-6, 24px);
-  border-block-start: 1px dashed var(--border-soft, var(--border-strong));
+  padding-block: var(--space-6) var(--space-8);
+  padding-inline: var(--space-6);
+  border-block-start: 1px solid var(--border);
 }
 
 .gantt-page__section-title {
-  font-size: 12px;
-  letter-spacing: 0.08em;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin: 0 0 var(--space-2, 8px);
+  margin: 0 0 var(--space-3);
 }
 
 .gantt-page__unscheduled-list {
@@ -122,7 +157,8 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-1);
+  max-inline-size: 720px;
 }
 
 .gantt-page__unscheduled-item {
@@ -130,24 +166,30 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  min-block-size: 44px;
   background: transparent;
   color: var(--text);
   border: 1px solid transparent;
-  border-radius: 6px;
-  padding: 6px 10px;
+  border-radius: 8px;
+  padding: var(--space-2) var(--space-3);
   font: inherit;
   cursor: pointer;
   text-align: start;
+  transition: background-color var(--transition-fast),
+              border-color var(--transition-fast);
 }
 
 .gantt-page__unscheduled-item:hover,
 .gantt-page__unscheduled-item:focus-visible {
-  background: var(--surface-2, color-mix(in oklch, var(--surface) 85%, var(--text)));
+  background: var(--surface-2);
   border-color: var(--border-strong);
   outline: none;
 }
 
 .gantt-page__unscheduled-state {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  margin-inline-start: var(--space-3);
 }

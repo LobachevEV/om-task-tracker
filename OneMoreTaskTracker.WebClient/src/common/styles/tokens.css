@@ -5,16 +5,38 @@
   /* Base palette */
   --bg:            oklch(0.12 0.010 60);
   --surface:       oklch(0.16 0.008 60);
+  --surface-2:     oklch(0.18 0.008 60);
   --elevated:      oklch(0.20 0.007 60);
+  --border-soft:   oklch(0.20 0.006 60);
   --border:        oklch(0.24 0.006 60);
   --border-strong: oklch(0.32 0.006 60);
   --text:          oklch(0.94 0.005 60);
+  --text-strong:   oklch(0.98 0.004 60);
   --text-muted:    oklch(0.65 0.008 60);
   --text-dim:      oklch(0.50 0.008 60);
   --accent:        oklch(0.75 0.14 85);
   --accent-hover:  oklch(0.80 0.14 85);
   --accent-ink:    oklch(0.18 0.02 85);
   --accent-dim:    oklch(0.75 0.14 85 / 0.15);
+
+  /* Spacing scale — owner: /layout. Numeric step name = 4px-multiple
+   * (--space-2 = 8px). Use these tokens; do not author new step values. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Type scale — owner: /typeset. Ratio ≥ 1.25 between adjacent steps.
+   * Pair scale with weight contrast for hierarchy (see DESIGN.md). */
+  --text-xs: 0.75rem;     /* 12px — meta strings, eyebrows, status chips */
+  --text-sm: 0.8125rem;   /* 13px — secondary body, table cells */
+  --text-base: 0.875rem;  /* 14px — primary body, form inputs */
+  --text-md: 1rem;        /* 16px — section subtitles */
+  --text-lg: 1.125rem;    /* 18px — drawer titles, route headings */
+  --text-xl: 1.375rem;    /* 22px — page-section headings */
+  --text-2xl: 1.75rem;    /* 28px — route headings */
 
   /* State palette — pipeline stages */
   --state-not-started: oklch(0.40 0.006 60);

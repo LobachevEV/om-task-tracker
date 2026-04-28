@@ -128,7 +128,7 @@
     "invalid": "Use YYYY-MM-DD"
   },
   "narrowViewport": {
-    "notice": "The Gantt timeline scrolls horizontally — pan with the trackbar or arrow keys."
+    "notice": "The Gantt timeline scrolls horizontally; pan with the trackbar or arrow keys."
   },
   "state": {
     "CsApproving": "CS approving",
@@ -193,13 +193,13 @@
       "missingStart": "Add a start date to complete this stage's plan."
     },
     "continuity": {
-      "aligned": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}} — aligned.",
-      "gap_one": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}} — {{days}}-day gap.",
-      "gap_other": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}} — {{days}}-day gap.",
-      "gap": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}} — {{days}}-day gap.",
-      "overlap_one": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}} — {{days}}-day overlap.",
-      "overlap_other": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}} — {{days}}-day overlap.",
-      "overlap": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}} — {{days}}-day overlap."
+      "aligned": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}}. Aligned.",
+      "gap_one": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}}. {{days}}-day gap.",
+      "gap_other": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}}. {{days}}-day gap.",
+      "gap": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}}. {{days}}-day gap.",
+      "overlap_one": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}}. {{days}}-day overlap.",
+      "overlap_other": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}}. {{days}}-day overlap.",
+      "overlap": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}}. {{days}}-day overlap."
     }
   }
 }
