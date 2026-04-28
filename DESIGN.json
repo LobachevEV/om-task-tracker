@@ -1,0 +1,136 @@
+{
+  "$schema": "https://stitch.withgoogle.com/schemas/design-md-sidecar.json",
+  "name": "OneMoreTaskTracker",
+  "description": "Sidecar for DESIGN.md — carries the token classes Stitch's 8-prop component schema can't express: motion, breakpoints, focus rings, glass effects, full component HTML/CSS snippets.",
+  "extensions": {
+    "shadows": {
+      "sm": "0 1px 2px oklch(0 0 0 / 0.30)",
+      "lg": "0 12px 30px oklch(0 0 0 / 0.45)",
+      "inset-light": "inset 0 0 0 1px oklch(0 0 0 / 0.25)",
+      "inset-medium": "inset 0 0 0 1px oklch(0 0 0 / 0.30)"
+    },
+    "motion": {
+      "transitionFast": "120ms",
+      "transitionBase": "160ms",
+      "transitionSlow": "240ms",
+      "easeOutQuart": "cubic-bezier(0.22, 1, 0.36, 1)",
+      "easeOutExpo": "cubic-bezier(0.16, 1, 0.30, 1)",
+      "rules": [
+        "Animate transform and opacity only — never width/height/top/left.",
+        "Pulse and highlight capped at 280ms, animating background-color and opacity only.",
+        "All motion collapses to instant under prefers-reduced-motion: reduce."
+      ]
+    },
+    "breakpoints": {
+      "sm": "640px",
+      "md": "960px",
+      "lg": "1280px",
+      "xl": "1600px",
+      "notes": "The Gantt is honest about being wider than the viewport. Below 1280px it shows a `narrowViewport.notice` callout instead of squashing into a card. Trackbar + arrow-key panning + Cmd/Ctrl+G are the navigation surface."
+    },
+    "focus": {
+      "ring-button": "0 0 0 2px oklch(0.75 0.14 85 / 0.40)",
+      "ring-input": "0 0 0 1px oklch(0.75 0.14 85)",
+      "offset-button": "2px",
+      "offset-input": "0px",
+      "notes": "Focus is always visible. Buttons take a 2px ring at 2px offset; inline-edit cells take a 1px ring with no offset so the cell stays flush with its row."
+    },
+    "stacking": {
+      "header": 10,
+      "popover": 40,
+      "drawer": 45,
+      "modal": 50
+    },
+    "i18n": {
+      "primary": "ru",
+      "mirror": "en",
+      "namespaces": ["app", "auth", "tasks", "gantt", "team", "shortcuts"],
+      "notes": "Russian is the primary script. Every face below the body line ships first-class Cyrillic. Geologica's condensed wdth 78 axis is what keeps the 280px Plan-view gutter readable for Russian compounds; never replace it without checking widths in both languages."
+    },
+    "a11y": {
+      "wcagFloor": "2.2 AA",
+      "reducedMotion": true,
+      "screenReaderTested": true,
+      "notes": [
+        "Every state-palette hue is paired with an icon or position so the palette survives color-vision deficiencies.",
+        "All toggles use aria-pressed; all live regions use aria-live with an explicit politeness level.",
+        "Focus must be visible — never `outline: none` without a replacement ring."
+      ]
+    },
+    "components": {
+      "button-primary": {
+        "html": "<button class=\"btn btn--primary btn--md\">Save</button>",
+        "css": ".btn--primary { background: var(--accent); color: var(--accent-ink); border-radius: 999px; padding: 0.65rem 1.3rem; min-height: 44px; box-shadow: var(--shadow-sm); transition: background-color var(--transition-fast); } .btn--primary:hover { background: var(--accent-hover); } .btn--primary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }"
+      },
+      "button-ghost": {
+        "html": "<button class=\"btn btn--ghost\">+ New feature</button>",
+        "css": ".btn--ghost { background: transparent; color: var(--text); border-radius: 999px; padding: 0.5rem 1.1rem; transition: background var(--transition-fast); } .btn--ghost:hover { background: var(--accent-dim); }"
+      },
+      "callout": {
+        "html": "<div class=\"callout callout--warning\" role=\"status\"><span class=\"callout__icon\" aria-hidden=\"true\">!</span><div class=\"callout__body\">Sample warning copy.</div></div>",
+        "css": ".callout { display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.75rem 1rem; border-radius: 0.75rem; border: 1px solid var(--border); } .callout--warning { background: color-mix(in oklch, var(--warning) 12%, var(--surface)); border-color: color-mix(in oklch, var(--warning) 30%, var(--border)); }",
+        "rules": [
+          "Never use a side-stripe border. Full border or background tint only.",
+          "Tint background with color-mix(in oklch, <tone> 12%, var(--surface)) so the surface stays warm."
+        ]
+      },
+      "status-dot": {
+        "html": "<span class=\"status-dot status-dot--blocked\" aria-hidden=\"true\"></span>",
+        "css": ".status-dot { width: 6px; height: 6px; border-radius: 999px; display: inline-block; } .status-dot--blocked { background: var(--accent); } .status-dot--clear { background: var(--success); } .status-dot--failed { background: var(--danger); }",
+        "rules": [
+          "Always paired with a 16px integration logo so color is reinforcement, not the only signal."
+        ]
+      },
+      "gantt-feature-row": {
+        "structure": "Sticky 280px gutter (lead avatar + title + mini-team + due chip) + horizontally-scrolling segmented bar of 5 stage segments. Row height is a multiple of 8px (default 48px); expanded sub-rows use 40px.",
+        "rules": [
+          "position: sticky on the gutter is load-bearing — never break it.",
+          "Bar segments use the state palette; status icon overlays current/overdue/completed/upcoming/notPlanned.",
+          "Today hairline is 1px solid var(--accent)."
+        ]
+      },
+      "add-feature-row": {
+        "html": "<div class=\"add-feature-row add-feature-row--row\"><button class=\"add-feature-row__ghost\"><span class=\"add-feature-row__plus\">+</span><span>New feature</span></button></div>",
+        "rules": [
+          "Inline-first, never modal. Two variants: row (head of gantt-page__lanes) and standalone (empty state).",
+          "After successful submit, focus stays in the input and the row pulses background-color for 280ms — rapid-add support.",
+          "Esc with a draft clears the draft; Esc with an empty draft collapses to ghost."
+        ]
+      }
+    },
+    "antiPatterns": [
+      "side-stripe border (border-left/right > 1px as colored accent)",
+      "gradient text (background-clip: text + linear-gradient)",
+      "glassmorphism on cards (backdrop-filter: blur on .card surfaces)",
+      "hero-metric template (big number + tiny label + delta arrow + sparkline)",
+      "identical card grids (same-sized icon+heading+text cards repeated)",
+      "modal as first answer to a create/edit task",
+      "nested cards",
+      "em dashes in copy",
+      "cyan-on-dark or cyan-to-green gradient lineage",
+      "Jira blue / Trello pastel / MS Project gridline gloom"
+    ],
+    "tokens": {
+      "source": "OneMoreTaskTracker.WebClient/src/common/styles/tokens.css",
+      "typography": "OneMoreTaskTracker.WebClient/src/common/styles/typography.css",
+      "primitives": "OneMoreTaskTracker.WebClient/src/common/styles/primitives/",
+      "components": "OneMoreTaskTracker.WebClient/src/common/ds/",
+      "compositesPlan": "OneMoreTaskTracker.WebClient/src/pages/Gantt/components/",
+      "ownership": {
+        "/colorize": ["tokens.css color + state + signals"],
+        "/typeset": ["typography.css font tokens, heading defaults"],
+        "/animate": ["tokens.css motion tokens"],
+        "/layout": ["per-component CSS, z-index tokens, rare tokens.css"],
+        "/quieter": ["per-component CSS files"],
+        "/bolder": ["per-component CSS files"],
+        "/adapt": [".tsx files + new component CSS"],
+        "/shape": ["new component CSS files; append-only on page CSS"]
+      },
+      "mergeSafety": ".gitattributes sets *.css merge=union as a fallback. Same-file edits should still be the exception, not the rule."
+    },
+    "registers": {
+      "primary": "product",
+      "rationale": "App UI / control room — design serves the product. Brand register would apply to a marketing or landing surface, which this project does not have."
+    }
+  }
+}
