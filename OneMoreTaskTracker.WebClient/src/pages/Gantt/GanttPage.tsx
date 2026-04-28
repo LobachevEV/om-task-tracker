@@ -14,6 +14,7 @@ import type {
   MiniTeamMember,
 } from '../../common/types/feature';
 import type { TeamRosterMember } from '../../common/api/teamApi';
+import { AddFeatureRow } from './components/AddFeatureRow';
 import { GanttChunkStripe } from './components/GanttChunkStripe';
 import { GanttDateHeader } from './components/GanttDateHeader';
 import { GanttEmpty } from './components/GanttEmpty';
@@ -21,7 +22,6 @@ import { GanttFeatureRow } from './components/GanttFeatureRow';
 import { GanttGoToDate } from './components/GanttGoToDate';
 import { GanttTimelineScroller } from './components/GanttTimelineScroller';
 import { GanttToolbar } from './components/GanttToolbar';
-import { CreateFeatureDialog } from './components/CreateFeatureDialog';
 import { usePlanFeatures } from './usePlanFeatures';
 import { useTeamRoster } from './useTeamRoster';
 import { useGanttLayout, type GanttLane } from './useGanttLayout';
@@ -142,7 +142,6 @@ export function GanttPageInternal({
   loadChunk,
 }: GanttPageInternalProps) {
   const { t } = useTranslation('gantt');
-  const [createOpen, setCreateOpen] = useState(false);
   const [goToOpen, setGoToOpen] = useState(false);
 
   const dayPx = DAY_PX_BY_ZOOM[state.zoom];
@@ -202,9 +201,8 @@ export function GanttPageInternal({
   );
 
   const handleCreated = useCallback(
-    (id: number) => {
-      setCreateOpen(false);
-      state.toggleFeatureExpanded(id);
+    (feature: FeatureSummary) => {
+      state.toggleFeatureExpanded(feature.id);
       onRetry();
     },
     [state, onRetry],
@@ -261,14 +259,12 @@ export function GanttPageInternal({
   return (
     <main className="gantt-page" style={pageStyle} data-testid="gantt-page">
       <GanttToolbar
-        role={role}
         zoom={state.zoom}
         scope={state.scope}
         stateFilter={state.stateFilter}
         onZoomChange={state.setZoom}
         onScopeChange={state.setScope}
         onStateFilterChange={state.setStateFilter}
-        onNewFeature={isManager ? () => setCreateOpen(true) : undefined}
       />
 
       {rosterError ? (
@@ -310,10 +306,7 @@ export function GanttPageInternal({
           </Callout>
         </div>
       ) : !hasAnyFeatures ? (
-        <GanttEmpty
-          canCreate={isManager}
-          onCreate={isManager ? () => setCreateOpen(true) : undefined}
-        />
+        <GanttEmpty isManager={isManager} onCreated={handleCreated} />
       ) : (
         <section className="gantt-page__timeline-wrap">
           <GanttTimelineScroller
@@ -362,6 +355,7 @@ export function GanttPageInternal({
                 role="list"
                 style={{ inlineSize: `${lanesInlinePx}px` }}
               >
+                {isManager ? <AddFeatureRow onCreated={handleCreated} /> : null}
                 {layout.lanes.map((lane: GanttLane) => {
                   const lead = resolveMember(lane.feature.leadUserId);
                   const expanded = state.expandedFeatureIds.has(lane.feature.id);
@@ -411,14 +405,6 @@ export function GanttPageInternal({
         onSubmit={handleGoToSubmit}
         onClose={() => setGoToOpen(false)}
       />
-
-      {isManager ? (
-        <CreateFeatureDialog
-          open={createOpen}
-          onClose={() => setCreateOpen(false)}
-          onCreated={(feature) => handleCreated(feature.id)}
-        />
-      ) : null}
     </main>
   );
 }

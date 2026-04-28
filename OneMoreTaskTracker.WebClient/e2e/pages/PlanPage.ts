@@ -29,16 +29,13 @@ export class PlanPage {
     this.page = page;
     this.header = new AppHeader(page);
     this.toolbar = page.getByRole('toolbar');
-    this.newFeatureButton = this.toolbar.getByRole('button', {
-      // t('gantt:toolbar.newFeature') → "New feature" / "Новая фича". The
-      // button is rendered with a leading "+ " glyph so we don't anchor the
-      // start of the string.
+    // The "+ New feature" affordance is now an inline ghost button rendered
+    // by `AddFeatureRow` at the head of the lanes list (and inside the
+    // empty-state when there are no features yet). Manager-only — for
+    // non-managers it is not rendered at all.
+    this.newFeatureButton = page.getByRole('button', {
       name: /new feature|новая фича/i,
     });
-    // The toolbar title block renders `{t('gantt:subtitle')}` as an <h2>. On
-    // top of that, the route component adds no dedicated <h1>, so we match
-    // the toolbar heading which always contains "Plan" / "План" as the
-    // eyebrow + subtitle text.
     this.heading = page.getByRole('heading', { name: /plan|план/i });
   }
 
@@ -47,36 +44,31 @@ export class PlanPage {
     await expect(this.toolbar).toBeVisible();
   }
 
-  // --- Create feature dialog ---------------------------------------------
+  // --- Inline create flow (AddFeatureRow) --------------------------------
 
-  async openCreateFeatureDialog(): Promise<void> {
-    await this.newFeatureButton.click();
-    await expect(this.createFeatureDialog).toBeVisible();
+  /** The inline form shell shown after activating the ghost button. */
+  get createFeatureForm(): Locator {
+    return this.page.locator('.add-feature-row__form');
   }
 
-  /** Dialog shell rendered by `CreateFeatureDialog` → `Dialog` DS component. */
-  get createFeatureDialog(): Locator {
-    return this.page
-      .getByRole('dialog')
-      .filter({ hasText: /create feature|создать фичу/i });
+  /** Activates the inline ghost button so the title input is focused. */
+  async openCreateFeatureDialog(): Promise<void> {
+    await this.newFeatureButton.first().click();
+    await expect(this.createFeatureForm).toBeVisible();
   }
 
   /**
-   * Fills the create dialog. `plannedStart` / `plannedEnd` were removed from
-   * the create form when per-stage planning launched — those dates now live
-   * inside the per-stage planning table on the drawer's edit view.
+   * Fills the inline title input. Description was dropped from the create
+   * surface; it can be added via the existing inline editors after the row
+   * appears, so the `description` argument is ignored.
    */
   async fillCreateFeatureForm(values: {
     title: string;
     description?: string;
   }): Promise<void> {
-    const dialog = this.createFeatureDialog;
-    // t('gantt:drawer.fields.title') → "Title" / "Название"
-    await dialog.getByLabel(/^(?:title|название)$/i).fill(values.title);
-    if (values.description !== undefined) {
-      // t('gantt:drawer.fields.description') → "Description" / "Описание"
-      await dialog.getByLabel(/^(?:description|описание)$/i).fill(values.description);
-    }
+    const input = this.createFeatureForm.getByLabel(/^(?:title|название)$/i);
+    await input.fill(values.title);
+    void values.description;
   }
 
   // --- Stage planning ----------------------------------------------------
@@ -140,15 +132,12 @@ export class PlanPage {
   }
 
   async submitCreateFeature(): Promise<number> {
-    const dialog = this.createFeatureDialog;
-    // t('gantt:create.submit') → "Create" / "Создать". Anchor to end so we
-    // don't match "Create feature" (the dialog heading text).
-    const submit = dialog.getByRole('button', { name: /^(?:create|создать)$/i });
+    const input = this.createFeatureForm.getByLabel(/^(?:title|название)$/i);
     const [response] = await Promise.all([
       this.page.waitForResponse(
         (r) => r.url().endsWith('/api/plan/features') && r.request().method() === 'POST',
       ),
-      submit.click(),
+      input.press('Enter'),
     ]);
     return response.status();
   }

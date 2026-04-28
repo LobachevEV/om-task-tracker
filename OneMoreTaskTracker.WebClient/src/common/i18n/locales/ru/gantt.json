@@ -103,12 +103,8 @@
     }
   },
   "create": {
-    "title": "Создать фичу",
-    "submit": "Создать",
-    "cancel": "Отмена",
-    "titlePlaceholder": "Что за фича?",
-    "leadLabel": "Лид",
-    "leadSelf": "Вы ({{email}})"
+    "inlineHint": "Enter — добавить, Esc — отменить",
+    "failed": "Не удалось добавить. Повторите."
   },
   "empty": {
     "title": "В работе ничего нет.",

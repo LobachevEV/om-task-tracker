@@ -95,12 +95,8 @@
     }
   },
   "create": {
-    "title": "Create feature",
-    "submit": "Create",
-    "cancel": "Cancel",
-    "titlePlaceholder": "What is this feature?",
-    "leadLabel": "Lead",
-    "leadSelf": "You ({{email}})"
+    "inlineHint": "Press Enter to add, Esc to cancel",
+    "failed": "Couldn't add. Try again."
   },
   "empty": {
     "title": "Nothing in flight.",

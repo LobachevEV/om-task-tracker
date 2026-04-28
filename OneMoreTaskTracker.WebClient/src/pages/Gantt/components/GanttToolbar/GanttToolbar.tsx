@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Kbd } from '../../../../common/ds';
 import type { FeatureScope, FeatureState } from '../../../../common/types/feature';
-import type { UserRole } from '../../../../common/auth/auth';
 import { ZOOM_DAYS, type ZoomLevel } from '../../ganttMath';
 import { FEATURE_STATE_ENTRIES } from '../../stateConfig';
 import { GanttLegend } from '../GanttLegend';
@@ -16,14 +15,12 @@ const STATE_FILTER_ORDER: readonly (FeatureState | 'all')[] = [
 ];
 
 export interface GanttToolbarProps {
-  role: UserRole;
   zoom: ZoomLevel;
   scope: FeatureScope;
   stateFilter: FeatureState | 'all';
   onZoomChange: (zoom: ZoomLevel) => void;
   onScopeChange: (scope: FeatureScope) => void;
   onStateFilterChange: (state: FeatureState | 'all') => void;
-  onNewFeature?: () => void;
 }
 
 function isTypingTarget(target: EventTarget | null): boolean {
@@ -34,17 +31,14 @@ function isTypingTarget(target: EventTarget | null): boolean {
 }
 
 export function GanttToolbar({
-  role,
   zoom,
   scope,
   stateFilter,
   onZoomChange,
   onScopeChange,
   onStateFilterChange,
-  onNewFeature,
 }: GanttToolbarProps) {
   const { t } = useTranslation('gantt');
-  const isManager = role === 'Manager';
 
   const cycleZoom = useCallback(
     (direction: 1 | -1) => {
@@ -184,12 +178,6 @@ export function GanttToolbar({
         </div>
 
         <GanttLegend />
-
-        {isManager && onNewFeature ? (
-          <Button type="button" variant="primary" size="sm" onClick={onNewFeature}>
-            + {t('toolbar.newFeature')}
-          </Button>
-        ) : null}
       </div>
     </div>
   );
