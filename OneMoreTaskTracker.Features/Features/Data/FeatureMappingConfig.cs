@@ -24,19 +24,6 @@ public static class FeatureMappingConfig
 
         FeatureStagePlanMappingConfig.Register();
 
-        TypeAdapterConfig<Feature, CreateDto>.NewConfig()
-            .Map(d => d.Id,             s => s.Id)
-            .Map(d => d.Title,          s => s.Title)
-            .Map(d => d.Description,    s => s.Description ?? string.Empty)
-            .Map(d => d.State,          s => (ProtoFeatureState)s.State)
-            .Map(d => d.PlannedStart,   s => s.PlannedStart == null ? string.Empty : s.PlannedStart.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.PlannedEnd,     s => s.PlannedEnd   == null ? string.Empty : s.PlannedEnd.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.LeadUserId,     s => s.LeadUserId)
-            .Map(d => d.ManagerUserId,  s => s.ManagerUserId)
-            .Map(d => d.CreatedAt,      s => s.CreatedAt.ToString("O"))
-            .Map(d => d.UpdatedAt,      s => s.UpdatedAt.ToString("O"))
-            .Map(d => d.Version,        s => s.Version);
-
         TypeAdapterConfig<Feature, ListDto>.NewConfig()
             .Map(d => d.Id,             s => s.Id)
             .Map(d => d.Title,          s => s.Title)
