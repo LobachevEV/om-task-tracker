@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using OneMoreTaskTracker.Api.Auth;
 using OneMoreTaskTracker.Api.Middleware;
+using OneMoreTaskTracker.Api.Time;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
@@ -51,6 +52,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 builder.Services.AddAuthorization();
+
+builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
+builder.Services.AddScoped<IRequestClock, RequestClock>();
 
 builder.Services.AddControllers();
 

@@ -17,6 +17,8 @@ builder.Configuration
 builder.Services.AddGrpc(o => o.Interceptors.Add<ValidationExceptionInterceptor>());
 builder.Services.AddValidatorsFromAssemblyContaining<CreateFeatureRequestValidator>();
 FeatureMappingConfig.Register();
+builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
+builder.Services.AddScoped<IRequestClock, RequestClock>();
 builder.Services.AddDbContextPool<FeaturesDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("FeaturesContext")));
 

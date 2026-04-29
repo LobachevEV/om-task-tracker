@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.5.0" />
     <ProjectReference Include="../../OneMoreTaskTracker.Api/OneMoreTaskTracker.Api.csproj" />
   </ItemGroup>
 
