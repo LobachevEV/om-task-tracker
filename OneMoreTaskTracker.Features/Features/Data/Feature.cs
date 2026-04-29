@@ -31,8 +31,7 @@ public class Feature
 
     public void RenameTitle(string newTitle, DateTime now)
     {
-        if (newTitle is null) throw new ArgumentNullException(nameof(newTitle));
-        Title = newTitle;
+        Title = newTitle ?? throw new ArgumentNullException(nameof(newTitle));
         Version += 1;
         UpdatedAt = now;
     }
