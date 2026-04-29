@@ -55,8 +55,6 @@ public class ListFeaturesHandler(FeaturesDbContext db) : FeaturesLister.Features
             value = default;
             return false;
         }
-        if (!DateOnly.TryParseExact(raw, "yyyy-MM-dd", out value))
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "window_* must be YYYY-MM-DD"));
-        return true;
+        return DateOnly.TryParseExact(raw, "yyyy-MM-dd", out value);
     }
 }

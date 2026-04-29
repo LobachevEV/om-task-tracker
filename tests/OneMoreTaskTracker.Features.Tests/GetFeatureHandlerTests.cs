@@ -3,6 +3,7 @@ using Grpc.Core;
 using Microsoft.EntityFrameworkCore;
 using OneMoreTaskTracker.Features.Features.Data;
 using OneMoreTaskTracker.Features.Features.Get;
+using OneMoreTaskTracker.Features.Tests.TestHelpers;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using Xunit;
 using ProtoFeatureState = OneMoreTaskTracker.Proto.Features.FeatureState;
@@ -21,9 +22,10 @@ public sealed class GetFeatureHandlerTests
     [Fact]
     public async Task Get_IdZero_ThrowsInvalidArgument()
     {
-        var handler = new GetFeatureHandler(NewDb());
+        var validator = new GetFeatureRequestValidator();
+        var request = new GetFeatureRequest { Id = 0 };
 
-        var act = () => handler.Get(new GetFeatureRequest { Id = 0 }, TestServerCallContext.Create());
+        var act = () => ValidationPipeline.ValidateAsync(validator, request);
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);

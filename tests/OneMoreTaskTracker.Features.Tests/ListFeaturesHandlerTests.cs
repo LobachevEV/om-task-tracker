@@ -3,6 +3,7 @@ using Grpc.Core;
 using Microsoft.EntityFrameworkCore;
 using OneMoreTaskTracker.Features.Features.Data;
 using OneMoreTaskTracker.Features.Features.List;
+using OneMoreTaskTracker.Features.Tests.TestHelpers;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using Xunit;
 
@@ -97,11 +98,10 @@ public sealed class ListFeaturesHandlerTests
     [Fact]
     public async Task List_InvalidWindowStart_ThrowsInvalidArgument()
     {
-        var handler = new ListFeaturesHandler(NewDb());
+        var validator = new ListFeaturesRequestValidator();
+        var request = new ListFeaturesRequest { WindowStart = "not-a-date" };
 
-        var act = () => handler.List(
-            new ListFeaturesRequest { WindowStart = "not-a-date" },
-            TestServerCallContext.Create());
+        var act = () => ValidationPipeline.ValidateAsync(validator, request);
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);

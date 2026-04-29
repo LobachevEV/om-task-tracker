@@ -10,9 +10,6 @@ public class GetFeatureHandler(FeaturesDbContext db) : FeatureGetter.FeatureGett
 {
     public override async Task<FeatureDto> Get(GetFeatureRequest request, ServerCallContext context)
     {
-        if (request.Id <= 0)
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "id is required"));
-
         // Include stage plans (single LEFT JOIN) so every read path returns
         // exactly 5 rows per feature without a second round-trip. Canonical
         // ordering by Stage is applied inside the Mapster projection so the

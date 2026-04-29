@@ -1,9 +1,11 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using OneMoreTaskTracker.Features.Features.Create;
 using OneMoreTaskTracker.Features.Features.Data;
 using OneMoreTaskTracker.Features.Features.Get;
 using OneMoreTaskTracker.Features.Features.List;
 using OneMoreTaskTracker.Features.Features.Update;
+using OneMoreTaskTracker.Features.Validation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +14,8 @@ builder.Configuration
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
 
-builder.Services.AddGrpc();
+builder.Services.AddGrpc(o => o.Interceptors.Add<ValidationExceptionInterceptor>());
+builder.Services.AddValidatorsFromAssemblyContaining<CreateFeatureRequestValidator>();
 FeatureMappingConfig.Register();
 builder.Services.AddDbContextPool<FeaturesDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("FeaturesContext")));

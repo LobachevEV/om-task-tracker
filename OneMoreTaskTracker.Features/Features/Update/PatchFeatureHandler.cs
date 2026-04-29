@@ -10,36 +10,16 @@ public sealed class PatchFeatureHandler(
     FeaturesDbContext db,
     ILogger<PatchFeatureHandler> logger) : FeaturePatcher.FeaturePatcherBase
 {
-    private const int TitleMaxLength = 200;
-    private const int DescriptionMaxLength = 4000;
-
     public override async Task<FeatureDto> Patch(PatchFeatureRequest request, ServerCallContext context)
     {
-        if (request.Id <= 0)
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "id is required"));
-
-        string? trimmedTitle = null;
-        if (request.HasTitle)
-        {
-            trimmedTitle = (request.Title ?? string.Empty).Trim();
-            if (trimmedTitle.Length == 0)
-                throw new RpcException(new Status(StatusCode.InvalidArgument, "title is required"));
-            if (trimmedTitle.Length > TitleMaxLength)
-                throw new RpcException(new Status(StatusCode.InvalidArgument, "title too long"));
-        }
+        string? trimmedTitle = request.HasTitle ? (request.Title ?? string.Empty).Trim() : null;
 
         string? normalizedDescription = null;
         if (request.HasDescription)
         {
-            var raw = request.Description ?? string.Empty;
-            if (raw.Length > DescriptionMaxLength)
-                throw new RpcException(new Status(StatusCode.InvalidArgument, "description too long"));
-            var trimmed = raw.TrimEnd();
+            var trimmed = (request.Description ?? string.Empty).TrimEnd();
             normalizedDescription = string.IsNullOrWhiteSpace(trimmed) ? null : trimmed;
         }
-
-        if (request.HasLeadUserId && request.LeadUserId <= 0)
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "lead_user_id is required"));
 
         var feature = await db.Features
                           .Include(f => f.StagePlans)

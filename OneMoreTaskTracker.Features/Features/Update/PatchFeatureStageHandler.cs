@@ -11,21 +11,19 @@ public sealed class PatchFeatureStageHandler(
     FeaturesDbContext db,
     ILogger<PatchFeatureStageHandler> logger) : FeatureStagePatcher.FeatureStagePatcherBase
 {
+    private static readonly string[] CanonicalStageNames =
+    [
+        nameof(FeatureState.CsApproving),
+        nameof(FeatureState.Development),
+        nameof(FeatureState.Testing),
+        nameof(FeatureState.EthalonTesting),
+        nameof(FeatureState.LiveRelease),
+    ];
+
     public override async Task<FeatureDto> Patch(PatchFeatureStageRequest request, ServerCallContext context)
     {
-        if (request.FeatureId <= 0)
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "feature_id is required"));
-
-        if (!Enum.IsDefined(typeof(ProtoFeatureState), request.Stage))
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "stage is required"));
-
-        DateOnly? parsedStart = null;
-        if (request.HasPlannedStart)
-            parsedStart = FeatureValidation.ParseOptionalDate(request.PlannedStart, "planned_start");
-
-        DateOnly? parsedEnd = null;
-        if (request.HasPlannedEnd)
-            parsedEnd = FeatureValidation.ParseOptionalDate(request.PlannedEnd, "planned_end");
+        var parsedStart = request.HasPlannedStart ? ParseDate(request.PlannedStart) : null;
+        var parsedEnd   = request.HasPlannedEnd   ? ParseDate(request.PlannedEnd)   : null;
 
         var feature = await db.Features
                           .Include(f => f.StagePlans)
@@ -46,14 +44,13 @@ public sealed class PatchFeatureStageHandler(
         {
             var prospectiveStart = request.HasPlannedStart ? parsedStart : plan.PlannedStart;
             var prospectiveEnd = request.HasPlannedEnd ? parsedEnd : plan.PlannedEnd;
-            FeatureValidation.ValidateDateOrder(prospectiveStart, prospectiveEnd);
 
             var snapshots = feature.StagePlans
                 .Select(sp => sp.Stage == stageOrdinal
                     ? new StagePlanSnapshot(sp.Stage, prospectiveStart, prospectiveEnd)
                     : new StagePlanSnapshot(sp.Stage, sp.PlannedStart, sp.PlannedEnd))
                 .ToList();
-            FeatureValidation.ValidateStageOrder(snapshots, stageOrdinal);
+            EnsureStageOrder(snapshots, stageOrdinal);
         }
 
         var now = DateTime.UtcNow;
@@ -114,4 +111,44 @@ public sealed class PatchFeatureStageHandler(
         dto.StagePlans.Add(FeatureMappingConfig.BuildProtoStagePlans(feature));
         return dto;
     }
+
+    private static DateOnly? ParseDate(string raw) =>
+        string.IsNullOrWhiteSpace(raw)
+            ? null
+            : DateOnly.ParseExact(raw, "yyyy-MM-dd");
+
+    private static void EnsureStageOrder(IReadOnlyList<StagePlanSnapshot> stages, int mutatedOrdinal)
+    {
+        var ordered = stages.OrderBy(s => s.Ordinal).ToArray();
+
+        for (int i = 0; i < ordered.Length - 1; i++)
+        {
+            var earlier = ordered[i];
+            var later = ordered[i + 1];
+
+            if (earlier.PlannedEnd is not { } earlierEnd) continue;
+            if (later.PlannedStart is not { } laterStart) continue;
+
+            if (laterStart < earlierEnd)
+            {
+                var neighbourOrdinal = mutatedOrdinal == earlier.Ordinal
+                    ? later.Ordinal
+                    : earlier.Ordinal;
+
+                throw new RpcException(new Status(
+                    StatusCode.FailedPrecondition,
+                    ConflictDetail.StageOrderOverlap(StageName(neighbourOrdinal))));
+            }
+        }
+    }
+
+    private static string StageName(int ordinal) =>
+        ordinal >= 0 && ordinal < CanonicalStageNames.Length
+            ? CanonicalStageNames[ordinal]
+            : ordinal.ToString();
+
+    private readonly record struct StagePlanSnapshot(
+        int Ordinal,
+        DateOnly? PlannedStart,
+        DateOnly? PlannedEnd);
 }

@@ -7,6 +7,7 @@ using OneMoreTaskTracker.Features.Features.Data;
 using OneMoreTaskTracker.Features.Features.Get;
 using OneMoreTaskTracker.Features.Features.List;
 using OneMoreTaskTracker.Features.Features.Update;
+using OneMoreTaskTracker.Features.Tests.TestHelpers;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
@@ -31,9 +32,9 @@ public sealed class HandlerRegistrationTests
     [Fact]
     public async Task CreateFeatureHandler_RejectsMissingTitle()
     {
-        var handler = new CreateFeatureHandler(NewDb());
+        var validator = new CreateFeatureRequestValidator();
 
-        var act = () => handler.Create(new CreateFeatureRequest(), TestServerCallContext.Create());
+        var act = () => ValidationPipeline.ValidateAsync(validator, new CreateFeatureRequest());
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
@@ -63,9 +64,9 @@ public sealed class HandlerRegistrationTests
     [Fact]
     public async Task GetFeatureHandler_RejectsMissingId()
     {
-        var handler = new GetFeatureHandler(NewDb());
+        var validator = new GetFeatureRequestValidator();
 
-        var act = () => handler.Get(new GetFeatureRequest(), TestServerCallContext.Create());
+        var act = () => ValidationPipeline.ValidateAsync(validator, new GetFeatureRequest());
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);

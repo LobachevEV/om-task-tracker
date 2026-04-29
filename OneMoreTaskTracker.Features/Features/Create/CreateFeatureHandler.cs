@@ -21,14 +21,8 @@ public class CreateFeatureHandler(FeaturesDbContext db) : FeatureCreator.Feature
 
     public override async Task<FeatureDto> Create(CreateFeatureRequest request, ServerCallContext context)
     {
-        if (string.IsNullOrWhiteSpace(request.Title))
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "title is required"));
-        if (request.ManagerUserId <= 0)
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "manager_user_id is required"));
-
-        var plannedStart = FeatureValidation.ParseOptionalDate(request.PlannedStart, "planned_start");
-        var plannedEnd   = FeatureValidation.ParseOptionalDate(request.PlannedEnd,   "planned_end");
-        FeatureValidation.ValidateDateOrder(plannedStart, plannedEnd);
+        var plannedStart = ParseDate(request.PlannedStart);
+        var plannedEnd   = ParseDate(request.PlannedEnd);
 
         var now = DateTime.UtcNow;
 
@@ -70,4 +64,9 @@ public class CreateFeatureHandler(FeaturesDbContext db) : FeatureCreator.Feature
         dto.StagePlans.Add(FeatureMappingConfig.BuildProtoStagePlans(feature));
         return dto;
     }
+
+    private static DateOnly? ParseDate(string raw) =>
+        string.IsNullOrWhiteSpace(raw)
+            ? null
+            : DateOnly.ParseExact(raw, "yyyy-MM-dd");
 }

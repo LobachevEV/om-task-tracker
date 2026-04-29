@@ -3,6 +3,7 @@ using Grpc.Core;
 using Microsoft.EntityFrameworkCore;
 using OneMoreTaskTracker.Features.Features.Create;
 using OneMoreTaskTracker.Features.Features.Data;
+using OneMoreTaskTracker.Features.Tests.TestHelpers;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using Xunit;
 using ProtoFeatureState = OneMoreTaskTracker.Proto.Features.FeatureState;
@@ -44,11 +45,10 @@ public sealed class CreateFeatureHandlerTests
     [InlineData("   ")]
     public async Task Create_EmptyOrWhitespaceTitle_ThrowsInvalidArgument(string title)
     {
-        var handler = new CreateFeatureHandler(NewDb());
+        var validator = new CreateFeatureRequestValidator();
+        var request = new CreateFeatureRequest { Title = title, ManagerUserId = 1 };
 
-        var act = () => handler.Create(
-            new CreateFeatureRequest { Title = title, ManagerUserId = 1 },
-            TestServerCallContext.Create());
+        var act = () => ValidationPipeline.ValidateAsync(validator, request);
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
@@ -58,11 +58,10 @@ public sealed class CreateFeatureHandlerTests
     [Fact]
     public async Task Create_MissingManagerUserId_ThrowsInvalidArgument()
     {
-        var handler = new CreateFeatureHandler(NewDb());
+        var validator = new CreateFeatureRequestValidator();
+        var request = new CreateFeatureRequest { Title = "X" };
 
-        var act = () => handler.Create(
-            new CreateFeatureRequest { Title = "X" },
-            TestServerCallContext.Create());
+        var act = () => ValidationPipeline.ValidateAsync(validator, request);
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
@@ -72,11 +71,10 @@ public sealed class CreateFeatureHandlerTests
     [Fact]
     public async Task Create_InvalidDateString_ThrowsInvalidArgumentNamingField()
     {
-        var handler = new CreateFeatureHandler(NewDb());
+        var validator = new CreateFeatureRequestValidator();
+        var request = new CreateFeatureRequest { Title = "X", ManagerUserId = 1, PlannedStart = "not-a-date" };
 
-        var act = () => handler.Create(
-            new CreateFeatureRequest { Title = "X", ManagerUserId = 1, PlannedStart = "not-a-date" },
-            TestServerCallContext.Create());
+        var act = () => ValidationPipeline.ValidateAsync(validator, request);
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
@@ -86,17 +84,16 @@ public sealed class CreateFeatureHandlerTests
     [Fact]
     public async Task Create_PlannedEndBeforePlannedStart_ThrowsInvalidArgument()
     {
-        var handler = new CreateFeatureHandler(NewDb());
+        var validator = new CreateFeatureRequestValidator();
+        var request = new CreateFeatureRequest
+        {
+            Title = "X",
+            ManagerUserId = 1,
+            PlannedStart = "2026-05-10",
+            PlannedEnd   = "2026-05-01",
+        };
 
-        var act = () => handler.Create(
-            new CreateFeatureRequest
-            {
-                Title = "X",
-                ManagerUserId = 1,
-                PlannedStart = "2026-05-10",
-                PlannedEnd   = "2026-05-01",
-            },
-            TestServerCallContext.Create());
+        var act = () => ValidationPipeline.ValidateAsync(validator, request);
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);

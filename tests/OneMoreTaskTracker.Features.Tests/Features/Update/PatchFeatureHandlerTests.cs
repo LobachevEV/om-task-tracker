@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using OneMoreTaskTracker.Features.Features.Create;
 using OneMoreTaskTracker.Features.Features.Data;
 using OneMoreTaskTracker.Features.Features.Update;
+using OneMoreTaskTracker.Features.Tests.TestHelpers;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureCommand;
 using Xunit;
@@ -183,17 +184,15 @@ public sealed class PatchFeatureHandlerTests
     [Fact]
     public async Task Patch_EmptyTitle_ThrowsInvalidArgument()
     {
-        var db = NewDb();
-        var created = await CreateFeatureAsync(db);
+        var validator = new PatchFeatureRequestValidator();
+        var request = new PatchFeatureRequest
+        {
+            Id = 1,
+            CallerUserId = 1,
+            Title = "   ",
+        };
 
-        var act = () => Handler(db).Patch(
-            new PatchFeatureRequest
-            {
-                Id = created.Id,
-                CallerUserId = 1,
-                Title = "   ",
-            },
-            TestServerCallContext.Create());
+        var act = () => ValidationPipeline.ValidateAsync(validator, request);
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
@@ -202,17 +201,15 @@ public sealed class PatchFeatureHandlerTests
     [Fact]
     public async Task Patch_TooLongTitle_ThrowsInvalidArgument()
     {
-        var db = NewDb();
-        var created = await CreateFeatureAsync(db);
+        var validator = new PatchFeatureRequestValidator();
+        var request = new PatchFeatureRequest
+        {
+            Id = 1,
+            CallerUserId = 1,
+            Title = new string('x', 201),
+        };
 
-        var act = () => Handler(db).Patch(
-            new PatchFeatureRequest
-            {
-                Id = created.Id,
-                CallerUserId = 1,
-                Title = new string('x', 201),
-            },
-            TestServerCallContext.Create());
+        var act = () => ValidationPipeline.ValidateAsync(validator, request);
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
@@ -221,17 +218,15 @@ public sealed class PatchFeatureHandlerTests
     [Fact]
     public async Task Patch_TooLongDescription_ThrowsInvalidArgument()
     {
-        var db = NewDb();
-        var created = await CreateFeatureAsync(db);
+        var validator = new PatchFeatureRequestValidator();
+        var request = new PatchFeatureRequest
+        {
+            Id = 1,
+            CallerUserId = 1,
+            Description = new string('d', 4001),
+        };
 
-        var act = () => Handler(db).Patch(
-            new PatchFeatureRequest
-            {
-                Id = created.Id,
-                CallerUserId = 1,
-                Description = new string('d', 4001),
-            },
-            TestServerCallContext.Create());
+        var act = () => ValidationPipeline.ValidateAsync(validator, request);
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
@@ -261,17 +256,15 @@ public sealed class PatchFeatureHandlerTests
     [Fact]
     public async Task Patch_LeadUserIdZero_ThrowsInvalidArgument()
     {
-        var db = NewDb();
-        var created = await CreateFeatureAsync(db);
+        var validator = new PatchFeatureRequestValidator();
+        var request = new PatchFeatureRequest
+        {
+            Id = 1,
+            CallerUserId = 1,
+            LeadUserId = 0,
+        };
 
-        var act = () => Handler(db).Patch(
-            new PatchFeatureRequest
-            {
-                Id = created.Id,
-                CallerUserId = 1,
-                LeadUserId = 0,
-            },
-            TestServerCallContext.Create());
+        var act = () => ValidationPipeline.ValidateAsync(validator, request);
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);

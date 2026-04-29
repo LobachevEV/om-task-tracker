@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using OneMoreTaskTracker.Features.Features.Create;
 using OneMoreTaskTracker.Features.Features.Data;
 using OneMoreTaskTracker.Features.Features.Update;
+using OneMoreTaskTracker.Features.Tests.TestHelpers;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand;
 using Xunit;
@@ -242,18 +243,16 @@ public sealed class PatchFeatureStageHandlerTests
     [Fact]
     public async Task Patch_InvalidPlannedStart_ThrowsInvalidArgument()
     {
-        var db = NewDb();
-        var created = await CreateFeatureAsync(db);
+        var validator = new PatchFeatureStageRequestValidator();
+        var request = new PatchFeatureStageRequest
+        {
+            FeatureId = 1,
+            Stage = ProtoFeatureState.Development,
+            CallerUserId = 1,
+            PlannedStart = "not-a-date",
+        };
 
-        var act = () => Handler(db).Patch(
-            new PatchFeatureStageRequest
-            {
-                FeatureId = created.Id,
-                Stage = ProtoFeatureState.Development,
-                CallerUserId = 1,
-                PlannedStart = "not-a-date",
-            },
-            TestServerCallContext.Create());
+        var act = () => ValidationPipeline.ValidateAsync(validator, request);
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
@@ -262,19 +261,17 @@ public sealed class PatchFeatureStageHandlerTests
     [Fact]
     public async Task Patch_PlannedEndBeforePlannedStartInSameRequest_ThrowsInvalidArgument()
     {
-        var db = NewDb();
-        var created = await CreateFeatureAsync(db);
+        var validator = new PatchFeatureStageRequestValidator();
+        var request = new PatchFeatureStageRequest
+        {
+            FeatureId = 1,
+            Stage = ProtoFeatureState.Development,
+            CallerUserId = 1,
+            PlannedStart = "2026-06-01",
+            PlannedEnd = "2026-05-01",
+        };
 
-        var act = () => Handler(db).Patch(
-            new PatchFeatureStageRequest
-            {
-                FeatureId = created.Id,
-                Stage = ProtoFeatureState.Development,
-                CallerUserId = 1,
-                PlannedStart = "2026-06-01",
-                PlannedEnd = "2026-05-01",
-            },
-            TestServerCallContext.Create());
+        var act = () => ValidationPipeline.ValidateAsync(validator, request);
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
@@ -283,18 +280,16 @@ public sealed class PatchFeatureStageHandlerTests
     [Fact]
     public async Task Patch_YearBelow2000_ThrowsInvalidArgumentWithRealReleaseDateMessage()
     {
-        var db = NewDb();
-        var created = await CreateFeatureAsync(db);
+        var validator = new PatchFeatureStageRequestValidator();
+        var request = new PatchFeatureStageRequest
+        {
+            FeatureId = 1,
+            Stage = ProtoFeatureState.Development,
+            CallerUserId = 1,
+            PlannedStart = "1899-01-01",
+        };
 
-        var act = () => Handler(db).Patch(
-            new PatchFeatureStageRequest
-            {
-                FeatureId = created.Id,
-                Stage = ProtoFeatureState.Development,
-                CallerUserId = 1,
-                PlannedStart = "1899-01-01",
-            },
-            TestServerCallContext.Create());
+        var act = () => ValidationPipeline.ValidateAsync(validator, request);
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
@@ -356,18 +351,16 @@ public sealed class PatchFeatureStageHandlerTests
     [Fact]
     public async Task Patch_UndefinedStage_ThrowsInvalidArgument()
     {
-        var db = NewDb();
-        var created = await CreateFeatureAsync(db);
+        var validator = new PatchFeatureStageRequestValidator();
+        var request = new PatchFeatureStageRequest
+        {
+            FeatureId = 1,
+            Stage = (ProtoFeatureState)999,
+            CallerUserId = 1,
+            StageOwnerUserId = 1,
+        };
 
-        var act = () => Handler(db).Patch(
-            new PatchFeatureStageRequest
-            {
-                FeatureId = created.Id,
-                Stage = (ProtoFeatureState)999,
-                CallerUserId = 1,
-                StageOwnerUserId = 1,
-            },
-            TestServerCallContext.Create());
+        var act = () => ValidationPipeline.ValidateAsync(validator, request);
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
