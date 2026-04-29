@@ -21,7 +21,9 @@ public sealed class FeaturesDbContextSmokeTests
             Title = "Smoke test feature",
             LeadUserId = 1,
             ManagerUserId = 2,
+            CreatedAt = DateTime.UtcNow,
         };
+        feature.Touch(DateTime.UtcNow);
         ctx.Features.Add(feature);
         ctx.SaveChanges();
 

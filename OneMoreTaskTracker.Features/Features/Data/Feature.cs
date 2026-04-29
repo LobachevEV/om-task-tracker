@@ -15,8 +15,8 @@ public class Feature
     public int LeadUserId { get; set; }
     public int ManagerUserId { get; set; }
 
-    public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; private set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; init; }
+    public DateTime UpdatedAt { get; private set; }
 
     // Cascade-delete configured in FeaturesDbContext.OnModelCreating. Always
     // exactly 5 rows per feature (materialized on create + guaranteed by the

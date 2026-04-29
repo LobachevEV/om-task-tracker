@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace OneMoreTaskTracker.Features.Features.Data;
 
-public static class DevFeatureSeeder
+public sealed class DevFeatureSeeder(IRequestClock clock)
 {
     // IDs mirror the insert order in OneMoreTaskTracker.Users/Data/DevDataSeeder.cs:
     // manager(1), alice.frontend(2), bob.frontend(3), charlie.backend(4), dave.backend(5), eve.qa(6).
@@ -82,12 +82,12 @@ public static class DevFeatureSeeder
             LegacyPlannedEnd:    new DateOnly(2030, 12, 31)),
     ];
 
-    public static async Task SeedAsync(FeaturesDbContext dbContext, CancellationToken cancellationToken = default)
+    public async Task SeedAsync(FeaturesDbContext dbContext, CancellationToken cancellationToken = default)
     {
         if (await dbContext.Features.AnyAsync(f => f.ManagerUserId == SeededManagerUserId, cancellationToken))
             return;
 
-        var now = DateTime.UtcNow;
+        var now = clock.GetUtcNow();
 
         foreach (var f in Features)
         {

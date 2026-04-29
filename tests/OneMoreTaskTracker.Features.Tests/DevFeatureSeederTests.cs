@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using OneMoreTaskTracker.Features.Features.Data;
+using OneMoreTaskTracker.Features.Tests.TestHelpers;
 using Xunit;
 
 namespace OneMoreTaskTracker.Features.Tests;
@@ -12,12 +13,14 @@ public sealed class DevFeatureSeederTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options);
 
+    private static DevFeatureSeeder NewSeeder() => new(TestRequestClock.System());
+
     [Fact]
     public async Task SeedAsync_OnEmptyDb_InsertsSeedFeaturesForSeededManager()
     {
         await using var db = NewDb();
 
-        await DevFeatureSeeder.SeedAsync(db);
+        await NewSeeder().SeedAsync(db);
 
         var features = await db.Features.AsNoTracking().ToListAsync();
         features.Should().NotBeEmpty();
@@ -35,10 +38,10 @@ public sealed class DevFeatureSeederTests
     {
         await using var db = NewDb();
 
-        await DevFeatureSeeder.SeedAsync(db);
+        await NewSeeder().SeedAsync(db);
         var countAfterFirst = await db.Features.CountAsync();
 
-        await DevFeatureSeeder.SeedAsync(db);
+        await NewSeeder().SeedAsync(db);
         var countAfterSecond = await db.Features.CountAsync();
 
         countAfterSecond.Should().Be(countAfterFirst);
@@ -48,15 +51,18 @@ public sealed class DevFeatureSeederTests
     public async Task SeedAsync_WhenSeededManagerAlreadyHasFeatures_DoesNotInsertAnything()
     {
         await using var db = NewDb();
-        db.Features.Add(new Feature
+        var preExisting = new Feature
         {
             Title         = "Pre-existing",
             ManagerUserId = DevFeatureSeeder.SeededManagerUserId,
             LeadUserId    = DevFeatureSeeder.SeededManagerUserId,
-        });
+            CreatedAt     = DateTime.UtcNow,
+        };
+        preExisting.Touch(DateTime.UtcNow);
+        db.Features.Add(preExisting);
         await db.SaveChangesAsync();
 
-        await DevFeatureSeeder.SeedAsync(db);
+        await NewSeeder().SeedAsync(db);
 
         var titles = await db.Features.AsNoTracking().Select(f => f.Title).ToListAsync();
         titles.Should().ContainSingle().Which.Should().Be("Pre-existing");
@@ -67,7 +73,7 @@ public sealed class DevFeatureSeederTests
     {
         await using var db = NewDb();
 
-        await DevFeatureSeeder.SeedAsync(db);
+        await NewSeeder().SeedAsync(db);
 
         // Legacy Feature.PlannedStart/End is derived from the stage plans (min/max
         // of populated dates). Empty seed feature ("Legacy API sunset") has all
@@ -85,7 +91,7 @@ public sealed class DevFeatureSeederTests
     {
         await using var db = NewDb();
 
-        await DevFeatureSeeder.SeedAsync(db);
+        await NewSeeder().SeedAsync(db);
 
         var features = await db.Features.AsNoTracking().Include(f => f.StagePlans).ToListAsync();
         features.Should().OnlyContain(f => f.StagePlans.Count == 5);
@@ -100,7 +106,7 @@ public sealed class DevFeatureSeederTests
     {
         await using var db = NewDb();
 
-        await DevFeatureSeeder.SeedAsync(db);
+        await NewSeeder().SeedAsync(db);
 
         var features = await db.Features.AsNoTracking().Include(f => f.StagePlans).ToListAsync();
 

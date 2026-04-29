@@ -19,8 +19,8 @@ public class FeatureStagePlan
     // (per microservices-data.md). `0` (proto3 scalar default) = unassigned.
     public int PerformerUserId { get; set; }
 
-    public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; private set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; init; }
+    public DateTime UpdatedAt { get; private set; }
 
     // Per-stage optimistic-concurrency token (see api-contract.md
     // § "Optimistic Concurrency"). Bumped by every stage-scoped PATCH (owner,

@@ -19,6 +19,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateFeatureRequestValidat
 FeatureMappingConfig.Register();
 builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
 builder.Services.AddScoped<IRequestClock, RequestClock>();
+builder.Services.AddScoped<DevFeatureSeeder>();
 builder.Services.AddDbContextPool<FeaturesDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("FeaturesContext")));
 
@@ -33,7 +34,10 @@ using (var scope = app.Services.CreateScope())
     featuresDb.Database.Migrate();
 
     if (app.Environment.IsDevelopment())
-        await DevFeatureSeeder.SeedAsync(featuresDb);
+    {
+        var seeder = scope.ServiceProvider.GetRequiredService<DevFeatureSeeder>();
+        await seeder.SeedAsync(featuresDb);
+    }
 }
 
 if (args.Contains("--migrate"))
