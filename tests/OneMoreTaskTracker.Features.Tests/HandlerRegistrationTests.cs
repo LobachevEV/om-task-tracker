@@ -43,7 +43,7 @@ public sealed class HandlerRegistrationTests
     [Fact]
     public async Task PatchFeatureHandler_ReturnsNotFoundForUnknownId()
     {
-        var handler = new PatchFeatureHandler(NewDb(), NullLogger<PatchFeatureHandler>.Instance);
+        var handler = new PatchFeatureHandler(NewDb(), NullLogger<PatchFeatureHandler>.Instance, TestRequestClock.System());
 
         var act = () => handler.Patch(new PatchFeatureRequest { Id = 999, Title = "x" }, TestServerCallContext.Create());
 

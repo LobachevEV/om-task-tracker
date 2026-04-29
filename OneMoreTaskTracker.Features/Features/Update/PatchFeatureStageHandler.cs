@@ -9,7 +9,8 @@ namespace OneMoreTaskTracker.Features.Features.Update;
 
 public sealed class PatchFeatureStageHandler(
     FeaturesDbContext db,
-    ILogger<PatchFeatureStageHandler> logger) : FeatureStagePatcher.FeatureStagePatcherBase
+    ILogger<PatchFeatureStageHandler> logger,
+    IRequestClock clock) : FeatureStagePatcher.FeatureStagePatcherBase
 {
     private static readonly string[] CanonicalStageNames =
     [
@@ -50,7 +51,7 @@ public sealed class PatchFeatureStageHandler(
             EnsureStageOrder(snapshots, stageOrdinal);
         }
 
-        var now = DateTime.UtcNow;
+        var now = clock.GetUtcNow();
         var anyMutation = false;
 
         if (request.HasStageOwnerUserId)

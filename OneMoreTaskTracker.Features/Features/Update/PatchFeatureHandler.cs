@@ -8,7 +8,8 @@ namespace OneMoreTaskTracker.Features.Features.Update;
 
 public sealed class PatchFeatureHandler(
     FeaturesDbContext db,
-    ILogger<PatchFeatureHandler> logger) : FeaturePatcher.FeaturePatcherBase
+    ILogger<PatchFeatureHandler> logger,
+    IRequestClock clock) : FeaturePatcher.FeaturePatcherBase
 {
     public override async Task<FeatureDto> Patch(PatchFeatureRequest request, ServerCallContext context)
     {
@@ -23,7 +24,7 @@ public sealed class PatchFeatureHandler(
         if (request.HasExpectedVersion && request.ExpectedVersion != feature.Version)
             throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));
 
-        var now = DateTime.UtcNow;
+        var now = clock.GetUtcNow();
         var anyMutation = false;
 
         if (request.HasTitle)

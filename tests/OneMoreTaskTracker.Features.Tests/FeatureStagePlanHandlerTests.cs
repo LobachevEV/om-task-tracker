@@ -4,6 +4,7 @@ using OneMoreTaskTracker.Features.Features.Create;
 using OneMoreTaskTracker.Features.Features.Data;
 using OneMoreTaskTracker.Features.Features.Get;
 using OneMoreTaskTracker.Features.Features.List;
+using OneMoreTaskTracker.Features.Tests.TestHelpers;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
@@ -28,7 +29,7 @@ public sealed class FeatureStagePlanHandlerTests
             new DbContextOptionsBuilder<FeaturesDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options);
-        var handler = new CreateFeatureHandler(db);
+        var handler = new CreateFeatureHandler(db, TestRequestClock.System());
 
         var dto = await handler.Create(
             new CreateFeatureRequest { Title = "X", ManagerUserId = 1 },
@@ -55,7 +56,7 @@ public sealed class FeatureStagePlanHandlerTests
     public async Task Get_IncludesFiveStagePlansOrderedByStage()
     {
         var db = NewDb();
-        var created = await new CreateFeatureHandler(db).Create(
+        var created = await new CreateFeatureHandler(db, TestRequestClock.System()).Create(
             new CreateFeatureRequest { Title = "X", ManagerUserId = 1 },
             TestServerCallContext.Create());
 
@@ -71,10 +72,10 @@ public sealed class FeatureStagePlanHandlerTests
     public async Task List_IncludesFiveStagePlansPerFeature()
     {
         var db = NewDb();
-        await new CreateFeatureHandler(db).Create(
+        await new CreateFeatureHandler(db, TestRequestClock.System()).Create(
             new CreateFeatureRequest { Title = "A", ManagerUserId = 1 },
             TestServerCallContext.Create());
-        await new CreateFeatureHandler(db).Create(
+        await new CreateFeatureHandler(db, TestRequestClock.System()).Create(
             new CreateFeatureRequest { Title = "B", ManagerUserId = 1 },
             TestServerCallContext.Create());
 

@@ -5,7 +5,7 @@ using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 
 namespace OneMoreTaskTracker.Features.Features.Create;
 
-public class CreateFeatureHandler(FeaturesDbContext db) : FeatureCreator.FeatureCreatorBase
+public class CreateFeatureHandler(FeaturesDbContext db, IRequestClock clock) : FeatureCreator.FeatureCreatorBase
 {
     // Canonical FeatureState ordinals. Materialized as 5 empty rows on every
     // create so subsequent reads always return exactly 5 stage plans — the FE
@@ -24,7 +24,7 @@ public class CreateFeatureHandler(FeaturesDbContext db) : FeatureCreator.Feature
         var plannedStart = PlannedDate.Parse(request.PlannedStart);
         var plannedEnd   = PlannedDate.Parse(request.PlannedEnd);
 
-        var now = DateTime.UtcNow;
+        var now = clock.GetUtcNow();
 
         var feature = new Feature
         {

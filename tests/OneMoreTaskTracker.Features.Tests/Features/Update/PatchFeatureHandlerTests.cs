@@ -22,7 +22,7 @@ public sealed class PatchFeatureHandlerTests
             .Options);
 
     private static PatchFeatureHandler Handler(FeaturesDbContext db) =>
-        new(db, NullLogger<PatchFeatureHandler>.Instance);
+        new(db, NullLogger<PatchFeatureHandler>.Instance, TestRequestClock.System());
 
     private static async Task<OneMoreTaskTracker.Proto.Features.CreateFeatureCommand.FeatureDto> CreateFeatureAsync(
         FeaturesDbContext db,
@@ -39,7 +39,7 @@ public sealed class PatchFeatureHandlerTests
         };
         if (description is not null)
             request.Description = description;
-        return await new CreateFeatureHandler(db).Create(request, TestServerCallContext.Create());
+        return await new CreateFeatureHandler(db, TestRequestClock.System()).Create(request, TestServerCallContext.Create());
     }
 
     [Fact]
