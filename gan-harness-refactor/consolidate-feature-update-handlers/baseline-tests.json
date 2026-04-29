@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "captured_at": "2026-04-28T12:07:37.924Z",
+  "side": "backend",
+  "parser": "generic",
+  "command": "dotnet test OneMoreTaskTracker.slnx --nologo --logger:\"console;verbosity=normal\"",
+  "tests": {}
+}

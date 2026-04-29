@@ -1,0 +1,29 @@
+[2026-04-28T11:50:00Z] /gan-refactor invoked
+  brief         = "Feature Update has too much handlers. There should be only one for FeatureUpdate and one for StageUpdate. Front should send only changed fields and back update only those. Version change and UpdatedAt should be inside the Feature class."
+  slug          = consolidate-feature-update-handlers
+  track         = fullstack (user-confirmed; resolved from --track=auto)
+  max-iterations = 8 (default)
+  pass-threshold = 7.0 (default)
+  skip-planner   = false
+  dev-url        = (auto-detect)
+  be-base-url    = (auto-detect)
+  BASELINE_SHA   = 935dc9af224333e382e31d161a9a8eca9126ccfa
+  baseline branch = main
+  working tree   = clean (5 untracked PNGs from prior session: avatars-*.png, lead-picker-fixed.png — not staged)
+  workspace      = gan-harness-refactor/consolidate-feature-update-handlers/
+
+[2026-04-28T13:??:00Z] iter 1 ✓ commit ea45d57c — slice (a) Version/UpdatedAt invariants on Feature + FeatureStagePlan. Eval PASS 8.125 (axes 6+7 → 0).
+[2026-04-28T13:??:00Z] iter 2 ✓ commit 402b1f5c — slice (b) PatchFeatureHandler + proto3 optional + 17 tests. Eval PASS 8.125 (proto_features additive drift only).
+[2026-04-28T13:??:00Z] iter 3 — generator commit 57c99e7b — slice (c) PatchFeatureStageHandler + 19 tests. Eval not yet run (interrupted by user feedback).
+[2026-04-28T13:??:00Z] USER FEEDBACK: "no logs worth extra variables. Never create a variable only for log. Variable must have as minimal lifetime as possible and only functional need determine this possibility, not logs." Saved as feedback memory `feedback_no_log_only_variables.md`.
+[2026-04-28T13:??:00Z] corrective commit 788918a — `refactor(features): drop log-only locals in patch handlers`. Removed 4 locals from PatchFeatureHandler + 5 locals from PatchFeatureStageHandler that existed solely to feed before/after log pairs. Log retains after-state values inlined from live aggregate. Build clean; Features.Tests 134/134.
+[2026-04-28T13:??:00Z] Iter-3 evaluator will be dispatched against HEAD=788918a (slice c + corrective bundled).
+[2026-04-28T??:??:00Z] iter 4 ✓ commit 6c9c252 — slice (d) gateway endpoints (sparse fork in FeaturesController.Update + new PatchFeatureStageController). Eval PASS 8.475 (additive drift only on openapi+proto_features+endpoint_matrix_plan_features). BE 500/500, FE 52/52. RF-004 flagged (sparse fork changes wire semantics for stagePlans=null callers; no FE call site relies on old behavior; resolve in slice f).
+[2026-04-28T??:??:00Z] iter 5 ✓ commit 699c1c4 — slice (e) FE consolidation (planApi.ts + schemas + reroute Gantt callbacks). Eval PASS 8.700 (drift on planapi_exports + planapi_schemas only, both additive). FE 539/539 across 72 vitest files (+30 new tests). Brief binding requirement (sparse FE payloads) met. New RF-008 LOW (refactor-label leak in JSDoc, retires slice f).
+[2026-04-28T23:29:00Z] iter 6 ✓ commit 61024e1 — slice (f) deletion sweep + refactor! (-4609 lines net). 7 BE handlers + 7 protos + 2 controllers + 7 payloads + 6 test suites deleted; bulk UpdateFeatureHandler retired (option b); private set on Feature/FeatureStagePlan; FeaturesController.Update collapsed to always-sparse. Eval PASS 9.325 (highest of run; BEHAVIOR_DRIFT=true but all REMOVAL on surfaces 1/2/4/6/7 within slice-f exception; surfaces 3/5/8 byte-identical). BE 412/412, FE 464/464. RF-001/002/004/005/008 retired. RF-009 LOW (proto reserved-clause hygiene; vacuous because entire .proto files were deleted).
+[2026-04-28T23:35:00Z] Phase 2 closed. Best-of-run: iter 6 = 9.325. Score progression: iter1 8.125 → iter2 8.125 → iter3 8.125 → iter4 8.475 → iter5 8.700 → iter6 9.325.
+[2026-04-28T23:40:00Z] Phase 3 ✓ refactor-report.md written. Harness complete.
+  FINAL: PASS 9.325/10 (final SHA 61024e1, 6 iterations, all 6 slices shipped)
+  All 10 MUST-improve axes MET. Brief binding requirements satisfied.
+  Cumulative diff vs baseline 935dc9a: -1548 lines net (+2824/-4372 across 68 files).
+  Carry-overs filed for next planner: RF-006 (rubric tightening), RF-009 (proto reserved-clause checklist).

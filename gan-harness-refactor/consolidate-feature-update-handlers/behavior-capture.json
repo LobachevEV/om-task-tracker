@@ -1,0 +1,53 @@
+{
+  "track": "fullstack",
+  "surfaces": [
+    {
+      "id": "openapi",
+      "kind": "json",
+      "command": "cat OneMoreTaskTracker.Api/openapi.json",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "proto_features",
+      "kind": "text",
+      "command": "cd OneMoreTaskTracker.Features/Protos && for f in $(find . -name '*.proto' -type f | LC_ALL=C sort); do printf '=== %s ===\\n' \"$f\"; cat \"$f\"; printf '\\n'; done",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "db_migrations_features",
+      "kind": "text",
+      "command": "ls OneMoreTaskTracker.Features/Migrations | LC_ALL=C sort | grep -E '^[0-9]+_.+\\.cs$' | grep -v Designer",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "endpoint_matrix_plan_features",
+      "kind": "text",
+      "command": "grep -REn '^\\s*\\[(HttpPatch|HttpGet|HttpPost|HttpDelete|Authorize|Route)\\(' OneMoreTaskTracker.Api/Controllers/Plan/Feature OneMoreTaskTracker.Api/Controllers/Plan/PlanController.cs | LC_ALL=C sort",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "feature_summary_response_shape",
+      "kind": "text",
+      "command": "cat OneMoreTaskTracker.Api/Controllers/Plan/Feature/FeatureSummaryResponse.cs OneMoreTaskTracker.Api/Controllers/Plan/Feature/FeatureDetailResponse.cs OneMoreTaskTracker.Api/Controllers/Plan/Feature/Stages/StagePlanResponse.cs OneMoreTaskTracker.Api/Controllers/Plan/Feature/Stages/StagePlanDetailResponse.cs",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "planapi_exports",
+      "kind": "text",
+      "command": "grep -E '^export (async function|type|const|interface) ' OneMoreTaskTracker.WebClient/src/common/api/planApi.ts | LC_ALL=C sort",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "planapi_schemas",
+      "kind": "text",
+      "command": "grep -E '^export const \\w+Schema\\b' OneMoreTaskTracker.WebClient/src/common/api/schemas.ts | LC_ALL=C sort",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "inline_editor_component_api",
+      "kind": "text",
+      "command": "grep -RE '^(export (default |type |interface |const |function )|export \\{)' OneMoreTaskTracker.WebClient/src/pages/Gantt/components/InlineEditors/ | LC_ALL=C sort",
+      "tolerance": { "kind": "exact" }
+    }
+  ]
+}

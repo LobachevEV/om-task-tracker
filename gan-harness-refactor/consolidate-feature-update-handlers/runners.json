@@ -1,0 +1,16 @@
+{
+  "$comment": "Project-local override authored by gan-refactor-planner. Canonical runners.json under ~/.claude/scripts/gan-feature/runners.json has all fields null; this file pins the actual commands for OneMoreTaskTracker. Backend uses dotnet test against the slnx solution; frontend uses vitest run via the npm test script (vitest TAP-style output is parsed via the 'vitest' parser).",
+  "frontend": {
+    "lint": "npm --prefix OneMoreTaskTracker.WebClient run lint",
+    "typecheck": "npx --prefix OneMoreTaskTracker.WebClient tsc -p OneMoreTaskTracker.WebClient/tsconfig.json --noEmit",
+    "test": "npm --prefix OneMoreTaskTracker.WebClient test -- --reporter=tap",
+    "build": "npm --prefix OneMoreTaskTracker.WebClient run build"
+  },
+  "backend": {
+    "lint": null,
+    "typecheck": "dotnet build OneMoreTaskTracker.slnx -c Debug --nologo",
+    "test": "dotnet test OneMoreTaskTracker.slnx --nologo --logger:\"console;verbosity=normal\"",
+    "build": "dotnet build OneMoreTaskTracker.slnx -c Debug --nologo",
+    "migrate": null
+  }
+}
