@@ -179,17 +179,12 @@ public sealed class CreateTaskHandlerTests
     [Fact]
     public async System.Threading.Tasks.Task Create_WhenFeatureIdIsZero_ThrowsInvalidArgument()
     {
-        var db = CreateDb();
-        var mrsProvider = Substitute.For<IMrsProvider>();
-        var projectsProvider = Substitute.For<IProjectsProvider>();
-
-        var handler = new CreateTaskHandler(db, projectsProvider, mrsProvider);
+        var validator = new CreateTaskRequestValidator();
         var request = new CreateTaskRequest { JiraTaskId = "TASK-000", UserId = 1, FeatureId = 0 };
-        var writer = new FakeServerStreamWriter<CreateTaskResponse>();
-        var ctx = Substitute.For<ServerCallContext>();
-        ctx.CancellationToken.Returns(CancellationToken.None);
 
-        var ex = await Assert.ThrowsAsync<RpcException>(() => handler.Create(request, writer, ctx));
+        var ex = await Assert.ThrowsAsync<RpcException>(() =>
+            ValidationPipeline.ValidateAsync(validator, request));
+
         ex.StatusCode.Should().Be(StatusCode.InvalidArgument);
         ex.Status.Detail.Should().Contain("feature_id");
     }

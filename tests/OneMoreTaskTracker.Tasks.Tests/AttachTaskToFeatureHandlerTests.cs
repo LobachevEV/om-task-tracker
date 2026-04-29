@@ -28,11 +28,11 @@ public sealed class AttachTaskToFeatureHandlerTests
     [Fact]
     public async System.Threading.Tasks.Task Attach_FeatureIdZero_ThrowsInvalidArgument()
     {
-        var db = CreateDb();
-        var handler = new AttachTaskToFeatureHandler(db);
-
+        var validator = new AttachTaskToFeatureRequestValidator();
         var request = new AttachTaskToFeatureRequest { JiraTaskId = "TASK-1", FeatureId = 0 };
-        var ex = await Assert.ThrowsAsync<RpcException>(() => handler.Attach(request, CreateContext()));
+
+        var ex = await Assert.ThrowsAsync<RpcException>(() =>
+            ValidationPipeline.ValidateAsync(validator, request));
 
         ex.StatusCode.Should().Be(StatusCode.InvalidArgument);
         ex.Status.Detail.Should().Contain("feature_id");
@@ -81,11 +81,11 @@ public sealed class AttachTaskToFeatureHandlerTests
     [Fact]
     public async System.Threading.Tasks.Task Detach_WithoutReassign_ThrowsFailedPrecondition()
     {
-        var db = CreateDb();
-        var handler = new AttachTaskToFeatureHandler(db);
-
+        var validator = new DetachTaskFromFeatureRequestValidator();
         var request = new DetachTaskFromFeatureRequest { JiraTaskId = "TASK-1" };
-        var ex = await Assert.ThrowsAsync<RpcException>(() => handler.Detach(request, CreateContext()));
+
+        var ex = await Assert.ThrowsAsync<RpcException>(() =>
+            ValidationPipeline.ValidateAsync(validator, request));
 
         ex.StatusCode.Should().Be(StatusCode.FailedPrecondition);
     }

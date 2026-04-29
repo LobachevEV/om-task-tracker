@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using OneMoreTaskTracker.Proto.Clients.Branches;
 using OneMoreTaskTracker.Proto.Clients.Events;
@@ -11,6 +12,7 @@ using OneMoreTaskTracker.Tasks.Tasks.Get;
 using OneMoreTaskTracker.Tasks.Tasks.AssigneeSummary;
 using OneMoreTaskTracker.Tasks.Tasks.Attach;
 using OneMoreTaskTracker.Tasks.Tasks.List;
+using OneMoreTaskTracker.Tasks.Validation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +21,8 @@ builder.Configuration.AddJsonFile("appsettings.json", true, true)
     .AddEnvironmentVariables();
 
 // Add services to the container.
-builder.Services.AddGrpc();
+builder.Services.AddGrpc(o => o.Interceptors.Add<ValidationExceptionInterceptor>());
+builder.Services.AddValidatorsFromAssemblyContaining<CreateTaskRequestValidator>();
 builder.Services.AddTransient<IProjectsProvider, EventBasedProjectsProvider>();
 builder.Services.AddTransient<IMrsProvider, MrsProvider>();
 builder.Services.AddDbContextPool<TasksDbContext>(opt => opt.UseNpgsql(

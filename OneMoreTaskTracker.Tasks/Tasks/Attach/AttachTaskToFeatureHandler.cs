@@ -12,11 +12,6 @@ public class AttachTaskToFeatureHandler(TasksDbContext db) : TaskFeatureLinker.T
         AttachTaskToFeatureRequest request,
         ServerCallContext context)
     {
-        if (string.IsNullOrWhiteSpace(request.JiraTaskId))
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "jira_task_id is required"));
-        if (request.FeatureId <= 0)
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "feature_id is required"));
-
         var task = await db.Tasks
             .FirstOrDefaultAsync(t => t.JiraId == request.JiraTaskId, context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, $"task {request.JiraTaskId} not found"));
@@ -40,11 +35,6 @@ public class AttachTaskToFeatureHandler(TasksDbContext db) : TaskFeatureLinker.T
         DetachTaskFromFeatureRequest request,
         ServerCallContext context)
     {
-        if (request.ReassignToFeatureId <= 0)
-            throw new RpcException(new Status(
-                StatusCode.FailedPrecondition,
-                "detach requires reassign_to_feature_id because Task.FeatureId is non-nullable"));
-
         return await Attach(
             new AttachTaskToFeatureRequest
             {
