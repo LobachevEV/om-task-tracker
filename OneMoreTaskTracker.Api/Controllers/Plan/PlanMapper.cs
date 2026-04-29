@@ -72,7 +72,7 @@ internal static class PlanMapper
         if (string.IsNullOrWhiteSpace(raw))
             return null;
 
-        if (!DateOnly.TryParseExact(raw, "yyyy-MM-dd", out var date))
+        if (!PlanRequestHelpers.TryParseIsoDate(raw, out var date))
             return "Date must be YYYY-MM-DD";
 
         if (date.Year < MinReleaseYear || date.Year > MaxReleaseYear)
@@ -92,7 +92,7 @@ internal static class PlanMapper
             return new MiniTeamMemberResponse(
                 member.UserId,
                 member.Email,
-                ExtractDisplayName(member.Email),
+                DisplayNameHelper.ExtractDisplayName(member.Email),
                 member.Role);
 
         return new MiniTeamMemberResponse(userId, string.Empty, string.Empty, string.Empty);
@@ -170,14 +170,5 @@ internal static class PlanMapper
             taskIds,
             plans,
             f.Version);
-    }
-
-    internal static string ExtractDisplayName(string email)
-    {
-        if (string.IsNullOrEmpty(email))
-            return string.Empty;
-        var local = email.Split('@')[0];
-        return string.Join(" ", local.Split('.', '-', '_').Select(p =>
-            p.Length == 0 ? p : char.ToUpperInvariant(p[0]) + p[1..]));
     }
 }

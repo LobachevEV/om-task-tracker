@@ -190,7 +190,7 @@ public class FeaturesController(
             return new MiniTeamMemberResponse(
                 member.UserId,
                 member.Email,
-                PlanMapper.ExtractDisplayName(member.Email),
+                DisplayNameHelper.ExtractDisplayName(member.Email),
                 member.Role);
 
         // Stale id: emit performer:null (not a placeholder); id stays on the wire.

@@ -63,7 +63,7 @@ public class TeamController(
                         Email: member.Email,
                         Role: member.Role,
                         ManagerId: member.ManagerId == 0 ? null : member.ManagerId,
-                        DisplayName: ExtractDisplayName(member.Email),
+                        DisplayName: DisplayNameHelper.ExtractDisplayName(member.Email),
                         IsSelf: member.UserId == callerId,
                         Status: status != null ? new UserStatusDto(
                             Active: status.ActiveCount,
@@ -156,10 +156,4 @@ public class TeamController(
         }
     }
 
-    private static string ExtractDisplayName(string email)
-    {
-        var localPart = email.Split('@')[0];
-        return string.Join(" ", localPart.Split('.', '-', '_').Select(part =>
-            char.ToUpperInvariant(part[0]) + part[1..]));
-    }
 }
