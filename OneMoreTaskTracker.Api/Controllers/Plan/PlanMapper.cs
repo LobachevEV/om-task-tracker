@@ -2,9 +2,6 @@ using OneMoreTaskTracker.Api.Controllers.Plan.Feature;
 using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
 using OneMoreTaskTracker.Proto.Features;
 using OneMoreTaskTracker.Proto.Users;
-using CreateFeatureDto = OneMoreTaskTracker.Proto.Features.CreateFeatureCommand.FeatureDto;
-using GetFeatureDto = OneMoreTaskTracker.Proto.Features.GetFeatureQuery.FeatureDto;
-using ListFeatureDto = OneMoreTaskTracker.Proto.Features.ListFeaturesQuery.FeatureDto;
 using ProtoFeatureStagePlan = OneMoreTaskTracker.Proto.Features.FeatureStagePlan;
 using PatchFeatureDto = OneMoreTaskTracker.Proto.Features.PatchFeatureCommand.FeatureDto;
 using PatchFeatureStageDto = OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand.FeatureDto;
@@ -158,21 +155,21 @@ internal static class PlanMapper
         IReadOnlyDictionary<int, List<int>> tasksByFeature,
         ILogger logger)
     {
-        var taskIds = tasksByFeature.TryGetValue(id, out var ids) ? (IReadOnlyList<int>)ids : Array.Empty<int>();
-        var plans = stagePlans.Select(sp => BuildStagePlan(sp, logger)).ToList();
+        var taskIds = tasksByFeature.TryGetValue(f.Id, out var ids) ? (IReadOnlyList<int>)ids : Array.Empty<int>();
+        var plans = f.StagePlans.Select(sp => BuildStagePlan(sp, logger)).ToList();
         return new FeatureSummaryResponse(
-            id,
-            title,
-            string.IsNullOrEmpty(description) ? null : description,
-            MapState(state, logger),
-            string.IsNullOrEmpty(plannedStart) ? null : plannedStart,
-            string.IsNullOrEmpty(plannedEnd)   ? null : plannedEnd,
-            leadUserId,
-            managerUserId,
+            f.Id,
+            f.Title,
+            string.IsNullOrEmpty(f.Description) ? null : f.Description,
+            MapState(f.State, logger),
+            string.IsNullOrEmpty(f.PlannedStart) ? null : f.PlannedStart,
+            string.IsNullOrEmpty(f.PlannedEnd)   ? null : f.PlannedEnd,
+            f.LeadUserId,
+            f.ManagerUserId,
             taskIds.Count,
             taskIds,
             plans,
-            version);
+            f.Version);
     }
 
     internal static string ExtractDisplayName(string email)
