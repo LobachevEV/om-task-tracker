@@ -1,0 +1,1031 @@
+{
+  "version": 1,
+  "captured_at": "2026-04-29T08:52:39.608Z",
+  "label": "iter-1",
+  "track": "backend",
+  "surfaces": [
+    {
+      "id": "openapi",
+      "kind": "json",
+      "command": "cat OneMoreTaskTracker.Api/openapi.json",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": {
+        "openapi": "3.0.3",
+        "info": {
+          "title": "OneMoreTaskTracker Plan API",
+          "version": "v1",
+          "description": "REST surface emitted by OneMoreTaskTracker.Api for the feature planning (Gantt) experience. Backed by gRPC into OneMoreTaskTracker.Features / .Tasks / .Users. All dates are ISO yyyy-MM-dd strings or null. Hand-rolled for iteration 1 of the feature-stage-planning feature (api-contract.md v1); Swashbuckle is a follow-up."
+        },
+        "servers": [
+          {
+            "url": "http://localhost:5000",
+            "description": "Local dev"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "paths": {
+          "/api/auth/health": {
+            "get": {
+              "summary": "Liveness probe — returns {status:'ok'}.",
+              "description": "Anonymous, no upstream calls. Used by deployment + GAN harness (BE_HEALTH_URL).",
+              "tags": [
+                "auth"
+              ],
+              "security": [],
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "ok"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "/api/plan/features": {
+            "get": {
+              "summary": "List features visible to the caller.",
+              "description": "Optional `windowStart` / `windowEnd` query params (ISO yyyy-MM-dd) constrain results to features whose plan overlaps the window. Window semantics: `windowStart` is inclusive on `plannedEnd`; `windowEnd` is exclusive on `plannedStart`; features with null `plannedStart` and/or `plannedEnd` are always included. Bad date format or `windowStart > windowEnd` returns 400 `Invalid request data` and the upstream gRPC service is NOT called.",
+              "tags": [
+                "plan"
+              ],
+              "parameters": [
+                {
+                  "name": "scope",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "string",
+                    "enum": [
+                      "mine",
+                      "all"
+                    ]
+                  }
+                },
+                {
+                  "name": "state",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "$ref": "#/components/schemas/FeatureState"
+                  }
+                },
+                {
+                  "name": "windowStart",
+                  "in": "query",
+                  "required": false,
+                  "description": "ISO yyyy-MM-dd. Inclusive on plannedEnd.",
+                  "schema": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                },
+                {
+                  "name": "windowEnd",
+                  "in": "query",
+                  "required": false,
+                  "description": "ISO yyyy-MM-dd. Exclusive on plannedStart.",
+                  "schema": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/FeatureSummary"
+                        }
+                      }
+                    }
+                  }
+                },
+                "400": {
+                  "$ref": "#/components/responses/BadRequest"
+                },
+                "401": {
+                  "$ref": "#/components/responses/Unauthorized"
+                }
+              }
+            },
+            "post": {
+              "summary": "Create a new feature (Manager only).",
+              "description": "Creates the feature and atomically materializes 5 empty stage plans (one per FeatureState ordinal). `managerUserId` is derived from the caller's JWT and MUST NOT be sent in the body.",
+              "tags": [
+                "plan"
+              ],
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/CreateFeaturePayload"
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "Created",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/FeatureSummary"
+                      }
+                    }
+                  }
+                },
+                "400": {
+                  "$ref": "#/components/responses/BadRequest"
+                },
+                "401": {
+                  "$ref": "#/components/responses/Unauthorized"
+                },
+                "403": {
+                  "$ref": "#/components/responses/Forbidden"
+                }
+              }
+            }
+          },
+          "/api/plan/features/{id}": {
+            "parameters": [
+              {
+                "name": "id",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              {
+                "name": "If-Match",
+                "in": "header",
+                "required": false,
+                "description": "Optional optimistic-concurrency token; current feature.version from the last read. Forwarded as `expectedVersion` on the sparse path.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "get": {
+              "summary": "Get a single feature with attached tasks, lead, mini-team, and resolved stage-plan performers.",
+              "tags": [
+                "plan"
+              ],
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/FeatureDetail"
+                      }
+                    }
+                  }
+                },
+                "401": {
+                  "$ref": "#/components/responses/Unauthorized"
+                },
+                "404": {
+                  "$ref": "#/components/responses/NotFound"
+                }
+              }
+            },
+            "patch": {
+              "summary": "Update a feature — sparse PATCH (Manager only).",
+              "description": "Consolidated PATCH endpoint: send only the fields you want to change. Sparse fields supported: `title`, `description`, `leadUserId`, `expectedVersion`. Omitted fields are unchanged. Per-stage edits live at `/api/plan/features/{id}/stages/{stage}`. Optimistic concurrency: include `If-Match` header with the current `feature.version`, or `expectedVersion` in the body. Body wins if both are supplied.",
+              "tags": [
+                "plan"
+              ],
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/UpdateFeaturePayload"
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/FeatureSummary"
+                      }
+                    }
+                  }
+                },
+                "400": {
+                  "$ref": "#/components/responses/BadRequest"
+                },
+                "401": {
+                  "$ref": "#/components/responses/Unauthorized"
+                },
+                "403": {
+                  "$ref": "#/components/responses/Forbidden"
+                },
+                "404": {
+                  "$ref": "#/components/responses/NotFound"
+                },
+                "409": {
+                  "$ref": "#/components/responses/Conflict"
+                },
+                "502": {
+                  "$ref": "#/components/responses/BadGateway"
+                }
+              }
+            }
+          },
+          "/api/plan/features/{id}/stages/{stage}": {
+            "parameters": [
+              {
+                "name": "id",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              {
+                "name": "stage",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureState"
+                }
+              },
+              {
+                "name": "If-Match",
+                "in": "header",
+                "required": false,
+                "description": "Optional stage-scoped optimistic-concurrency token (stagePlans[].stageVersion). Forwarded as `expectedStageVersion`.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "patch": {
+              "summary": "Update a single stage — sparse PATCH (Manager only).",
+              "description": "Consolidated stage PATCH endpoint: send only the fields you want to change. Sparse fields supported: `stageOwnerUserId`, `plannedStart`, `plannedEnd`, `expectedStageVersion`. Omitted fields are unchanged. `stageOwnerUserId` must be a positive integer on the feature manager's roster. `plannedStart` / `plannedEnd` are ISO yyyy-MM-dd strings (year 2000..2100). Cross-stage chronological order is enforced — violation returns 422 with `conflict.kind = 'overlap'`. Stage path segment is case-insensitive. Optimistic concurrency: include `If-Match` header with current stagePlan.version, or `expectedStageVersion` in the body. Body wins if both are supplied.",
+              "tags": [
+                "plan"
+              ],
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/PatchFeatureStagePayload"
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/FeatureSummary"
+                      }
+                    }
+                  }
+                },
+                "400": {
+                  "$ref": "#/components/responses/BadRequest"
+                },
+                "401": {
+                  "$ref": "#/components/responses/Unauthorized"
+                },
+                "403": {
+                  "$ref": "#/components/responses/Forbidden"
+                },
+                "404": {
+                  "$ref": "#/components/responses/NotFound"
+                },
+                "409": {
+                  "$ref": "#/components/responses/Conflict"
+                },
+                "422": {
+                  "$ref": "#/components/responses/UnprocessableEntity"
+                },
+                "502": {
+                  "$ref": "#/components/responses/BadGateway"
+                }
+              }
+            }
+          },
+          "/api/plan/features/{id}/tasks/{jiraId}": {
+            "parameters": [
+              {
+                "name": "id",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              {
+                "name": "jiraId",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "post": {
+              "summary": "Attach a task (by Jira id) to a feature (Manager only).",
+              "tags": [
+                "plan"
+              ],
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/FeatureSummary"
+                      }
+                    }
+                  }
+                },
+                "401": {
+                  "$ref": "#/components/responses/Unauthorized"
+                },
+                "403": {
+                  "$ref": "#/components/responses/Forbidden"
+                },
+                "404": {
+                  "$ref": "#/components/responses/NotFound"
+                }
+              }
+            },
+            "delete": {
+              "summary": "Detach a task from a feature, reassigning it to another feature (Manager only).",
+              "tags": [
+                "plan"
+              ],
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/DetachTaskBody"
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/FeatureSummary"
+                      }
+                    }
+                  }
+                },
+                "401": {
+                  "$ref": "#/components/responses/Unauthorized"
+                },
+                "403": {
+                  "$ref": "#/components/responses/Forbidden"
+                },
+                "404": {
+                  "$ref": "#/components/responses/NotFound"
+                },
+                "422": {
+                  "$ref": "#/components/responses/UnprocessableEntity"
+                }
+              }
+            }
+          }
+        },
+        "components": {
+          "securitySchemes": {
+            "bearerAuth": {
+              "type": "http",
+              "scheme": "bearer",
+              "bearerFormat": "JWT"
+            }
+          },
+          "responses": {
+            "BadRequest": {
+              "description": "Invalid request data.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "Unauthorized": {
+              "description": "Authentication required.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "Forbidden": {
+              "description": "Permission denied.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "NotFound": {
+              "description": "Resource not found.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "UnprocessableEntity": {
+              "description": "Validation error. On cross-stage chronological-order violations the body extends to `{ error, conflict: { kind: 'overlap' | 'order' | 'rangeInvalid', with: <stage> } }` so the FE can highlight the offending neighbour stage.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ConflictError"
+                  }
+                }
+              }
+            },
+            "BadGateway": {
+              "description": "Upstream service temporarily unavailable.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "Conflict": {
+              "description": "Version mismatch (concurrent edit detected). Body includes a `conflict` object with `kind:'version'` and the server's current `currentVersion` when the handler reports a concurrency conflict.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ConflictError"
+                  }
+                }
+              }
+            }
+          },
+          "schemas": {
+            "Error": {
+              "type": "object",
+              "required": [
+                "error"
+              ],
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            },
+            "ConflictError": {
+              "type": "object",
+              "description": "Extended error envelope emitted on 409/422 when the handler reports a concurrency or stage-order conflict. Clients unaware of `conflict` fall back to the bare `error` string.",
+              "required": [
+                "error"
+              ],
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "description": "Public-facing message such as 'Updated by someone else' or 'Stage order violation'."
+                },
+                "conflict": {
+                  "type": "object",
+                  "description": "Structured conflict context. Absent when the upstream did not supply one.",
+                  "required": [
+                    "kind"
+                  ],
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "version",
+                        "overlap"
+                      ]
+                    },
+                    "currentVersion": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "Server's current version (kind='version')."
+                    },
+                    "with": {
+                      "$ref": "#/components/schemas/FeatureState"
+                    }
+                  }
+                }
+              }
+            },
+            "FeatureState": {
+              "type": "string",
+              "enum": [
+                "CsApproving",
+                "Development",
+                "Testing",
+                "EthalonTesting",
+                "LiveRelease"
+              ]
+            },
+            "StagePlan": {
+              "type": "object",
+              "description": "List-row stage plan — id-only performer. `stageVersion` is rolled out additively (api-contract.md §rollout-tolerance) and is therefore NOT in the required set; old payloads that predate the inline-edit feature may omit it.",
+              "required": [
+                "stage",
+                "plannedStart",
+                "plannedEnd",
+                "performerUserId"
+              ],
+              "properties": {
+                "stage": {
+                  "$ref": "#/components/schemas/FeatureState"
+                },
+                "plannedStart": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                },
+                "plannedEnd": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                },
+                "performerUserId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "nullable": true
+                },
+                "stageVersion": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Per-stage optimistic-concurrency token; consumed by the FE inline editor's If-Match header for stage-scoped PATCHes."
+                }
+              }
+            },
+            "StagePlanDetail": {
+              "type": "object",
+              "description": "Detail stage plan — resolved performer mini-member. `performer` is null when the stage is unassigned OR when the stored performer id is no longer on the manager's roster (stale). In the stale case `performerUserId` is still emitted so the FE can render the 'Performer no longer on team' state.",
+              "required": [
+                "stage",
+                "plannedStart",
+                "plannedEnd",
+                "performerUserId",
+                "performer"
+              ],
+              "properties": {
+                "stage": {
+                  "$ref": "#/components/schemas/FeatureState"
+                },
+                "plannedStart": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                },
+                "plannedEnd": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                },
+                "performerUserId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "nullable": true
+                },
+                "performer": {
+                  "nullable": true,
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/MiniTeamMember"
+                    }
+                  ]
+                },
+                "stageVersion": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Per-stage optimistic-concurrency token."
+                }
+              }
+            },
+            "MiniTeamMember": {
+              "type": "object",
+              "required": [
+                "userId",
+                "email",
+                "displayName",
+                "role"
+              ],
+              "properties": {
+                "userId": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "displayName": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                }
+              }
+            },
+            "AttachedTask": {
+              "type": "object",
+              "required": [
+                "id",
+                "jiraId",
+                "state",
+                "userId"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "jiraId": {
+                  "type": "string"
+                },
+                "state": {
+                  "type": "string"
+                },
+                "userId": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "FeatureSummary": {
+              "type": "object",
+              "required": [
+                "id",
+                "title",
+                "description",
+                "state",
+                "plannedStart",
+                "plannedEnd",
+                "leadUserId",
+                "managerUserId",
+                "taskCount",
+                "taskIds",
+                "stagePlans"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "title": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "description": {
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 4000
+                },
+                "state": {
+                  "$ref": "#/components/schemas/FeatureState"
+                },
+                "plannedStart": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true,
+                  "description": "Derived server-side as min(stagePlans[].plannedStart)."
+                },
+                "plannedEnd": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true,
+                  "description": "Derived server-side as max(stagePlans[].plannedEnd)."
+                },
+                "leadUserId": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "managerUserId": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "taskCount": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "taskIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                },
+                "stagePlans": {
+                  "type": "array",
+                  "minItems": 5,
+                  "maxItems": 5,
+                  "items": {
+                    "$ref": "#/components/schemas/StagePlan"
+                  },
+                  "description": "Always length 5, canonical FeatureState order. Performer is id-only on list rows."
+                },
+                "version": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Monotonically-increasing row version used as an optimistic-concurrency token. Bumped by every inline-edit PATCH."
+                }
+              }
+            },
+            "FeatureDetail": {
+              "type": "object",
+              "required": [
+                "feature",
+                "tasks",
+                "lead",
+                "miniTeam",
+                "stagePlans"
+              ],
+              "properties": {
+                "feature": {
+                  "$ref": "#/components/schemas/FeatureSummary"
+                },
+                "tasks": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AttachedTask"
+                  }
+                },
+                "lead": {
+                  "$ref": "#/components/schemas/MiniTeamMember"
+                },
+                "miniTeam": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MiniTeamMember"
+                  },
+                  "description": "Deduped union of task assignees, lead, and every populated stage-plan performer."
+                },
+                "stagePlans": {
+                  "type": "array",
+                  "minItems": 5,
+                  "maxItems": 5,
+                  "items": {
+                    "$ref": "#/components/schemas/StagePlanDetail"
+                  },
+                  "description": "Always length 5, canonical FeatureState order. Each entry carries a resolved performer mini-member."
+                }
+              }
+            },
+            "CreateFeaturePayload": {
+              "type": "object",
+              "required": [
+                "title"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "description": {
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 4000
+                },
+                "leadUserId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "nullable": true
+                },
+                "plannedStart": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true,
+                  "description": "Legacy feature-level date; prefer authoring per-stage plans via PATCH."
+                },
+                "plannedEnd": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true,
+                  "description": "Legacy feature-level date; prefer authoring per-stage plans via PATCH."
+                }
+              }
+            },
+            "UpdateFeaturePayload": {
+              "type": "object",
+              "description": "All fields optional — send only the fields you want to change. Sparse fields: `title`, `description`, `leadUserId`, `expectedVersion`.",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 200
+                },
+                "description": {
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 4000
+                },
+                "leadUserId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "nullable": true,
+                  "minimum": 1
+                },
+                "expectedVersion": {
+                  "type": "integer",
+                  "format": "int32",
+                  "nullable": true,
+                  "description": "Optimistic-concurrency token. Body wins over `If-Match` header when both are supplied."
+                }
+              }
+            },
+            "PatchFeatureStagePayload": {
+              "type": "object",
+              "description": "All fields optional — send only the fields you want to change. Sparse fields: `stageOwnerUserId`, `plannedStart`, `plannedEnd`, `expectedStageVersion`.",
+              "properties": {
+                "stageOwnerUserId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "nullable": true,
+                  "minimum": 1
+                },
+                "plannedStart": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                },
+                "plannedEnd": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                },
+                "expectedStageVersion": {
+                  "type": "integer",
+                  "format": "int32",
+                  "nullable": true,
+                  "description": "Stage-scoped optimistic-concurrency token. Body wins over `If-Match` header when both are supplied."
+                }
+              }
+            },
+            "DetachTaskBody": {
+              "type": "object",
+              "required": [
+                "reassignToFeatureId"
+              ],
+              "properties": {
+                "reassignToFeatureId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "proto_features",
+      "kind": "text",
+      "command": "cd OneMoreTaskTracker.Features/Protos && for f in $(find . -name '*.proto' -type f | LC_ALL=C sort); do printf '=== %s ===\\n' \"$f\"; cat \"$f\"; printf '\\n'; done",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": "=== ./CreateFeatureCommand/create_feature_command_handler.proto ===\nsyntax = \"proto3\";\nimport \"feature_state.proto\";\nimport \"feature_stage_plan.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Features.CreateFeatureCommand\";\npackage mr_helper.features;\n\nservice FeatureCreator {\n  rpc Create (CreateFeatureRequest) returns (FeatureDto);\n}\n\nmessage CreateFeatureRequest {\n  string title            = 1;\n  string description      = 2;\n  int32  lead_user_id     = 3;\n  int32  manager_user_id  = 4;\n  string planned_start    = 5;\n  string planned_end      = 6;\n}\n\nmessage FeatureDto {\n  int32        id                 = 1;\n  string       title              = 2;\n  string       description        = 3;\n  FeatureState state              = 4;\n  string       planned_start      = 5;\n  string       planned_end        = 6;\n  int32        lead_user_id       = 7;\n  int32        manager_user_id    = 8;\n  string       created_at         = 9;\n  string       updated_at         = 10;\n  repeated     FeatureStagePlan stage_plans = 11;\n  int32        version            = 12;\n}\n\n=== ./GetFeatureQuery/get_feature_query_handler.proto ===\nsyntax = \"proto3\";\nimport \"feature_state.proto\";\nimport \"feature_stage_plan.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Features.GetFeatureQuery\";\npackage mr_helper.features;\n\nservice FeatureGetter {\n  rpc Get (GetFeatureRequest) returns (FeatureDto);\n}\n\nmessage GetFeatureRequest {\n  int32 id = 1;\n}\n\nmessage FeatureDto {\n  int32        id                 = 1;\n  string       title              = 2;\n  string       description        = 3;\n  FeatureState state              = 4;\n  string       planned_start      = 5;\n  string       planned_end        = 6;\n  int32        lead_user_id       = 7;\n  int32        manager_user_id    = 8;\n  string       created_at         = 9;\n  string       updated_at         = 10;\n  repeated     FeatureStagePlan stage_plans = 11;\n  int32        version            = 12;\n}\n\n=== ./ListFeaturesQuery/list_features_query_handler.proto ===\nsyntax = \"proto3\";\nimport \"feature_state.proto\";\nimport \"feature_stage_plan.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Features.ListFeaturesQuery\";\npackage mr_helper.features;\n\nservice FeaturesLister {\n  rpc List (ListFeaturesRequest) returns (ListFeaturesResponse);\n}\n\nmessage ListFeaturesRequest {\n  int32  manager_user_id = 1;\n  string window_start    = 2;\n  string window_end      = 3;\n}\n\nmessage ListFeaturesResponse {\n  repeated FeatureDto features = 1;\n}\n\nmessage FeatureDto {\n  int32        id                 = 1;\n  string       title              = 2;\n  string       description        = 3;\n  FeatureState state              = 4;\n  string       planned_start      = 5;\n  string       planned_end        = 6;\n  int32        lead_user_id       = 7;\n  int32        manager_user_id    = 8;\n  string       created_at         = 9;\n  string       updated_at         = 10;\n  repeated     FeatureStagePlan stage_plans = 11;\n  int32        version            = 12;\n}\n\n=== ./PatchFeatureCommand/patch_feature_command_handler.proto ===\nsyntax = \"proto3\";\nimport \"feature_state.proto\";\nimport \"feature_stage_plan.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Features.PatchFeatureCommand\";\npackage mr_helper.features;\n\nservice FeaturePatcher {\n  rpc Patch (PatchFeatureRequest) returns (FeatureDto);\n}\n\nmessage PatchFeatureRequest {\n  int32 id = 1;\n  int32 caller_user_id = 2;\n  optional int32 expected_version = 3;\n  optional string title = 4;\n  optional string description = 5;\n  optional int32 lead_user_id = 6;\n}\n\nmessage FeatureDto {\n  int32        id                 = 1;\n  string       title              = 2;\n  string       description        = 3;\n  FeatureState state              = 4;\n  string       planned_start      = 5;\n  string       planned_end        = 6;\n  int32        lead_user_id       = 7;\n  int32        manager_user_id    = 8;\n  string       created_at         = 9;\n  string       updated_at         = 10;\n  repeated     FeatureStagePlan stage_plans = 11;\n  int32        version            = 12;\n}\n\n=== ./PatchFeatureStageCommand/patch_feature_stage_command_handler.proto ===\nsyntax = \"proto3\";\nimport \"feature_state.proto\";\nimport \"feature_stage_plan.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand\";\npackage mr_helper.features;\n\nservice FeatureStagePatcher {\n  rpc Patch (PatchFeatureStageRequest) returns (FeatureDto);\n}\n\nmessage PatchFeatureStageRequest {\n  int32        feature_id             = 1;\n  FeatureState stage                  = 2;\n  int32        caller_user_id         = 3;\n  optional int32 expected_stage_version = 4;\n  optional int32  stage_owner_user_id  = 5;\n  optional string planned_start        = 6;\n  optional string planned_end          = 7;\n}\n\nmessage FeatureDto {\n  int32        id                 = 1;\n  string       title              = 2;\n  string       description        = 3;\n  FeatureState state              = 4;\n  string       planned_start      = 5;\n  string       planned_end        = 6;\n  int32        lead_user_id       = 7;\n  int32        manager_user_id    = 8;\n  string       created_at         = 9;\n  string       updated_at         = 10;\n  repeated     FeatureStagePlan stage_plans = 11;\n  int32        version            = 12;\n}\n\n=== ./feature_stage_plan.proto ===\nsyntax = \"proto3\";\nimport \"feature_state.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Features\";\npackage mr_helper.features;\n\n// Canonical per-stage plan message shared by every FeatureDto carrier.\n// Mirrors api-contract.md: exactly 5 entries per feature (one per FeatureState\n// ordinal), upserted atomically by UpdateFeatureHandler.\n//\n// Wire conventions:\n//   planned_start / planned_end = \"\"   → null (matches the existing planned_*\n//                                        string-empty convention on FeatureDto).\n//   performer_user_id           =  0   → unassigned (proto3 scalar default;\n//                                        the gateway surfaces this as `null`).\nmessage FeatureStagePlan {\n  FeatureState stage              = 1;\n  string       planned_start      = 2;\n  string       planned_end        = 3;\n  int32        performer_user_id  = 4;\n  // Per-stage optimistic-concurrency token (see api-contract.md\n  // § \"Optimistic Concurrency\"). Bumped by every stage-scoped PATCH.\n  int32        version            = 5;\n}\n\n=== ./feature_state.proto ===\nsyntax = \"proto3\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Features\";\npackage mr_helper.features;\n\n// Ordinals mirror the C# FeatureState enum (CsApproving = 0) to match the\n// Tasks service's task_state.proto style (see task_state.proto, which also\n// forgoes the proto3 *_UNSPECIFIED = 0 convention to share ordinals with\n// the C# enum). Spec 02 § \"FeatureState proto enum ordinals\" explicitly\n// tolerates this and directs us to replicate task_state.proto.\nenum FeatureState {\n  CS_APPROVING = 0;\n  DEVELOPMENT = 1;\n  TESTING = 2;\n  ETHALON_TESTING = 3;\n  LIVE_RELEASE = 4;\n}\n\n"
+    },
+    {
+      "id": "proto_tasks",
+      "kind": "text",
+      "command": "cd OneMoreTaskTracker.Tasks/Protos && for f in $(find . -name '*.proto' -type f -not -path './Clients/*' | LC_ALL=C sort); do printf '=== %s ===\\n' \"$f\"; cat \"$f\"; printf '\\n'; done",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": "=== ./AttachTaskCommand/attach_task_command_handler.proto ===\nsyntax = \"proto3\";\nimport \"task_state.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Tasks.AttachTaskCommand\";\npackage mr_helper.tasks;\n\nservice TaskFeatureLinker {\n  rpc Attach (AttachTaskToFeatureRequest) returns (AttachTaskToFeatureResponse);\n  rpc Detach (DetachTaskFromFeatureRequest) returns (AttachTaskToFeatureResponse);\n}\n\nmessage AttachTaskToFeatureRequest {\n  string jira_task_id = 1;\n  int32  feature_id   = 2;\n}\n\nmessage DetachTaskFromFeatureRequest {\n  string jira_task_id = 1;\n  int32  reassign_to_feature_id = 2;\n}\n\nmessage AttachTaskToFeatureResponse {\n  int32     task_id     = 1;\n  string    jira_task_id = 2;\n  int32     feature_id  = 3;\n  TaskState state       = 4;\n}\n\n=== ./CreateTaskCommand/create_task_command_handler.proto ===\nsyntax = \"proto3\";\nimport \"task_state.proto\";\nimport \"google/protobuf/timestamp.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Tasks.CreateTaskCommand\";\npackage mr_helper.tasks;\n\nservice TaskCreator{\n  rpc Create(CreateTaskRequest) returns (stream CreateTaskResponse);\n}\n\nmessage CreateTaskRequest{\n  string jira_task_id = 1;\n  int32 userId = 2;\n  google.protobuf.Timestamp start_date = 3;\n  int32 feature_id = 4;\n}\n\nmessage CreateTaskResponse{\n  TaskDto task = 1;\n  repeated ProjectDto projects = 2;\n  repeated MergeRequestDto merge_requests = 3;\n}\n\nmessage TaskDto{\n  int32 id = 1;\n  string jira_task_id = 2;\n  TaskState state = 3;\n}\n\nmessage ProjectDto{\n  int32 id = 1;\n  string name = 2;\n}\n\nmessage MergeRequestDto{\n  string id = 1;\n  string title = 2;\n  string source_branch = 3;\n  string target_branch = 4;\n}\n=== ./GetTaskQuery/get_task_query_handler.proto ===\nsyntax = \"proto3\";\nimport \"task_state.proto\";\nimport \"google/protobuf/timestamp.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Tasks.GetTaskQuery\";\npackage mr_helper.tasks;\n\nservice TaskGetter{\n  rpc Get(GetTaskRequest) returns (GetTaskResponse);\n}\n\nmessage GetTaskRequest{\n  string task_id = 1;\n  int32 user_id = 2;\n  google.protobuf.Timestamp first_push_date = 3;\n}\n\nmessage GetTaskResponse{\n  string id = 1;\n  TaskState state = 2;\n  repeated ProjectDto projects = 3;\n  repeated MergeRequestDto merge_requests = 4;\n}\n\nmessage ProjectDto{\n  int32 id = 1;\n  string name = 2;\n}\n\n\nmessage MergeRequestDto{\n  string id = 1;\n  string title = 2;\n  string source_branch = 3;\n  string target_branch = 4;\n}\n=== ./ListTasksQuery/list_tasks_query_handler.proto ===\nsyntax = \"proto3\";\nimport \"task_state.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Tasks.ListTasksQuery\";\npackage mr_helper.tasks;\n\nservice TaskLister {\n  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse);\n}\n\nmessage ListTasksRequest {\n  int32 user_id = 1;\n  string role = 2;\n  repeated int32 team_member_ids = 3;\n}\n\nmessage ListTasksResponse {\n  repeated TaskDto tasks = 1;\n}\n\nmessage TaskDto {\n  int32 id = 1;\n  string jira_task_id = 2;\n  TaskState state = 3;\n  int32 user_id = 4;\n}\n\n=== ./MoveTaskCommand/move_task.proto ===\nsyntax = \"proto3\";\n\nimport \"google/protobuf/timestamp.proto\";\nimport \"task_state.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Tasks\";\npackage mr_helper.tasks;\n\nservice TaskMover{\n  rpc Handle(MoveTaskCommand) returns (stream MoveTaskResponse);\n}\n\nmessage MoveTaskCommand{\n  int32 user_id = 1;\n  string task_id = 2;\n  google.protobuf.Timestamp first_push_date = 3;\n}\n\nmessage MoveTaskResponse {\n  TaskState state = 1;\n  repeated TaskProjectDto projects = 2;\n}\n\nmessage TaskProjectDto {\n  string id = 1;\n  string name = 2;\n}\n=== ./TaskAggregateQuery/assignee_task_summary.proto ===\nsyntax = \"proto3\";\nimport \"google/protobuf/timestamp.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Tasks.TaskAggregateQuery\";\npackage mr_helper.tasks;\n\nservice TaskAggregateQuery {\n  rpc BatchGetAssigneeTaskSummary(BatchGetAssigneeTaskSummaryRequest) returns (BatchGetAssigneeTaskSummaryResponse);\n}\n\nmessage BatchGetAssigneeTaskSummaryRequest {\n  repeated int32 assignee_user_ids = 1;\n}\n\nmessage TaskStateMix {\n  int32 in_dev = 1;\n  int32 mr_to_release = 2;\n  int32 in_test = 3;\n  int32 mr_to_master = 4;\n  int32 completed = 5;\n}\n\nmessage AssigneeTaskSummary {\n  int32 assignee_user_id = 1;\n  int32 active_count = 2;\n  google.protobuf.Timestamp last_activity_at = 3;\n  TaskStateMix mix = 4;\n}\n\nmessage BatchGetAssigneeTaskSummaryResponse {\n  repeated AssigneeTaskSummary summaries = 1;\n}\n\n=== ./task_state.proto ===\nsyntax = \"proto3\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Tasks\";\npackage mr_helper.tasks;\n\nenum TaskState {\n  NOT_STARTED = 0;\n  IN_DEV = 1;\n  MR_TO_RELEASE = 2;\n  IN_TEST = 3;\n  MR_TO_MASTER = 4;\n  COMPLETED = 5;\n}\n"
+    },
+    {
+      "id": "proto_users",
+      "kind": "text",
+      "command": "cd OneMoreTaskTracker.Users/Protos && for f in $(find . -name '*.proto' -type f | LC_ALL=C sort); do printf '=== %s ===\\n' \"$f\"; cat \"$f\"; printf '\\n'; done",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": "=== ./user_service.proto ===\nsyntax = \"proto3\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Users\";\npackage mr_helper.users;\n\nservice UserService {\n  rpc Register(RegisterRequest) returns (RegisterResponse);\n  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);\n  rpc GetTeamMemberIds(GetTeamMemberIdsRequest) returns (GetTeamMemberIdsResponse);\n  rpc GetTeamRoster(GetTeamRosterRequest) returns (GetTeamRosterResponse);\n  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);\n}\n\nmessage RegisterRequest {\n  string email = 1;\n  string password = 2;\n  int32 manager_id = 3;\n  string role = 4;\n}\n\nmessage RegisterResponse {\n  int32 user_id = 1;\n  string email = 2;\n  string role = 3;\n  int32 manager_user_id = 4;\n}\n\nmessage AuthenticateRequest {\n  string email = 1;\n  string password = 2;\n}\n\nmessage AuthenticateResponse {\n  bool success = 1;\n  int32 user_id = 2;\n  string email = 3;\n  string role = 4;\n  int32 manager_user_id = 5;\n}\n\nmessage GetTeamMemberIdsRequest {\n  int32 manager_id = 1;\n}\n\nmessage GetTeamMemberIdsResponse {\n  repeated int32 user_ids = 1;\n}\n\nmessage GetTeamRosterRequest {\n  int32 manager_id = 1;\n}\n\nmessage TeamRosterMember {\n  int32 user_id = 1;\n  string email = 2;\n  string role = 3;\n  int32 manager_id = 4;\n}\n\nmessage GetTeamRosterResponse {\n  repeated TeamRosterMember members = 1;\n}\n\nmessage DeleteUserRequest {\n  int32 user_id = 1;\n  int32 manager_id = 2;\n}\n\nmessage DeleteUserResponse {\n}\n\n"
+    },
+    {
+      "id": "rpc_error_surface_users",
+      "kind": "text",
+      "command": "grep -REn 'throw new RpcException\\(new Status\\(StatusCode\\.[A-Za-z]+,' OneMoreTaskTracker.Users --include='*.cs' | grep -v '/bin/' | grep -v '/obj/' | LC_ALL=C sort",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": "OneMoreTaskTracker.Users/UserServiceHandler.cs:120:            throw new RpcException(new Status(StatusCode.InvalidArgument, \"Manager not found or user is not a manager\"));\nOneMoreTaskTracker.Users/UserServiceHandler.cs:157:            throw new RpcException(new Status(StatusCode.NotFound, \"User not found\"));\nOneMoreTaskTracker.Users/UserServiceHandler.cs:161:            throw new RpcException(new Status(StatusCode.PermissionDenied, \"User is not on your team\"));\nOneMoreTaskTracker.Users/UserServiceHandler.cs:20:            throw new RpcException(new Status(StatusCode.InvalidArgument, \"Email and password are required\"));\nOneMoreTaskTracker.Users/UserServiceHandler.cs:23:            throw new RpcException(new Status(StatusCode.InvalidArgument, \"Invalid email address\"));\nOneMoreTaskTracker.Users/UserServiceHandler.cs:26:            throw new RpcException(new Status(StatusCode.InvalidArgument,\nOneMoreTaskTracker.Users/UserServiceHandler.cs:30:            throw new RpcException(new Status(StatusCode.AlreadyExists, \"Email already registered\"));\nOneMoreTaskTracker.Users/UserServiceHandler.cs:43:                throw new RpcException(new Status(StatusCode.InvalidArgument,\nOneMoreTaskTracker.Users/UserServiceHandler.cs:48:                throw new RpcException(new Status(StatusCode.InvalidArgument, \"Invalid ManagerId\"));\n"
+    },
+    {
+      "id": "rpc_error_surface_tasks",
+      "kind": "text",
+      "command": "grep -REn 'throw new RpcException\\(new Status\\(StatusCode\\.[A-Za-z]+,' OneMoreTaskTracker.Tasks --include='*.cs' | grep -v '/bin/' | grep -v '/obj/' | LC_ALL=C sort",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": "OneMoreTaskTracker.Tasks/Tasks/Attach/AttachTaskToFeatureHandler.cs:17:            ?? throw new RpcException(new Status(StatusCode.NotFound, $\"task {request.JiraTaskId} not found\"));\n"
+    },
+    {
+      "id": "rpc_error_surface_features",
+      "kind": "text",
+      "command": "grep -REn 'throw new RpcException\\(new Status\\(StatusCode\\.[A-Za-z]+,' OneMoreTaskTracker.Features --include='*.cs' | grep -v '/bin/' | grep -v '/obj/' | LC_ALL=C sort",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": "OneMoreTaskTracker.Features/Features/Create/CreateFeatureHandler.cs:25:            throw new RpcException(new Status(StatusCode.InvalidArgument, \"title is required\"));\nOneMoreTaskTracker.Features/Features/Create/CreateFeatureHandler.cs:27:            throw new RpcException(new Status(StatusCode.InvalidArgument, \"manager_user_id is required\"));\nOneMoreTaskTracker.Features/Features/Data/FeatureValidation.cs:24:            throw new RpcException(new Status(StatusCode.InvalidArgument, $\"{field} must be YYYY-MM-DD\"));\nOneMoreTaskTracker.Features/Features/Data/FeatureValidation.cs:27:            throw new RpcException(new Status(StatusCode.InvalidArgument, \"Use a real release date\"));\nOneMoreTaskTracker.Features/Features/Data/FeatureValidation.cs:35:            throw new RpcException(new Status(StatusCode.InvalidArgument, \"planned_end must be on or after planned_start\"));\nOneMoreTaskTracker.Features/Features/Get/GetFeatureHandler.cs:14:            throw new RpcException(new Status(StatusCode.InvalidArgument, \"id is required\"));\nOneMoreTaskTracker.Features/Features/Get/GetFeatureHandler.cs:23:            ?? throw new RpcException(new Status(StatusCode.NotFound, $\"feature {request.Id} not found\"));\nOneMoreTaskTracker.Features/Features/List/ListFeaturesHandler.cs:59:            throw new RpcException(new Status(StatusCode.InvalidArgument, \"window_* must be YYYY-MM-DD\"));\nOneMoreTaskTracker.Features/Features/Update/PatchFeatureHandler.cs:19:            throw new RpcException(new Status(StatusCode.InvalidArgument, \"id is required\"));\nOneMoreTaskTracker.Features/Features/Update/PatchFeatureHandler.cs:26:                throw new RpcException(new Status(StatusCode.InvalidArgument, \"title is required\"));\nOneMoreTaskTracker.Features/Features/Update/PatchFeatureHandler.cs:28:                throw new RpcException(new Status(StatusCode.InvalidArgument, \"title too long\"));\nOneMoreTaskTracker.Features/Features/Update/PatchFeatureHandler.cs:36:                throw new RpcException(new Status(StatusCode.InvalidArgument, \"description too long\"));\nOneMoreTaskTracker.Features/Features/Update/PatchFeatureHandler.cs:42:            throw new RpcException(new Status(StatusCode.InvalidArgument, \"lead_user_id is required\"));\nOneMoreTaskTracker.Features/Features/Update/PatchFeatureHandler.cs:47:                      ?? throw new RpcException(new Status(StatusCode.NotFound, $\"feature {request.Id} not found\"));\nOneMoreTaskTracker.Features/Features/Update/PatchFeatureHandler.cs:50:            throw new RpcException(new Status(StatusCode.PermissionDenied, \"Not the feature owner\"));\nOneMoreTaskTracker.Features/Features/Update/PatchFeatureHandler.cs:53:            throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));\nOneMoreTaskTracker.Features/Features/Update/PatchFeatureHandler.cs:85:                throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));\nOneMoreTaskTracker.Features/Features/Update/PatchFeatureStageHandler.cs:17:            throw new RpcException(new Status(StatusCode.InvalidArgument, \"feature_id is required\"));\nOneMoreTaskTracker.Features/Features/Update/PatchFeatureStageHandler.cs:20:            throw new RpcException(new Status(StatusCode.InvalidArgument, \"stage is required\"));\nOneMoreTaskTracker.Features/Features/Update/PatchFeatureStageHandler.cs:33:                      ?? throw new RpcException(new Status(StatusCode.NotFound, $\"feature {request.FeatureId} not found\"));\nOneMoreTaskTracker.Features/Features/Update/PatchFeatureStageHandler.cs:36:            throw new RpcException(new Status(StatusCode.PermissionDenied, \"Not the feature owner\"));\nOneMoreTaskTracker.Features/Features/Update/PatchFeatureStageHandler.cs:40:                   ?? throw new RpcException(new Status(StatusCode.NotFound, $\"stage {request.Stage} not found\"));\nOneMoreTaskTracker.Features/Features/Update/PatchFeatureStageHandler.cs:43:            throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(plan.Version)));\nOneMoreTaskTracker.Features/Features/Update/PatchFeatureStageHandler.cs:95:                throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(plan.Version)));\n"
+    },
+    {
+      "id": "db_migrations_features",
+      "kind": "text",
+      "command": "ls OneMoreTaskTracker.Features/Migrations | LC_ALL=C sort | grep -E '^[0-9]+_.+\\.cs$' | grep -v Designer",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": "20260422084830_InitialCreate.cs\n20260423104631_AddFeatureStagePlans.cs\n20260424120000_AddFeatureAndStageVersion.cs\n"
+    },
+    {
+      "id": "db_migrations_tasks",
+      "kind": "text",
+      "command": "ls OneMoreTaskTracker.Tasks/Migrations | LC_ALL=C sort | grep -E '^[0-9]+_.+\\.cs$' | grep -v Designer",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": "20260402163545_InitialCreate.cs\n20260422084642_AddTaskFeatureId.cs\n"
+    },
+    {
+      "id": "db_migrations_users",
+      "kind": "text",
+      "command": "ls OneMoreTaskTracker.Users/Migrations | LC_ALL=C sort | grep -E '^[0-9]+_.+\\.cs$' | grep -v Designer",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": "20260402163547_InitialCreate.cs\n20260418155000_SplitDeveloperRole.cs\n"
+    },
+    {
+      "id": "endpoint_matrix_api",
+      "kind": "text",
+      "command": "grep -REn '^\\s*\\[(HttpPatch|HttpGet|HttpPost|HttpDelete|Authorize|Route|ApiController)\\(' OneMoreTaskTracker.Api/Controllers --include='*.cs' | LC_ALL=C sort",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": "OneMoreTaskTracker.Api/Controllers/Auth/AuthController.cs:13:    [HttpPost(\"register\")]\nOneMoreTaskTracker.Api/Controllers/Auth/AuthController.cs:32:    [HttpGet(\"health\")]\nOneMoreTaskTracker.Api/Controllers/Auth/AuthController.cs:36:    [HttpPost(\"login\")]\nOneMoreTaskTracker.Api/Controllers/Auth/AuthController.cs:8:[Route(\"api/auth\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/FeaturesController.cs:113:    [HttpPatch(\"{id:int}\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/FeaturesController.cs:114:    [Authorize(Roles = Roles.Manager)]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/FeaturesController.cs:18:[Route(\"api/plan/features\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/FeaturesController.cs:68:    [HttpGet(\"{id:int}\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/FeaturesController.cs:99:    [Authorize(Roles = Roles.Manager)]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Stages/PatchFeatureStageController.cs:11:[Authorize(Roles = Roles.Manager)]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Stages/PatchFeatureStageController.cs:12:[Route(\"api/plan/features/{id:int}/stages/{stage}\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Stages/PatchFeatureStageController.cs:18:    [HttpPatch(\"\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Tasks/FeatureTasksController.cs:10:[Authorize(Roles = Roles.Manager)]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Tasks/FeatureTasksController.cs:11:[Route(\"api/plan/features/{id:int}/tasks\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Tasks/FeatureTasksController.cs:17:    [HttpPost(\"{jiraId}\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Tasks/FeatureTasksController.cs:37:    [HttpDelete(\"{jiraId}\")]\nOneMoreTaskTracker.Api/Controllers/Tasks/TasksController.cs:17:[Route(\"api/tasks\")]\nOneMoreTaskTracker.Api/Controllers/Tasks/TasksController.cs:45:    [HttpGet(\"{jiraId}\")]\nOneMoreTaskTracker.Api/Controllers/Tasks/TasksController.cs:97:    [HttpPost(\"{jiraId}/move\")]\nOneMoreTaskTracker.Api/Controllers/Team/TeamController.cs:112:    [Authorize(Roles = Roles.Manager)]\nOneMoreTaskTracker.Api/Controllers/Team/TeamController.cs:12:[Route(\"api/team/members\")]\nOneMoreTaskTracker.Api/Controllers/Team/TeamController.cs:91:    [HttpDelete(\"{userId}\")]\nOneMoreTaskTracker.Api/Controllers/Team/TeamController.cs:92:    [Authorize(Roles = Roles.Manager)]\n"
+    },
+    {
+      "id": "validation_test_assertions",
+      "kind": "text",
+      "command": "grep -REn 'StatusCode\\s*==\\s*StatusCode\\.|StatusCode\\.Should\\(\\)|\\.Status\\.Detail|RpcException' tests --include='*.cs' | grep -v '/bin/' | grep -v '/obj/' | LC_ALL=C sort",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": "tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs:105:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs:133:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs:162:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs:190:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs:216:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs:236:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs:434:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs:46:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/FeaturesControllerWindowTests.cs:108:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/FeaturesControllerWindowTests.cs:127:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/FeaturesControllerWindowTests.cs:36:        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/FeaturesControllerWindowTests.cs:52:        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/FeaturesControllerWindowTests.cs:66:        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/FeaturesControllerWindowTests.cs:88:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureSparseEndpointTests.cs:116:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureSparseEndpointTests.cs:140:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureSparseEndpointTests.cs:162:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureSparseEndpointTests.cs:176:        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureSparseEndpointTests.cs:189:        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureSparseEndpointTests.cs:212:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureSparseEndpointTests.cs:239:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureSparseEndpointTests.cs:262:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureSparseEndpointTests.cs:274:            .Returns(_ => throw new RpcException(\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureSparseEndpointTests.cs:280:        response.StatusCode.Should().Be(HttpStatusCode.Conflict);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureSparseEndpointTests.cs:290:            .Returns(_ => throw new RpcException(\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureSparseEndpointTests.cs:296:        response.StatusCode.Should().Be(HttpStatusCode.NotFound);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureSparseEndpointTests.cs:307:        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureSparseEndpointTests.cs:318:        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:120:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:146:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:167:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:194:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:218:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:244:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:268:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:283:        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:297:        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:309:        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:321:        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:333:        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:343:            .Returns(_ => throw new RpcException(\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:350:        response.StatusCode.Should().Be(HttpStatusCode.Conflict);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:360:            .Returns(_ => throw new RpcException(\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:367:        response.StatusCode.Should().Be(HttpStatusCode.NotFound);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:377:            .Returns(_ => throw new RpcException(\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:384:        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:396:        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PatchFeatureStageControllerTests.cs:408:        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PlanControllerStagePlansTests.cs:153:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PlanControllerStagePlansTests.cs:201:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PlanControllerStagePlansTests.cs:228:            .Returns(_ => throw new RpcException(new Status(StatusCode.PermissionDenied, \"Not the feature owner\")));\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PlanControllerStagePlansTests.cs:233:        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PlanControllerStagePlansTests.cs:254:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PlanControllerStagePlansTests.cs:301:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PlanControllerStagePlansTests.cs:96:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PlanControllerTests.cs:114:            .Returns(_ => throw new RpcException(new Status(StatusCode.NotFound, \"feature not found\")));\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PlanControllerTests.cs:118:        response.StatusCode.Should().Be(HttpStatusCode.NotFound);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PlanControllerTests.cs:126:        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PlanControllerTests.cs:138:        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PlanControllerTests.cs:178:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PlanControllerTests.cs:219:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PlanControllerTests.cs:54:        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PlanControllerTests.cs:63:        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/PlanControllerTests.cs:96:        response.StatusCode.Should().Be(HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerCreateTaskTests.cs:25:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerCreateTaskTests.cs:42:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerCreateTaskTests.cs:57:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerCreateTaskTests.cs:71:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.InternalServerError);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerGetTaskTests.cs:18:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerGetTaskTests.cs:38:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerGetTaskTests.cs:71:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerGetTasksTests.cs:19:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerGetTasksTests.cs:36:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerGetTasksTests.cs:60:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerGetTasksTests.cs:79:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerMoveTaskTests.cs:17:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerMoveTaskTests.cs:35:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerMoveTaskTests.cs:61:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerMoveTaskTests.cs:77:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.InternalServerError);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TasksControllerMoveTaskTests.cs:97:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:134:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:151:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:161:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:172:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Forbidden);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:197:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Created);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:219:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:230:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:241:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:256:            .Returns(_ => throw new RpcException(new Status(StatusCode.AlreadyExists, \"Email already registered\")));\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:260:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Conflict);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:312:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Created);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:342:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Created);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:356:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:365:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Forbidden);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:385:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.NoContent);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:401:            .Returns(_ => throw new RpcException(new Status(StatusCode.NotFound, \"User not found\")));\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:405:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.NotFound);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:421:            .Returns(_ => throw new RpcException(new Status(StatusCode.PermissionDenied, \"User is not on your team\")));\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:425:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Forbidden);\ntests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:78:        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);\ntests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs:107:        var ex = new RpcException(new Status(StatusCode.NotFound, \"Not found\"));\ntests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs:123:        var ex = new RpcException(new Status(StatusCode.AlreadyExists, detail));\ntests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs:128:        context.Response.StatusCode.Should().Be(409);\ntests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs:141:        var ex = new RpcException(new Status(StatusCode.FailedPrecondition, detail));\ntests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs:146:        context.Response.StatusCode.Should().Be(422);\ntests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs:14:    private static async Task<HttpContext> InvokeWithException(RpcException? ex)\ntests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs:161:        var ex = new RpcException(new Status(StatusCode.AlreadyExists, \"EF internal error: row version 3\"));\ntests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs:166:        context.Response.StatusCode.Should().Be(409);\ntests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs:178:        var ex = new RpcException(new Status(StatusCode.NotFound, detail));\ntests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs:183:        context.Response.StatusCode.Should().Be(404);\ntests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs:219:        var ex = new RpcException(new Status(StatusCode.Unavailable, \"connection refused\"));\ntests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs:42:        context.Response.StatusCode.Should().Be(200);\ntests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs:63:        var ex = new RpcException(new Status(grpcStatus, \"detail\"));\ntests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs:68:        context.Response.StatusCode.Should().Be(expectedHttp);\ntests/OneMoreTaskTracker.Api.Tests/Middleware/GrpcExceptionMiddlewareTests.cs:76:        var ex = new RpcException(new Status(StatusCode.InvalidArgument, \"Invalid\"));\ntests/OneMoreTaskTracker.Features.Tests/CreateFeatureHandlerTests.cs:101:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/CreateFeatureHandlerTests.cs:102:        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Features.Tests/CreateFeatureHandlerTests.cs:53:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/CreateFeatureHandlerTests.cs:54:        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Features.Tests/CreateFeatureHandlerTests.cs:55:        ex.Which.Status.Detail.Should().Contain(\"title\");\ntests/OneMoreTaskTracker.Features.Tests/CreateFeatureHandlerTests.cs:67:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/CreateFeatureHandlerTests.cs:68:        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Features.Tests/CreateFeatureHandlerTests.cs:69:        ex.Which.Status.Detail.Should().Contain(\"manager_user_id\");\ntests/OneMoreTaskTracker.Features.Tests/CreateFeatureHandlerTests.cs:81:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/CreateFeatureHandlerTests.cs:82:        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Features.Tests/CreateFeatureHandlerTests.cs:83:        ex.Which.Status.Detail.Should().Contain(\"planned_start\");\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureHandlerTests.cs:198:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureHandlerTests.cs:199:        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureHandlerTests.cs:217:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureHandlerTests.cs:218:        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureHandlerTests.cs:236:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureHandlerTests.cs:237:        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureHandlerTests.cs:276:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureHandlerTests.cs:277:        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureHandlerTests.cs:294:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureHandlerTests.cs:295:        ex.Which.StatusCode.Should().Be(StatusCode.NotFound);\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureHandlerTests.cs:313:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureHandlerTests.cs:314:        ex.Which.StatusCode.Should().Be(StatusCode.PermissionDenied);\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureHandlerTests.cs:334:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureHandlerTests.cs:335:        ex.Which.StatusCode.Should().Be(StatusCode.PermissionDenied);\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureHandlerTests.cs:362:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureHandlerTests.cs:363:        ex.Which.StatusCode.Should().Be(StatusCode.AlreadyExists);\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureHandlerTests.cs:364:        ex.Which.Status.Detail.Should().Contain(\"|conflict=\");\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureHandlerTests.cs:365:        ex.Which.Status.Detail.Should().Contain(\"\\\"kind\\\":\\\"version\\\"\");\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureHandlerTests.cs:366:        ex.Which.Status.Detail.Should().StartWith(\"Updated by someone else\");\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:258:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:259:        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:279:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:280:        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:299:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:300:        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:301:        ex.Which.Status.Detail.Should().Be(\"Use a real release date\");\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:330:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:331:        ex.Which.StatusCode.Should().Be(StatusCode.FailedPrecondition);\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:332:        ex.Which.Status.Detail.Should().StartWith(\"Stage order violation|conflict=\");\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:333:        ex.Which.Status.Detail.Should().Contain(\"\\\"kind\\\":\\\"overlap\\\"\");\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:334:        ex.Which.Status.Detail.Should().Contain(\"\\\"with\\\":\\\"Development\\\"\");\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:352:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:353:        ex.Which.StatusCode.Should().Be(StatusCode.NotFound);\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:372:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:373:        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:392:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:393:        ex.Which.StatusCode.Should().Be(StatusCode.PermissionDenied);\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:411:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:412:        ex.Which.StatusCode.Should().Be(StatusCode.PermissionDenied);\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:442:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:443:        ex.Which.StatusCode.Should().Be(StatusCode.AlreadyExists);\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:444:        ex.Which.Status.Detail.Should().StartWith(\"Updated by someone else\");\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:445:        ex.Which.Status.Detail.Should().Contain(\"|conflict=\");\ntests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs:446:        ex.Which.Status.Detail.Should().Contain(\"\\\"currentVersion\\\":1\");\ntests/OneMoreTaskTracker.Features.Tests/GetFeatureHandlerTests.cs:28:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/GetFeatureHandlerTests.cs:29:        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Features.Tests/GetFeatureHandlerTests.cs:39:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/GetFeatureHandlerTests.cs:40:        ex.Which.StatusCode.Should().Be(StatusCode.NotFound);\ntests/OneMoreTaskTracker.Features.Tests/HandlerRegistrationTests.cs:38:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/HandlerRegistrationTests.cs:39:        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Features.Tests/HandlerRegistrationTests.cs:49:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/HandlerRegistrationTests.cs:50:        ex.Which.StatusCode.Should().Be(StatusCode.NotFound);\ntests/OneMoreTaskTracker.Features.Tests/HandlerRegistrationTests.cs:70:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/HandlerRegistrationTests.cs:71:        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Features.Tests/ListFeaturesHandlerTests.cs:106:        var ex = await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Features.Tests/ListFeaturesHandlerTests.cs:107:        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Tasks.Tests/AttachTaskToFeatureHandlerTests.cs:23:        var ex = await Assert.ThrowsAsync<RpcException>(() => handler.Attach(request, CreateContext()));\ntests/OneMoreTaskTracker.Tasks.Tests/AttachTaskToFeatureHandlerTests.cs:25:        ex.StatusCode.Should().Be(StatusCode.NotFound);\ntests/OneMoreTaskTracker.Tasks.Tests/AttachTaskToFeatureHandlerTests.cs:34:        var ex = await Assert.ThrowsAsync<RpcException>(() =>\ntests/OneMoreTaskTracker.Tasks.Tests/AttachTaskToFeatureHandlerTests.cs:37:        ex.StatusCode.Should().Be(StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Tasks.Tests/AttachTaskToFeatureHandlerTests.cs:38:        ex.Status.Detail.Should().Contain(\"feature_id\");\ntests/OneMoreTaskTracker.Tasks.Tests/AttachTaskToFeatureHandlerTests.cs:87:        var ex = await Assert.ThrowsAsync<RpcException>(() =>\ntests/OneMoreTaskTracker.Tasks.Tests/AttachTaskToFeatureHandlerTests.cs:90:        ex.StatusCode.Should().Be(StatusCode.FailedPrecondition);\ntests/OneMoreTaskTracker.Tasks.Tests/MergeRequests/MrsProviderTests.cs:106:    public async System.Threading.Tasks.Task Find_ThrowsRpcException_OnStreamError()\ntests/OneMoreTaskTracker.Tasks.Tests/MergeRequests/MrsProviderTests.cs:109:        var rpcException = new RpcException(new Status(StatusCode.Internal, \"Stream error\"));\ntests/OneMoreTaskTracker.Tasks.Tests/MergeRequests/MrsProviderTests.cs:128:        await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Tasks.Tests/Projects/EventBasedProjectsProviderTests.cs:178:    public async System.Threading.Tasks.Task Get_ThrowsRpcException_OnEventStreamError()\ntests/OneMoreTaskTracker.Tasks.Tests/Projects/EventBasedProjectsProviderTests.cs:183:        var rpcException = new RpcException(new Status(StatusCode.Unavailable, \"Service unavailable\"));\ntests/OneMoreTaskTracker.Tasks.Tests/Projects/EventBasedProjectsProviderTests.cs:203:        await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Tasks.Tests/Projects/EventBasedProjectsProviderTests.cs:207:    public async System.Threading.Tasks.Task Get_ThrowsRpcException_OnProjectGetterError()\ntests/OneMoreTaskTracker.Tasks.Tests/Projects/EventBasedProjectsProviderTests.cs:220:        var projectException = new RpcException(new Status(StatusCode.NotFound, \"Project not found\"));\ntests/OneMoreTaskTracker.Tasks.Tests/Projects/EventBasedProjectsProviderTests.cs:235:        await act.Should().ThrowAsync<RpcException>();\ntests/OneMoreTaskTracker.Tasks.Tests/Tasks/Create/CreateTaskHandlerTests.cs:185:        var ex = await Assert.ThrowsAsync<RpcException>(() =>\ntests/OneMoreTaskTracker.Tasks.Tests/Tasks/Create/CreateTaskHandlerTests.cs:188:        ex.StatusCode.Should().Be(StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Tasks.Tests/Tasks/Create/CreateTaskHandlerTests.cs:189:        ex.Status.Detail.Should().Contain(\"feature_id\");\ntests/OneMoreTaskTracker.Tasks.Tests/TestHelpers/ValidationPipeline.cs:22:        throw new RpcException(new Status(statusCode, ValidationDetailComposer.Compose(result.Errors)));\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerDeleteUserTests.cs:37:        await act.Should().ThrowAsync<RpcException>()\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerDeleteUserTests.cs:38:            .Where(e => e.StatusCode == StatusCode.NotFound);\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerDeleteUserTests.cs:57:        await act.Should().ThrowAsync<RpcException>()\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerDeleteUserTests.cs:58:            .Where(e => e.StatusCode == StatusCode.PermissionDenied);\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerDeleteUserTests.cs:79:        catch (RpcException)\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerGetTeamRosterTests.cs:62:        await act.Should().ThrowAsync<RpcException>()\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerGetTeamRosterTests.cs:63:            .Where(e => e.StatusCode == StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerGetTeamRosterTests.cs:77:        await act.Should().ThrowAsync<RpcException>()\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerGetTeamRosterTests.cs:78:            .Where(e => e.StatusCode == StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:104:        await act.Should().ThrowAsync<RpcException>()\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:105:            .Where(e => e.StatusCode == StatusCode.AlreadyExists);\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:120:        await act.Should().ThrowAsync<RpcException>()\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:121:            .Where(e => e.StatusCode == StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:146:        await act.Should().ThrowAsync<RpcException>()\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:147:            .Where(e => e.StatusCode == StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:21:        await act.Should().ThrowAsync<RpcException>()\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:22:            .Where(e => e.StatusCode == StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:265:        await act.Should().ThrowAsync<RpcException>()\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:266:            .Where(e => e.StatusCode == StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:291:        await act.Should().ThrowAsync<RpcException>()\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:292:            .Where(e => e.StatusCode == StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:32:        await act.Should().ThrowAsync<RpcException>()\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:33:            .Where(e => e.StatusCode == StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:350:        await act.Should().ThrowAsync<RpcException>()\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:351:            .Where(e => e.StatusCode == StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:43:        await act.Should().ThrowAsync<RpcException>()\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:44:            .Where(e => e.StatusCode == StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:55:        await act.Should().ThrowAsync<RpcException>()\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:56:            .Where(e => e.StatusCode == StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:66:        await act.Should().ThrowAsync<RpcException>()\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:67:            .Where(e => e.StatusCode == StatusCode.InvalidArgument);\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:81:        await act.Should().ThrowAsync<RpcException>()\ntests/OneMoreTaskTracker.Users.Tests/UserServiceHandlerRegisterTests.cs:82:            .Where(e => e.StatusCode == StatusCode.InvalidArgument);\n"
+    }
+  ]
+}

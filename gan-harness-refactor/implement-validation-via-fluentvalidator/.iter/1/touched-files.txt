@@ -1,0 +1,3 @@
+OneMoreTaskTracker.Tasks/Tasks/Attach/AttachTaskToFeatureHandler.cs
+OneMoreTaskTracker.Tasks/Tasks/Create/CreateTaskHandler.cs
+OneMoreTaskTracker.Tasks/Program.cs

@@ -1,0 +1,78 @@
+{
+  "$comment": "Behavior contract capture config for the implement-validation-via-fluentvalidator refactor. Track=backend. The frozen surface is: every gRPC handler's input/output proto, plus the externally observable error surface (RpcException StatusCode + Detail message) for each validator-driven failure path. After the refactor those StatusCode + Detail strings MUST be byte-identical (or fall within tolerance). All surfaces use exact tolerance — text/proto diffs are auto-fail.",
+  "track": "backend",
+  "surfaces": [
+    {
+      "id": "openapi",
+      "kind": "json",
+      "command": "cat OneMoreTaskTracker.Api/openapi.json",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "proto_features",
+      "kind": "text",
+      "command": "cd OneMoreTaskTracker.Features/Protos && for f in $(find . -name '*.proto' -type f | LC_ALL=C sort); do printf '=== %s ===\\n' \"$f\"; cat \"$f\"; printf '\\n'; done",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "proto_tasks",
+      "kind": "text",
+      "command": "cd OneMoreTaskTracker.Tasks/Protos && for f in $(find . -name '*.proto' -type f -not -path './Clients/*' | LC_ALL=C sort); do printf '=== %s ===\\n' \"$f\"; cat \"$f\"; printf '\\n'; done",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "proto_users",
+      "kind": "text",
+      "command": "cd OneMoreTaskTracker.Users/Protos && for f in $(find . -name '*.proto' -type f | LC_ALL=C sort); do printf '=== %s ===\\n' \"$f\"; cat \"$f\"; printf '\\n'; done",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "rpc_error_surface_users",
+      "kind": "text",
+      "command": "grep -REn 'throw new RpcException\\(new Status\\(StatusCode\\.[A-Za-z]+,' OneMoreTaskTracker.Users --include='*.cs' | grep -v '/bin/' | grep -v '/obj/' | LC_ALL=C sort",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "rpc_error_surface_tasks",
+      "kind": "text",
+      "command": "grep -REn 'throw new RpcException\\(new Status\\(StatusCode\\.[A-Za-z]+,' OneMoreTaskTracker.Tasks --include='*.cs' | grep -v '/bin/' | grep -v '/obj/' | LC_ALL=C sort",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "rpc_error_surface_features",
+      "kind": "text",
+      "command": "grep -REn 'throw new RpcException\\(new Status\\(StatusCode\\.[A-Za-z]+,' OneMoreTaskTracker.Features --include='*.cs' | grep -v '/bin/' | grep -v '/obj/' | LC_ALL=C sort",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "db_migrations_features",
+      "kind": "text",
+      "command": "ls OneMoreTaskTracker.Features/Migrations | LC_ALL=C sort | grep -E '^[0-9]+_.+\\.cs$' | grep -v Designer",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "db_migrations_tasks",
+      "kind": "text",
+      "command": "ls OneMoreTaskTracker.Tasks/Migrations | LC_ALL=C sort | grep -E '^[0-9]+_.+\\.cs$' | grep -v Designer",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "db_migrations_users",
+      "kind": "text",
+      "command": "ls OneMoreTaskTracker.Users/Migrations | LC_ALL=C sort | grep -E '^[0-9]+_.+\\.cs$' | grep -v Designer",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "endpoint_matrix_api",
+      "kind": "text",
+      "command": "grep -REn '^\\s*\\[(HttpPatch|HttpGet|HttpPost|HttpDelete|Authorize|Route|ApiController)\\(' OneMoreTaskTracker.Api/Controllers --include='*.cs' | LC_ALL=C sort",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "validation_test_assertions",
+      "kind": "text",
+      "command": "grep -REn 'StatusCode\\s*==\\s*StatusCode\\.|StatusCode\\.Should\\(\\)|\\.Status\\.Detail|RpcException' tests --include='*.cs' | grep -v '/bin/' | grep -v '/obj/' | LC_ALL=C sort",
+      "tolerance": { "kind": "exact" }
+    }
+  ]
+}
