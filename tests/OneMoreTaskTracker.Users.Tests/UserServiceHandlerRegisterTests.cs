@@ -5,6 +5,8 @@ using OneMoreTaskTracker.Proto.Users;
 using OneMoreTaskTracker.Users.Data;
 using OneMoreTaskTracker.Users.Services;
 using OneMoreTaskTracker.Users.Tests.Infra;
+using OneMoreTaskTracker.Users.Tests.TestHelpers;
+using OneMoreTaskTracker.Users.Validators;
 using Xunit;
 
 namespace OneMoreTaskTracker.Users.Tests;
@@ -14,9 +16,11 @@ public sealed class UserServiceHandlerRegisterTests : UserServiceHandlerTestBase
     [Fact]
     public async Task Register_WhenEmailIsEmpty_ThrowsInvalidArgument()
     {
+        var validator = new RegisterRequestValidator();
         var request = new RegisterRequest { Email = "", Password = "validPassword123" };
 
-        var act = async () => await Sut.Register(request, Ctx);
+        var act = async () =>
+            await ValidationPipeline.ValidateAsync(validator, request);
 
         await act.Should().ThrowAsync<RpcException>()
             .Where(e => e.StatusCode == StatusCode.InvalidArgument);
@@ -25,9 +29,11 @@ public sealed class UserServiceHandlerRegisterTests : UserServiceHandlerTestBase
     [Fact]
     public async Task Register_WhenPasswordIsEmpty_ThrowsInvalidArgument()
     {
+        var validator = new RegisterRequestValidator();
         var request = new RegisterRequest { Email = "test@example.com", Password = "" };
 
-        var act = async () => await Sut.Register(request, Ctx);
+        var act = async () =>
+            await ValidationPipeline.ValidateAsync(validator, request);
 
         await act.Should().ThrowAsync<RpcException>()
             .Where(e => e.StatusCode == StatusCode.InvalidArgument);
@@ -36,9 +42,11 @@ public sealed class UserServiceHandlerRegisterTests : UserServiceHandlerTestBase
     [Fact]
     public async Task Register_WhenEmailIsWhitespace_ThrowsInvalidArgument()
     {
+        var validator = new RegisterRequestValidator();
         var request = new RegisterRequest { Email = "   ", Password = "validPassword123" };
 
-        var act = async () => await Sut.Register(request, Ctx);
+        var act = async () =>
+            await ValidationPipeline.ValidateAsync(validator, request);
 
         await act.Should().ThrowAsync<RpcException>()
             .Where(e => e.StatusCode == StatusCode.InvalidArgument);
@@ -47,10 +55,12 @@ public sealed class UserServiceHandlerRegisterTests : UserServiceHandlerTestBase
     [Fact]
     public async Task Register_WhenEmailIsTooLong_ThrowsInvalidArgument()
     {
+        var validator = new RegisterRequestValidator();
         var longEmail = new string('a', 255) + "@example.com";
         var request = new RegisterRequest { Email = longEmail, Password = "validPassword123" };
 
-        var act = async () => await Sut.Register(request, Ctx);
+        var act = async () =>
+            await ValidationPipeline.ValidateAsync(validator, request);
 
         await act.Should().ThrowAsync<RpcException>()
             .Where(e => e.StatusCode == StatusCode.InvalidArgument);
@@ -59,9 +69,11 @@ public sealed class UserServiceHandlerRegisterTests : UserServiceHandlerTestBase
     [Fact]
     public async Task Register_WhenEmailIsInvalid_ThrowsInvalidArgument()
     {
+        var validator = new RegisterRequestValidator();
         var request = new RegisterRequest { Email = "notanemail", Password = "validPassword123" };
 
-        var act = async () => await Sut.Register(request, Ctx);
+        var act = async () =>
+            await ValidationPipeline.ValidateAsync(validator, request);
 
         await act.Should().ThrowAsync<RpcException>()
             .Where(e => e.StatusCode == StatusCode.InvalidArgument);
@@ -70,13 +82,15 @@ public sealed class UserServiceHandlerRegisterTests : UserServiceHandlerTestBase
     [Fact]
     public async Task Register_WhenPasswordTooShort_ThrowsInvalidArgument()
     {
+        var validator = new RegisterRequestValidator();
         var request = new RegisterRequest
         {
             Email = "test@example.com",
             Password = "short12"
         };
 
-        var act = async () => await Sut.Register(request, Ctx);
+        var act = async () =>
+            await ValidationPipeline.ValidateAsync(validator, request);
 
         await act.Should().ThrowAsync<RpcException>()
             .Where(e => e.StatusCode == StatusCode.InvalidArgument);
@@ -115,7 +129,13 @@ public sealed class UserServiceHandlerRegisterTests : UserServiceHandlerTestBase
             ManagerId = 999
         };
 
-        var act = async () => await Sut.Register(request, Ctx);
+        var validator = new RegisterRequestValidator();
+
+        var act = async () =>
+        {
+            await ValidationPipeline.ValidateAsync(validator, request);
+            await Sut.Register(request, Ctx);
+        };
 
         await act.Should().ThrowAsync<RpcException>()
             .Where(e => e.StatusCode == StatusCode.InvalidArgument);
@@ -252,6 +272,7 @@ public sealed class UserServiceHandlerRegisterTests : UserServiceHandlerTestBase
         DbContext.Users.Add(manager);
         await DbContext.SaveChangesAsync();
 
+        var validator = new RegisterRequestValidator();
         var request = new RegisterRequest
         {
             Email = "newdev@example.com",
@@ -260,7 +281,8 @@ public sealed class UserServiceHandlerRegisterTests : UserServiceHandlerTestBase
             Role = Roles.Manager
         };
 
-        var act = async () => await Sut.Register(request, Ctx);
+        var act = async () =>
+            await ValidationPipeline.ValidateAsync(validator, request);
 
         await act.Should().ThrowAsync<RpcException>()
             .Where(e => e.StatusCode == StatusCode.InvalidArgument);
@@ -278,6 +300,7 @@ public sealed class UserServiceHandlerRegisterTests : UserServiceHandlerTestBase
         DbContext.Users.Add(manager);
         await DbContext.SaveChangesAsync();
 
+        var validator = new RegisterRequestValidator();
         var request = new RegisterRequest
         {
             Email = "newdev@example.com",
@@ -286,7 +309,8 @@ public sealed class UserServiceHandlerRegisterTests : UserServiceHandlerTestBase
             Role = ""
         };
 
-        var act = async () => await Sut.Register(request, Ctx);
+        var act = async () =>
+            await ValidationPipeline.ValidateAsync(validator, request);
 
         await act.Should().ThrowAsync<RpcException>()
             .Where(e => e.StatusCode == StatusCode.InvalidArgument);
@@ -337,6 +361,7 @@ public sealed class UserServiceHandlerRegisterTests : UserServiceHandlerTestBase
         DbContext.Users.Add(manager);
         await DbContext.SaveChangesAsync();
 
+        var validator = new RegisterRequestValidator();
         var request = new RegisterRequest
         {
             Email = "newdev@example.com",
@@ -345,7 +370,8 @@ public sealed class UserServiceHandlerRegisterTests : UserServiceHandlerTestBase
             Role = "Admin"
         };
 
-        var act = async () => await Sut.Register(request, Ctx);
+        var act = async () =>
+            await ValidationPipeline.ValidateAsync(validator, request);
 
         await act.Should().ThrowAsync<RpcException>()
             .Where(e => e.StatusCode == StatusCode.InvalidArgument);

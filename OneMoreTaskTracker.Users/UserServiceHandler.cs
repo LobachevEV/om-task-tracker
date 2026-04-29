@@ -1,31 +1,16 @@
-using System.Net.Mail;
 using Grpc.Core;
 using Microsoft.EntityFrameworkCore;
 using OneMoreTaskTracker.Proto.Users;
 using OneMoreTaskTracker.Users.Data;
 using OneMoreTaskTracker.Users.Services;
-using static OneMoreTaskTracker.Users.Services.Roles;
 
 namespace OneMoreTaskTracker.Users;
 
 // TODO: add xUnit tests for Register (validation, duplicate email, BCrypt) and Authenticate (success, wrong password, missing user)
 public class UserServiceHandler(UsersDbContext dbContext) : UserService.UserServiceBase
 {
-    private const int MinPasswordLength = 8;
-    private const int MaxEmailLength = 254;
-
     public override async Task<RegisterResponse> Register(RegisterRequest request, ServerCallContext context)
     {
-        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "Email and password are required"));
-
-        if (request.Email.Length > MaxEmailLength || !IsValidEmail(request.Email))
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid email address"));
-
-        if (request.Password.Length < MinPasswordLength)
-            throw new RpcException(new Status(StatusCode.InvalidArgument,
-                $"Password must be at least {MinPasswordLength} characters"));
-
         if (await dbContext.Users.AnyAsync(u => u.Email == request.Email, context.CancellationToken))
             throw new RpcException(new Status(StatusCode.AlreadyExists, "Email already registered"));
 
@@ -38,11 +23,6 @@ public class UserServiceHandler(UsersDbContext dbContext) : UserService.UserServ
         }
         else
         {
-            // Managed creation: validate role and manager
-            if (!Roles.DeveloperRoles.Contains(request.Role))
-                throw new RpcException(new Status(StatusCode.InvalidArgument,
-                    "Role must be one of: FrontendDeveloper, BackendDeveloper, Qa"));
-
             var manager = await dbContext.Users.FindAsync([request.ManagerId], context.CancellationToken);
             if (manager is null || manager.Role != Roles.Manager)
                 throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid ManagerId"));
@@ -164,18 +144,5 @@ public class UserServiceHandler(UsersDbContext dbContext) : UserService.UserServ
         await dbContext.SaveChangesAsync(context.CancellationToken);
 
         return new DeleteUserResponse();
-    }
-
-    private static bool IsValidEmail(string email)
-    {
-        try
-        {
-            var addr = new MailAddress(email);
-            return addr.Address == email;
-        }
-        catch
-        {
-            return false;
-        }
     }
 }

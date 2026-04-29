@@ -1,6 +1,9 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using OneMoreTaskTracker.Users;
 using OneMoreTaskTracker.Users.Data;
+using OneMoreTaskTracker.Users.Validation;
+using OneMoreTaskTracker.Users.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +13,8 @@ builder.Configuration
     .AddEnvironmentVariables();
 
 // TODO: add mTLS or internal service token validation to prevent unauthenticated direct gRPC access
-builder.Services.AddGrpc();
+builder.Services.AddGrpc(o => o.Interceptors.Add<ValidationExceptionInterceptor>());
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 builder.Services.AddDbContextPool<UsersDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("UsersContext")));
 
