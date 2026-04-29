@@ -20,7 +20,7 @@ public class TasksController(
     TaskLister.TaskListerClient taskLister,
     TaskGetter.TaskGetterClient taskGetter,
     TaskMover.TaskMoverClient taskMover,
-    UserService.UserServiceClient userService,
+    UserService.UserServiceClient userService, OneMoreTaskTracker.Api.Time.IRequestClock clock,
     ILogger<TasksController> logger) : ControllerBase
 {
     [HttpGet]
@@ -66,15 +66,15 @@ public class TasksController(
     }
 
     private static readonly TimeSpan DefaultLookback = TimeSpan.FromDays(365);
-    private static Timestamp DefaultFirstPushDate() =>
-        Timestamp.FromDateTime(DateTime.UtcNow - DefaultLookback);
+    private Timestamp DefaultFirstPushDate() =>
+        Timestamp.FromDateTime(clock.GetUtcNow() - DefaultLookback);
 
     [HttpPost]
     public async Task<ActionResult<TaskResponse>> CreateTask(
         [FromBody] CreateTaskPayload payload,
         CancellationToken cancellationToken)
     {
-        var startDate = (payload.StartDate ?? DateTime.UtcNow - DefaultLookback).ToUniversalTime();
+        var startDate = (payload.StartDate ?? clock.GetUtcNow() - DefaultLookback).ToUniversalTime();
 
         using var call = taskCreator.Create(new CreateTaskRequest
         {
