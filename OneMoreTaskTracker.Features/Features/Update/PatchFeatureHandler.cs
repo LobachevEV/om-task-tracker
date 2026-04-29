@@ -12,15 +12,6 @@ public sealed class PatchFeatureHandler(
 {
     public override async Task<FeatureDto> Patch(PatchFeatureRequest request, ServerCallContext context)
     {
-        string? trimmedTitle = request.HasTitle ? (request.Title ?? string.Empty).Trim() : null;
-
-        string? normalizedDescription = null;
-        if (request.HasDescription)
-        {
-            var trimmed = (request.Description ?? string.Empty).TrimEnd();
-            normalizedDescription = string.IsNullOrWhiteSpace(trimmed) ? null : trimmed;
-        }
-
         var feature = await db.Features
                           .Include(f => f.StagePlans)
                           .FirstOrDefaultAsync(f => f.Id == request.Id, context.CancellationToken)
@@ -37,12 +28,15 @@ public sealed class PatchFeatureHandler(
 
         if (request.HasTitle)
         {
-            feature.RenameTitle(trimmedTitle!, now);
+            var trimmedTitle = (request.Title ?? string.Empty).Trim();
+            feature.RenameTitle(trimmedTitle, now);
             anyMutation = true;
         }
 
         if (request.HasDescription)
         {
+            var trimmed = (request.Description ?? string.Empty).TrimEnd();
+            var normalizedDescription = string.IsNullOrWhiteSpace(trimmed) ? null : trimmed;
             feature.SetDescription(normalizedDescription, now);
             anyMutation = true;
         }

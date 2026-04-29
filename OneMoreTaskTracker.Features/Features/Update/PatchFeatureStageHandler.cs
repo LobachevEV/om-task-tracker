@@ -22,9 +22,6 @@ public sealed class PatchFeatureStageHandler(
 
     public override async Task<FeatureDto> Patch(PatchFeatureStageRequest request, ServerCallContext context)
     {
-        var parsedStart = request.HasPlannedStart ? ParseDate(request.PlannedStart) : null;
-        var parsedEnd   = request.HasPlannedEnd   ? ParseDate(request.PlannedEnd)   : null;
-
         var feature = await db.Features
                           .Include(f => f.StagePlans)
                           .FirstOrDefaultAsync(f => f.Id == request.FeatureId, context.CancellationToken)
@@ -42,8 +39,8 @@ public sealed class PatchFeatureStageHandler(
 
         if (request.HasPlannedStart || request.HasPlannedEnd)
         {
-            var prospectiveStart = request.HasPlannedStart ? parsedStart : plan.PlannedStart;
-            var prospectiveEnd = request.HasPlannedEnd ? parsedEnd : plan.PlannedEnd;
+            var prospectiveStart = request.HasPlannedStart ? PlannedDate.Parse(request.PlannedStart) : plan.PlannedStart;
+            var prospectiveEnd = request.HasPlannedEnd ? PlannedDate.Parse(request.PlannedEnd) : plan.PlannedEnd;
 
             var snapshots = feature.StagePlans
                 .Select(sp => sp.Stage == stageOrdinal
@@ -65,13 +62,13 @@ public sealed class PatchFeatureStageHandler(
 
         if (request.HasPlannedStart)
         {
-            plan.SetPlannedStart(parsedStart, now);
+            plan.SetPlannedStart(PlannedDate.Parse(request.PlannedStart), now);
             anyMutation = true;
         }
 
         if (request.HasPlannedEnd)
         {
-            plan.SetPlannedEnd(parsedEnd, now);
+            plan.SetPlannedEnd(PlannedDate.Parse(request.PlannedEnd), now);
             anyMutation = true;
         }
 
@@ -111,11 +108,6 @@ public sealed class PatchFeatureStageHandler(
         dto.StagePlans.Add(FeatureMappingConfig.BuildProtoStagePlans(feature));
         return dto;
     }
-
-    private static DateOnly? ParseDate(string raw) =>
-        string.IsNullOrWhiteSpace(raw)
-            ? null
-            : DateOnly.ParseExact(raw, "yyyy-MM-dd");
 
     private static void EnsureStageOrder(IReadOnlyList<StagePlanSnapshot> stages, int mutatedOrdinal)
     {

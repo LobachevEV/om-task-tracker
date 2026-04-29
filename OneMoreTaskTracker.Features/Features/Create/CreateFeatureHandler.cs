@@ -21,8 +21,8 @@ public class CreateFeatureHandler(FeaturesDbContext db) : FeatureCreator.Feature
 
     public override async Task<FeatureDto> Create(CreateFeatureRequest request, ServerCallContext context)
     {
-        var plannedStart = ParseDate(request.PlannedStart);
-        var plannedEnd   = ParseDate(request.PlannedEnd);
+        var plannedStart = PlannedDate.Parse(request.PlannedStart);
+        var plannedEnd   = PlannedDate.Parse(request.PlannedEnd);
 
         var now = DateTime.UtcNow;
 
@@ -64,9 +64,4 @@ public class CreateFeatureHandler(FeaturesDbContext db) : FeatureCreator.Feature
         dto.StagePlans.Add(FeatureMappingConfig.BuildProtoStagePlans(feature));
         return dto;
     }
-
-    private static DateOnly? ParseDate(string raw) =>
-        string.IsNullOrWhiteSpace(raw)
-            ? null
-            : DateOnly.ParseExact(raw, "yyyy-MM-dd");
 }
