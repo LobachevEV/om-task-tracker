@@ -6,35 +6,46 @@ namespace OneMoreTaskTracker.Features.Features.Update;
 
 public static class FeatureConcurrencySaver
 {
-    public static async Task SaveFeatureAsync(
-        this FeaturesDbContext db,
-        Feature feature,
-        CancellationToken cancellationToken)
+    extension(FeaturesDbContext db)
     {
-        try
+        public async Task SaveFeatureAsync(
+            Feature feature,
+            CancellationToken cancellationToken)
         {
-            await db.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await db.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                await db.Entry(feature).ReloadAsync(cancellationToken);
+                throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));
+            }
         }
-        catch (DbUpdateConcurrencyException)
+        
+        public async Task SaveStageAsync(
+            FeatureStagePlan plan,
+            CancellationToken cancellationToken)
         {
-            await db.Entry(feature).ReloadAsync(cancellationToken);
-            throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));
+            try
+            {
+                await db.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                await db.Entry(plan).ReloadAsync(cancellationToken);
+                throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(plan.Version)));
+            }
         }
-    }
-
-    public static async Task SaveStageAsync(
-        this FeaturesDbContext db,
-        FeatureStagePlan plan,
-        CancellationToken cancellationToken)
-    {
-        try
+        
+        public async Task<Feature> LoadFeatureWithStagePlansAsync(
+            int featureId,
+            CancellationToken cancellationToken)
         {
-            await db.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            await db.Entry(plan).ReloadAsync(cancellationToken);
-            throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(plan.Version)));
+            return await db.Features
+                       .Include(f => f.StagePlans)
+                       .FirstOrDefaultAsync(f => f.Id == featureId, cancellationToken)
+                   ?? throw new RpcException(new Status(StatusCode.NotFound, $"feature {featureId} not found"));
         }
     }
 }

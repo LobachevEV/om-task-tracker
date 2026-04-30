@@ -25,7 +25,8 @@ public sealed class PatchFeatureStageHandler(
         FeatureOwnershipGuard.EnsureManager(feature, request.CallerUserId);
 
         var stageOrdinal = (int)request.Stage;
-        var plan = feature.ResolveStage(stageOrdinal, request.Stage.ToString());
+        var plan = feature.ResolveStage(stageOrdinal)
+                   ?? throw new RpcException(new Status(StatusCode.NotFound, $"stage {request.Stage.ToString()} not found"));
         FeatureVersionGuard.EnsureStageVersion(plan, request.HasExpectedStageVersion, request.ExpectedStageVersion);
 
         if (request.HasPlannedStart || request.HasPlannedEnd)
