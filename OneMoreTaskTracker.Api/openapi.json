@@ -327,7 +327,8 @@
               "currentVersion": { "type": "integer", "format": "int32", "description": "Server's current version (kind='version')." },
               "track":          { "type": "string", "enum": ["Backend", "Frontend"], "description": "Track whose phase tripped a cap (kind='subStageCap'/'subStageOverlap')." },
               "phase":          { "type": "string", "description": "Phase whose cap tripped (kind='subStageCap'/'subStageOverlap')." },
-              "cap":            { "type": "integer", "format": "int32", "description": "Hard cap value (kind='subStageCap')." }
+              "cap":            { "type": "integer", "format": "int32", "description": "Hard cap value (kind='subStageCap')." },
+              "neighborOrdinal": { "type": "integer", "format": "int32", "description": "Ordinal of the neighboring sub-stage whose interval overlaps the candidate (kind='subStageOverlap')." }
             }
           }
         }

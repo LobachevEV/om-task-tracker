@@ -13,12 +13,13 @@ internal static class ConflictDetail
             currentVersion
         })}";
 
-    public static string SubStageOverlap(int subStageId, string neighbourSubStageId) =>
+    public static string SubStageOverlap(string track, string phase, short neighborOrdinal) =>
         $"Sub-stage order violation{Marker}{JsonSerializer.Serialize(new
         {
             kind = "subStageOverlap",
-            subStageId,
-            with = neighbourSubStageId
+            track,
+            phase,
+            neighborOrdinal
         })}";
 
     public static string SubStageCapReached(string track, string phase, int cap) =>

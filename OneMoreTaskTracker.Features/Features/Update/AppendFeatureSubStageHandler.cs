@@ -31,6 +31,21 @@ public sealed class AppendFeatureSubStageHandler(
         var plannedEnd   = ParseOptionalDate(request.HasPlannedEnd   ? request.PlannedEnd   : null);
 
         var sub = FeatureStageLayout.Append(feature, track, phase, ownerUserId, plannedStart, plannedEnd, now);
+
+        var others = feature.SubStages.Where(s =>
+            s.Track == track && s.PhaseKind == phase && !ReferenceEquals(s, sub));
+        var neighbor = SubStageOrderRule.FindOverlappingNeighbor(
+            others,
+            sub.PlannedStart,
+            sub.PlannedEnd);
+        if (neighbor is { } neighborOrdinal)
+        {
+            feature.SubStages.Remove(sub);
+            throw new RpcException(new Status(
+                StatusCode.FailedPrecondition,
+                ConflictDetail.SubStageOverlap(track.ToString(), phase.ToString(), neighborOrdinal)));
+        }
+
         feature.RecordSubStageMutation(now);
 
         await db.SaveFeatureAsync(feature, context.CancellationToken);

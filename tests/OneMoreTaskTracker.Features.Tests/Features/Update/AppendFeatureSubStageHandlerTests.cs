@@ -8,6 +8,7 @@ using OneMoreTaskTracker.Features.Features.Update;
 using OneMoreTaskTracker.Features.Tests.TestHelpers;
 using OneMoreTaskTracker.Proto.Features.AppendFeatureSubStageCommand;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
+using OneMoreTaskTracker.Proto.Features.PatchFeatureSubStageCommand;
 using Xunit;
 using ProtoFeaturePhaseKind = OneMoreTaskTracker.Proto.Features.FeaturePhaseKind;
 using ProtoFeatureTrack = OneMoreTaskTracker.Proto.Features.FeatureTrack;
@@ -120,6 +121,49 @@ public sealed class AppendFeatureSubStageHandlerTests
         ex.Which.StatusCode.Should().Be(StatusCode.FailedPrecondition);
         ex.Which.Status.Detail.Should().Contain("subStageCap");
         ex.Which.Status.Detail.Should().Contain("\"cap\":6");
+    }
+
+    [Fact]
+    public async Task Append_OverlappingExplicitDates_ThrowsFailedPrecondition_WithSubStageOverlap()
+    {
+        var db = NewDb();
+        var featureId = await CreateFeatureAsync(db);
+
+        var seedSubStageId = (await db.Features.Include(f => f.SubStages).AsNoTracking().SingleAsync(f => f.Id == featureId))
+            .SubStages.Single(s => s.Track == Track.Backend && s.PhaseKind == PhaseKind.Development).Id;
+
+        await new PatchFeatureSubStageHandler(db, NullLogger<PatchFeatureSubStageHandler>.Instance, TestRequestClock.System())
+            .Patch(
+                new PatchFeatureSubStageRequest
+                {
+                    FeatureId = featureId,
+                    SubStageId = seedSubStageId,
+                    CallerUserId = ManagerUserId,
+                    PlannedStart = "2026-05-01",
+                    PlannedEnd = "2026-05-15",
+                },
+                TestServerCallContext.Create());
+
+        var act = () => Handler(db).Append(
+            new AppendFeatureSubStageRequest
+            {
+                FeatureId = featureId,
+                CallerUserId = ManagerUserId,
+                Track = "backend",
+                Phase = "development",
+                PlannedStart = "2026-05-10",
+                PlannedEnd = "2026-05-12",
+            },
+            TestServerCallContext.Create());
+
+        var ex = await act.Should().ThrowAsync<RpcException>();
+        ex.Which.StatusCode.Should().Be(StatusCode.FailedPrecondition);
+        ex.Which.Status.Detail.Should().Contain("subStageOverlap");
+        ex.Which.Status.Detail.Should().Contain("\"neighborOrdinal\":1");
+
+        var siblings = (await db.Features.Include(f => f.SubStages).AsNoTracking().SingleAsync(f => f.Id == featureId))
+            .SubStages.Where(s => s.Track == Track.Backend && s.PhaseKind == PhaseKind.Development).ToList();
+        siblings.Should().HaveCount(1);
     }
 
     [Fact]

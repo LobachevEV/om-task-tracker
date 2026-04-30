@@ -21,6 +21,7 @@ public sealed class PatchFeatureSubStageHandler(
 
         var now = clock.GetUtcNow();
         var mutated = false;
+        var datesTouched = false;
 
         if (request.HasOwnerUserId)
         {
@@ -32,12 +33,31 @@ public sealed class PatchFeatureSubStageHandler(
         {
             subStage.SetPlannedStart(ParseOptionalDate(request.PlannedStart), now);
             mutated = true;
+            datesTouched = true;
         }
 
         if (request.HasPlannedEnd)
         {
             subStage.SetPlannedEnd(ParseOptionalDate(request.PlannedEnd), now);
             mutated = true;
+            datesTouched = true;
+        }
+
+        if (datesTouched)
+        {
+            var others = feature.SubStages.Where(s =>
+                s.Track == subStage.Track && s.PhaseKind == subStage.PhaseKind && s.Id != subStage.Id);
+            var neighbor = SubStageOrderRule.FindOverlappingNeighbor(
+                others,
+                subStage.PlannedStart,
+                subStage.PlannedEnd);
+            if (neighbor is { } neighborOrdinal)
+                throw new RpcException(new Status(
+                    StatusCode.FailedPrecondition,
+                    ConflictDetail.SubStageOverlap(
+                        subStage.Track.ToString(),
+                        subStage.PhaseKind.ToString(),
+                        neighborOrdinal)));
         }
 
         if (mutated)
