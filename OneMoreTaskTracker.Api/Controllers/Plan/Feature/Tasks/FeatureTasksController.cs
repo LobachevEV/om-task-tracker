@@ -31,7 +31,7 @@ public class FeatureTasksController(
             new AttachTaskToFeatureRequest { JiraTaskId = jiraId, FeatureId = id },
             cancellationToken: ct);
 
-        return Ok(PlanMapper.MapSummary(feature, PlanRequestHelpers.EmptyTasks, logger));
+        return Ok(FeatureSummaryBuilder.MapSummary(feature, PlanRequestHelpers.EmptyTasks, logger));
     }
 
     [HttpDelete("{jiraId}")]
@@ -56,6 +56,6 @@ public class FeatureTasksController(
 
         await Task.WhenAll(detach, get);
 
-        return Ok(PlanMapper.MapSummary(get.Result, PlanRequestHelpers.EmptyTasks, logger));
+        return Ok(FeatureSummaryBuilder.MapSummary(get.Result, PlanRequestHelpers.EmptyTasks, logger));
     }
 }

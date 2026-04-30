@@ -23,15 +23,15 @@ public class PatchFeatureStageController(
         [FromHeader(Name = "If-Match")] string? ifMatch,
         CancellationToken ct)
     {
-        if (!PlanMapper.TryParseStage(stage, out var parsedStage))
+        if (!FeatureStateMapper.TryParseStage(stage, out var parsedStage))
             return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
 
         if (body.PlannedStart is not null
-            && PlanMapper.ValidateOptionalReleaseDate(body.PlannedStart) is { } startError)
+            && ReleaseDateValidator.Validate(body.PlannedStart) is { } startError)
             return BadRequest(new { error = startError });
 
         if (body.PlannedEnd is not null
-            && PlanMapper.ValidateOptionalReleaseDate(body.PlannedEnd) is { } endError)
+            && ReleaseDateValidator.Validate(body.PlannedEnd) is { } endError)
             return BadRequest(new { error = endError });
 
         var callerUserId = User.GetUserId();
@@ -69,6 +69,6 @@ public class PatchFeatureStageController(
             request.ExpectedStageVersion = expectedStageVersion.Value;
 
         var dto = await featureStagePatcher.PatchAsync(request, cancellationToken: ct);
-        return Ok(PlanMapper.MapSummary(dto, PlanRequestHelpers.EmptyTasks, logger));
+        return Ok(FeatureSummaryBuilder.MapSummary(dto, PlanRequestHelpers.EmptyTasks, logger));
     }
 }

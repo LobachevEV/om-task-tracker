@@ -36,21 +36,21 @@ public sealed class PlannedDateParserTests
     [Fact]
     public void ValidateOptionalReleaseDate_ReturnsNull_OnMissingOrValidValue()
     {
-        PlanMapper.ValidateOptionalReleaseDate(null).Should().BeNull();
-        PlanMapper.ValidateOptionalReleaseDate("").Should().BeNull();
-        PlanMapper.ValidateOptionalReleaseDate("2026-04-29").Should().BeNull();
+        ReleaseDateValidator.Validate(null).Should().BeNull();
+        ReleaseDateValidator.Validate("").Should().BeNull();
+        ReleaseDateValidator.Validate("2026-04-29").Should().BeNull();
     }
 
     [Fact]
     public void ValidateOptionalReleaseDate_ReportsFormatError_OnUnparseableDate()
     {
-        PlanMapper.ValidateOptionalReleaseDate("31/01/2026").Should().Be("Date must be YYYY-MM-DD");
+        ReleaseDateValidator.Validate("31/01/2026").Should().Be("Date must be YYYY-MM-DD");
     }
 
     [Fact]
     public void ValidateOptionalReleaseDate_ReportsRangeError_OnOutOfWindowYear()
     {
-        PlanMapper.ValidateOptionalReleaseDate("1999-12-31").Should().Be("Use a real release date");
-        PlanMapper.ValidateOptionalReleaseDate("2101-01-01").Should().Be("Use a real release date");
+        ReleaseDateValidator.Validate("1999-12-31").Should().Be("Use a real release date");
+        ReleaseDateValidator.Validate("2101-01-01").Should().Be("Use a real release date");
     }
 }

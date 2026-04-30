@@ -24,61 +24,25 @@ public static class FeatureMappingConfig
 
         FeatureStagePlanMappingConfig.Register();
 
-        TypeAdapterConfig<Feature, ListDto>.NewConfig()
-            .Map(d => d.Id,             s => s.Id)
-            .Map(d => d.Title,          s => s.Title)
-            .Map(d => d.Description,    s => s.Description ?? string.Empty)
-            .Map(d => d.State,          s => (ProtoFeatureState)s.State)
-            .Map(d => d.PlannedStart,   s => s.PlannedStart == null ? string.Empty : s.PlannedStart.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.PlannedEnd,     s => s.PlannedEnd   == null ? string.Empty : s.PlannedEnd.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.LeadUserId,     s => s.LeadUserId)
-            .Map(d => d.ManagerUserId,  s => s.ManagerUserId)
-            .Map(d => d.CreatedAt,      s => s.CreatedAt.ToString("O"))
-            .Map(d => d.UpdatedAt,      s => s.UpdatedAt.ToString("O"))
-            .Map(d => d.Version,        s => s.Version);
-
-        TypeAdapterConfig<Feature, GetDto>.NewConfig()
-            .Map(d => d.Id,             s => s.Id)
-            .Map(d => d.Title,          s => s.Title)
-            .Map(d => d.Description,    s => s.Description ?? string.Empty)
-            .Map(d => d.State,          s => (ProtoFeatureState)s.State)
-            .Map(d => d.PlannedStart,   s => s.PlannedStart == null ? string.Empty : s.PlannedStart.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.PlannedEnd,     s => s.PlannedEnd   == null ? string.Empty : s.PlannedEnd.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.LeadUserId,     s => s.LeadUserId)
-            .Map(d => d.ManagerUserId,  s => s.ManagerUserId)
-            .Map(d => d.CreatedAt,      s => s.CreatedAt.ToString("O"))
-            .Map(d => d.UpdatedAt,      s => s.UpdatedAt.ToString("O"))
-            .Map(d => d.Version,        s => s.Version);
-
-        TypeAdapterConfig<Feature, PatchDto>.NewConfig()
-            .Map(d => d.Id,             s => s.Id)
-            .Map(d => d.Title,          s => s.Title)
-            .Map(d => d.Description,    s => s.Description ?? string.Empty)
-            .Map(d => d.State,          s => (ProtoFeatureState)s.State)
-            .Map(d => d.PlannedStart,   s => s.PlannedStart == null ? string.Empty : s.PlannedStart.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.PlannedEnd,     s => s.PlannedEnd   == null ? string.Empty : s.PlannedEnd.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.LeadUserId,     s => s.LeadUserId)
-            .Map(d => d.ManagerUserId,  s => s.ManagerUserId)
-            .Map(d => d.CreatedAt,      s => s.CreatedAt.ToString("O"))
-            .Map(d => d.UpdatedAt,      s => s.UpdatedAt.ToString("O"))
-            .Map(d => d.Version,        s => s.Version);
-
-        TypeAdapterConfig<Feature, PatchStageDto>.NewConfig()
-            .Map(d => d.Id,             s => s.Id)
-            .Map(d => d.Title,          s => s.Title)
-            .Map(d => d.Description,    s => s.Description ?? string.Empty)
-            .Map(d => d.State,          s => (ProtoFeatureState)s.State)
-            .Map(d => d.PlannedStart,   s => s.PlannedStart == null ? string.Empty : s.PlannedStart.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.PlannedEnd,     s => s.PlannedEnd   == null ? string.Empty : s.PlannedEnd.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.LeadUserId,     s => s.LeadUserId)
-            .Map(d => d.ManagerUserId,  s => s.ManagerUserId)
-            .Map(d => d.CreatedAt,      s => s.CreatedAt.ToString("O"))
-            .Map(d => d.UpdatedAt,      s => s.UpdatedAt.ToString("O"))
-            .Map(d => d.Version,        s => s.Version);
+        RegisterFeatureToDto<CreateDto>();
+        RegisterFeatureToDto<ListDto>();
+        RegisterFeatureToDto<GetDto>();
+        RegisterFeatureToDto<PatchDto>();
+        RegisterFeatureToDto<PatchStageDto>();
     }
 
     public static IEnumerable<ProtoFeatureStagePlan> BuildProtoStagePlans(Feature feature) =>
         feature.StagePlans
             .OrderBy(sp => sp.Stage)
             .Select(sp => sp.Adapt<ProtoFeatureStagePlan>());
+
+    private static void RegisterFeatureToDto<TDto>()
+        where TDto : class, IFeatureMappingTarget, new() =>
+        TypeAdapterConfig<Feature, TDto>.NewConfig()
+            .Map(d => d.Description, s => s.Description ?? string.Empty)
+            .Map(d => d.State,        s => (ProtoFeatureState)s.State)
+            .Map(d => d.PlannedStart, s => s.PlannedStart == null ? string.Empty : s.PlannedStart.Value.ToString("yyyy-MM-dd"))
+            .Map(d => d.PlannedEnd,   s => s.PlannedEnd   == null ? string.Empty : s.PlannedEnd.Value.ToString("yyyy-MM-dd"))
+            .Map(d => d.CreatedAt,    s => s.CreatedAt.ToString("O"))
+            .Map(d => d.UpdatedAt,    s => s.UpdatedAt.ToString("O"));
 }
