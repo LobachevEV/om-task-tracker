@@ -4,7 +4,7 @@ using OneMoreTaskTracker.Features.Features.Data;
 
 namespace OneMoreTaskTracker.Features.Features.Update;
 
-public static class FeatureConcurrencySaver
+public static class FeatureDbContextExtensions
 {
     extension(FeaturesDbContext db)
     {
