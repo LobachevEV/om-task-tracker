@@ -41,23 +41,18 @@ public class FeaturesController(
             new ListFeaturesRequest
             {
                 ManagerUserId = userId,
+                CallerUserId = userId,
                 WindowStart = windowStart ?? string.Empty,
                 WindowEnd = windowEnd ?? string.Empty,
+                State = state ?? string.Empty,
+                Scope = scope ?? string.Empty,
             },
             cancellationToken: ct);
-
-        var features = listResponse.Features.AsEnumerable();
-
-        if (!string.IsNullOrEmpty(state))
-            features = features.Where(f => f.State.ToWireString().Equals(state, StringComparison.OrdinalIgnoreCase));
-
-        if (string.Equals(scope, "mine", StringComparison.OrdinalIgnoreCase))
-            features = features.Where(f => f.LeadUserId == userId || f.ManagerUserId == userId);
 
         // tasksByFeature stays empty: TaskDto has no feature_id, so per-feature
         // task counts can't be computed from ListTasks. Calling Tasks/Users
         // here would only add an unused dependency.
-        var summaries = features
+        var summaries = listResponse.Features
             .Select(f => FeatureSummaryResponse.From(f, PlanRequestHelpers.EmptyTasks))
             .ToList();
 

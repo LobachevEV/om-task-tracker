@@ -20,6 +20,23 @@ public class ListFeaturesHandler(FeaturesDbContext db) : FeaturesLister.Features
         if (request.ManagerUserId > 0)
             q = q.Where(f => f.ManagerUserId == request.ManagerUserId);
 
+        if (!string.IsNullOrEmpty(request.State))
+        {
+            if (Enum.TryParse<FeatureState>(request.State, ignoreCase: true, out var stateFilter)
+                && Enum.IsDefined(typeof(FeatureState), stateFilter))
+            {
+                var stateValue = (int)stateFilter;
+                q = q.Where(f => f.State == stateValue);
+            }
+            else
+            {
+                q = q.Where(_ => false);
+            }
+        }
+
+        if (string.Equals(request.Scope, "mine", StringComparison.OrdinalIgnoreCase) && request.CallerUserId > 0)
+            q = q.Where(f => f.LeadUserId == request.CallerUserId || f.ManagerUserId == request.CallerUserId);
+
         // Window semantics (spec 04 §61–65):
         //   window_start inclusive on PlannedEnd   (exclude features that finished before the window began),
         //   window_end   exclusive on PlannedStart (exclude features that start at/after the window ends).
