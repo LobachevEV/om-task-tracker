@@ -50,7 +50,7 @@ public class FeaturesController(
         var features = listResponse.Features.AsEnumerable();
 
         if (!string.IsNullOrEmpty(state))
-            features = features.Where(f => FeatureStateMapper.MapState(f.State, logger).Equals(state, StringComparison.OrdinalIgnoreCase));
+            features = features.Where(f => f.State.ToWireString().Equals(state, StringComparison.OrdinalIgnoreCase));
 
         if (string.Equals(scope, "mine", StringComparison.OrdinalIgnoreCase))
             features = features.Where(f => f.LeadUserId == userId || f.ManagerUserId == userId);
@@ -59,7 +59,7 @@ public class FeaturesController(
         // task counts can't be computed from ListTasks. Calling Tasks/Users
         // here would only add an unused dependency.
         var summaries = features
-            .Select(f => FeatureSummaryBuilder.MapSummary(f, PlanRequestHelpers.EmptyTasks, logger))
+            .Select(f => FeatureSummaryResponse.From(f, PlanRequestHelpers.EmptyTasks))
             .ToList();
 
         return Ok(summaries);
@@ -76,7 +76,7 @@ public class FeaturesController(
 
         var roster = await userService.LoadRosterForManagerAsync(feature.ManagerUserId, logger, ct);
 
-        var lead = MiniTeamMemberBuilder.Build(feature.LeadUserId, roster);
+        var lead = MiniTeamMemberResponse.From(feature.LeadUserId, roster);
         var detailStagePlans = feature.StagePlans
             .Select(sp => BuildDetailStagePlan(sp, roster, feature.Id, feature.ManagerUserId))
             .ToList();
@@ -87,10 +87,10 @@ public class FeaturesController(
             if (sp.PerformerUserId > 0) miniTeamIds.Add(sp.PerformerUserId);
 
         var miniTeam = miniTeamIds
-            .Select(uid => MiniTeamMemberBuilder.Build(uid, roster))
+            .Select(uid => MiniTeamMemberResponse.From(uid, roster))
             .ToList();
 
-        var summary = FeatureSummaryBuilder.MapSummary(feature, PlanRequestHelpers.EmptyTasks, logger);
+        var summary = FeatureSummaryResponse.From(feature, PlanRequestHelpers.EmptyTasks);
 
         return Ok(new FeatureDetailResponse(summary, [], lead, miniTeam, detailStagePlans));
     }
@@ -107,7 +107,7 @@ public class FeaturesController(
         var request = CreateFeatureRequestFactory.From(body, User.GetUserId());
 
         var created = await featureCreator.CreateAsync(request, cancellationToken: ct);
-        return Ok(FeatureSummaryBuilder.MapSummary(created, PlanRequestHelpers.EmptyTasks, logger));
+        return Ok(FeatureSummaryResponse.From(created, PlanRequestHelpers.EmptyTasks));
     }
 
     [HttpPatch("{id:int}")]
@@ -155,7 +155,7 @@ public class FeaturesController(
             request.ExpectedVersion = expectedVersion.Value;
 
         var dto = await featurePatcher.PatchAsync(request, cancellationToken: ct);
-        return Ok(FeatureSummaryBuilder.MapSummary(dto, PlanRequestHelpers.EmptyTasks, logger));
+        return Ok(FeatureSummaryResponse.From(dto, PlanRequestHelpers.EmptyTasks));
     }
 
     private StagePlanDetailResponse BuildDetailStagePlan(
@@ -168,7 +168,7 @@ public class FeaturesController(
         var performer = ResolvePerformer(performerUserId, roster, featureId, managerUserId, sp.Stage);
 
         return new StagePlanDetailResponse(
-            FeatureStateMapper.MapState(sp.Stage, logger),
+            sp.Stage.ToWireString(),
             string.IsNullOrEmpty(sp.PlannedStart) ? null : sp.PlannedStart,
             string.IsNullOrEmpty(sp.PlannedEnd) ? null : sp.PlannedEnd,
             performerUserId,

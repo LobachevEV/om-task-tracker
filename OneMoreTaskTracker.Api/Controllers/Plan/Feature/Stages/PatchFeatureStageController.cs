@@ -26,13 +26,9 @@ public class PatchFeatureStageController(
         if (!FeatureStateMapper.TryParseStage(stage, out var parsedStage))
             return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
 
-        if (body.PlannedStart is not null
-            && ReleaseDateValidator.Validate(body.PlannedStart) is { } startError)
-            return BadRequest(new { error = startError });
-
-        if (body.PlannedEnd is not null
-            && ReleaseDateValidator.Validate(body.PlannedEnd) is { } endError)
-            return BadRequest(new { error = endError });
+        var validation = await new PatchFeatureStagePayloadValidator().ValidateAsync(body, ct);
+        if (!validation.IsValid)
+            return BadRequest(new { error = validation.Errors[0].ErrorMessage });
 
         var callerUserId = User.GetUserId();
 
@@ -69,6 +65,6 @@ public class PatchFeatureStageController(
             request.ExpectedStageVersion = expectedStageVersion.Value;
 
         var dto = await featureStagePatcher.PatchAsync(request, cancellationToken: ct);
-        return Ok(FeatureSummaryBuilder.MapSummary(dto, PlanRequestHelpers.EmptyTasks, logger));
+        return Ok(FeatureSummaryResponse.From(dto, PlanRequestHelpers.EmptyTasks));
     }
 }

@@ -11,8 +11,7 @@ namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.Tasks;
 [Route("api/plan/features/{id:int}/tasks")]
 public class FeatureTasksController(
     FeatureGetter.FeatureGetterClient featureGetter,
-    TaskFeatureLinker.TaskFeatureLinkerClient taskFeatureLinker,
-    ILogger<FeatureTasksController> logger) : ControllerBase
+    TaskFeatureLinker.TaskFeatureLinkerClient taskFeatureLinker) : ControllerBase
 {
     [HttpPost("{jiraId}")]
     public async Task<ActionResult<FeatureSummaryResponse>> Attach(
@@ -31,7 +30,7 @@ public class FeatureTasksController(
             new AttachTaskToFeatureRequest { JiraTaskId = jiraId, FeatureId = id },
             cancellationToken: ct);
 
-        return Ok(FeatureSummaryBuilder.MapSummary(feature, PlanRequestHelpers.EmptyTasks, logger));
+        return Ok(FeatureSummaryResponse.From(feature, PlanRequestHelpers.EmptyTasks));
     }
 
     [HttpDelete("{jiraId}")]
@@ -56,6 +55,6 @@ public class FeatureTasksController(
 
         await Task.WhenAll(detach, get);
 
-        return Ok(FeatureSummaryBuilder.MapSummary(get.Result, PlanRequestHelpers.EmptyTasks, logger));
+        return Ok(FeatureSummaryResponse.From(get.Result, PlanRequestHelpers.EmptyTasks));
     }
 }

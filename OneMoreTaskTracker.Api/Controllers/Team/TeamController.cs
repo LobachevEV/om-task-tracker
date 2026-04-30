@@ -55,29 +55,7 @@ public class TeamController(
             var statusMap = summaryResponse.Summaries.ToDictionary(s => s.AssigneeUserId);
 
             var roster = rosterResponse.Members
-                .Select(member =>
-                {
-                    statusMap.TryGetValue(member.UserId, out var status);
-                    return new TeamRosterDto(
-                        UserId: member.UserId,
-                        Email: member.Email,
-                        Role: member.Role,
-                        ManagerId: member.ManagerId == 0 ? null : member.ManagerId,
-                        DisplayName: DisplayNameHelper.ExtractDisplayName(member.Email),
-                        IsSelf: member.UserId == callerId,
-                        Status: status != null ? new UserStatusDto(
-                            Active: status.ActiveCount,
-                            LastActive: status.LastActivityAt?.ToDateTime(),
-                            Mix: new StateMixDto(
-                                InDev: status.Mix.InDev,
-                                MrToRelease: status.Mix.MrToRelease,
-                                InTest: status.Mix.InTest,
-                                MrToMaster: status.Mix.MrToMaster,
-                                Completed: status.Mix.Completed
-                            )
-                        ) : new UserStatusDto(0, null, new StateMixDto(0, 0, 0, 0, 0))
-                    );
-                })
+                .Select(member => TeamRosterDto.From(member, callerId, statusMap))
                 .ToArray();
 
             return Ok(roster);

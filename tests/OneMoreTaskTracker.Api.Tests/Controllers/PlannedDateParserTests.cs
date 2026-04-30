@@ -1,5 +1,6 @@
 using FluentAssertions;
 using OneMoreTaskTracker.Api.Controllers.Plan;
+using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
 using Xunit;
 
 namespace OneMoreTaskTracker.Api.Tests.Controllers;
@@ -33,24 +34,51 @@ public sealed class PlannedDateParserTests
         PlanRequestHelpers.TryParseIsoDate(raw, out _).Should().BeFalse();
     }
 
-    [Fact]
-    public void ValidateOptionalReleaseDate_ReturnsNull_OnMissingOrValidValue()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("2026-04-29")]
+    public void Validator_Passes_OnMissingOrValidPlannedStart(string? raw)
     {
-        ReleaseDateValidator.Validate(null).Should().BeNull();
-        ReleaseDateValidator.Validate("").Should().BeNull();
-        ReleaseDateValidator.Validate("2026-04-29").Should().BeNull();
+        var payload = new PatchFeatureStagePayload(StageOwnerUserId: null, PlannedStart: raw, PlannedEnd: null, ExpectedStageVersion: null);
+
+        var result = new PatchFeatureStagePayloadValidator().Validate(payload);
+
+        result.IsValid.Should().BeTrue();
     }
 
     [Fact]
-    public void ValidateOptionalReleaseDate_ReportsFormatError_OnUnparseableDate()
+    public void Validator_ReportsFormatError_OnUnparseablePlannedStart()
     {
-        ReleaseDateValidator.Validate("31/01/2026").Should().Be("Date must be YYYY-MM-DD");
+        var payload = new PatchFeatureStagePayload(StageOwnerUserId: null, PlannedStart: "31/01/2026", PlannedEnd: null, ExpectedStageVersion: null);
+
+        var result = new PatchFeatureStagePayloadValidator().Validate(payload);
+
+        result.IsValid.Should().BeFalse();
+        result.Errors[0].ErrorMessage.Should().Be("Date must be YYYY-MM-DD");
+    }
+
+    [Theory]
+    [InlineData("1999-12-31")]
+    [InlineData("2101-01-01")]
+    public void Validator_ReportsRangeError_OnOutOfWindowYear(string raw)
+    {
+        var payload = new PatchFeatureStagePayload(StageOwnerUserId: null, PlannedStart: raw, PlannedEnd: null, ExpectedStageVersion: null);
+
+        var result = new PatchFeatureStagePayloadValidator().Validate(payload);
+
+        result.IsValid.Should().BeFalse();
+        result.Errors[0].ErrorMessage.Should().Be("Use a real release date");
     }
 
     [Fact]
-    public void ValidateOptionalReleaseDate_ReportsRangeError_OnOutOfWindowYear()
+    public void Validator_AlsoChecksPlannedEnd()
     {
-        ReleaseDateValidator.Validate("1999-12-31").Should().Be("Use a real release date");
-        ReleaseDateValidator.Validate("2101-01-01").Should().Be("Use a real release date");
+        var payload = new PatchFeatureStagePayload(StageOwnerUserId: null, PlannedStart: null, PlannedEnd: "31/01/2026", ExpectedStageVersion: null);
+
+        var result = new PatchFeatureStagePayloadValidator().Validate(payload);
+
+        result.IsValid.Should().BeFalse();
+        result.Errors[0].ErrorMessage.Should().Be("Date must be YYYY-MM-DD");
     }
 }
