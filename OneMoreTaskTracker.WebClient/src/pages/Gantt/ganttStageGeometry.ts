@@ -55,6 +55,8 @@ export interface TrackBarGeometry {
   trackBar: BarGeometryPx | null;
   /** True when prepGate is not approved — chrome should dim downstream phases. */
   dimmed: boolean;
+  /** The phase currently in flight for this track (status='current'), or null. */
+  inFlightPhase: PhaseBarGeometry | null;
 }
 
 export interface FeatureBarGeometry {
@@ -298,6 +300,7 @@ export function computeFeatureGeometry(
         phases: fallbackPhases,
         trackBar: null,
         dimmed: true,
+        inFlightPhase: null,
       };
     }
     const trackRange = deriveTrackRange(trackTaxonomy);
@@ -339,12 +342,15 @@ export function computeFeatureGeometry(
           )
         : null;
 
+    const inFlightPhase = phases.find((p) => p.status === 'current') ?? null;
+
     return {
       track: trackId,
       prepGate,
       phases,
       trackBar,
       dimmed: prepGate.gate != null && prepGate.gate.status !== 'approved',
+      inFlightPhase,
     };
   });
 

@@ -71,24 +71,23 @@ export function GanttPhaseSegment({
     onToggleExpand(track, phase);
   };
 
-  return (
-    <button
-      type="button"
-      className="gantt-phase-segment"
-      data-testid={`phase-segment-${track}-${phase}`}
-      data-track={track}
-      data-phase={phase}
-      data-status={status}
-      data-overdue={isOverdue ? 'true' : 'false'}
-      data-dimmed={dimmed ? 'true' : 'false'}
-      data-multi-owner={multiOwner ? 'true' : 'false'}
-      data-expanded={expanded ? 'true' : 'false'}
-      data-variant={bar ? 'planned' : 'ghost'}
-      style={style}
-      aria-label={ariaLabel}
-      aria-expanded={multiOwner ? expanded : undefined}
-      onClick={handleClick}
-    >
+  const commonProps = {
+    className: 'gantt-phase-segment',
+    'data-testid': `phase-segment-${track}-${phase}`,
+    'data-track': track,
+    'data-phase': phase,
+    'data-status': status,
+    'data-overdue': isOverdue ? 'true' : 'false',
+    'data-dimmed': dimmed ? 'true' : 'false',
+    'data-multi-owner': multiOwner ? 'true' : 'false',
+    'data-expanded': expanded ? 'true' : 'false',
+    'data-variant': bar ? 'planned' : 'ghost',
+    style,
+    'aria-label': ariaLabel,
+  };
+
+  const inner = (
+    <>
       <span className="gantt-phase-segment__fill" aria-hidden="true" />
       {hairlines.map((leftPx, idx) => (
         <span
@@ -98,6 +97,25 @@ export function GanttPhaseSegment({
           aria-hidden="true"
         />
       ))}
+    </>
+  );
+
+  if (!multiOwner) {
+    return (
+      <span {...commonProps} role="img">
+        {inner}
+      </span>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      {...commonProps}
+      aria-expanded={expanded}
+      onClick={handleClick}
+    >
+      {inner}
     </button>
   );
 }

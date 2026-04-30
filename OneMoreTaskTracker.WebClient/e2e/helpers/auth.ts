@@ -1,7 +1,7 @@
 import type { APIRequestContext, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
-import { AUTH_KEY } from '../../src/shared/auth/auth';
-import type { UserRole } from '../../src/shared/auth/roles';
+import { AUTH_KEY } from '../../src/common/auth/auth';
+import type { UserRole } from '../../src/common/auth/roles';
 
 export { AUTH_KEY };
 export const API_BASE_URL = process.env.E2E_API_BASE_URL ?? 'http://localhost:5000';

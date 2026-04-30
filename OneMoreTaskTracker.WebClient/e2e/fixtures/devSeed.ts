@@ -1,6 +1,6 @@
 // Mirror of OneMoreTaskTracker.Users/Data/DevDataSeeder.cs — seeded only when
 // ASPNETCORE_ENVIRONMENT=Development. Update both sides when roster changes.
-import type { UserRole } from '../../src/shared/auth/roles';
+import type { UserRole } from '../../src/common/auth/roles';
 
 export const DEV_SEED_PASSWORD = 'Password123!';
 

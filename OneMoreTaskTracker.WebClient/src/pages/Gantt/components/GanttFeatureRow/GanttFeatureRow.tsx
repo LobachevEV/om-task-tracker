@@ -21,6 +21,7 @@ import {
   type FeatureBarGeometry,
 } from '../../ganttStageGeometry';
 import { GanttGateChip } from '../GanttGateChip';
+import { GanttPhaseSegment } from '../GanttPhaseSegment';
 import { GanttTrackRow } from '../GanttTrackRow';
 import type { GanttLaneVariant } from '../../useGanttLayout';
 import {
@@ -171,6 +172,14 @@ function GanttFeatureRowInner({
     } as CSSProperties;
   }, [geometry.summaryBar]);
 
+  const trackBarStyle = useCallback((bar: { leftPx: number; widthPx: number } | null) => {
+    if (bar == null) return undefined;
+    return {
+      ['--track-summary-left' as string]: `${bar.leftPx}px`,
+      ['--track-summary-width' as string]: `${bar.widthPx}px`,
+    } as CSSProperties;
+  }, []);
+
   return (
     <>
       <div
@@ -307,12 +316,58 @@ function GanttFeatureRowInner({
               {t('row.notPlannedYet')}
             </span>
           )}
+          {geometry.tracks.map((trackGeom) => (
+            <div
+              key={`${feature.id}-${trackGeom.track}-summary`}
+              className="gantt-row__track-summary"
+              data-testid={`feature-track-summary-${feature.id}-${trackGeom.track}`}
+              data-track={trackGeom.track}
+              data-dimmed={trackGeom.dimmed ? 'true' : 'false'}
+              data-in-flight={trackGeom.inFlightPhase != null ? trackGeom.inFlightPhase.phase : 'none'}
+              aria-label={
+                trackGeom.inFlightPhase != null
+                  ? t('gates.inFlightAria', {
+                      defaultValue: '{{track}} in flight: {{phase}}',
+                      track: t(`tracks.${trackGeom.track}`),
+                      phase: t(`phases.${trackGeom.inFlightPhase.phase}`),
+                    })
+                  : undefined
+              }
+            >
+              {trackGeom.trackBar != null ? (
+                <span
+                  className="gantt-row__track-summary-bar"
+                  style={trackBarStyle(trackGeom.trackBar)}
+                  aria-hidden="true"
+                />
+              ) : null}
+              {trackGeom.inFlightPhase != null && trackGeom.inFlightPhase.bar != null ? (
+                <GanttPhaseSegment
+                  track={trackGeom.track}
+                  phaseGeom={trackGeom.inFlightPhase}
+                  dimmed={trackGeom.dimmed}
+                  expanded={false}
+                  onToggleExpand={handleTogglePhase}
+                />
+              ) : null}
+            </div>
+          ))}
           <GanttGateChip
             gate={geometry.specGate.gate}
             leftPx={geometry.specGate.leftPx}
             canEdit={inlineEnabled}
             onChangeStatus={handleSpecGate}
           />
+          {geometry.tracks.map((trackGeom) => (
+            <GanttGateChip
+              key={`${feature.id}-${trackGeom.track}-prep-collapsed`}
+              gate={trackGeom.prepGate.gate}
+              leftPx={trackGeom.prepGate.leftPx}
+              canEdit={inlineEnabled}
+              testIdScope="collapsed"
+              onChangeStatus={handleSpecGate}
+            />
+          ))}
         </div>
       </div>
 

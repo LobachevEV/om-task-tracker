@@ -153,7 +153,19 @@
     "spec": "Спека",
     "backend.prep-gate": "BE согл.",
     "frontend.prep-gate": "FE согл.",
-    "aria": "Гейт «{{name}}», {{status}}"
+    "aria": "Гейт «{{name}}», {{status}}",
+    "approveAria": "Утвердить гейт {{name}}",
+    "unapproveAria": "Сбросить гейт {{name}} в ожидание",
+    "rejectAria": "Отклонить гейт {{name}}",
+    "unrejectAria": "Вернуть гейт {{name}} в работу",
+    "reasonAria": "Причина отклонения для {{name}}",
+    "reasonPlaceholder": "Причина (обязательно)",
+    "reasonSubmit": "Отклонить",
+    "reasonCancel": "Отмена",
+    "rejectReasonRequired": "Нужна причина для отклонения",
+    "rejectReasonTooLong": "Максимум {{max}} символов",
+    "rejectFailed": "Не удалось отклонить. Попробуйте ещё раз.",
+    "inFlightAria": "{{track}} в работе: {{phase}}"
   },
   "gateStatus": {
     "waiting": "Ожидание",
@@ -193,6 +205,8 @@
       "endBeforeStart": "Дата окончания не раньше {{date}}",
       "startAfterEnd": "Дата начала не позже {{date}}",
       "stageOverlap": "Пересекается с этапом «{{neighbour}}»",
+      "subStageOverlap": "Пересекается с подэтапом #{{ordinal}}",
+      "subStageCap": "{{phase}}: достигнут предел {{cap}} подэтапов",
       "conflict": "Кто-то уже обновил это поле; обновите страницу",
       "network": "Не удалось сохранить. Повторить?"
     },

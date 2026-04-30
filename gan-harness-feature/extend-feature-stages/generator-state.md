@@ -1,42 +1,63 @@
-# Frontend Generator State — Iteration 001
+# Frontend Generator State — Iteration 002
 
 ## Track
 fullstack (FE side)
 
 ## Current Phase
-A (Skeleton)
+B (Design fidelity / fix iteration)
 
 ## What Changed This Iteration
-- `OneMoreTaskTracker.WebClient/src/common/types/feature.ts`: replaced flat 5-stage `FeatureStagePlan` with v2 taxonomy types (`FeatureGate`, `FeatureSubStage`, `FeaturePhaseTaxonomy`, `FeatureTrackTaxonomy`, `FeatureTaxonomy`); exported `GATE_KEYS`, `MULTI_OWNER_PHASES`, `PHASE_KINDS`, `SUB_STAGE_HARD_CAP`, `TRACKS`, `PhaseKind`, `Track`, `GateKey`, `GateKind`, `GateStatus`.
-- `OneMoreTaskTracker.WebClient/src/common/api/schemas.ts`: rewrote zod boundary for v2 — `featureGateSchema`, `featureSubStageSchema`, `featurePhaseTaxonomySchema`, `featureTrackTaxonomySchema`, `featureTaxonomySchema`, plus `gateMutationResponseSchema`/`subStageMutationResponseSchema` for taxonomy-only PATCH responses. Used `.nullable().default(null)` for required-with-null fields to match TS interface contract.
-- `OneMoreTaskTracker.WebClient/src/common/api/planApi.ts`: added `patchFeatureGate(featureId, gateId, body, ifMatch)`, `patchFeatureSubStage(featureId, subStageId, body, ifMatch)`, `appendSubStage(featureId, track, phase, body, ifMatch)`, `deleteSubStage(featureId, subStageId, ifMatch)`. Removed v1 `patchFeatureStage*` exports.
-- `OneMoreTaskTracker.WebClient/src/pages/Gantt/components/GanttGateChip/`: new zero-width gate marker (status pill + tooltip) with css.
-- `OneMoreTaskTracker.WebClient/src/pages/Gantt/components/GanttPhaseSegment/`: new per-phase split-bar segment (multi-owner phases stack ownership slices vertically; single-owner phases render a solid bar).
-- `OneMoreTaskTracker.WebClient/src/pages/Gantt/components/GanttSubStageRow/`: new expanded sub-stage row reusing `InlineEditors/` primitives (`InlineDateField`, `PerformerCombobox`).
-- `OneMoreTaskTracker.WebClient/src/pages/Gantt/components/AddSubStageButton/`: new ghost button bound to `appendSubStage`; respects `SUB_STAGE_HARD_CAP` and per-phase `cap`.
-- `OneMoreTaskTracker.WebClient/src/pages/Gantt/components/GanttTrackRow/`: new BE/FE track row (gate chip + 4 phase segments) plus expanded sub-stage cascade per multi-owner phase.
-- `OneMoreTaskTracker.WebClient/src/pages/Gantt/useGanttLayout.ts`: `GanttLane` now exposes `geometry: FeatureBarGeometry` (summary bar + per-phase rects) instead of v1 `bar`/`stageBars`.
-- `OneMoreTaskTracker.WebClient/src/pages/Gantt/ganttStageGeometry.ts`: replaced `computeStageBars`/`activeStageIndex`/`plannedStageCount` with `computeFeatureGeometry`, `computePhaseGeometry`, `featureHasAnyPlannedDate`, `plannedSubStageCount`.
-- `OneMoreTaskTracker.WebClient/src/pages/Gantt/useGanttPageState.ts`: added `expandedPhases: ReadonlyMap<featureId, ReadonlyMap<Track, ReadonlySet<PhaseKind>>>` + `togglePhaseExpanded(featureId, track, phase)`; v1 stage drawer state removed.
-- `OneMoreTaskTracker.WebClient/src/pages/Gantt/components/GanttFeatureRow/GanttFeatureRow.tsx`: rewired to take `geometry`, `expandedPhases`, `onTogglePhase`. Renders summary bar + spec gate chip, plus 2 × `GanttTrackRow` when expanded. `computeFeatureDtr` derives DTR from track-phase max end date.
-- `OneMoreTaskTracker.WebClient/src/pages/Gantt/components/GanttFeatureRow/GanttFeatureRow.css`: added `.gantt-row__summary` (accent-soft fill + accent border) and `.gantt-row__empty-label`.
-- `OneMoreTaskTracker.WebClient/src/pages/Gantt/usePlanFeatures.ts`: added `getFeatureById(id)` to result so taxonomy-only PATCH responses can rebuild the cached row.
-- `OneMoreTaskTracker.WebClient/src/pages/Gantt/components/InlineEditors/useFeatureMutationCallbacks.ts`: response merger now resolves the prior summary via caller-supplied `resolveFeature(id)` and applies `{featureId, featureVersion, taxonomy}` instead of re-parsing a full FeatureSummary.
-- `OneMoreTaskTracker.WebClient/src/pages/Gantt/GanttPage.tsx`: removed v1 stage drawer wiring; passes `geometry`, `expandedPhases`, `onTogglePhase` to `GanttFeatureRow`; threads `resolveFeature` through `useFeatureMutationCallbacks`.
-- `OneMoreTaskTracker.WebClient/src/pages/Gantt/__fixtures__/FeatureFixtures.ts`: rewrote five fixtures (SOLO/MINI_TEAM/UNSCHEDULED/OVERDUE/SHIPPED) on v2 taxonomy via `buildSubStage`/`buildPhase`/`buildTrack`/`buildGate`/`buildTaxonomy` helpers. `MINI_TEAM_FEATURE` now demonstrates a multi-owner BE development phase with two owners and an FE prep-gate in `waiting`. `OVERDUE_FEATURE` shows BE+FE prep-gates in `rejected`.
-- `OneMoreTaskTracker.WebClient/src/pages/Gantt/useFeatureTaxonomy.ts`: new selector hook returning gate/track/phase/sub-stage projections for the row renderer.
-- `OneMoreTaskTracker.WebClient/src/common/i18n/locales/{en,ru}/gantt.json`: added `tracks`, `gates`, `gateStatus`, `phases`, `phaseSegment`, `subStage`, `actions`, `validation.subStageCap`, plus `inlineEdit.announce.subStage{Owner,Start,End}{Saved,Error}` and aria-label keys.
-- `OneMoreTaskTracker.WebClient/src/pages/Gantt/{useStagePlanForm.ts,components/StagePlanRow/StagePlanRow.tsx,components/StagePlanTable/StagePlanTable.tsx,components/StagePerformerCombobox/StagePerformerCombobox.tsx,components/GanttSegmentedBar/GanttSegmentedBar.tsx,components/GanttStageSubRow/GanttStageSubRow.tsx}`: tombstoned (single-line `*_REMOVED = true` export to satisfy unchanged barrel re-exports). v1-specific tests stubbed with `expect(true).toBe(true)` placeholders.
-- `OneMoreTaskTracker.WebClient/tests/common/api/{planApi.test.ts,patchFeature.test.ts}`: rebuilt `sampleSummary` on v2 taxonomy shape (gates with `id`/`gateKey`/`kind`, phases with `multiOwner`/`cap`).
+
+### UX-001-02 — Collapsed row gate visibility + per-track in-flight indicator
+- `OneMoreTaskTracker.WebClient/src/pages/Gantt/components/GanttGateChip/GanttGateChip.tsx`: added `testIdScope?: string` prop so the collapsed-row chips don't collide with the in-row chips when both are mounted; chip now renders the spec gate at all times and the prep gates at their per-track vertical offsets.
+- `OneMoreTaskTracker.WebClient/src/pages/Gantt/components/GanttFeatureRow/GanttFeatureRow.tsx`: collapsed lane now stacks two `gantt-row__track-summary` stripes (BE / FE), each carrying the track summary bar + the in-flight `GanttPhaseSegment` (when one phase is current) + the per-track prep-gate chip with `testIdScope="collapsed"`. The spec chip remains in the row's lane.
+- `OneMoreTaskTracker.WebClient/src/pages/Gantt/components/GanttFeatureRow/GanttFeatureRow.css`: lane min-height bumped to 56px; per-track stripe vertical positioning (`top: calc(50% - 12px)` for backend, +4px for frontend) and per-key prep-gate offsets so collapsed chips remain readable. Dimmed stripe opacity uses the existing `--track-dim-opacity` token (0.55 when waiting/rejected).
+
+### UX-001-01 / FE-001-03 — Gate-reject inline reason editor
+- `OneMoreTaskTracker.WebClient/src/pages/Gantt/components/GanttGateChip/GanttGateChip.tsx`: replaced the cycling single button with a `<span role="group">` containing two distinct buttons (approve / reject) plus an inline reason editor. The reject button:
+  - On a non-rejected gate, opens an inline single-line `<input>` (autoFocus) with Enter-submits / Escape-cancels keyboard support and a Submit button.
+  - Validates the trimmed reason length 1..500. Empty / whitespace shows `gate-chip-spec-reason-error` and does NOT fire `onChangeStatus`.
+  - On a rejected gate, fires `onChangeStatus(gateKey, 'waiting', null, version)` directly without opening the editor (re-open path).
+  - Tracks pending state during the in-flight PATCH so double-clicks are eaten.
+- `OneMoreTaskTracker.WebClient/src/pages/Gantt/components/GanttGateChip/GanttGateChip.css`: added classes for the new actions, reason editor, error label, and rejection-reason readout.
+
+### UX-001-03 — Single-owner phase semantics
+- `OneMoreTaskTracker.WebClient/src/pages/Gantt/components/GanttPhaseSegment/GanttPhaseSegment.tsx`: single-owner phases (`ethalon-testing`, `live-release`) now render as `<span role="img">` instead of a fake-button affordance; only multi-owner phases render `<button aria-expanded>`. `inFlightPhase` (added to `TrackBarGeometry`) is now consumed in the collapsed row.
+
+### FE-001-04 / iter-2 conflict surface — `subStageOverlap` + `subStageCap`
+- `OneMoreTaskTracker.WebClient/src/common/api/ApiError.ts`: extended `InlineEditConflictKind` to add `'subStageCap' | 'subStageOverlap'`; added optional `cap?: number`, `track?: string`, `phase?: string`, `neighborOrdinal?: number`.
+- `OneMoreTaskTracker.WebClient/src/common/api/httpClient.ts`: `parseConflict` now accepts the extended kinds via `KNOWN_CONFLICT_KINDS` Set and reads `cap`, `track`, `phase`, `neighborOrdinal` off the conflict envelope.
+- `OneMoreTaskTracker.WebClient/src/pages/Gantt/components/InlineEditors/InlineDateCell.tsx`: `resolveDateCellMessage` now branches on `subStageOverlap` (renders `Overlaps sub-stage #{neighborOrdinal+1}`) and `subStageCap` (renders `{phase} is at the {cap}-sub-stage cap`).
+- `OneMoreTaskTracker.WebClient/src/common/i18n/locales/{en,ru}/gantt.json`: added `inlineEdit.errors.subStageOverlap` and `inlineEdit.errors.subStageCap` keys + the gate-chip aria/label keys (`approveAria`, `unapproveAria`, `rejectAria`, `unrejectAria`, `reasonAria`, `reasonPlaceholder`, `reasonSubmit`, `reasonCancel`, `rejectReasonRequired`, `rejectReasonTooLong`, `rejectFailed`, `inFlightAria`).
+
+### FE-001-01 — Test coverage repair
+- Deleted dead placeholder tests (every `expect(true).toBe(true)` tombstone): `tests/common/api/patchFeatureStage.test.ts`, `tests/pages/Gantt/{useStagePlanForm,useGanttLayout}.test.ts`, `tests/pages/Gantt/components/{StagePlanRow,StagePerformerCombobox,StagePlanTable,GanttSegmentedBar,GanttStageSubRow}/`, `tests/pages/Gantt/GanttPage.test.tsx`.
+- Replaced `tests/pages/Gantt/ganttStageGeometry.test.ts` with 11 behavioral tests over the v2 taxonomy fixtures (`SOLO_FEATURE`, `MINI_TEAM_FEATURE`, `UNSCHEDULED_FEATURE`, `OVERDUE_FEATURE`, `SHIPPED_FEATURE`): gate count + track count + canonical phase order, `specBlocked`, `dimmed`, `inFlightPhase`, `plannedSubStageCount`, `featureHasAnyPlannedDate`, `featureIsOverdue`.
+- New `tests/pages/Gantt/components/GanttGateChip/GanttGateChip.test.tsx` (13 tests): render + status data attr + aria-label + testIdScope namespacing; approve cycle (waiting then approved, approved then waiting); reject editor (does NOT fire on click; empty/whitespace blocks; trimmed-reason fires `(gateKey, 'rejected', trimmed, version)`; Enter submits; Escape cancels); re-open from rejected; readonly hides actions. **Critical FE-001-03 assertion: `onChangeStatus` is NEVER called with empty / whitespace `rejectionReason`.**
+- New `tests/pages/Gantt/components/GanttPhaseSegment/GanttPhaseSegment.test.tsx` (12 tests): render-mode (`<span role="img">` for single-owner, `<button aria-expanded>` for multi-owner); hairline counts (0 for 1 sub-stage, 1 for 2, 5 for 6); ghost variant when bar is null; data-status / data-dimmed / data-overdue / data-multi-owner / data-expanded mirroring; click wiring (`onToggleExpand` only on multi-owner).
+- New `tests/pages/Gantt/components/AddSubStageButton/AddSubStageButton.test.tsx` (4 tests): enabled fires `onAppend`; at-cap disables; cap value surfaced in the title tooltip; default label as title when not at cap.
+- New `tests/pages/Gantt/components/GanttSubStageRow/GanttSubStageRow.test.tsx` (6 tests): read-only date rendering + owner display name resolution + `data-overdue`; remove-button gating (hidden when `total===1`, hidden when `canEdit=false`, fires `(subStageId, version)` when both pass).
+- New `tests/pages/Gantt/components/GanttTrackRow/GanttTrackRow.test.tsx` (8 tests): header composition (prep gate chip + 4 phase segments); data-track / data-dimmed mirroring; cascade gating (no sub-stage rows when no phase expanded; only the expanded phase renders its rows); `AddSubStageButton` only on multi-owner phases when expanded + editable; gate change wires through `mutations.saveGateStatus`; phase click fires `onTogglePhase`.
+- Replaced `tests/pages/Gantt/components/GanttFeatureRow/GanttFeatureRow.test.tsx` placeholder with 7 composition tests: collapsed-row composition (3 visible gate chips, per-track stripes, dimmed/non-dimmed) + caret toggle wiring + expand mounts the cascade.
+- New `tests/pages/Gantt/useFeatureTaxonomy.test.ts` (4 tests): 3-gate / 2-track shape; `inFlightPhase` projection; memoization across re-renders with identical inputs; recomputes on feature ref change.
+
+### Playwright recovery + happy-path E2E
+- Root cause of iter-1 `PLAYWRIGHT_UNAVAILABLE` was a stale path import: `e2e/helpers/auth.ts` and `e2e/fixtures/devSeed.ts` imported from `../../src/shared/auth/...` but the source dir is `src/common/auth/...`. Patched both files. `npx playwright test --list` now resolves all 132 specs across 12 files.
+- New `e2e/specs/gantt.gates-and-substages.spec.ts`: walks `/plan` → asserts the 3 collapsed-lane gate chips visible (UX-001-02) → expands → asserts both track rows mount → opens the spec reject editor → submits empty reason → asserts the inline error appears + `onChangeStatus` NOT fired (FE-001-03) → cancels (Escape) → approves the spec gate. Skips cleanly when (a) the gateway is unreachable, (b) `apiRegister` fails, or (c) the manager has no features in their plan (fresh-DB case). Smoke-validated on chromium against the running dev server: skips with `no features in plan` when the seed pipeline is incomplete.
 
 ## Feedback Items Addressed
-None — iteration 001 (skeleton).
+- UX-001-01 (critical) — gate-reject empty-reason wire bug → fixed via inline editor + ≥1 char trimmed validation; never fires `onChangeStatus` with empty / whitespace.
+- UX-001-02 (critical) — collapsed feature row hides BE-CS / FE-SR / per-track in-flight phase → fixed by mounting both prep-gate chips with `testIdScope="collapsed"` plus per-track summary stripes containing the in-flight `GanttPhaseSegment`.
+- UX-001-03 (medium) — single-owner phases looked like buttons → single-owner now `<span role="img">`; multi-owner stays a button.
+- FE-001-01 (critical) — test coverage regression → 13 placeholder/tombstoned files removed or replaced; +6 new behavioral test files (54 new tests); +real geometry test (11). `npm test` is now 51 files / 429 tests passing.
+- FE-001-03 (critical) — gate-reject body contained `rejectionReason: ''` → fix above; explicit unit-test guard.
+- FE-001-04 (medium) — `subStageOverlap` not surfaced in the FE → conflict envelope extended; InlineDateCell renders the localized `Overlaps sub-stage #{n}` message.
 
 ## Contract Snapshot
 - api-contract.md version consumed: v2 (machine-readable: `gan-harness-feature/extend-feature-stages/contract-artifact/v2/openapi.json`)
-- Generated client path: not generated — codebase has no codegen pipeline. Hand-typed against `openapi.json` per `feature-digest.md` "Codebase Conventions". Annotated as the contract surface in `src/common/types/feature.ts` + `src/common/api/schemas.ts`.
+- Generated client path: not generated — codebase has no codegen pipeline. Hand-typed against `openapi.json` per `feature-digest.md`. Conflict envelope follows the BE iter-2 spec (`{ error, conflict: { kind, currentVersion?, track?, phase?, cap?, neighborOrdinal? } }`).
 - Regenerated this iteration: n/a (no codegen step exists)
-- BE commit consumed: `a4fbc1816881ed153fad149e84b39ae767edb798`
+- BE commit consumed: `04a014f` (iter-2 BE: SubStageOrderRule + subStageOverlap conflict variant)
 
 ## Digest Version Consumed
 v2
@@ -47,15 +68,20 @@ None.
 ## Dev Server
 - Command: `cd OneMoreTaskTracker.WebClient && npm run dev`
 - URL: http://localhost:5173/plan
-- Status: running
-- Started at: 2026-04-30T14:00:00Z
+- Status: running (verified via `lsof -nPi tcp:5173` immediately before commit)
+- Started at: 2026-04-30T14:00:00Z (carried over from iter-1)
 
 ## Waiting on BE (fullstack only)
-Nothing blocking. BE skeleton at `a4fbc18` emits v2 contract; FE consumes it. The v2 wire format uses `kind` ∈ {`spec`,`cs`,`sr`} on each gate (FE renders via i18n `gateStatus.*`).
+Nothing blocking. BE iter-2 at `04a014f` emits the new `subStageOverlap` conflict variant which the FE now consumes.
 
 ## Known Gaps (carry forward)
-- Storybook stories for new components (`GanttTrackRow`, `GanttGateChip`, `GanttPhaseSegment`, `GanttSubStageRow`, `AddSubStageButton`) not yet written. Tracked for Phase B; fixtures are ready (`MINI_TEAM_FEATURE` exercises multi-owner BE development; `UNSCHEDULED_FEATURE` exercises empty taxonomy; `OVERDUE_FEATURE` exercises rejected gates).
-- v1 storybook stories for removed `GanttSegmentedBar` / `GanttStageSubRow` / `GanttFeatureRow` legacy variants were swapped to placeholder Removed/Pending stubs; v2 rewrites pending.
-- No unit-level tests yet for `GanttGateChip`, `GanttPhaseSegment`, `GanttSubStageRow`, `AddSubStageButton`, `useFeatureTaxonomy`. Phase B will add behavioral tests (gate-chip aria/status mapping, phase-segment split rendering, sub-stage cap enforcement).
-- A11y/keyboard nav for the new track/phase expansion not yet exercised under Storybook a11y addon — Phase C polish.
-- `npm run test:stories` (storybook + playwright) was not run this iteration; only `npm test` (unit, 373 passing) + `npx tsc -b` (0 errors) + `npm run lint` (0 errors).
+- Storybook stories for the new gate-chip reason editor + collapsed-row stripes not yet written. Phase C polish.
+- The new e2e spec `gantt.gates-and-substages.spec.ts` skips when the manager's plan is empty; once the harness wires a seed-one-feature hook into `before` (or once the BE's dev seeder ships features) the body will run end-to-end. Spec is structured so that flip is a one-line change.
+- A11y / keyboard nav for the gate-chip reason editor + track expansion not yet exercised under Storybook a11y addon — Phase C polish.
+
+## Run Output
+- `npm run lint` — 0 errors, 3 warnings (only in `coverage/` artifacts, not source).
+- `npx tsc -p tsconfig.json --noEmit` — 0 errors.
+- `npm test` — 51 files, 429 tests passing.
+- `npx playwright test --list` — 132 tests across 12 files (was 0 in iter-1 due to broken path imports).
+- `npx playwright test e2e/specs/gantt.gates-and-substages.spec.ts --project=chromium` — 1 skipped (skip-on-empty-plan path; spec parses, launches chromium successfully, runs the seeding helper).

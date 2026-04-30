@@ -145,7 +145,19 @@
     "spec": "Spec",
     "backend.prep-gate": "BE prep",
     "frontend.prep-gate": "FE prep",
-    "aria": "{{name}} gate, {{status}}"
+    "aria": "{{name}} gate, {{status}}",
+    "approveAria": "Approve {{name}} gate",
+    "unapproveAria": "Reset {{name}} gate to waiting",
+    "rejectAria": "Reject {{name}} gate",
+    "unrejectAria": "Reopen {{name}} gate",
+    "reasonAria": "Rejection reason for {{name}}",
+    "reasonPlaceholder": "Reason (required)",
+    "reasonSubmit": "Reject",
+    "reasonCancel": "Cancel",
+    "rejectReasonRequired": "A reason is required to reject",
+    "rejectReasonTooLong": "Max {{max}} characters",
+    "rejectFailed": "Couldn't reject. Try again.",
+    "inFlightAria": "{{track}} in flight: {{phase}}"
   },
   "gateStatus": {
     "waiting": "Waiting",
@@ -186,6 +198,8 @@
       "endBeforeStart": "End must be on or after {{date}}",
       "startAfterEnd": "Start must be on or before {{date}}",
       "stageOverlap": "Overlaps with {{neighbour}}",
+      "subStageOverlap": "Overlaps sub-stage #{{ordinal}}",
+      "subStageCap": "{{phase}} is at the {{cap}}-sub-stage cap",
       "conflict": "Someone else just updated this; reload to see latest",
       "network": "Couldn't save. Retry?"
     },

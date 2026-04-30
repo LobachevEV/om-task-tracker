@@ -17,17 +17,30 @@ export function authHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+const KNOWN_CONFLICT_KINDS = new Set([
+  'version',
+  'overlap',
+  'order',
+  'rangeInvalid',
+  'subStageCap',
+  'subStageOverlap',
+]);
+
 function parseConflict(raw: unknown): InlineEditConflict | null {
   if (raw == null || typeof raw !== 'object') return null;
   const obj = raw as Record<string, unknown>;
   const kind = obj.kind;
-  if (kind !== 'version' && kind !== 'overlap' && kind !== 'order' && kind !== 'rangeInvalid') {
+  if (typeof kind !== 'string' || !KNOWN_CONFLICT_KINDS.has(kind)) {
     return null;
   }
   return {
-    kind,
+    kind: kind as InlineEditConflict['kind'],
     with: typeof obj.with === 'string' ? obj.with : undefined,
     currentVersion: typeof obj.currentVersion === 'number' ? obj.currentVersion : undefined,
+    cap: typeof obj.cap === 'number' ? obj.cap : undefined,
+    track: typeof obj.track === 'string' ? obj.track : undefined,
+    phase: typeof obj.phase === 'string' ? obj.phase : undefined,
+    neighborOrdinal: typeof obj.neighborOrdinal === 'number' ? obj.neighborOrdinal : undefined,
   };
 }
 
