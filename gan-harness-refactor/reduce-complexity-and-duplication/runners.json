@@ -1,0 +1,16 @@
+{
+  "$comment": "Project-local runners for the reduce-complexity-and-duplication refactor. Mirrors the proven config from the per-request-datetime-provider refactor: backend uses dotnet test against the slnx solution.",
+  "frontend": {
+    "lint": "npm --prefix OneMoreTaskTracker.WebClient run lint",
+    "typecheck": "npx --prefix OneMoreTaskTracker.WebClient tsc -p OneMoreTaskTracker.WebClient/tsconfig.json --noEmit",
+    "test": "npm --prefix OneMoreTaskTracker.WebClient test -- --reporter=tap",
+    "build": "npm --prefix OneMoreTaskTracker.WebClient run build"
+  },
+  "backend": {
+    "lint": null,
+    "typecheck": "dotnet build OneMoreTaskTracker.slnx -c Debug --nologo",
+    "test": "dotnet test OneMoreTaskTracker.slnx --nologo --logger:\"console;verbosity=normal\"",
+    "build": "dotnet build OneMoreTaskTracker.slnx -c Debug --nologo",
+    "migrate": null
+  }
+}

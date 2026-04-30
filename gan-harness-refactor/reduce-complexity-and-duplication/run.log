@@ -1,0 +1,154 @@
+# /gan-refactor run log
+
+## Phase 0 — Setup
+
+- start_time: 2026-04-29
+- brief: "go through entire code base, find too complex classes/methods and make them less complex. Take into account possible logic duplication"
+- slug: reduce-complexity-and-duplication
+- baseline_sha: 935dc9af224333e382e31d161a9a8eca9126ccfa (worktree branch worktree-refactor-reduce-complexity, derived from main HEAD)
+- track: backend (forced by /gan-back-refactoring alias)
+- max_iterations: 8 (default)
+- pass_threshold: 7.0 (default)
+- skip_planner: false
+- worktree: /Users/e.lobacev/Repos/OneMoreTaskTracker/.claude/worktrees/refactor-reduce-complexity (branch: worktree-refactor-reduce-complexity)
+- runners.json: copied from prior refactor (per-request-datetime-provider) — backend dotnet build/test
+- baseline tests green (BASELINE_TESTS_GREEN=true, generic parser → exit-code-based)
+- baseline manifest: gan-harness-refactor/reduce-complexity-and-duplication/baseline-tests.json
+
+
+## Phase 1 — Refactor Planning
+
+- agent: gan-refactor-planner
+- result: NO_BLOCKER
+- artifacts: refactor-plan.md, behavior-contract.{md,json}, behavior-capture.json, refactor-eval-rubric.md
+- MUST_IMPROVE_AXIS_COUNT=7
+- MUST_NOT_TOUCH_COUNT=10
+- 7 planned commits (LoC reduction + dup elimination across Features handlers, PlanMapper overloads, FeatureMappingConfig blocks, gateway helpers)
+
+## Phase 2 — Iteration 1
+
+- agent: gan-refactor-generator
+- GEN_COMMIT=00ec1a50e29d1e1826cb7036aa614f9ea3835914
+- GEN_BUILD=green; GEN_TYPECHECK=green; GEN_TESTS=green (437/437)
+- scope: scaffolding only — 4 helpers in OneMoreTaskTracker.Features/Features/Update/ (FeatureOwnershipGuard, FeatureVersionGuard, FeatureLoader, FeatureConcurrencySaver) + 4 sibling test files (18 [Fact]s). NO call sites migrated.
+
+## Phase 2 — Iteration 1 — Evaluation
+
+- agent: gan-refactor-evaluator
+- WEIGHTED_TOTAL=8.225; VERDICT=PASS; AUTO_FAIL=false; BEHAVIOR_DRIFT=false; BASELINE_TESTS_REGRESSED=false
+- gate: GREEN — only additive drift on grpc_status_code_emit_sites (+4 sites all in Features/Update/, status code set unchanged) and test_corpus_assertion_count (+42, additive); both within planner-pinned tolerances.
+- per-axis movement: NONE — axes 1, 2, 4–7 unchanged (no call-site migration); axis 3 raw count 6 → 8 (helper introduces 2 catch sites; collapses in iter 2/3)
+- decision: CONTINUE despite PASS. The pass reflects scaffolding quality only; none of the MUST-improve axes have actually moved (LoC unchanged, dup count unchanged). Stopping now would ship helpers that no code consumes — net-negative complexity. The evaluator listed 7 RF-* carry-overs explicitly for iter-2.
+- carry-overs: RF-001-01..07 (migrate 7 inline-edit handlers, collapse PlanMapper, FeatureMappingConfig, gateway helpers)
+
+## Phase 2 — Iteration 2
+
+- agent: gan-refactor-generator
+- GEN_COMMIT=140c9b4524114f39c5c62bcc8c7dd20efafc1a95
+- GEN_BUILD=green; GEN_TYPECHECK=green; GEN_TESTS=green (437/437)
+- scope: 4 feature-level inline-edit handlers migrated onto iter-1 helpers (UpdateFeatureTitleHandler, UpdateFeatureDescriptionHandler, UpdateFeatureLeadHandler, UpdateFeatureHandler)
+- LoC delta: 493 → 423 (-70 across 4 handlers)
+- axis 2 (mgr guard): 7 → 3
+- axis 3 (concurrency catches): 6 → 5
+
+## Phase 2 — Iteration 2 — Evaluation
+
+- agent: gan-refactor-evaluator
+- WEIGHTED_TOTAL=8.45; VERDICT=PASS; AUTO_FAIL=false; BEHAVIOR_DRIFT=false; BASELINE_TESTS_REGRESSED=false
+- gate: GREEN (drift on grpc_status_code_emit_sites, feature_inline_edit_log_format, test_corpus_assertion_count — all within planner-pinned tolerances)
+- score progression: 8.225 → 8.450 (+0.225)
+- decision: CONTINUE — axes 1, 3 still gap-open; axes 4–7 untouched per plan; iter 3 = stage-level handlers per planner slicing
+
+## Phase 2 — Iteration 3
+
+- agent: gan-refactor-generator
+- GEN_COMMIT=2a363c1cffb1dedb58b3e00c6aa43169c57b625e
+- GEN_BUILD=green; GEN_TYPECHECK=green; GEN_TESTS=green (442/442, +5 vs iter-2)
+- scope: 3 stage-level handlers migrated (UpdateStageOwner/PlannedStart/PlannedEnd) + 2 new helpers (StageEditContext, StageEditContextLoader, +5 [Fact]s) + Boy-Scout cleanup on UpdateFeatureHandler + ValidateStageOrderWithOverride helper
+
+## Phase 2 — Iteration 3 — Evaluation
+
+- agent: gan-refactor-evaluator
+- WEIGHTED_TOTAL=9.10; VERDICT=PASS; AUTO_FAIL=false; BEHAVIOR_DRIFT=false; BASELINE_TESTS_REGRESSED=false
+- score progression: 8.225 → 8.450 → 9.100 (+0.65 vs iter-2 — largest lift)
+- axis 1 LoC: 313 (target ≤320 — MET); axis 2 mgr-guard: 0 (target 1 — over-target); axis 3 concurrency catches: 2 (target ≤2 — MET)
+- axes 4-7 still open (PlanMapper.MapSummary 10, FeatureMappingConfig.NewConfig 10, ExtractDisplayName 2, gateway TryParseExact 2)
+- decision: CONTINUE — half the planner's axes still pending; iter 4 = PlanMapper consolidation
+
+## Phase 2 — Iteration 4
+
+- agent: gan-refactor-generator
+- GEN_COMMIT=b64c1137186a9ec697924a26868371f19708b5d5
+- GEN_BUILD=green; GEN_TYPECHECK=green; GEN_TESTS=green (442/442, no new warnings)
+- scope: PlanMapper.MapSummary 10 overloads → 1 driver via IFeatureSummaryProjection + 10 partial-class bridges (one per proto namespace). PlanMapper.cs 226 → 137 LoC.
+
+## Phase 2 — Iteration 4 — Evaluation
+
+- agent: gan-refactor-evaluator
+- WEIGHTED_TOTAL=9.325; VERDICT=PASS; AUTO_FAIL=false; BEHAVIOR_DRIFT=false; BASELINE_TESTS_REGRESSED=false
+- score progression: 8.225 → 8.450 → 9.100 → 9.325 (peak)
+- axis 4 closed: PlanMapper.MapSummary count = 1 (verified by grep at HEAD)
+- openapi_json + api_endpoint_matrix byte-identical to baseline
+- decision: CONTINUE — axes 5-7 still open; iter 5 = FeatureMappingConfig.Register collapse
+
+## Phase 2 — Iteration 5
+
+- agent: gan-refactor-generator
+- GEN_COMMIT=3cbab3f
+- GEN_BUILD=green; GEN_TYPECHECK=green; GEN_TESTS=green (442/442, 0 errors / 0 warnings)
+- scope: FeatureMappingConfig.Register 10 NewConfig blocks → 1 generic driver via IFeatureMappingTarget + 10 bridge partial classes. FeatureMappingConfig.cs 187 → 60 LoC.
+
+## Phase 2 — Iteration 5 — Evaluation
+
+- agent: gan-refactor-evaluator
+- WEIGHTED_TOTAL=9.325; VERDICT=PASS; AUTO_FAIL=false; BEHAVIOR_DRIFT=false; BASELINE_TESTS_REGRESSED=false
+- score progression: 8.225 → 8.450 → 9.100 → 9.325 → 9.325 (plateau at peak)
+- axis 5 closed: NewConfig block count 10 → 1 (verified at HEAD)
+- openapi_json + features_proto_surface + api_endpoint_matrix sha256 match baseline byte-for-byte
+- decision: CONTINUE — axes 6 (ExtractDisplayName 2→1) and 7 (gateway DateOnly.TryParseExact 2→1) still open; iter 6 = combined gateway dedup
+
+## Phase 2 — Iteration 6
+
+- agent: gan-refactor-generator
+- GEN_COMMIT=c040078
+- GEN_BUILD=green; GEN_TYPECHECK=green; GEN_TESTS=green (455/455, +13 vs iter-5; 0 errors / 0 new warnings)
+- scope: gateway dedup — DisplayNameHelper (axis 6: 2 → 1), PlannedDateParser via PlanRequestHelpers.cs (axis 7: 2 → 1) + 13 sibling tests
+
+## Phase 2 — Iteration 6 — Evaluation (FINAL CONTENT ITERATION)
+
+- agent: gan-refactor-evaluator
+- WEIGHTED_TOTAL=9.555; VERDICT=PASS; AUTO_FAIL=false; BEHAVIOR_DRIFT=false; BASELINE_TESTS_REGRESSED=false
+- score progression: 8.225 → 8.450 → 9.100 → 9.325 → 9.325 → 9.555 (new peak)
+- ALL 7 MUST-improve axes met or exceeded at HEAD c040078
+- evaluator recommendation: STOP — no iter-7 cleanup work left (no Obsolete markers, no stale helpers, all bridges load-bearing)
+- decision: STOP — proceed to Phase 3
+
+## Phase 2 — Final tally
+
+- baseline: 935dc9a (worktree branch)
+- final HEAD: c040078
+- iterations: 6
+- score: PASS @ 9.555 (peak)
+- pass threshold: 7.0 (cleared by 2.555)
+- behavior drift: NONE (drift surfaces all within planner-pinned tolerances)
+- baseline tests: 442 → 455 (+13 additive coverage)
+
+## Phase 3 — Report
+
+- Authored gan-harness-refactor/reduce-complexity-and-duplication/refactor-report.md from agents/_templates/refactor-report.tpl.md.
+- Final SHA: c040078; baseline 935dc9a; 6 iterations.
+- Final verdict: PASS @ 9.555 (peak score).
+- All 7 MUST-improve axes met or exceeded; 9 of 9 axes (incl. 8/9 sentinels) green.
+- 55 files changed, +1310 / -475 across 6 conventional refactor(...) commits.
+- 0 carry-over RF-* issues; 6 out-of-scope follow-ups documented.
+
+## Phase 4 — Post-run pattern re-application (off-harness)
+
+- trigger: commit 61024e1 (`refactor!(features,api,webclient): delete dead per-field PATCH surfaces and tighten aggregate invariants`) landed AFTER this harness run, folding the 7 migrated `Update*Handler` classes onto 2 consolidated sparse-PATCH surfaces (`PatchFeatureHandler` + `PatchFeatureStageHandler`) and incidentally deleting the harness helpers since they had no callers at that moment.
+- regression observed: consolidated PATCH handlers re-acquired inline load + manager-guard + version-guard + concurrency-save duplication. Axes 2/3 (manager-guard literal copies / concurrency catches) silently slipped back to 2/2.
+- action: re-introduced the 4 helpers (`FeatureOwnershipGuard`, `FeatureVersionGuard`, `FeatureLoader`, `FeatureConcurrencySaver`) byte-identical to the harness iter-1 signatures; migrated `PatchFeatureHandler` and `PatchFeatureStageHandler` to consume them. `StageEditContext`/`StageEditContextLoader` deliberately NOT re-introduced — with only 1 stage-level call site (vs the original 3), aggregating the helpers behind a loader no longer earns its weight.
+- LoC delta: PatchFeatureHandler.cs 80 → 62 (-18); PatchFeatureStageHandler.cs 148 → 128 (-20).
+- axis re-state: manager-guard literal copies 2 → 0 (over-target); concurrency catches 2 → 2 (both inside `FeatureConcurrencySaver`, target ≤ 2 met).
+- behavior preservation: `dotnet build` green (0 errors); `dotnet test` green at 489/489 (no regressed tests). RpcException status codes, status-detail strings, log templates, and version-bump semantics byte-identical (helpers never touch `Version`; mutator methods on `Feature`/`FeatureStagePlan` continue to bump it privately).
+- harness ran in single-shot mode (no Generator/Evaluator loop) — this is a manual maintenance application of the harness pattern, not a re-run of the harness.
+- lesson: when a major consolidation deletes call sites for harness-introduced helpers, the helpers should be re-evaluated against the surviving call sites BEFORE deletion. The breaking-change consolidation (61024e1) opted for "delete entirely" without checking whether consolidating the call sites also consolidated the duplication those helpers existed to remove. Recommendation: when /gan-refactor-introduced helpers are touched by a follow-up structural change, validate axis state at that change's HEAD before merging.

@@ -1,9 +1,7 @@
 using Grpc.Core;
 using Mapster;
-using Microsoft.EntityFrameworkCore;
 using OneMoreTaskTracker.Features.Features.Data;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand;
-using ProtoFeatureState = OneMoreTaskTracker.Proto.Features.FeatureState;
 
 namespace OneMoreTaskTracker.Features.Features.Update;
 
@@ -23,20 +21,12 @@ public sealed class PatchFeatureStageHandler(
 
     public override async Task<FeatureDto> Patch(PatchFeatureStageRequest request, ServerCallContext context)
     {
-        var feature = await db.Features
-                          .Include(f => f.StagePlans)
-                          .FirstOrDefaultAsync(f => f.Id == request.FeatureId, context.CancellationToken)
-                      ?? throw new RpcException(new Status(StatusCode.NotFound, $"feature {request.FeatureId} not found"));
-
-        if (request.CallerUserId <= 0 || feature.ManagerUserId != request.CallerUserId)
-            throw new RpcException(new Status(StatusCode.PermissionDenied, "Not the feature owner"));
+        var feature = await FeatureLoader.LoadWithStagePlansAsync(db, request.FeatureId, context.CancellationToken);
+        FeatureOwnershipGuard.EnsureManager(feature, request.CallerUserId);
 
         var stageOrdinal = (int)request.Stage;
-        var plan = feature.StagePlans.FirstOrDefault(sp => sp.Stage == stageOrdinal)
-                   ?? throw new RpcException(new Status(StatusCode.NotFound, $"stage {request.Stage} not found"));
-
-        if (request.HasExpectedStageVersion && request.ExpectedStageVersion != plan.Version)
-            throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(plan.Version)));
+        var plan = FeatureLoader.ResolveStage(feature, stageOrdinal, request.Stage.ToString());
+        FeatureVersionGuard.EnsureStageVersion(plan, request.HasExpectedStageVersion, request.ExpectedStageVersion);
 
         if (request.HasPlannedStart || request.HasPlannedEnd)
         {
@@ -56,8 +46,7 @@ public sealed class PatchFeatureStageHandler(
 
         if (request.HasStageOwnerUserId)
         {
-            var newOwner = request.StageOwnerUserId > 0 ? request.StageOwnerUserId : 0;
-            plan.AssignOwner(newOwner, now);
+            plan.AssignOwner(request.StageOwnerUserId > 0 ? request.StageOwnerUserId : 0, now);
             anyMutation = true;
         }
 
@@ -80,15 +69,7 @@ public sealed class PatchFeatureStageHandler(
 
             feature.RecordStageEdit(now);
 
-            try
-            {
-                await db.SaveChangesAsync(context.CancellationToken);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                await db.Entry(plan).ReloadAsync(context.CancellationToken);
-                throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(plan.Version)));
-            }
+            await FeatureConcurrencySaver.SaveStageAsync(db, plan, context.CancellationToken);
 
             logger.LogInformation(
                 "Feature stage patch applied: feature_id={FeatureId} stage={Stage} fields_owner={HasOwner} fields_planned_start={HasStart} fields_planned_end={HasEnd} owner={Owner} start={Start} end={End} actor_user_id={ActorUserId} stage_version={StageVersion} feature_version={FeatureVersion}",
