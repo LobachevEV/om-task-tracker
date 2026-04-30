@@ -1,0 +1,26 @@
+syntax = "proto3";
+import "feature_taxonomy.proto";
+
+option csharp_namespace = "OneMoreTaskTracker.Proto.Features.AppendFeatureSubStageCommand";
+package mr_helper.features;
+
+service FeatureSubStageAppender {
+  rpc Append (AppendFeatureSubStageRequest) returns (AppendFeatureSubStageResponse);
+}
+
+message AppendFeatureSubStageRequest {
+  int32           feature_id      = 1;
+  int32           caller_user_id  = 2;
+  string          track           = 3;
+  string          phase           = 4;
+  optional int32  owner_user_id   = 5;
+  optional string planned_start   = 6;
+  optional string planned_end     = 7;
+}
+
+message AppendFeatureSubStageResponse {
+  int32              feature_id          = 1;
+  int32              feature_version     = 2;
+  int32              created_sub_stage_id = 3;
+  FeatureTaxonomyDto taxonomy            = 4;
+}

@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "OneMoreTaskTracker Plan API",
-    "version": "v1",
-    "description": "REST surface emitted by OneMoreTaskTracker.Api for the feature planning (Gantt) experience. Backed by gRPC into OneMoreTaskTracker.Features / .Tasks / .Users. All dates are ISO yyyy-MM-dd strings or null. Hand-rolled for iteration 1 of the feature-stage-planning feature (api-contract.md v1); Swashbuckle is a follow-up."
+    "version": "v2",
+    "description": "REST surface emitted by OneMoreTaskTracker.Api for the feature planning (Gantt) experience. Backed by gRPC into OneMoreTaskTracker.Features / .Tasks / .Users. v2 replaces the flat 5-stage taxonomy with a structured gate(3) + track(2) + phase(4) + sub-stage(1..6) taxonomy. Hand-rolled per memory `project_openapi_hand_rolled`; drift = contract auto-fail."
   },
   "servers": [
     { "url": "http://localhost:5000", "description": "Local dev" }
@@ -35,7 +35,7 @@
     "/api/plan/features": {
       "get": {
         "summary": "List features visible to the caller.",
-        "description": "Optional `windowStart` / `windowEnd` query params (ISO yyyy-MM-dd) constrain results to features whose plan overlaps the window. Window semantics: `windowStart` is inclusive on `plannedEnd`; `windowEnd` is exclusive on `plannedStart`; features with null `plannedStart` and/or `plannedEnd` are always included. Bad date format or `windowStart > windowEnd` returns 400 `Invalid request data` and the upstream gRPC service is NOT called.",
+        "description": "Optional `windowStart` / `windowEnd` query params (ISO yyyy-MM-dd) constrain results to features whose plan overlaps the window. Bad date format or `windowStart > windowEnd` returns 400 `Invalid request data` and the upstream gRPC service is NOT called.",
         "tags": ["plan"],
         "parameters": [
           { "name": "scope", "in": "query", "required": false, "schema": { "type": "string", "enum": ["mine", "all"] } },
@@ -58,7 +58,7 @@
       },
       "post": {
         "summary": "Create a new feature (Manager only).",
-        "description": "Creates the feature and atomically materializes 5 empty stage plans (one per FeatureState ordinal). `managerUserId` is derived from the caller's JWT and MUST NOT be sent in the body.",
+        "description": "Creates the feature and atomically materializes the v2 taxonomy: 3 gates in `waiting` (spec, backend.prep-gate, frontend.prep-gate) + 8 phases each with exactly 1 unowned sub-stage. `managerUserId` is derived from the caller's JWT and MUST NOT be sent in the body.",
         "tags": ["plan"],
         "requestBody": {
           "required": true,
@@ -85,7 +85,7 @@
         { "name": "If-Match", "in": "header", "required": false, "description": "Optional optimistic-concurrency token; current feature.version from the last read. Forwarded as `expectedVersion` on the sparse path.", "schema": { "type": "string" } }
       ],
       "get": {
-        "summary": "Get a single feature with attached tasks, lead, mini-team, and resolved stage-plan performers.",
+        "summary": "Get a single feature with attached tasks, lead, mini-team, and full taxonomy.",
         "tags": ["plan"],
         "responses": {
           "200": {
@@ -100,7 +100,7 @@
       },
       "patch": {
         "summary": "Update a feature — sparse PATCH (Manager only).",
-        "description": "Consolidated PATCH endpoint: send only the fields you want to change. Sparse fields supported: `title`, `description`, `leadUserId`, `expectedVersion`. Omitted fields are unchanged. Per-stage edits live at `/api/plan/features/{id}/stages/{stage}`. Optimistic concurrency: include `If-Match` header with the current `feature.version`, or `expectedVersion` in the body. Body wins if both are supplied.",
+        "description": "Consolidated PATCH endpoint: send only the fields you want to change. Sparse fields supported: `title`, `description`, `leadUserId`, `expectedVersion`. Omitted fields are unchanged. Per-gate edits live at `/api/plan/features/{id}/gates/{gateKey}`. Per-sub-stage edits live at `/api/plan/features/{id}/sub-stages/{subStageId}`. Optimistic concurrency: include `If-Match` header with the current `feature.version`, or `expectedVersion` in the body. Body wins if both are supplied.",
         "tags": ["plan"],
         "requestBody": {
           "required": true,
@@ -124,34 +124,107 @@
         }
       }
     },
-    "/api/plan/features/{id}/stages/{stage}": {
+    "/api/plan/features/{id}/gates/{gateKey}": {
       "parameters": [
         { "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } },
-        { "name": "stage", "in": "path", "required": true, "schema": { "$ref": "#/components/schemas/FeatureState" } },
-        { "name": "If-Match", "in": "header", "required": false, "description": "Optional stage-scoped optimistic-concurrency token (stagePlans[].stageVersion). Forwarded as `expectedStageVersion`.", "schema": { "type": "string" } }
+        { "name": "gateKey", "in": "path", "required": true, "description": "One of `spec`, `backend.prep-gate`, `frontend.prep-gate`.", "schema": { "type": "string", "enum": ["spec", "backend.prep-gate", "frontend.prep-gate"] } },
+        { "name": "If-Match", "in": "header", "required": false, "description": "Optional gate-scoped optimistic-concurrency token (taxonomy.gates[].gateVersion). Forwarded as `expectedVersion`.", "schema": { "type": "string" } }
       ],
       "patch": {
-        "summary": "Update a single stage — sparse PATCH (Manager only).",
-        "description": "Consolidated stage PATCH endpoint: send only the fields you want to change. Sparse fields supported: `stageOwnerUserId`, `plannedStart`, `plannedEnd`, `expectedStageVersion`. Omitted fields are unchanged. `stageOwnerUserId` must be a positive integer on the feature manager's roster. `plannedStart` / `plannedEnd` are ISO yyyy-MM-dd strings (year 2000..2100). Cross-stage chronological order is enforced — violation returns 422 with `conflict.kind = 'overlap'`. Stage path segment is case-insensitive. Optimistic concurrency: include `If-Match` header with current stagePlan.version, or `expectedStageVersion` in the body. Body wins if both are supplied.",
+        "summary": "Flip a gate's approval status — sparse PATCH (Manager only).",
+        "description": "Sparse PATCH; only fields the caller wants to change are sent. Server stamps `approverUserId` + `approvedAtUtc`. `gateStatus = approved` clears any prior `rejectionReason`. `gateStatus = rejected` requires a non-empty `rejectionReason` (≤ 500 chars). `gateStatus = waiting` clears approver, timestamp, reason and stamps a new `requestedAtUtc`. Optimistic concurrency: `If-Match` header carries `gate.version` or `expectedVersion` in body; body wins.",
         "tags": ["plan"],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": { "schema": { "$ref": "#/components/schemas/PatchFeatureStagePayload" } }
+            "application/json": { "schema": { "$ref": "#/components/schemas/PatchFeatureGatePayload" } }
           }
         },
         "responses": {
           "200": {
             "description": "OK",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FeatureSummary" } } }
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PatchFeatureGateResponse" } } }
           },
           "400": { "$ref": "#/components/responses/BadRequest" },
           "401": { "$ref": "#/components/responses/Unauthorized" },
           "403": { "$ref": "#/components/responses/Forbidden" },
           "404": { "$ref": "#/components/responses/NotFound" },
           "409": { "$ref": "#/components/responses/Conflict" },
-          "422": { "$ref": "#/components/responses/UnprocessableEntity" },
           "502": { "$ref": "#/components/responses/BadGateway" }
+        }
+      }
+    },
+    "/api/plan/features/{id}/sub-stages/{subStageId}": {
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } },
+        { "name": "subStageId", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } },
+        { "name": "If-Match", "in": "header", "required": false, "description": "Optional sub-stage-scoped optimistic-concurrency token (taxonomy.tracks[].phases[].subStages[].subStageVersion). Forwarded as `expectedVersion`.", "schema": { "type": "string" } }
+      ],
+      "patch": {
+        "summary": "Update a sub-stage — sparse PATCH (Manager only).",
+        "description": "Sparse PATCH of one sub-stage's `ownerUserId` / `plannedStart` / `plannedEnd`. Send only the fields you want to change. Validators: `plannedStart ≤ plannedEnd` if both present, dates ISO yyyy-MM-dd in years 2000..2100. Optimistic concurrency: `If-Match` header carries `subStage.version` or `expectedVersion` in body; body wins.",
+        "tags": ["plan"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/PatchFeatureSubStagePayload" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SubStageMutationResponse" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "502": { "$ref": "#/components/responses/BadGateway" }
+        }
+      },
+      "delete": {
+        "summary": "Delete a sub-stage (Manager only).",
+        "description": "Removes one owner sub-stage. The phase must retain ≥ 1 sub-stage; deleting the last sub-stage of a phase is rejected 409 with `conflict.kind = 'subStageCap'`. `ethalon-testing` and `live-release` reject deletes outright. `If-Match` optional.",
+        "tags": ["plan"],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SubStageMutationResponse" } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" }
+        }
+      }
+    },
+    "/api/plan/features/{id}/phases/{track}/{phase}/sub-stages": {
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } },
+        { "name": "track", "in": "path", "required": true, "schema": { "type": "string", "enum": ["backend", "frontend"] } },
+        { "name": "phase", "in": "path", "required": true, "schema": { "type": "string", "enum": ["development", "stand-testing"] }, "description": "Only multi-owner phases accept appends; ethalon-testing / live-release are capped at 1." }
+      ],
+      "post": {
+        "summary": "Append a sub-stage to a multi-owner phase (Manager only).",
+        "description": "Appends a new owner sub-stage at the next ordinal. Server-fills `plannedStart` from previous sibling's `plannedEnd` and `plannedEnd` to `plannedStart + 1d` if either is null. Hard cap = 6 sub-stages per phase per track; exceeding returns 409 with `conflict.kind = 'subStageCap'`.",
+        "tags": ["plan"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/AppendFeatureSubStagePayload" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SubStageMutationResponse" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" }
         }
       }
     },
@@ -221,7 +294,7 @@
         "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
       },
       "UnprocessableEntity": {
-        "description": "Validation error. On cross-stage chronological-order violations the body extends to `{ error, conflict: { kind: 'overlap' | 'order' | 'rangeInvalid', with: <stage> } }` so the FE can highlight the offending neighbour stage.",
+        "description": "Validation error.",
         "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ConflictError" } } }
       },
       "BadGateway": {
@@ -229,7 +302,7 @@
         "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
       },
       "Conflict": {
-        "description": "Version mismatch (concurrent edit detected). Body includes a `conflict` object with `kind:'version'` and the server's current `currentVersion` when the handler reports a concurrency conflict.",
+        "description": "Version mismatch (concurrent edit detected) or sub-stage cap reached. Body extends to `{ error, conflict: { kind: 'version' | 'subStageCap' | 'subStageOverlap', currentVersion?, track?, phase?, cap? } }` so the FE can render the right CTA.",
         "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ConflictError" } } }
       }
     },
@@ -241,18 +314,20 @@
       },
       "ConflictError": {
         "type": "object",
-        "description": "Extended error envelope emitted on 409/422 when the handler reports a concurrency or stage-order conflict. Clients unaware of `conflict` fall back to the bare `error` string.",
+        "description": "Extended error envelope emitted on 409/422 when the handler reports a structured conflict. Clients unaware of `conflict` fall back to the bare `error` string.",
         "required": ["error"],
         "properties": {
-          "error": { "type": "string", "description": "Public-facing message such as 'Updated by someone else' or 'Stage order violation'." },
+          "error": { "type": "string", "description": "Public-facing message such as 'Updated by someone else' or 'Sub-stage cap reached'." },
           "conflict": {
             "type": "object",
             "description": "Structured conflict context. Absent when the upstream did not supply one.",
             "required": ["kind"],
             "properties": {
-              "kind": { "type": "string", "enum": ["version", "overlap"] },
+              "kind": { "type": "string", "enum": ["version", "subStageCap", "subStageOverlap"] },
               "currentVersion": { "type": "integer", "format": "int32", "description": "Server's current version (kind='version')." },
-              "with": { "$ref": "#/components/schemas/FeatureState" }
+              "track":          { "type": "string", "enum": ["Backend", "Frontend"], "description": "Track whose phase tripped a cap (kind='subStageCap'/'subStageOverlap')." },
+              "phase":          { "type": "string", "description": "Phase whose cap tripped (kind='subStageCap'/'subStageOverlap')." },
+              "cap":            { "type": "integer", "format": "int32", "description": "Hard cap value (kind='subStageCap')." }
             }
           }
         }
@@ -261,32 +336,76 @@
         "type": "string",
         "enum": ["CsApproving", "Development", "Testing", "EthalonTesting", "LiveRelease"]
       },
-      "StagePlan": {
+      "GateKind": {
+        "type": "string",
+        "enum": ["spec", "cs", "sr"]
+      },
+      "GateStatus": {
+        "type": "string",
+        "enum": ["waiting", "approved", "rejected"]
+      },
+      "Track": {
+        "type": "string",
+        "enum": ["backend", "frontend"]
+      },
+      "PhaseKind": {
+        "type": "string",
+        "enum": ["development", "stand-testing", "ethalon-testing", "live-release"]
+      },
+      "FeatureGate": {
         "type": "object",
-        "description": "List-row stage plan — id-only performer. `stageVersion` is rolled out additively (api-contract.md §rollout-tolerance) and is therefore NOT in the required set; old payloads that predate the inline-edit feature may omit it.",
-        "required": ["stage", "plannedStart", "plannedEnd", "performerUserId"],
+        "required": ["id", "gateKey", "kind", "status", "version"],
         "properties": {
-          "stage": { "$ref": "#/components/schemas/FeatureState" },
-          "plannedStart": { "type": "string", "format": "date", "nullable": true },
-          "plannedEnd":   { "type": "string", "format": "date", "nullable": true },
-          "performerUserId": { "type": "integer", "format": "int32", "nullable": true },
-          "stageVersion": { "type": "integer", "format": "int32", "description": "Per-stage optimistic-concurrency token; consumed by the FE inline editor's If-Match header for stage-scoped PATCHes." }
+          "id":              { "type": "integer", "format": "int32" },
+          "gateKey":         { "type": "string", "enum": ["spec", "backend.prep-gate", "frontend.prep-gate"] },
+          "kind":            { "$ref": "#/components/schemas/GateKind" },
+          "track":           { "nullable": true, "allOf": [ { "$ref": "#/components/schemas/Track" } ], "description": "null on the spec gate; set on track-scoped gates." },
+          "status":          { "$ref": "#/components/schemas/GateStatus" },
+          "approverUserId":  { "type": "integer", "format": "int32", "nullable": true, "description": "Bare cross-service id (Users service); resolution lives in `miniTeam` on detail responses." },
+          "approvedAtUtc":   { "type": "string", "format": "date-time", "nullable": true },
+          "requestedAtUtc":  { "type": "string", "format": "date-time", "nullable": true, "description": "Set on creation and on flips back to waiting." },
+          "rejectionReason": { "type": "string", "nullable": true, "maxLength": 500 },
+          "version":         { "type": "integer", "format": "int32", "description": "Per-gate optimistic-concurrency token." }
         }
       },
-      "StagePlanDetail": {
+      "FeatureSubStage": {
         "type": "object",
-        "description": "Detail stage plan — resolved performer mini-member. `performer` is null when the stage is unassigned OR when the stored performer id is no longer on the manager's roster (stale). In the stale case `performerUserId` is still emitted so the FE can render the 'Performer no longer on team' state.",
-        "required": ["stage", "plannedStart", "plannedEnd", "performerUserId", "performer"],
+        "required": ["id", "track", "phase", "ordinal", "version"],
         "properties": {
-          "stage": { "$ref": "#/components/schemas/FeatureState" },
+          "id":           { "type": "integer", "format": "int32" },
+          "track":        { "$ref": "#/components/schemas/Track" },
+          "phase":        { "$ref": "#/components/schemas/PhaseKind" },
+          "ordinal":      { "type": "integer", "format": "int32", "minimum": 1, "description": "1-based position within the phase, recomputed on append/delete." },
+          "ownerUserId":  { "type": "integer", "format": "int32", "nullable": true },
           "plannedStart": { "type": "string", "format": "date", "nullable": true },
           "plannedEnd":   { "type": "string", "format": "date", "nullable": true },
-          "performerUserId": { "type": "integer", "format": "int32", "nullable": true },
-          "performer": {
-            "nullable": true,
-            "allOf": [ { "$ref": "#/components/schemas/MiniTeamMember" } ]
-          },
-          "stageVersion": { "type": "integer", "format": "int32", "description": "Per-stage optimistic-concurrency token." }
+          "version":      { "type": "integer", "format": "int32", "description": "Per-sub-stage optimistic-concurrency token." }
+        }
+      },
+      "FeaturePhaseTaxonomy": {
+        "type": "object",
+        "required": ["phase", "multiOwner", "cap", "subStages"],
+        "properties": {
+          "phase":      { "$ref": "#/components/schemas/PhaseKind" },
+          "multiOwner": { "type": "boolean", "description": "true for development/stand-testing; false for ethalon-testing/live-release." },
+          "cap":        { "type": "integer", "format": "int32", "description": "Hard cap on sub-stages — 6 for multi-owner phases, 1 otherwise." },
+          "subStages":  { "type": "array", "items": { "$ref": "#/components/schemas/FeatureSubStage" } }
+        }
+      },
+      "FeatureTrackTaxonomy": {
+        "type": "object",
+        "required": ["track", "phases"],
+        "properties": {
+          "track":  { "$ref": "#/components/schemas/Track" },
+          "phases": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "$ref": "#/components/schemas/FeaturePhaseTaxonomy" }, "description": "Always length 4 in canonical order: development, stand-testing, ethalon-testing, live-release." }
+        }
+      },
+      "FeatureTaxonomy": {
+        "type": "object",
+        "required": ["gates", "tracks"],
+        "properties": {
+          "gates":  { "type": "array", "minItems": 3, "maxItems": 3, "items": { "$ref": "#/components/schemas/FeatureGate" }, "description": "Always length 3 in canonical order: spec, backend.prep-gate, frontend.prep-gate." },
+          "tracks": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "#/components/schemas/FeatureTrackTaxonomy" }, "description": "Always length 2: backend, frontend." }
         }
       },
       "MiniTeamMember": {
@@ -311,43 +430,30 @@
       },
       "FeatureSummary": {
         "type": "object",
-        "required": ["id","title","description","state","plannedStart","plannedEnd","leadUserId","managerUserId","taskCount","taskIds","stagePlans"],
+        "required": ["id","title","description","state","plannedStart","plannedEnd","leadUserId","managerUserId","taskCount","taskIds","taxonomy"],
         "properties": {
           "id":            { "type": "integer", "format": "int32" },
           "title":         { "type": "string", "maxLength": 200 },
           "description":   { "type": "string", "nullable": true, "maxLength": 4000 },
           "state":         { "$ref": "#/components/schemas/FeatureState" },
-          "plannedStart":  { "type": "string", "format": "date", "nullable": true, "description": "Derived server-side as min(stagePlans[].plannedStart)." },
-          "plannedEnd":    { "type": "string", "format": "date", "nullable": true, "description": "Derived server-side as max(stagePlans[].plannedEnd)." },
+          "plannedStart":  { "type": "string", "format": "date", "nullable": true, "description": "Manually editable feature-scoped date." },
+          "plannedEnd":    { "type": "string", "format": "date", "nullable": true, "description": "Manually editable feature-scoped date." },
           "leadUserId":    { "type": "integer", "format": "int32" },
           "managerUserId": { "type": "integer", "format": "int32" },
           "taskCount":     { "type": "integer", "format": "int32" },
           "taskIds":       { "type": "array", "items": { "type": "integer", "format": "int32" } },
-          "stagePlans": {
-            "type": "array",
-            "minItems": 5,
-            "maxItems": 5,
-            "items": { "$ref": "#/components/schemas/StagePlan" },
-            "description": "Always length 5, canonical FeatureState order. Performer is id-only on list rows."
-          },
-          "version": { "type": "integer", "format": "int32", "description": "Monotonically-increasing row version used as an optimistic-concurrency token. Bumped by every inline-edit PATCH." }
+          "taxonomy":      { "$ref": "#/components/schemas/FeatureTaxonomy" },
+          "version":       { "type": "integer", "format": "int32", "description": "Monotonically-increasing feature-scoped optimistic-concurrency token; bumped by every feature edit, gate flip, or sub-stage mutation." }
         }
       },
       "FeatureDetail": {
         "type": "object",
-        "required": ["feature","tasks","lead","miniTeam","stagePlans"],
+        "required": ["feature","tasks","lead","miniTeam"],
         "properties": {
           "feature":  { "$ref": "#/components/schemas/FeatureSummary" },
           "tasks":    { "type": "array", "items": { "$ref": "#/components/schemas/AttachedTask" } },
           "lead":     { "$ref": "#/components/schemas/MiniTeamMember" },
-          "miniTeam": { "type": "array", "items": { "$ref": "#/components/schemas/MiniTeamMember" }, "description": "Deduped union of task assignees, lead, and every populated stage-plan performer." },
-          "stagePlans": {
-            "type": "array",
-            "minItems": 5,
-            "maxItems": 5,
-            "items": { "$ref": "#/components/schemas/StagePlanDetail" },
-            "description": "Always length 5, canonical FeatureState order. Each entry carries a resolved performer mini-member."
-          }
+          "miniTeam": { "type": "array", "items": { "$ref": "#/components/schemas/MiniTeamMember" }, "description": "Deduped union of task assignees, lead, every populated sub-stage owner, and every gate approver." }
         }
       },
       "CreateFeaturePayload": {
@@ -357,8 +463,8 @@
           "title":        { "type": "string", "maxLength": 200 },
           "description":  { "type": "string", "nullable": true, "maxLength": 4000 },
           "leadUserId":   { "type": "integer", "format": "int32", "nullable": true },
-          "plannedStart": { "type": "string", "format": "date", "nullable": true, "description": "Legacy feature-level date; prefer authoring per-stage plans via PATCH." },
-          "plannedEnd":   { "type": "string", "format": "date", "nullable": true, "description": "Legacy feature-level date; prefer authoring per-stage plans via PATCH." }
+          "plannedStart": { "type": "string", "format": "date", "nullable": true },
+          "plannedEnd":   { "type": "string", "format": "date", "nullable": true }
         }
       },
       "UpdateFeaturePayload": {
@@ -371,14 +477,52 @@
           "expectedVersion": { "type": "integer", "format": "int32", "nullable": true, "description": "Optimistic-concurrency token. Body wins over `If-Match` header when both are supplied." }
         }
       },
-      "PatchFeatureStagePayload": {
+      "PatchFeatureGatePayload": {
         "type": "object",
-        "description": "All fields optional — send only the fields you want to change. Sparse fields: `stageOwnerUserId`, `plannedStart`, `plannedEnd`, `expectedStageVersion`.",
+        "description": "All fields optional — send only the fields you want to change. Sparse fields: `status`, `rejectionReason`, `expectedVersion`.",
         "properties": {
-          "stageOwnerUserId":     { "type": "integer", "format": "int32", "nullable": true, "minimum": 1 },
-          "plannedStart":         { "type": "string",  "format": "date",  "nullable": true },
-          "plannedEnd":           { "type": "string",  "format": "date",  "nullable": true },
-          "expectedStageVersion": { "type": "integer", "format": "int32", "nullable": true, "description": "Stage-scoped optimistic-concurrency token. Body wins over `If-Match` header when both are supplied." }
+          "status":          { "$ref": "#/components/schemas/GateStatus" },
+          "rejectionReason": { "type": "string", "nullable": true, "maxLength": 500, "description": "Required only when status = 'rejected'." },
+          "expectedVersion": { "type": "integer", "format": "int32", "nullable": true, "description": "Gate-scoped optimistic-concurrency token. Body wins over `If-Match` when both are supplied." }
+        }
+      },
+      "PatchFeatureGateResponse": {
+        "type": "object",
+        "required": ["featureId", "featureVersion", "taxonomy"],
+        "properties": {
+          "featureId":      { "type": "integer", "format": "int32" },
+          "featureVersion": { "type": "integer", "format": "int32" },
+          "taxonomy":       { "$ref": "#/components/schemas/FeatureTaxonomy" }
+        }
+      },
+      "PatchFeatureSubStagePayload": {
+        "type": "object",
+        "description": "All fields optional — send only the fields you want to change. Sparse fields: `ownerUserId`, `plannedStart`, `plannedEnd`, `expectedVersion`.",
+        "properties": {
+          "ownerUserId":     { "type": "integer", "format": "int32", "nullable": true, "minimum": 0 },
+          "plannedStart":    { "type": "string",  "format": "date",  "nullable": true },
+          "plannedEnd":      { "type": "string",  "format": "date",  "nullable": true },
+          "expectedVersion": { "type": "integer", "format": "int32", "nullable": true, "description": "Sub-stage-scoped optimistic-concurrency token. Body wins over `If-Match`." }
+        }
+      },
+      "AppendFeatureSubStagePayload": {
+        "type": "object",
+        "description": "All fields optional — server fills sensible defaults (planned dates from previous sibling).",
+        "properties": {
+          "ownerUserId":  { "type": "integer", "format": "int32", "nullable": true },
+          "plannedStart": { "type": "string", "format": "date", "nullable": true },
+          "plannedEnd":   { "type": "string", "format": "date", "nullable": true }
+        }
+      },
+      "SubStageMutationResponse": {
+        "type": "object",
+        "description": "Returned by sub-stage append / patch / delete endpoints. `createdSubStageId` is set only on append.",
+        "required": ["featureId", "featureVersion", "taxonomy"],
+        "properties": {
+          "featureId":         { "type": "integer", "format": "int32" },
+          "featureVersion":    { "type": "integer", "format": "int32" },
+          "createdSubStageId": { "type": "integer", "format": "int32", "nullable": true },
+          "taxonomy":          { "$ref": "#/components/schemas/FeatureTaxonomy" }
         }
       },
       "DetachTaskBody": {

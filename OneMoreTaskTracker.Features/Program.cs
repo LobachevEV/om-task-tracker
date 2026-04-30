@@ -50,7 +50,11 @@ app.MapGrpcService<CreateFeatureHandler>();
 app.MapGrpcService<ListFeaturesHandler>();
 app.MapGrpcService<GetFeatureHandler>();
 app.MapGrpcService<PatchFeatureHandler>();
-app.MapGrpcService<PatchFeatureStageHandler>();
+app.MapGrpcService<PatchFeatureGateHandler>();
+app.MapGrpcService<PatchFeatureSubStageHandler>();
+app.MapGrpcService<AppendFeatureSubStageHandler>();
+app.MapGrpcService<DeleteFeatureSubStageHandler>();
+app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
 app.Run();
 

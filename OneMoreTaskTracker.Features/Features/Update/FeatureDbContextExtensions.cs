@@ -22,9 +22,9 @@ public static class FeatureDbContextExtensions
                 throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));
             }
         }
-        
-        public async Task SaveStageAsync(
-            FeatureStagePlan plan,
+
+        public async Task SaveGateAsync(
+            FeatureGate gate,
             CancellationToken cancellationToken)
         {
             try
@@ -33,17 +33,33 @@ public static class FeatureDbContextExtensions
             }
             catch (DbUpdateConcurrencyException)
             {
-                await db.Entry(plan).ReloadAsync(cancellationToken);
-                throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(plan.Version)));
+                await db.Entry(gate).ReloadAsync(cancellationToken);
+                throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(gate.Version)));
             }
         }
-        
-        public async Task<Feature> LoadFeatureWithStagePlansAsync(
+
+        public async Task SaveSubStageAsync(
+            FeatureSubStage subStage,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                await db.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                await db.Entry(subStage).ReloadAsync(cancellationToken);
+                throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(subStage.Version)));
+            }
+        }
+
+        public async Task<Feature> LoadFeatureWithTaxonomyAsync(
             int featureId,
             CancellationToken cancellationToken)
         {
             return await db.Features
-                       .Include(f => f.StagePlans)
+                       .Include(f => f.Gates)
+                       .Include(f => f.SubStages)
                        .FirstOrDefaultAsync(f => f.Id == featureId, cancellationToken)
                    ?? throw new RpcException(new Status(StatusCode.NotFound, $"feature {featureId} not found"));
         }

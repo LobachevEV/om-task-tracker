@@ -79,7 +79,7 @@ public sealed class FeatureAggregateTests
     }
 
     [Fact]
-    public void RecordStageEdit_BumpsVersionByOne_AndStampsUpdatedAt_WithoutChangingFields()
+    public void RecordGateFlip_BumpsVersionByOne_AndStampsUpdatedAt_WithoutChangingFields()
     {
         var feature = NewFeature();
         var versionBefore = feature.Version;
@@ -87,7 +87,24 @@ public sealed class FeatureAggregateTests
         var leadBefore = feature.LeadUserId;
         var now = new DateTime(2026, 4, 28, 14, 0, 0, DateTimeKind.Utc);
 
-        feature.RecordStageEdit(now);
+        feature.RecordGateFlip(now);
+
+        feature.Version.Should().Be(versionBefore + 1);
+        feature.UpdatedAt.Should().Be(now);
+        feature.Title.Should().Be(titleBefore);
+        feature.LeadUserId.Should().Be(leadBefore);
+    }
+
+    [Fact]
+    public void RecordSubStageMutation_BumpsVersionByOne_AndStampsUpdatedAt_WithoutChangingFields()
+    {
+        var feature = NewFeature();
+        var versionBefore = feature.Version;
+        var titleBefore = feature.Title;
+        var leadBefore = feature.LeadUserId;
+        var now = new DateTime(2026, 4, 28, 14, 30, 0, DateTimeKind.Utc);
+
+        feature.RecordSubStageMutation(now);
 
         feature.Version.Should().Be(versionBefore + 1);
         feature.UpdatedAt.Should().Be(now);

@@ -11,9 +11,15 @@ public static class FeatureVersionGuard
             throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));
     }
 
-    public static void EnsureStageVersion(FeatureStagePlan plan, bool hasExpected, int expectedStageVersion)
+    public static void EnsureGateVersion(FeatureGate gate, bool hasExpected, int expectedVersion)
     {
-        if (hasExpected && expectedStageVersion != plan.Version)
-            throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(plan.Version)));
+        if (hasExpected && expectedVersion != gate.Version)
+            throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(gate.Version)));
+    }
+
+    public static void EnsureSubStageVersion(FeatureSubStage subStage, bool hasExpected, int expectedVersion)
+    {
+        if (hasExpected && expectedVersion != subStage.Version)
+            throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(subStage.Version)));
     }
 }

@@ -14,12 +14,17 @@ public class Feature
 
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; private set; }
-    public List<FeatureStagePlan> StagePlans { get; init; } = [];
+
+    public List<FeatureGate> Gates { get; init; } = [];
+    public List<FeatureSubStage> SubStages { get; init; } = [];
 
     public int Version { get; private set; }
 
-    public FeatureStagePlan? ResolveStage(int stageOrdinal) =>
-        StagePlans.FirstOrDefault(sp => sp.Stage == stageOrdinal);
+    public FeatureGate? ResolveGate(string gateKey) =>
+        Gates.FirstOrDefault(g => g.GateKey == gateKey);
+
+    public FeatureSubStage? ResolveSubStage(int subStageId) =>
+        SubStages.FirstOrDefault(s => s.Id == subStageId);
 
     public void RenameTitle(string newTitle, DateTime now)
     {
@@ -42,7 +47,13 @@ public class Feature
         UpdatedAt = now;
     }
 
-    public void RecordStageEdit(DateTime now)
+    public void RecordGateFlip(DateTime now)
+    {
+        Version += 1;
+        UpdatedAt = now;
+    }
+
+    public void RecordSubStageMutation(DateTime now)
     {
         Version += 1;
         UpdatedAt = now;

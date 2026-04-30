@@ -1,4 +1,4 @@
-using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
+using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Taxonomy;
 
 namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature;
 
@@ -13,9 +13,7 @@ public record FeatureSummaryResponse(
     int ManagerUserId,
     int TaskCount,
     IReadOnlyList<int> TaskIds,
-    IReadOnlyList<StagePlanResponse> StagePlans,
-    // Optimistic-concurrency token. Bumped by every inline-edit PATCH;
-    // legacy clients that ignore it stay last-write-wins.
+    FeatureTaxonomyResponse Taxonomy,
     int Version)
 {
     internal static FeatureSummaryResponse From<T>(T f, IReadOnlyDictionary<int, List<int>> tasksByFeature)
@@ -33,7 +31,7 @@ public record FeatureSummaryResponse(
             f.ManagerUserId,
             taskIds.Count,
             taskIds,
-            f.StagePlans.Select(StagePlanResponse.From).ToList(),
+            FeatureTaxonomyProjector.FromProto(f.Taxonomy),
             f.Version);
     }
 }

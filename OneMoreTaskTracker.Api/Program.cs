@@ -7,7 +7,10 @@ using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureCommand;
-using OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand;
+using OneMoreTaskTracker.Proto.Features.PatchFeatureGateCommand;
+using OneMoreTaskTracker.Proto.Features.PatchFeatureSubStageCommand;
+using OneMoreTaskTracker.Proto.Features.AppendFeatureSubStageCommand;
+using OneMoreTaskTracker.Proto.Features.DeleteFeatureSubStageCommand;
 using OneMoreTaskTracker.Proto.Tasks;
 using OneMoreTaskTracker.Proto.Tasks.AttachTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.CreateTaskCommand;
@@ -111,7 +114,16 @@ builder.Services
     .AddGrpcClient<FeaturePatcher.FeaturePatcherClient>(o => o.Address = new Uri(featuresServiceAddress));
 
 builder.Services
-    .AddGrpcClient<FeatureStagePatcher.FeatureStagePatcherClient>(o => o.Address = new Uri(featuresServiceAddress));
+    .AddGrpcClient<FeatureGatePatcher.FeatureGatePatcherClient>(o => o.Address = new Uri(featuresServiceAddress));
+
+builder.Services
+    .AddGrpcClient<FeatureSubStagePatcher.FeatureSubStagePatcherClient>(o => o.Address = new Uri(featuresServiceAddress));
+
+builder.Services
+    .AddGrpcClient<FeatureSubStageAppender.FeatureSubStageAppenderClient>(o => o.Address = new Uri(featuresServiceAddress));
+
+builder.Services
+    .AddGrpcClient<FeatureSubStageDeleter.FeatureSubStageDeleterClient>(o => o.Address = new Uri(featuresServiceAddress));
 
 var app = builder.Build();
 

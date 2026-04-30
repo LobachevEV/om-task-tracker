@@ -12,6 +12,6 @@ internal interface IFeatureSummaryProjection
     string PlannedEnd { get; }
     int LeadUserId { get; }
     int ManagerUserId { get; }
-    IEnumerable<FeatureStagePlan> StagePlans { get; }
+    FeatureTaxonomyDto Taxonomy { get; }
     int Version { get; }
 }

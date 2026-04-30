@@ -387,7 +387,7 @@ public sealed class PatchFeatureHandlerTests
     }
 
     [Fact]
-    public async Task Patch_PreservesStagePlansInResponseShape()
+    public async Task Patch_PreservesTaxonomyInResponseShape()
     {
         var db = NewDb();
         var created = await CreateFeatureAsync(db);
@@ -401,7 +401,10 @@ public sealed class PatchFeatureHandlerTests
             },
             TestServerCallContext.Create());
 
-        dto.StagePlans.Count.Should().Be(created.StagePlans.Count);
-        dto.StagePlans.Count.Should().BeGreaterThan(0);
+        dto.Taxonomy.Should().NotBeNull();
+        dto.Taxonomy.Gates.Count.Should().Be(created.Taxonomy.Gates.Count);
+        dto.Taxonomy.SubStages.Count.Should().Be(created.Taxonomy.SubStages.Count);
+        dto.Taxonomy.Gates.Should().NotBeEmpty();
+        dto.Taxonomy.SubStages.Should().NotBeEmpty();
     }
 }

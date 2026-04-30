@@ -1,11 +1,10 @@
 using Mapster;
+using OneMoreTaskTracker.Proto.Features;
 using ProtoFeatureState = OneMoreTaskTracker.Proto.Features.FeatureState;
-using ProtoFeatureStagePlan = OneMoreTaskTracker.Proto.Features.FeatureStagePlan;
 using CreateDto = OneMoreTaskTracker.Proto.Features.CreateFeatureCommand.FeatureDto;
 using ListDto = OneMoreTaskTracker.Proto.Features.ListFeaturesQuery.FeatureDto;
 using GetDto = OneMoreTaskTracker.Proto.Features.GetFeatureQuery.FeatureDto;
 using PatchDto = OneMoreTaskTracker.Proto.Features.PatchFeatureCommand.FeatureDto;
-using PatchStageDto = OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand.FeatureDto;
 
 namespace OneMoreTaskTracker.Features.Features.Data;
 
@@ -22,19 +21,24 @@ public static class FeatureMappingConfig
             _registered = true;
         }
 
-        FeatureStagePlanMappingConfig.Register();
+        FeatureGateMappingConfig.Register();
+        FeatureSubStageMappingConfig.Register();
 
         RegisterFeatureToDto<CreateDto>();
         RegisterFeatureToDto<ListDto>();
         RegisterFeatureToDto<GetDto>();
         RegisterFeatureToDto<PatchDto>();
-        RegisterFeatureToDto<PatchStageDto>();
     }
 
-    public static IEnumerable<ProtoFeatureStagePlan> BuildProtoStagePlans(Feature feature) =>
-        feature.StagePlans
-            .OrderBy(sp => sp.Stage)
-            .Select(sp => sp.Adapt<ProtoFeatureStagePlan>());
+    public static FeatureTaxonomyDto BuildProtoTaxonomy(Feature feature)
+    {
+        var taxonomy = new FeatureTaxonomyDto();
+        foreach (var gate in FeatureTaxonomyProjector.OrderedGates(feature))
+            taxonomy.Gates.Add(gate.Adapt<FeatureGateDto>());
+        foreach (var sub in FeatureTaxonomyProjector.OrderedSubStages(feature))
+            taxonomy.SubStages.Add(sub.Adapt<FeatureSubStageDto>());
+        return taxonomy;
+    }
 
     private static void RegisterFeatureToDto<TDto>()
         where TDto : class, IFeatureMappingTarget, new() =>
@@ -44,5 +48,6 @@ public static class FeatureMappingConfig
             .Map(d => d.PlannedStart, s => s.PlannedStart == null ? string.Empty : s.PlannedStart.Value.ToString("yyyy-MM-dd"))
             .Map(d => d.PlannedEnd,   s => s.PlannedEnd   == null ? string.Empty : s.PlannedEnd.Value.ToString("yyyy-MM-dd"))
             .Map(d => d.CreatedAt,    s => s.CreatedAt.ToString("O"))
-            .Map(d => d.UpdatedAt,    s => s.UpdatedAt.ToString("O"));
+            .Map(d => d.UpdatedAt,    s => s.UpdatedAt.ToString("O"))
+            .Ignore(d => d.Taxonomy);
 }

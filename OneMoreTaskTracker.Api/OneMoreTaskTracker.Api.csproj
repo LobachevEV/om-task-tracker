@@ -82,7 +82,23 @@
       <CompileOutputs>True</CompileOutputs>
       <Generator>MSBuild:Compile</Generator>
     </Protobuf>
-    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\feature_stage_plan.proto">
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\feature_gate.proto">
+      <GrpcServices>None</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
+      <CompileOutputs>True</CompileOutputs>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\feature_sub_stage.proto">
+      <GrpcServices>None</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
+      <CompileOutputs>True</CompileOutputs>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\feature_taxonomy.proto">
       <GrpcServices>None</GrpcServices>
       <Access>Public</Access>
       <ProtoCompile>True</ProtoCompile>
@@ -122,7 +138,31 @@
       <CompileOutputs>True</CompileOutputs>
       <Generator>MSBuild:Compile</Generator>
     </Protobuf>
-    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\PatchFeatureStageCommand\patch_feature_stage_command_handler.proto">
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\PatchFeatureGateCommand\patch_feature_gate_command_handler.proto">
+      <GrpcServices>Client</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
+      <CompileOutputs>True</CompileOutputs>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\PatchFeatureSubStageCommand\patch_feature_sub_stage_command_handler.proto">
+      <GrpcServices>Client</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
+      <CompileOutputs>True</CompileOutputs>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\AppendFeatureSubStageCommand\append_feature_sub_stage_command_handler.proto">
+      <GrpcServices>Client</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
+      <CompileOutputs>True</CompileOutputs>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\DeleteFeatureSubStageCommand\delete_feature_sub_stage_command_handler.proto">
       <GrpcServices>Client</GrpcServices>
       <Access>Public</Access>
       <ProtoCompile>True</ProtoCompile>

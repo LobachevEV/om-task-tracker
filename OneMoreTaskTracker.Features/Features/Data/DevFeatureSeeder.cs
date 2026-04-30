@@ -4,26 +4,12 @@ namespace OneMoreTaskTracker.Features.Features.Data;
 
 public sealed class DevFeatureSeeder(IRequestClock clock)
 {
-    // IDs mirror the insert order in OneMoreTaskTracker.Users/Data/DevDataSeeder.cs:
-    // manager(1), alice.frontend(2), bob.frontend(3), charlie.backend(4), dave.backend(5), eve.qa(6).
     public const int SeededManagerUserId = 1;
 
     private const int AliceFrontendUserId  = 2;
-    private const int BobFrontendUserId    = 3;
     private const int CharlieBackendUserId = 4;
-    private const int DaveBackendUserId    = 5;
     private const int EveQaUserId          = 6;
 
-    // Four fixture variants:
-    //   A — fully planned (all 5 stages populated with dates + performers)
-    //   B — partially planned (first 2 stages populated)
-    //   C — empty (all 5 rows present, all dates null, performer = 0)
-    //   D — legacy drift: no stage dates, but Feature.PlannedStart/PlannedEnd
-    //       hold extreme values (simulates the back-compat write path in
-    //       UpdateFeatureHandler that bypasses stage-derived recompute).
-    //       Bounds query MUST ignore this feature; only stages contribute.
-    // Derived Feature.PlannedStart/PlannedEnd are computed from the stage dates
-    // unless LegacyPlannedStart/End override them (variant D).
     private static readonly SeedFeature[] Features =
     [
         new(
@@ -31,55 +17,29 @@ public sealed class DevFeatureSeeder(IRequestClock clock)
             Description:  "Ship the new multi-step checkout flow end to end.",
             State:        FeatureState.Development,
             LeadUserId:   AliceFrontendUserId,
-            StagePlans:
-            [
-                new(FeatureState.CsApproving,    new DateOnly(2026, 04, 01), new DateOnly(2026, 04, 07), SeededManagerUserId),
-                new(FeatureState.Development,    new DateOnly(2026, 04, 08), new DateOnly(2026, 05, 15), AliceFrontendUserId),
-                new(FeatureState.Testing,        new DateOnly(2026, 05, 16), new DateOnly(2026, 05, 25), EveQaUserId),
-                new(FeatureState.EthalonTesting, new DateOnly(2026, 05, 26), new DateOnly(2026, 06, 05), EveQaUserId),
-                new(FeatureState.LiveRelease,    new DateOnly(2026, 06, 10), new DateOnly(2026, 06, 15), AliceFrontendUserId),
-            ]),
+            PlannedStart: new DateOnly(2026, 04, 01),
+            PlannedEnd:   new DateOnly(2026, 06, 15)),
         new(
             Title:        "Search infra upgrade",
             Description:  "Move full-text search to the new backend cluster.",
             State:        FeatureState.CsApproving,
             LeadUserId:   CharlieBackendUserId,
-            StagePlans:
-            [
-                new(FeatureState.CsApproving,    new DateOnly(2026, 05, 01), new DateOnly(2026, 05, 10), SeededManagerUserId),
-                new(FeatureState.Development,    new DateOnly(2026, 05, 11), new DateOnly(2026, 07, 15), CharlieBackendUserId),
-                new(FeatureState.Testing,        null,                       null,                       0),
-                new(FeatureState.EthalonTesting, null,                       null,                       0),
-                new(FeatureState.LiveRelease,    null,                       null,                       0),
-            ]),
+            PlannedStart: new DateOnly(2026, 05, 01),
+            PlannedEnd:   new DateOnly(2026, 07, 15)),
         new(
             Title:        "Legacy API sunset",
             Description:  "Retire v1 REST endpoints and migrate remaining callers.",
             State:        FeatureState.LiveRelease,
             LeadUserId:   SeededManagerUserId,
-            StagePlans:
-            [
-                new(FeatureState.CsApproving,    null, null, 0),
-                new(FeatureState.Development,    null, null, 0),
-                new(FeatureState.Testing,        null, null, 0),
-                new(FeatureState.EthalonTesting, null, null, 0),
-                new(FeatureState.LiveRelease,    null, null, 0),
-            ]),
+            PlannedStart: null,
+            PlannedEnd:   null),
         new(
-            Title:               "Drift fixture (legacy dates only)",
-            Description:         "Feature-level PlannedStart/End set far outside the planned-stage range; no stage dates. Verifies bounds query ignores feature-level legacy values.",
-            State:               FeatureState.CsApproving,
-            LeadUserId:          SeededManagerUserId,
-            StagePlans:
-            [
-                new(FeatureState.CsApproving,    null, null, 0),
-                new(FeatureState.Development,    null, null, 0),
-                new(FeatureState.Testing,        null, null, 0),
-                new(FeatureState.EthalonTesting, null, null, 0),
-                new(FeatureState.LiveRelease,    null, null, 0),
-            ],
-            LegacyPlannedStart:  new DateOnly(2020, 01, 01),
-            LegacyPlannedEnd:    new DateOnly(2030, 12, 31)),
+            Title:        "QA hardening pass",
+            Description:  "Tighten regression coverage across the platform.",
+            State:        FeatureState.Testing,
+            LeadUserId:   EveQaUserId,
+            PlannedStart: new DateOnly(2026, 06, 01),
+            PlannedEnd:   new DateOnly(2026, 06, 30)),
     ];
 
     public async Task SeedAsync(FeaturesDbContext dbContext, CancellationToken cancellationToken = default)
@@ -91,38 +51,20 @@ public sealed class DevFeatureSeeder(IRequestClock clock)
 
         foreach (var f in Features)
         {
-            // Derive feature-level dates from the seeded stage plans so the
-            // min/max invariant holds at read time (derivation is recomputed
-            // on Update; the seeder matches it at rest).
-            var populatedStarts = f.StagePlans.Where(sp => sp.PlannedStart.HasValue).Select(sp => sp.PlannedStart!.Value).ToList();
-            var populatedEnds   = f.StagePlans.Where(sp => sp.PlannedEnd.HasValue).Select(sp => sp.PlannedEnd!.Value).ToList();
-
             var feature = new Feature
             {
                 Title         = f.Title,
                 Description   = f.Description,
                 State         = (int)f.State,
-                PlannedStart  = f.LegacyPlannedStart ?? (populatedStarts.Count > 0 ? populatedStarts.Min() : null),
-                PlannedEnd    = f.LegacyPlannedEnd   ?? (populatedEnds.Count   > 0 ? populatedEnds.Max()   : null),
+                PlannedStart  = f.PlannedStart,
+                PlannedEnd    = f.PlannedEnd,
                 LeadUserId    = f.LeadUserId,
                 ManagerUserId = SeededManagerUserId,
                 CreatedAt     = now,
             };
             feature.Touch(now);
 
-            foreach (var sp in f.StagePlans)
-            {
-                var plan = new FeatureStagePlan
-                {
-                    Stage           = (int)sp.Stage,
-                    PlannedStart    = sp.PlannedStart,
-                    PlannedEnd      = sp.PlannedEnd,
-                    PerformerUserId = sp.PerformerUserId,
-                    CreatedAt       = now,
-                };
-                plan.Touch(now);
-                feature.StagePlans.Add(plan);
-            }
+            FeatureStageLayout.Materialize(feature, now);
 
             dbContext.Features.Add(feature);
         }
@@ -135,13 +77,6 @@ public sealed class DevFeatureSeeder(IRequestClock clock)
         string Description,
         FeatureState State,
         int LeadUserId,
-        SeedStagePlan[] StagePlans,
-        DateOnly? LegacyPlannedStart = null,
-        DateOnly? LegacyPlannedEnd   = null);
-
-    private readonly record struct SeedStagePlan(
-        FeatureState Stage,
         DateOnly? PlannedStart,
-        DateOnly? PlannedEnd,
-        int PerformerUserId);
+        DateOnly? PlannedEnd);
 }

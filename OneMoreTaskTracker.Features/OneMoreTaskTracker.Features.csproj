@@ -28,7 +28,17 @@
       <ProtoRoot>Protos</ProtoRoot>
       <Access>Public</Access>
     </Protobuf>
-    <Protobuf Include="Protos\feature_stage_plan.proto">
+    <Protobuf Include="Protos\feature_gate.proto">
+      <GrpcServices>Server</GrpcServices>
+      <ProtoRoot>Protos</ProtoRoot>
+      <Access>Public</Access>
+    </Protobuf>
+    <Protobuf Include="Protos\feature_sub_stage.proto">
+      <GrpcServices>Server</GrpcServices>
+      <ProtoRoot>Protos</ProtoRoot>
+      <Access>Public</Access>
+    </Protobuf>
+    <Protobuf Include="Protos\feature_taxonomy.proto">
       <GrpcServices>Server</GrpcServices>
       <ProtoRoot>Protos</ProtoRoot>
       <Access>Public</Access>
@@ -57,7 +67,25 @@
       <ProtoRoot>Protos</ProtoRoot>
       <AdditionalImportDirs>Protos</AdditionalImportDirs>
     </Protobuf>
-    <Protobuf Include="Protos\PatchFeatureStageCommand\patch_feature_stage_command_handler.proto">
+    <Protobuf Include="Protos\PatchFeatureGateCommand\patch_feature_gate_command_handler.proto">
+      <GrpcServices>Server</GrpcServices>
+      <Access>Public</Access>
+      <ProtoRoot>Protos</ProtoRoot>
+      <AdditionalImportDirs>Protos</AdditionalImportDirs>
+    </Protobuf>
+    <Protobuf Include="Protos\PatchFeatureSubStageCommand\patch_feature_sub_stage_command_handler.proto">
+      <GrpcServices>Server</GrpcServices>
+      <Access>Public</Access>
+      <ProtoRoot>Protos</ProtoRoot>
+      <AdditionalImportDirs>Protos</AdditionalImportDirs>
+    </Protobuf>
+    <Protobuf Include="Protos\AppendFeatureSubStageCommand\append_feature_sub_stage_command_handler.proto">
+      <GrpcServices>Server</GrpcServices>
+      <Access>Public</Access>
+      <ProtoRoot>Protos</ProtoRoot>
+      <AdditionalImportDirs>Protos</AdditionalImportDirs>
+    </Protobuf>
+    <Protobuf Include="Protos\DeleteFeatureSubStageCommand\delete_feature_sub_stage_command_handler.proto">
       <GrpcServices>Server</GrpcServices>
       <Access>Public</Access>
       <ProtoRoot>Protos</ProtoRoot>

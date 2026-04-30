@@ -12,7 +12,10 @@ using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureCommand;
-using OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand;
+using OneMoreTaskTracker.Proto.Features.PatchFeatureGateCommand;
+using OneMoreTaskTracker.Proto.Features.PatchFeatureSubStageCommand;
+using OneMoreTaskTracker.Proto.Features.AppendFeatureSubStageCommand;
+using OneMoreTaskTracker.Proto.Features.DeleteFeatureSubStageCommand;
 using OneMoreTaskTracker.Proto.Tasks;
 using OneMoreTaskTracker.Proto.Tasks.AttachTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.CreateTaskCommand;
@@ -58,8 +61,17 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
     public FeaturePatcher.FeaturePatcherClient MockFeaturePatcher { get; } =
         Substitute.For<FeaturePatcher.FeaturePatcherClient>();
 
-    public FeatureStagePatcher.FeatureStagePatcherClient MockFeatureStagePatcher { get; } =
-        Substitute.For<FeatureStagePatcher.FeatureStagePatcherClient>();
+    public FeatureGatePatcher.FeatureGatePatcherClient MockFeatureGatePatcher { get; } =
+        Substitute.For<FeatureGatePatcher.FeatureGatePatcherClient>();
+
+    public FeatureSubStagePatcher.FeatureSubStagePatcherClient MockFeatureSubStagePatcher { get; } =
+        Substitute.For<FeatureSubStagePatcher.FeatureSubStagePatcherClient>();
+
+    public FeatureSubStageAppender.FeatureSubStageAppenderClient MockFeatureSubStageAppender { get; } =
+        Substitute.For<FeatureSubStageAppender.FeatureSubStageAppenderClient>();
+
+    public FeatureSubStageDeleter.FeatureSubStageDeleterClient MockFeatureSubStageDeleter { get; } =
+        Substitute.For<FeatureSubStageDeleter.FeatureSubStageDeleterClient>();
 
     public string GenerateToken(int userId, string email, string role, int? managerId = null)
     {
@@ -99,7 +111,10 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
                 d.ServiceType == typeof(FeaturesLister.FeaturesListerClient) ||
                 d.ServiceType == typeof(FeatureGetter.FeatureGetterClient) ||
                 d.ServiceType == typeof(FeaturePatcher.FeaturePatcherClient) ||
-                d.ServiceType == typeof(FeatureStagePatcher.FeatureStagePatcherClient)
+                d.ServiceType == typeof(FeatureGatePatcher.FeatureGatePatcherClient) ||
+                d.ServiceType == typeof(FeatureSubStagePatcher.FeatureSubStagePatcherClient) ||
+                d.ServiceType == typeof(FeatureSubStageAppender.FeatureSubStageAppenderClient) ||
+                d.ServiceType == typeof(FeatureSubStageDeleter.FeatureSubStageDeleterClient)
             ).ToList();
 
             foreach (var descriptor in descriptors)
@@ -116,7 +131,10 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
             services.AddSingleton(MockFeaturesLister);
             services.AddSingleton(MockFeatureGetter);
             services.AddSingleton(MockFeaturePatcher);
-            services.AddSingleton(MockFeatureStagePatcher);
+            services.AddSingleton(MockFeatureGatePatcher);
+            services.AddSingleton(MockFeatureSubStagePatcher);
+            services.AddSingleton(MockFeatureSubStageAppender);
+            services.AddSingleton(MockFeatureSubStageDeleter);
 
             services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
             {

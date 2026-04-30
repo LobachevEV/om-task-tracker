@@ -76,7 +76,65 @@ namespace OneMoreTaskTracker.Features.Migrations
                     b.ToTable("Features", "features");
                 });
 
-            modelBuilder.Entity("OneMoreTaskTracker.Features.Features.Data.FeatureStagePlan", b =>
+            modelBuilder.Entity("OneMoreTaskTracker.Features.Features.Data.FeatureGate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("ApprovedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ApproverUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FeatureId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("GateKey")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<short>("Kind")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime?>("RequestedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint");
+
+                    b.Property<short?>("Track")
+                        .HasColumnType("smallint");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApproverUserId");
+
+                    b.HasIndex("FeatureId", "GateKey")
+                        .IsUnique();
+
+                    b.ToTable("FeatureGates", "features");
+                });
+
+            modelBuilder.Entity("OneMoreTaskTracker.Features.Features.Data.FeatureSubStage", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -90,8 +148,14 @@ namespace OneMoreTaskTracker.Features.Migrations
                     b.Property<int>("FeatureId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("PerformerUserId")
+                    b.Property<short>("Ordinal")
+                        .HasColumnType("smallint");
+
+                    b.Property<int>("OwnerUserId")
                         .HasColumnType("integer");
+
+                    b.Property<short>("PhaseKind")
+                        .HasColumnType("smallint");
 
                     b.Property<DateOnly?>("PlannedEnd")
                         .HasColumnType("date");
@@ -99,8 +163,8 @@ namespace OneMoreTaskTracker.Features.Migrations
                     b.Property<DateOnly?>("PlannedStart")
                         .HasColumnType("date");
 
-                    b.Property<int>("Stage")
-                        .HasColumnType("integer");
+                    b.Property<short>("Track")
+                        .HasColumnType("smallint");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -111,18 +175,29 @@ namespace OneMoreTaskTracker.Features.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PerformerUserId");
+                    b.HasIndex("OwnerUserId");
 
-                    b.HasIndex("FeatureId", "Stage")
+                    b.HasIndex("FeatureId", "Track", "PhaseKind");
+
+                    b.HasIndex("FeatureId", "Track", "PhaseKind", "Ordinal")
                         .IsUnique();
 
-                    b.ToTable("FeatureStagePlans", "features");
+                    b.ToTable("FeatureSubStages", "features");
                 });
 
-            modelBuilder.Entity("OneMoreTaskTracker.Features.Features.Data.FeatureStagePlan", b =>
+            modelBuilder.Entity("OneMoreTaskTracker.Features.Features.Data.FeatureGate", b =>
                 {
                     b.HasOne("OneMoreTaskTracker.Features.Features.Data.Feature", null)
-                        .WithMany("StagePlans")
+                        .WithMany("Gates")
+                        .HasForeignKey("FeatureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("OneMoreTaskTracker.Features.Features.Data.FeatureSubStage", b =>
+                {
+                    b.HasOne("OneMoreTaskTracker.Features.Features.Data.Feature", null)
+                        .WithMany("SubStages")
                         .HasForeignKey("FeatureId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -130,7 +205,9 @@ namespace OneMoreTaskTracker.Features.Migrations
 
             modelBuilder.Entity("OneMoreTaskTracker.Features.Features.Data.Feature", b =>
                 {
-                    b.Navigation("StagePlans");
+                    b.Navigation("Gates");
+
+                    b.Navigation("SubStages");
                 });
 #pragma warning restore 612, 618
         }

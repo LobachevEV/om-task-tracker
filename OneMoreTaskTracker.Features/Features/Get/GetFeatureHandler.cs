@@ -10,17 +10,14 @@ public class GetFeatureHandler(FeaturesDbContext db) : FeatureGetter.FeatureGett
 {
     public override async Task<FeatureDto> Get(GetFeatureRequest request, ServerCallContext context)
     {
-        // Include stage plans (single LEFT JOIN) so every read path returns
-        // exactly 5 rows per feature without a second round-trip. Canonical
-        // ordering by Stage is applied inside the Mapster projection so the
-        // in-memory collection order cannot drift between providers.
         var feature = await db.Features.AsNoTracking()
-            .Include(f => f.StagePlans)
+            .Include(f => f.Gates)
+            .Include(f => f.SubStages)
             .FirstOrDefaultAsync(f => f.Id == request.Id, context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, $"feature {request.Id} not found"));
 
         var dto = feature.Adapt<FeatureDto>();
-        dto.StagePlans.Add(FeatureMappingConfig.BuildProtoStagePlans(feature));
+        dto.Taxonomy = FeatureMappingConfig.BuildProtoTaxonomy(feature);
         return dto;
     }
 }

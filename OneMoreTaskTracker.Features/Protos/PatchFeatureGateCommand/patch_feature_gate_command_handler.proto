@@ -1,0 +1,24 @@
+syntax = "proto3";
+import "feature_taxonomy.proto";
+
+option csharp_namespace = "OneMoreTaskTracker.Proto.Features.PatchFeatureGateCommand";
+package mr_helper.features;
+
+service FeatureGatePatcher {
+  rpc Patch (PatchFeatureGateRequest) returns (FeatureTaxonomyResponse);
+}
+
+message PatchFeatureGateRequest {
+  int32          feature_id        = 1;
+  string         gate_key          = 2;
+  int32          caller_user_id    = 3;
+  optional int32 expected_version  = 4;
+  optional string status           = 5;
+  optional string rejection_reason = 6;
+}
+
+message FeatureTaxonomyResponse {
+  int32              feature_id      = 1;
+  int32              feature_version = 2;
+  FeatureTaxonomyDto taxonomy        = 3;
+}

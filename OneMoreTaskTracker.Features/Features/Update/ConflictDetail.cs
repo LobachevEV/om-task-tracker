@@ -2,9 +2,6 @@ using System.Text.Json;
 
 namespace OneMoreTaskTracker.Features.Features.Update;
 
-// Wire format: "<publicMessage>|conflict={...json...}". The marker must stay in
-// sync with GrpcExceptionMiddleware.ConflictMarker; clients without the
-// extended envelope see only the leading publicMessage.
 internal static class ConflictDetail
 {
     private const string Marker = "|conflict=";
@@ -16,10 +13,20 @@ internal static class ConflictDetail
             currentVersion
         })}";
 
-    public static string StageOrderOverlap(string neighbourStage) =>
-        $"Stage order violation{Marker}{JsonSerializer.Serialize(new
+    public static string SubStageOverlap(int subStageId, string neighbourSubStageId) =>
+        $"Sub-stage order violation{Marker}{JsonSerializer.Serialize(new
         {
-            kind = "overlap",
-            with = neighbourStage
+            kind = "subStageOverlap",
+            subStageId,
+            with = neighbourSubStageId
+        })}";
+
+    public static string SubStageCapReached(string track, string phase, int cap) =>
+        $"Sub-stage cap reached{Marker}{JsonSerializer.Serialize(new
+        {
+            kind = "subStageCap",
+            track,
+            phase,
+            cap
         })}";
 }
