@@ -7,7 +7,7 @@ namespace OneMoreTaskTracker.Features.Features.Update;
 public static class FeatureConcurrencySaver
 {
     public static async Task SaveFeatureAsync(
-        FeaturesDbContext db,
+        this FeaturesDbContext db,
         Feature feature,
         CancellationToken cancellationToken)
     {
@@ -23,7 +23,7 @@ public static class FeatureConcurrencySaver
     }
 
     public static async Task SaveStageAsync(
-        FeaturesDbContext db,
+        this FeaturesDbContext db,
         FeatureStagePlan plan,
         CancellationToken cancellationToken)
     {

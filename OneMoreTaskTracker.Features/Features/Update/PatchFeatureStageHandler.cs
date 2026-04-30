@@ -21,11 +21,11 @@ public sealed class PatchFeatureStageHandler(
 
     public override async Task<FeatureDto> Patch(PatchFeatureStageRequest request, ServerCallContext context)
     {
-        var feature = await FeatureLoader.LoadWithStagePlansAsync(db, request.FeatureId, context.CancellationToken);
+        var feature = await db.LoadFeatureWithStagePlansAsync(request.FeatureId, context.CancellationToken);
         FeatureOwnershipGuard.EnsureManager(feature, request.CallerUserId);
 
         var stageOrdinal = (int)request.Stage;
-        var plan = FeatureLoader.ResolveStage(feature, stageOrdinal, request.Stage.ToString());
+        var plan = feature.ResolveStage(stageOrdinal, request.Stage.ToString());
         FeatureVersionGuard.EnsureStageVersion(plan, request.HasExpectedStageVersion, request.ExpectedStageVersion);
 
         if (request.HasPlannedStart || request.HasPlannedEnd)
@@ -69,7 +69,7 @@ public sealed class PatchFeatureStageHandler(
 
             feature.RecordStageEdit(now);
 
-            await FeatureConcurrencySaver.SaveStageAsync(db, plan, context.CancellationToken);
+            await db.SaveStageAsync(plan, context.CancellationToken);
 
             logger.LogInformation(
                 "Feature stage patch applied: feature_id={FeatureId} stage={Stage} fields_owner={HasOwner} fields_planned_start={HasStart} fields_planned_end={HasEnd} owner={Owner} start={Start} end={End} actor_user_id={ActorUserId} stage_version={StageVersion} feature_version={FeatureVersion}",

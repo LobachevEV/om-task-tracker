@@ -6,8 +6,8 @@ namespace OneMoreTaskTracker.Features.Features.Update;
 
 public static class FeatureLoader
 {
-    public static async Task<Feature> LoadWithStagePlansAsync(
-        FeaturesDbContext db,
+    public static async Task<Feature> LoadFeatureWithStagePlansAsync(
+        this FeaturesDbContext db,
         int featureId,
         CancellationToken cancellationToken)
     {
@@ -17,7 +17,7 @@ public static class FeatureLoader
                ?? throw new RpcException(new Status(StatusCode.NotFound, $"feature {featureId} not found"));
     }
 
-    public static FeatureStagePlan ResolveStage(Feature feature, int stageOrdinal, string stageDisplay)
+    public static FeatureStagePlan ResolveStage(this Feature feature, int stageOrdinal, string stageDisplay)
     {
         return feature.StagePlans.FirstOrDefault(sp => sp.Stage == stageOrdinal)
                ?? throw new RpcException(new Status(StatusCode.NotFound, $"stage {stageDisplay} not found"));

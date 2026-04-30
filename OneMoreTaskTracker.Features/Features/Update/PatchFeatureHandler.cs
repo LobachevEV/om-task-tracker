@@ -12,7 +12,7 @@ public sealed class PatchFeatureHandler(
 {
     public override async Task<FeatureDto> Patch(PatchFeatureRequest request, ServerCallContext context)
     {
-        var feature = await FeatureLoader.LoadWithStagePlansAsync(db, request.Id, context.CancellationToken);
+        var feature = await db.LoadFeatureWithStagePlansAsync(request.Id, context.CancellationToken);
         FeatureOwnershipGuard.EnsureManager(feature, request.CallerUserId);
         FeatureVersionGuard.EnsureFeatureVersion(feature, request.HasExpectedVersion, request.ExpectedVersion);
 
@@ -40,7 +40,7 @@ public sealed class PatchFeatureHandler(
 
         if (anyMutation)
         {
-            await FeatureConcurrencySaver.SaveFeatureAsync(db, feature, context.CancellationToken);
+            await db.SaveFeatureAsync(feature, context.CancellationToken);
 
             logger.LogInformation(
                 "Feature patch applied: feature_id={FeatureId} fields_title={HasTitle} fields_description={HasDescription} fields_lead={HasLead} title_len={TitleLen} description_len={DescLen} lead={Lead} actor_user_id={ActorUserId} version={Version}",
