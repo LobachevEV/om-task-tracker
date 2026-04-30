@@ -21,7 +21,7 @@ public record FeatureSummaryResponse(
     internal static FeatureSummaryResponse From<T>(T f, IReadOnlyDictionary<int, List<int>> tasksByFeature)
         where T : IFeatureSummaryProjection
     {
-        var taskIds = tasksByFeature.TryGetValue(f.Id, out var ids) ? (IReadOnlyList<int>)ids : Array.Empty<int>();
+        IReadOnlyList<int> taskIds = tasksByFeature.TryGetValue(f.Id, out var ids) ? ids : [];
         return new FeatureSummaryResponse(
             f.Id,
             f.Title,
