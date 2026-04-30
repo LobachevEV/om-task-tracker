@@ -1,0 +1,10 @@
+OneMoreTaskTracker.Features/Features/Update/UpdateFeatureTitleHandler.cs
+OneMoreTaskTracker.Features/Features/Update/UpdateFeatureDescriptionHandler.cs
+OneMoreTaskTracker.Features/Features/Update/UpdateFeatureLeadHandler.cs
+OneMoreTaskTracker.Features/Features/Update/UpdateStageOwnerHandler.cs
+OneMoreTaskTracker.Features/Features/Update/UpdateStagePlannedStartHandler.cs
+OneMoreTaskTracker.Features/Features/Update/UpdateStagePlannedEndHandler.cs
+OneMoreTaskTracker.Features/Features/Update/UpdateFeatureHandler.cs
+OneMoreTaskTracker.Features/Features/Update/StageEditContext.cs
+OneMoreTaskTracker.Features/Features/Update/StageEditContextLoader.cs
+OneMoreTaskTracker.Features/Features/Data/FeatureValidation.cs
