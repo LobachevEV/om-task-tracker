@@ -1,2 +1,1 @@
-export { GanttStageSubRow } from './GanttStageSubRow';
-export type { GanttStageSubRowProps } from './GanttStageSubRow';
+export { GANTT_STAGE_SUB_ROW_REMOVED } from './GanttStageSubRow';

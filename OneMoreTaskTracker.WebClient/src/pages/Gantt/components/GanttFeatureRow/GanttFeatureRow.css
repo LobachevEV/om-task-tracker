@@ -138,6 +138,29 @@
   font-style: italic;
 }
 
+.gantt-row__summary {
+  position: absolute;
+  top: 50%;
+  left: var(--summary-left, 0px);
+  width: var(--summary-width, 0px);
+  height: 6px;
+  transform: translateY(-50%);
+  background: var(--accent-soft, color-mix(in oklab, var(--accent) 22%, transparent));
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.gantt-row__empty-label {
+  position: absolute;
+  top: 50%;
+  left: 8px;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 .gantt-row__sr-only {
   position: absolute;
   width: 1px;

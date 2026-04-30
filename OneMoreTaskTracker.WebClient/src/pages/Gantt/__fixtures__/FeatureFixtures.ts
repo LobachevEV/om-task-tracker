@@ -1,66 +1,229 @@
 import type {
   AttachedTask,
   FeatureDetail,
-  FeatureStagePlan,
+  FeatureGate,
+  FeaturePhaseTaxonomy,
+  FeatureSubStage,
   FeatureSummary,
+  FeatureTaxonomy,
+  FeatureTrackTaxonomy,
+  GateKey,
+  GateStatus,
   MiniTeamMember,
+  PhaseKind,
+  Track,
 } from '../../../common/types/feature';
-import { FEATURE_STATES } from '../../../common/types/feature';
+import {
+  GATE_KEYS,
+  MULTI_OWNER_PHASES,
+  PHASE_KINDS,
+  SUB_STAGE_HARD_CAP,
+  TRACKS,
+} from '../../../common/types/feature';
 
 export const FIXTURE_TODAY = '2026-04-21';
 
 const qa: MiniTeamMember = { userId: 10, email: 'qa@example.com', displayName: 'Qa Smith',  role: 'Qa' };
 const fe: MiniTeamMember = { userId: 11, email: 'fe@example.com', displayName: 'Fe Wong',   role: 'FrontendDeveloper' };
 const be: MiniTeamMember = { userId: 12, email: 'be@example.com', displayName: 'Be Ivanov', role: 'BackendDeveloper' };
-const mg: MiniTeamMember = { userId:  1, email: 'pm@example.com', displayName: 'Mel PM',    role: 'Manager' };
+const mg: MiniTeamMember = {  userId: 1, email: 'pm@example.com', displayName: 'Mel PM',    role: 'Manager' };
 
 export const MINI_TEAM_MEMBERS = { qa, fe, be, mg } as const;
 
-/** Produce a 5-row empty stage plan in canonical order. */
-export function emptyStagePlans(): FeatureStagePlan[] {
-  return FEATURE_STATES.map((stage) => ({
-    stage,
-    plannedStart: null,
-    plannedEnd: null,
-    performerUserId: null,
-    stageVersion: 0,
-  }));
+let nextSubStageId = 1000;
+
+function nextId(): number {
+  nextSubStageId += 1;
+  return nextSubStageId;
 }
 
-/**
- * Produce a fully-planned 5-row stage plan with contiguous dates and the
- * given performers. Missing entries fall back to unassigned / null dates.
- */
-export function buildStagePlans(
-  entries: Partial<Record<string, Partial<FeatureStagePlan>>>,
-): FeatureStagePlan[] {
-  return FEATURE_STATES.map<FeatureStagePlan>((stage) => {
-    const override = entries[stage] ?? {};
-    return {
-      stage,
-      plannedStart: override.plannedStart ?? null,
-      plannedEnd: override.plannedEnd ?? null,
-      performerUserId: override.performerUserId ?? null,
-      performer: override.performer ?? null,
-      stageVersion: override.stageVersion ?? 0,
-    };
-  });
+function buildSubStage(input: Partial<FeatureSubStage> & {
+  track: Track;
+  phase: PhaseKind;
+  ordinal: number;
+}): FeatureSubStage {
+  return {
+    id: input.id ?? nextId(),
+    track: input.track,
+    phase: input.phase,
+    ordinal: input.ordinal,
+    ownerUserId: input.ownerUserId ?? null,
+    owner: input.owner ?? null,
+    plannedStart: input.plannedStart ?? null,
+    plannedEnd: input.plannedEnd ?? null,
+    version: input.version ?? 0,
+  };
 }
 
-const soloStagePlans = buildStagePlans({
-  CsApproving:    { plannedStart: '2026-04-15', plannedEnd: '2026-04-17', performerUserId: mg.userId },
-  Development:    { plannedStart: '2026-04-17', plannedEnd: '2026-04-24', performerUserId: fe.userId },
-  Testing:        { plannedStart: '2026-04-24', plannedEnd: '2026-04-26', performerUserId: qa.userId },
-  EthalonTesting: { plannedStart: '2026-04-26', plannedEnd: '2026-04-27', performerUserId: qa.userId },
-  LiveRelease:    { plannedStart: '2026-04-28', plannedEnd: '2026-04-28', performerUserId: mg.userId },
+function phaseCap(phase: PhaseKind): number {
+  return MULTI_OWNER_PHASES.has(phase) ? SUB_STAGE_HARD_CAP : 1;
+}
+
+function buildPhase(
+  track: Track,
+  phase: PhaseKind,
+  subStages: ReadonlyArray<Partial<FeatureSubStage>>,
+): FeaturePhaseTaxonomy {
+  const multiOwner = MULTI_OWNER_PHASES.has(phase);
+  return {
+    phase,
+    multiOwner,
+    cap: phaseCap(phase),
+    subStages: subStages.map((ss, idx) =>
+      buildSubStage({ ...ss, track, phase, ordinal: idx }),
+    ),
+  };
+}
+
+function buildEmptyPhase(track: Track, phase: PhaseKind): FeaturePhaseTaxonomy {
+  return buildPhase(track, phase, [{ ownerUserId: null }]);
+}
+
+function buildTrack(
+  track: Track,
+  phaseSubStages: Partial<Record<PhaseKind, ReadonlyArray<Partial<FeatureSubStage>>>>,
+): FeatureTrackTaxonomy {
+  return {
+    track,
+    phases: PHASE_KINDS.map((phase) =>
+      buildPhase(track, phase, phaseSubStages[phase] ?? [{ ownerUserId: null }]),
+    ),
+  };
+}
+
+function buildGate(
+  gateKey: GateKey,
+  status: GateStatus,
+  approverUserId: number,
+  approver: MiniTeamMember | null = null,
+  approvedAtUtc: string | null = null,
+  rejectionReason: string | null = null,
+): FeatureGate {
+  return {
+    id: nextId(),
+    gateKey,
+    kind: gateKey === 'spec' ? 'spec' : gateKey.startsWith('backend') ? 'cs' : 'sr',
+    track: gateKey === 'spec' ? null : gateKey.startsWith('backend') ? 'backend' : 'frontend',
+    status,
+    approverUserId,
+    approver,
+    approvedAtUtc,
+    requestedAtUtc: null,
+    rejectionReason,
+    version: 0,
+  };
+}
+
+function buildTaxonomy(args: {
+  gates: ReadonlyArray<FeatureGate>;
+  backendPhases: Partial<Record<PhaseKind, ReadonlyArray<Partial<FeatureSubStage>>>>;
+  frontendPhases: Partial<Record<PhaseKind, ReadonlyArray<Partial<FeatureSubStage>>>>;
+}): FeatureTaxonomy {
+  const gateByKey = new Map<GateKey, FeatureGate>(
+    args.gates.map((g) => [g.gateKey, g] as const),
+  );
+  const orderedGates = GATE_KEYS.map((k) => gateByKey.get(k)).filter(
+    (g): g is FeatureGate => g != null,
+  );
+  return {
+    gates: orderedGates.length === GATE_KEYS.length
+      ? orderedGates
+      : GATE_KEYS.map(
+          (k) =>
+            gateByKey.get(k) ??
+            buildGate(k, 'waiting', mg.userId),
+        ),
+    tracks: TRACKS.map((track) =>
+      track === 'backend'
+        ? buildTrack('backend', args.backendPhases)
+        : buildTrack('frontend', args.frontendPhases),
+    ),
+  };
+}
+
+const SOLO_TAXONOMY: FeatureTaxonomy = buildTaxonomy({
+  gates: [
+    buildGate('spec', 'approved', mg.userId, mg, '2026-04-15T10:00:00Z'),
+    buildGate('backend.prep-gate', 'approved', mg.userId, mg, '2026-04-15T11:00:00Z'),
+    buildGate('frontend.prep-gate', 'approved', mg.userId, mg, '2026-04-15T11:00:00Z'),
+  ],
+  backendPhases: {
+    development: [{ ownerUserId: be.userId, plannedStart: '2026-04-17', plannedEnd: '2026-04-22' }],
+    'stand-testing': [{ ownerUserId: qa.userId, plannedStart: '2026-04-22', plannedEnd: '2026-04-24' }],
+    'ethalon-testing': [{ ownerUserId: qa.userId, plannedStart: '2026-04-24', plannedEnd: '2026-04-26' }],
+    'live-release': [{ ownerUserId: mg.userId, plannedStart: '2026-04-28', plannedEnd: '2026-04-28' }],
+  },
+  frontendPhases: {
+    development: [{ ownerUserId: fe.userId, plannedStart: '2026-04-17', plannedEnd: '2026-04-24' }],
+    'stand-testing': [{ ownerUserId: qa.userId, plannedStart: '2026-04-24', plannedEnd: '2026-04-26' }],
+    'ethalon-testing': [{ ownerUserId: qa.userId, plannedStart: '2026-04-26', plannedEnd: '2026-04-27' }],
+    'live-release': [{ ownerUserId: mg.userId, plannedStart: '2026-04-28', plannedEnd: '2026-04-28' }],
+  },
 });
 
-const miniTeamStagePlans = buildStagePlans({
-  CsApproving:    { plannedStart: '2026-04-10', plannedEnd: '2026-04-12', performerUserId: mg.userId },
-  Development:    { plannedStart: '2026-04-12', plannedEnd: '2026-04-25', performerUserId: be.userId },
-  Testing:        { plannedStart: '2026-04-25', plannedEnd: '2026-05-01', performerUserId: qa.userId },
-  EthalonTesting: { plannedStart: '2026-05-01', plannedEnd: '2026-05-04', performerUserId: qa.userId },
-  LiveRelease:    { plannedStart: '2026-05-05', plannedEnd: '2026-05-05', performerUserId: mg.userId },
+const MINI_TEAM_TAXONOMY: FeatureTaxonomy = buildTaxonomy({
+  gates: [
+    buildGate('spec', 'approved', mg.userId, mg, '2026-04-09T10:00:00Z'),
+    buildGate('backend.prep-gate', 'approved', mg.userId, mg, '2026-04-10T11:00:00Z'),
+    buildGate('frontend.prep-gate', 'waiting', mg.userId),
+  ],
+  backendPhases: {
+    development: [
+      { ownerUserId: be.userId, plannedStart: '2026-04-12', plannedEnd: '2026-04-19' },
+      { ownerUserId: fe.userId, plannedStart: '2026-04-19', plannedEnd: '2026-04-25' },
+    ],
+    'stand-testing': [{ ownerUserId: qa.userId, plannedStart: '2026-04-25', plannedEnd: '2026-05-01' }],
+    'ethalon-testing': [{ ownerUserId: qa.userId, plannedStart: '2026-05-01', plannedEnd: '2026-05-04' }],
+    'live-release': [{ ownerUserId: mg.userId, plannedStart: '2026-05-05', plannedEnd: '2026-05-05' }],
+  },
+  frontendPhases: {
+    development: [{ ownerUserId: fe.userId, plannedStart: '2026-04-12', plannedEnd: '2026-04-25' }],
+    'stand-testing': [{ ownerUserId: qa.userId, plannedStart: '2026-04-25', plannedEnd: '2026-05-01' }],
+    'ethalon-testing': [{ ownerUserId: qa.userId, plannedStart: '2026-05-01', plannedEnd: '2026-05-04' }],
+    'live-release': [{ ownerUserId: mg.userId, plannedStart: '2026-05-05', plannedEnd: '2026-05-05' }],
+  },
+});
+
+const EMPTY_TAXONOMY: FeatureTaxonomy = {
+  gates: GATE_KEYS.map((k) => buildGate(k, 'waiting', mg.userId)),
+  tracks: TRACKS.map<FeatureTrackTaxonomy>((track) => ({
+    track,
+    phases: PHASE_KINDS.map((p) => buildEmptyPhase(track, p)),
+  })),
+};
+
+const OVERDUE_TAXONOMY: FeatureTaxonomy = buildTaxonomy({
+  gates: [
+    buildGate('spec', 'approved', mg.userId, mg, '2026-02-28T10:00:00Z'),
+    buildGate('backend.prep-gate', 'rejected', mg.userId, null, null, 'Scope unclear'),
+    buildGate('frontend.prep-gate', 'rejected', mg.userId, null, null, 'Scope unclear'),
+  ],
+  backendPhases: {
+    development: [{ ownerUserId: be.userId, plannedStart: '2026-03-05', plannedEnd: '2026-04-10' }],
+  },
+  frontendPhases: {
+    development: [{ ownerUserId: fe.userId, plannedStart: '2026-03-05', plannedEnd: '2026-04-10' }],
+  },
+});
+
+const SHIPPED_TAXONOMY: FeatureTaxonomy = buildTaxonomy({
+  gates: [
+    buildGate('spec', 'approved', mg.userId, mg, '2026-04-01T10:00:00Z'),
+    buildGate('backend.prep-gate', 'approved', mg.userId, mg, '2026-04-02T11:00:00Z'),
+    buildGate('frontend.prep-gate', 'approved', mg.userId, mg, '2026-04-02T11:00:00Z'),
+  ],
+  backendPhases: {
+    development: [{ ownerUserId: be.userId, plannedStart: '2026-04-04', plannedEnd: '2026-04-12' }],
+    'stand-testing': [{ ownerUserId: qa.userId, plannedStart: '2026-04-12', plannedEnd: '2026-04-15' }],
+    'ethalon-testing': [{ ownerUserId: qa.userId, plannedStart: '2026-04-15', plannedEnd: '2026-04-17' }],
+    'live-release': [{ ownerUserId: mg.userId, plannedStart: '2026-04-18', plannedEnd: '2026-04-18' }],
+  },
+  frontendPhases: {
+    development: [{ ownerUserId: fe.userId, plannedStart: '2026-04-04', plannedEnd: '2026-04-12' }],
+    'stand-testing': [{ ownerUserId: qa.userId, plannedStart: '2026-04-12', plannedEnd: '2026-04-15' }],
+    'ethalon-testing': [{ ownerUserId: qa.userId, plannedStart: '2026-04-15', plannedEnd: '2026-04-17' }],
+    'live-release': [{ ownerUserId: mg.userId, plannedStart: '2026-04-18', plannedEnd: '2026-04-18' }],
+  },
 });
 
 export const SOLO_FEATURE: FeatureSummary = {
@@ -74,7 +237,7 @@ export const SOLO_FEATURE: FeatureSummary = {
   managerUserId: mg.userId,
   taskCount: 2,
   taskIds: [501, 502],
-  stagePlans: soloStagePlans,
+  taxonomy: SOLO_TAXONOMY,
   version: 0,
 };
 
@@ -89,7 +252,7 @@ export const MINI_TEAM_FEATURE: FeatureSummary = {
   managerUserId: mg.userId,
   taskCount: 5,
   taskIds: [503, 504, 505, 506, 507],
-  stagePlans: miniTeamStagePlans,
+  taxonomy: MINI_TEAM_TAXONOMY,
   version: 0,
 };
 
@@ -104,7 +267,7 @@ export const UNSCHEDULED_FEATURE: FeatureSummary = {
   managerUserId: mg.userId,
   taskCount: 0,
   taskIds: [],
-  stagePlans: emptyStagePlans(),
+  taxonomy: EMPTY_TAXONOMY,
   version: 0,
 };
 
@@ -119,10 +282,7 @@ export const OVERDUE_FEATURE: FeatureSummary = {
   managerUserId: mg.userId,
   taskCount: 3,
   taskIds: [508, 509, 510],
-  stagePlans: buildStagePlans({
-    CsApproving: { plannedStart: '2026-03-01', plannedEnd: '2026-03-05', performerUserId: mg.userId },
-    Development: { plannedStart: '2026-03-05', plannedEnd: '2026-04-10', performerUserId: be.userId },
-  }),
+  taxonomy: OVERDUE_TAXONOMY,
   version: 0,
 };
 
@@ -137,13 +297,7 @@ export const SHIPPED_FEATURE: FeatureSummary = {
   managerUserId: mg.userId,
   taskCount: 4,
   taskIds: [511, 512, 513, 514],
-  stagePlans: buildStagePlans({
-    CsApproving:    { plannedStart: '2026-04-02', plannedEnd: '2026-04-04', performerUserId: mg.userId },
-    Development:    { plannedStart: '2026-04-04', plannedEnd: '2026-04-12', performerUserId: fe.userId },
-    Testing:        { plannedStart: '2026-04-12', plannedEnd: '2026-04-15', performerUserId: qa.userId },
-    EthalonTesting: { plannedStart: '2026-04-15', plannedEnd: '2026-04-17', performerUserId: qa.userId },
-    LiveRelease:    { plannedStart: '2026-04-18', plannedEnd: '2026-04-18', performerUserId: mg.userId },
-  }),
+  taxonomy: SHIPPED_TAXONOMY,
   version: 0,
 };
 
@@ -163,23 +317,11 @@ const tasksForMiniTeam: AttachedTask[] = [
   { id: 507, jiraId: 'REAL-105', state: 'NotStarted', userId: fe.userId },
 ];
 
-// Resolved stage plans (with performer mini-members) for detail view.
-const miniTeamDetailStagePlans: FeatureStagePlan[] = miniTeamStagePlans.map((plan) => ({
-  ...plan,
-  performer:
-    plan.performerUserId === mg.userId ? mg :
-    plan.performerUserId === be.userId ? be :
-    plan.performerUserId === fe.userId ? fe :
-    plan.performerUserId === qa.userId ? qa :
-    null,
-}));
-
 export const MINI_TEAM_FEATURE_DETAIL: FeatureDetail = {
-  feature: { ...MINI_TEAM_FEATURE, stagePlans: miniTeamDetailStagePlans },
+  feature: MINI_TEAM_FEATURE,
   tasks: tasksForMiniTeam,
   lead: be,
   miniTeam: [be, fe, qa, mg],
-  stagePlans: miniTeamDetailStagePlans,
 };
 
 export const EMPTY_FEATURE_DETAIL: FeatureDetail = {
@@ -187,7 +329,6 @@ export const EMPTY_FEATURE_DETAIL: FeatureDetail = {
   tasks: [],
   lead: fe,
   miniTeam: [fe],
-  stagePlans: UNSCHEDULED_FEATURE.stagePlans.map((p) => ({ ...p, performer: null })),
 };
 
 export const SHIPPED_FEATURE_DETAIL: FeatureDetail = {
@@ -195,37 +336,11 @@ export const SHIPPED_FEATURE_DETAIL: FeatureDetail = {
   tasks: [],
   lead: fe,
   miniTeam: [fe, mg, qa],
-  stagePlans: SHIPPED_FEATURE.stagePlans.map<FeatureStagePlan>((plan) => ({
-    ...plan,
-    performer:
-      plan.performerUserId === mg.userId ? mg :
-      plan.performerUserId === fe.userId ? fe :
-      plan.performerUserId === qa.userId ? qa :
-      null,
-  })),
 };
 
-/** Stale performer: userId referenced by the plan is NOT on the mini-team. */
-const stalePerformerPlans = buildStagePlans({
-  CsApproving:    { plannedStart: '2026-04-10', plannedEnd: '2026-04-12', performerUserId: mg.userId },
-  Development:    { plannedStart: '2026-04-12', plannedEnd: '2026-04-25', performerUserId: 9999 },
-  Testing:        { plannedStart: '2026-04-25', plannedEnd: '2026-05-01', performerUserId: qa.userId },
-  EthalonTesting: { plannedStart: '2026-05-01', plannedEnd: '2026-05-04', performerUserId: qa.userId },
-  LiveRelease:    { plannedStart: '2026-05-05', plannedEnd: '2026-05-05', performerUserId: mg.userId },
-});
-
 export const STALE_PERFORMER_DETAIL: FeatureDetail = {
-  feature: { ...MINI_TEAM_FEATURE, stagePlans: stalePerformerPlans },
+  feature: MINI_TEAM_FEATURE,
   tasks: [],
   lead: be,
   miniTeam: [be, qa, mg],
-  stagePlans: stalePerformerPlans.map<FeatureStagePlan>((plan) => ({
-    ...plan,
-    // Unknown ids come back with performer=null; the FE covers the "stale" copy.
-    performer:
-      plan.performerUserId === mg.userId ? mg :
-      plan.performerUserId === qa.userId ? qa :
-      plan.performerUserId === be.userId ? be :
-      null,
-  })),
 };

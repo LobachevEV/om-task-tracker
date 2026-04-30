@@ -137,6 +137,41 @@
     "EthalonTesting": "Ethalon testing",
     "LiveRelease": "Live release"
   },
+  "tracks": {
+    "backend": "Backend",
+    "frontend": "Frontend"
+  },
+  "gates": {
+    "spec": "Spec",
+    "backend.prep-gate": "BE prep",
+    "frontend.prep-gate": "FE prep",
+    "aria": "{{name}} gate, {{status}}"
+  },
+  "gateStatus": {
+    "waiting": "Waiting",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "phases": {
+    "development": "Development",
+    "stand-testing": "Stand testing",
+    "ethalon-testing": "Ethalon testing",
+    "live-release": "Live release"
+  },
+  "phaseSegment": {
+    "aria": "{{track}} {{phase}} — {{count}} sub-stage(s)."
+  },
+  "subStage": {
+    "indexOf": "{{index}} of {{total}}",
+    "label": "{{track}} · {{phase}}"
+  },
+  "actions": {
+    "addSubStage": "+ Add sub-stage",
+    "removeSubStage": "Remove"
+  },
+  "validation": {
+    "subStageCap": "Phase is at the {{cap}} sub-stage cap."
+  },
   "inlineEdit": {
     "titleAria": "Feature title: {{title}}",
     "leadAria": "Lead for \"{{title}}\"",
@@ -169,8 +204,17 @@
       "startSaved": "{{stage}} planned start saved.",
       "startError": "{{stage}} planned start change was rejected.",
       "endSaved": "{{stage}} planned end saved.",
-      "endError": "{{stage}} planned end change was rejected."
-    }
+      "endError": "{{stage}} planned end change was rejected.",
+      "subStageOwnerSaved": "{{phase}} sub-stage owner saved.",
+      "subStageOwnerError": "{{phase}} sub-stage owner change was rejected.",
+      "subStageStartSaved": "{{phase}} sub-stage start saved.",
+      "subStageStartError": "{{phase}} sub-stage start change was rejected.",
+      "subStageEndSaved": "{{phase}} sub-stage end saved.",
+      "subStageEndError": "{{phase}} sub-stage end change was rejected."
+    },
+    "subStageOwnerAria": "Owner for {{phase}} sub-stage of \"{{title}}\"",
+    "subStagePlannedStartAria": "Planned start for {{phase}} sub-stage of \"{{title}}\"",
+    "subStagePlannedEndAria": "Planned end for {{phase}} sub-stage of \"{{title}}\""
   },
   "stagePlan": {
     "title": "Stage plan",

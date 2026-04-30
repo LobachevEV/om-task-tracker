@@ -1,2 +1,1 @@
-export { GanttSegmentedBar } from './GanttSegmentedBar';
-export type { GanttSegmentedBarProps } from './GanttSegmentedBar';
+export { GANTT_SEGMENTED_BAR_REMOVED } from './GanttSegmentedBar';

@@ -10,13 +10,33 @@ import { makeResponse } from '../../testUtils';
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
-const emptyStagePlans = [
-  { stage: 'CsApproving' as const,    plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
-  { stage: 'Development' as const,    plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
-  { stage: 'Testing' as const,        plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
-  { stage: 'EthalonTesting' as const, plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
-  { stage: 'LiveRelease' as const,    plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
-];
+const emptyTaxonomy = {
+  gates: [
+    { id: 1, gateKey: 'spec' as const,                kind: 'spec' as const, track: null,                  status: 'approved' as const, requestedAtUtc: null, approverUserId: null, approvedAtUtc: null, rejectionReason: null, version: 0 },
+    { id: 2, gateKey: 'backend.prep-gate' as const,   kind: 'sr' as const,   track: 'backend' as const,    status: 'approved' as const, requestedAtUtc: null, approverUserId: null, approvedAtUtc: null, rejectionReason: null, version: 0 },
+    { id: 3, gateKey: 'frontend.prep-gate' as const,  kind: 'sr' as const,   track: 'frontend' as const,   status: 'approved' as const, requestedAtUtc: null, approverUserId: null, approvedAtUtc: null, rejectionReason: null, version: 0 },
+  ],
+  tracks: [
+    {
+      track: 'backend' as const,
+      phases: [
+        { phase: 'development' as const,     multiOwner: true,  cap: 6, subStages: [] },
+        { phase: 'stand-testing' as const,   multiOwner: true,  cap: 6, subStages: [] },
+        { phase: 'ethalon-testing' as const, multiOwner: false, cap: 1, subStages: [] },
+        { phase: 'live-release' as const,    multiOwner: false, cap: 1, subStages: [] },
+      ],
+    },
+    {
+      track: 'frontend' as const,
+      phases: [
+        { phase: 'development' as const,     multiOwner: true,  cap: 6, subStages: [] },
+        { phase: 'stand-testing' as const,   multiOwner: true,  cap: 6, subStages: [] },
+        { phase: 'ethalon-testing' as const, multiOwner: false, cap: 1, subStages: [] },
+        { phase: 'live-release' as const,    multiOwner: false, cap: 1, subStages: [] },
+      ],
+    },
+  ],
+};
 
 const sampleSummary = {
   id: 7,
@@ -29,7 +49,7 @@ const sampleSummary = {
   managerUserId: 1,
   taskCount: 0,
   taskIds: [] as number[],
-  stagePlans: emptyStagePlans,
+  taxonomy: emptyTaxonomy,
   version: 3,
 };
 

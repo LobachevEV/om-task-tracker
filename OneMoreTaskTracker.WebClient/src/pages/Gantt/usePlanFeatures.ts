@@ -45,6 +45,12 @@ export interface UsePlanFeaturesResult {
    * rows.
    */
   applyFeatureUpdate: (next: FeatureSummary) => void;
+  /**
+   * Read-through helper used by mutation callbacks that receive a
+   * taxonomy-only response and need the full FeatureSummary to merge
+   * before invoking applyFeatureUpdate.
+   */
+  getFeatureById: (id: number) => FeatureSummary | undefined;
 }
 
 function cacheKey(params: { scope?: FeatureScope; state?: FeatureState }): string {
@@ -205,5 +211,22 @@ export function usePlanFeatures(params: UsePlanFeaturesParams): UsePlanFeaturesR
     [key],
   );
 
-  return { data, loading, error, refetch, loadChunk, applyFeatureUpdate };
+  const getFeatureById = useCallback(
+    (id: number): FeatureSummary | undefined => {
+      const cached = featuresCache.get(key);
+      if (cached?.has(id)) return cached.get(id);
+      return data?.find((row) => row.id === id);
+    },
+    [key, data],
+  );
+
+  return {
+    data,
+    loading,
+    error,
+    refetch,
+    loadChunk,
+    applyFeatureUpdate,
+    getFeatureById,
+  };
 }

@@ -3,6 +3,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { __resetPlanFeaturesCache, usePlanFeatures } from '../../../src/pages/Gantt/usePlanFeatures';
 import type { FeatureSummary } from '../../../src/common/types/feature';
 import type { ListFeaturesParams } from '../../../src/common/api/planApi';
+import { UNSCHEDULED_FEATURE } from '../../../src/pages/Gantt/__fixtures__/FeatureFixtures';
 
 type Fetcher = (params: ListFeaturesParams) => Promise<FeatureSummary[]>;
 
@@ -18,18 +19,8 @@ function makeFeature(id: number, plannedStart: string, plannedEnd: string): Feat
     managerUserId: 1,
     taskCount: 0,
     taskIds: [],
-    stagePlans: [
-      {
-        stage: 'CsApproving',
-        plannedStart: null,
-        plannedEnd: null,
-        performerUserId: null,
-      },
-      { stage: 'Development', plannedStart, plannedEnd, performerUserId: null },
-      { stage: 'Testing', plannedStart: null, plannedEnd: null, performerUserId: null },
-      { stage: 'EthalonTesting', plannedStart: null, plannedEnd: null, performerUserId: null },
-      { stage: 'LiveRelease', plannedStart: null, plannedEnd: null, performerUserId: null },
-    ],
+    taxonomy: UNSCHEDULED_FEATURE.taxonomy,
+    version: 0,
   };
 }
 

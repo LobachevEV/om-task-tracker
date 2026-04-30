@@ -1,0 +1,25 @@
+.add-substage-button {
+  background: transparent;
+  border: 1px dashed var(--border);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  padding: 4px var(--space-2);
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: var(--space-6);
+}
+
+.add-substage-button:hover:not([disabled]) {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.add-substage-button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.add-substage-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

@@ -12,6 +12,8 @@ import { isUserRole, type UserRole } from '../../common/auth/roles';
 import type {
   FeatureSummary,
   MiniTeamMember,
+  PhaseKind,
+  Track,
 } from '../../common/types/feature';
 import type { TeamRosterMember } from '../../common/api/teamApi';
 import { AddFeatureRow } from './components/AddFeatureRow';
@@ -51,6 +53,8 @@ const CHUNK_DAYS = 14;
  * share the same coordinate space; must match `--gantt-gutter-width` in CSS.
  */
 const GUTTER_WIDTH_PX = 280;
+
+const EMPTY_PHASE_EXPANSION: ReadonlyMap<Track, ReadonlySet<PhaseKind>> = new Map();
 
 function toMiniMember(row: TeamRosterMember): MiniTeamMember {
   return {
@@ -93,6 +97,8 @@ export interface GanttPageInternalProps {
    * Supplied by `usePlanFeatures.applyFeatureUpdate`.
    */
   onFeatureUpdated: (next: FeatureSummary) => void;
+  /** Read-through used by mutation callbacks that receive taxonomy-only responses. */
+  resolveFeature: (id: number) => FeatureSummary | undefined;
   /** Chunk-fetch callback wired into the scrollable timeline. */
   loadChunk: (req: ScrollChunkRequest) => Promise<unknown>;
 }
@@ -139,6 +145,7 @@ export function GanttPageInternal({
   onRetry,
   state,
   onFeatureUpdated,
+  resolveFeature,
   loadChunk,
 }: GanttPageInternalProps) {
   const { t } = useTranslation('gantt');
@@ -146,7 +153,10 @@ export function GanttPageInternal({
 
   const dayPx = DAY_PX_BY_ZOOM[state.zoom];
   const isManager = role === 'Manager';
-  const mutations = useFeatureMutationCallbacks({ onApplied: onFeatureUpdated });
+  const mutations = useFeatureMutationCallbacks({
+    onApplied: onFeatureUpdated,
+    resolveFeature,
+  });
 
   const trailingStripeWidthPx = CHUNK_DAYS * dayPx;
 
@@ -193,11 +203,6 @@ export function GanttPageInternal({
     (id: number | null | undefined): MiniTeamMember | undefined =>
       id == null ? undefined : rosterById.get(id),
     [rosterById],
-  );
-
-  const handleOpenStage = useCallback(
-    (featureId: number) => state.toggleFeatureExpanded(featureId),
-    [state],
   );
 
   const handleCreated = useCallback(
@@ -354,18 +359,20 @@ export function GanttPageInternal({
                 {layout.lanes.map((lane: GanttLane) => {
                   const lead = resolveMember(lane.feature.leadUserId);
                   const expanded = state.expandedFeatureIds.has(lane.feature.id);
+                  const phaseExpansion =
+                    state.expandedPhases.get(lane.feature.id) ?? EMPTY_PHASE_EXPANSION;
                   return (
                     <GanttFeatureRow
                       key={lane.feature.id}
                       feature={lane.feature}
-                      stageBars={lane.stageBars}
-                      bar={lane.bar}
+                      geometry={lane.geometry}
                       today={state.today}
                       lead={lead}
                       variant={lane.variant}
                       expanded={expanded}
+                      expandedPhases={phaseExpansion}
                       onToggleExpand={state.toggleFeatureExpanded}
-                      onOpenStage={handleOpenStage}
+                      onTogglePhase={state.togglePhaseExpanded}
                       resolvePerformer={resolvePerformer}
                       canEdit={isManager}
                       mutations={isManager ? mutations : undefined}
@@ -450,6 +457,7 @@ export function GanttPage() {
       onRetry={features.refetch}
       state={state}
       onFeatureUpdated={features.applyFeatureUpdate}
+      resolveFeature={features.getFeatureById}
       loadChunk={loadChunk}
     />
   );

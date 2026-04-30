@@ -1,0 +1,37 @@
+.gantt-track-row {
+  display: flex;
+  flex-direction: column;
+  opacity: var(--track-dim-opacity, 1);
+}
+
+.gantt-track-row__header {
+  display: grid;
+  grid-template-columns: var(--gantt-gutter-width, 280px) 1fr;
+  align-items: center;
+  height: 36px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.gantt-track-row__gutter {
+  padding-left: var(--space-4);
+  padding-right: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.gantt-track-row__label {
+  font-weight: 600;
+}
+
+.gantt-track-row__lane {
+  position: relative;
+  height: 100%;
+}
+
+.gantt-track-row__cascade {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-soft, transparent);
+}
