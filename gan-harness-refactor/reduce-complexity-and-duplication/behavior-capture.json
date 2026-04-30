@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "track": "backend",
+  "surfaces": [
+    {
+      "id": "openapi_json",
+      "kind": "json",
+      "command": "cat OneMoreTaskTracker.Api/openapi.json",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "features_proto_surface",
+      "kind": "text",
+      "command": "find OneMoreTaskTracker.Features/Protos -type f -name '*.proto' | sort | xargs -I {} sh -c 'echo \"# FILE: {}\"; cat \"{}\"'",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "ef_migrations_history",
+      "kind": "text",
+      "command": "ls -1 OneMoreTaskTracker.Features/Migrations/ | grep -Ev 'Designer|Snapshot' | sort",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "ef_schema_columns",
+      "kind": "text",
+      "command": "grep -hn 'table\\.Column' OneMoreTaskTracker.Features/Migrations/*.cs | sort",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "feature_entity_shape",
+      "kind": "text",
+      "command": "for f in OneMoreTaskTracker.Features/Features/Data/Feature.cs OneMoreTaskTracker.Features/Features/Data/FeatureStagePlan.cs OneMoreTaskTracker.Features/Features/Data/FeatureState.cs; do echo \"# FILE: $f\"; grep -nE '^(\\s*)(public|internal|private|protected)?\\s*(partial\\s+)?(class|record|enum|interface)\\s|public\\s+[^()]+\\s+[A-Za-z_][A-Za-z0-9_]*\\s*\\{\\s*(get|set|init|private)' \"$f\" | sed -E 's/(\\})[[:space:]]*=[[:space:]]*[^;]+;/\\1/' || true; done",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "api_endpoint_matrix",
+      "kind": "text",
+      "command": "grep -rEn '^\\s*\\[(HttpGet|HttpPost|HttpPut|HttpPatch|HttpDelete|Route|Authorize|AllowAnonymous|ApiController)' OneMoreTaskTracker.Api/Controllers --include='*.cs' | sort",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "grpc_status_code_emit_sites",
+      "kind": "text",
+      "command": "grep -rEn 'new RpcException\\(new Status\\(StatusCode\\.[A-Za-z]+' OneMoreTaskTracker.Features/Features --include='*.cs' | sed -E 's/^([^:]+):([0-9]+):.*StatusCode\\.([A-Za-z]+).*/\\1 :: \\3/' | sort | uniq -c | sort -k2",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "feature_inline_edit_log_format",
+      "kind": "text",
+      "command": "grep -hEn 'Feature inline edit applied' OneMoreTaskTracker.Features/Features/Update/*.cs | sed -E 's/[[:space:]]+/ /g' | sort",
+      "tolerance": { "kind": "exact" }
+    },
+    {
+      "id": "test_corpus_assertion_count",
+      "kind": "text",
+      "command": "grep -rEn '\\b(Should|Be|Equal|Contain|Throw|NotBeNull|BeNull|HaveCount|BeEquivalentTo|Match)\\(' tests --include='*.cs' | wc -l | tr -d ' '",
+      "tolerance": { "kind": "exact" }
+    }
+  ]
+}

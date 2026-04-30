@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OneMoreTaskTracker.Api.Auth;
-using OneMoreTaskTracker.Api.Controllers.Plan;
 using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
 using OneMoreTaskTracker.Proto.Features;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
@@ -42,24 +41,19 @@ public class FeaturesController(
             new ListFeaturesRequest
             {
                 ManagerUserId = userId,
+                CallerUserId = userId,
                 WindowStart = windowStart ?? string.Empty,
                 WindowEnd = windowEnd ?? string.Empty,
+                State = state ?? string.Empty,
+                Scope = scope ?? string.Empty,
             },
             cancellationToken: ct);
-
-        var features = listResponse.Features.AsEnumerable();
-
-        if (!string.IsNullOrEmpty(state))
-            features = features.Where(f => PlanMapper.MapState(f.State, logger).Equals(state, StringComparison.OrdinalIgnoreCase));
-
-        if (string.Equals(scope, "mine", StringComparison.OrdinalIgnoreCase))
-            features = features.Where(f => f.LeadUserId == userId || f.ManagerUserId == userId);
 
         // tasksByFeature stays empty: TaskDto has no feature_id, so per-feature
         // task counts can't be computed from ListTasks. Calling Tasks/Users
         // here would only add an unused dependency.
-        var summaries = features
-            .Select(f => PlanMapper.MapSummary(f, PlanRequestHelpers.EmptyTasks, logger))
+        var summaries = listResponse.Features
+            .Select(f => FeatureSummaryResponse.From(f, PlanRequestHelpers.EmptyTasks))
             .ToList();
 
         return Ok(summaries);
@@ -76,7 +70,7 @@ public class FeaturesController(
 
         var roster = await userService.LoadRosterForManagerAsync(feature.ManagerUserId, logger, ct);
 
-        var lead = PlanMapper.BuildMiniTeamMember(feature.LeadUserId, roster);
+        var lead = MiniTeamMemberResponse.From(feature.LeadUserId, roster);
         var detailStagePlans = feature.StagePlans
             .Select(sp => BuildDetailStagePlan(sp, roster, feature.Id, feature.ManagerUserId))
             .ToList();
@@ -87,10 +81,10 @@ public class FeaturesController(
             if (sp.PerformerUserId > 0) miniTeamIds.Add(sp.PerformerUserId);
 
         var miniTeam = miniTeamIds
-            .Select(uid => PlanMapper.BuildMiniTeamMember(uid, roster))
+            .Select(uid => MiniTeamMemberResponse.From(uid, roster))
             .ToList();
 
-        var summary = PlanMapper.MapSummary(feature, PlanRequestHelpers.EmptyTasks, logger);
+        var summary = FeatureSummaryResponse.From(feature, PlanRequestHelpers.EmptyTasks);
 
         return Ok(new FeatureDetailResponse(summary, [], lead, miniTeam, detailStagePlans));
     }
@@ -107,7 +101,7 @@ public class FeaturesController(
         var request = CreateFeatureRequestFactory.From(body, User.GetUserId());
 
         var created = await featureCreator.CreateAsync(request, cancellationToken: ct);
-        return Ok(PlanMapper.MapSummary(created, PlanRequestHelpers.EmptyTasks, logger));
+        return Ok(FeatureSummaryResponse.From(created, PlanRequestHelpers.EmptyTasks));
     }
 
     [HttpPatch("{id:int}")]
@@ -155,7 +149,7 @@ public class FeaturesController(
             request.ExpectedVersion = expectedVersion.Value;
 
         var dto = await featurePatcher.PatchAsync(request, cancellationToken: ct);
-        return Ok(PlanMapper.MapSummary(dto, PlanRequestHelpers.EmptyTasks, logger));
+        return Ok(FeatureSummaryResponse.From(dto, PlanRequestHelpers.EmptyTasks));
     }
 
     private StagePlanDetailResponse BuildDetailStagePlan(
@@ -168,7 +162,7 @@ public class FeaturesController(
         var performer = ResolvePerformer(performerUserId, roster, featureId, managerUserId, sp.Stage);
 
         return new StagePlanDetailResponse(
-            PlanMapper.MapState(sp.Stage, logger),
+            sp.Stage.ToWireString(),
             string.IsNullOrEmpty(sp.PlannedStart) ? null : sp.PlannedStart,
             string.IsNullOrEmpty(sp.PlannedEnd) ? null : sp.PlannedEnd,
             performerUserId,
@@ -190,7 +184,7 @@ public class FeaturesController(
             return new MiniTeamMemberResponse(
                 member.UserId,
                 member.Email,
-                PlanMapper.ExtractDisplayName(member.Email),
+                DisplayNameHelper.ExtractDisplayName(member.Email),
                 member.Role);
 
         // Stale id: emit performer:null (not a placeholder); id stays on the wire.

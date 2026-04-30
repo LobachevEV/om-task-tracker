@@ -1,6 +1,5 @@
 using Grpc.Core;
 using Mapster;
-using Microsoft.EntityFrameworkCore;
 using OneMoreTaskTracker.Features.Features.Data;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureCommand;
 
@@ -13,32 +12,23 @@ public sealed class PatchFeatureHandler(
 {
     public override async Task<FeatureDto> Patch(PatchFeatureRequest request, ServerCallContext context)
     {
-        var feature = await db.Features
-                          .Include(f => f.StagePlans)
-                          .FirstOrDefaultAsync(f => f.Id == request.Id, context.CancellationToken)
-                      ?? throw new RpcException(new Status(StatusCode.NotFound, $"feature {request.Id} not found"));
-
-        if (request.CallerUserId <= 0 || feature.ManagerUserId != request.CallerUserId)
-            throw new RpcException(new Status(StatusCode.PermissionDenied, "Not the feature owner"));
-
-        if (request.HasExpectedVersion && request.ExpectedVersion != feature.Version)
-            throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));
+        var feature = await db.LoadFeatureWithStagePlansAsync(request.Id, context.CancellationToken);
+        FeatureOwnershipGuard.EnsureManager(feature, request.CallerUserId);
+        FeatureVersionGuard.EnsureFeatureVersion(feature, request.HasExpectedVersion, request.ExpectedVersion);
 
         var now = clock.GetUtcNow();
         var anyMutation = false;
 
         if (request.HasTitle)
         {
-            var trimmedTitle = (request.Title ?? string.Empty).Trim();
-            feature.RenameTitle(trimmedTitle, now);
+            feature.RenameTitle((request.Title ?? string.Empty).Trim(), now);
             anyMutation = true;
         }
 
         if (request.HasDescription)
         {
             var trimmed = (request.Description ?? string.Empty).TrimEnd();
-            var normalizedDescription = string.IsNullOrWhiteSpace(trimmed) ? null : trimmed;
-            feature.SetDescription(normalizedDescription, now);
+            feature.SetDescription(string.IsNullOrWhiteSpace(trimmed) ? null : trimmed, now);
             anyMutation = true;
         }
 
@@ -50,15 +40,7 @@ public sealed class PatchFeatureHandler(
 
         if (anyMutation)
         {
-            try
-            {
-                await db.SaveChangesAsync(context.CancellationToken);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                await db.Entry(feature).ReloadAsync(context.CancellationToken);
-                throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));
-            }
+            await db.SaveFeatureAsync(feature, context.CancellationToken);
 
             logger.LogInformation(
                 "Feature patch applied: feature_id={FeatureId} fields_title={HasTitle} fields_description={HasDescription} fields_lead={HasLead} title_len={TitleLen} description_len={DescLen} lead={Lead} actor_user_id={ActorUserId} version={Version}",

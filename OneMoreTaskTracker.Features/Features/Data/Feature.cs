@@ -6,9 +6,6 @@ public class Feature
     public required string Title { get; set; }
     public string? Description { get; set; }
     public int State { get; set; } = (int)FeatureState.CsApproving;
-
-    // Derived server-side (see StagePlanUpserter.RecomputeFeatureDates) from the
-    // min/max of non-null stage dates. Not independently editable via REST.
     public DateOnly? PlannedStart { get; set; }
     public DateOnly? PlannedEnd { get; set; }
 
@@ -17,17 +14,12 @@ public class Feature
 
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; private set; }
-
-    // Cascade-delete configured in FeaturesDbContext.OnModelCreating. Always
-    // exactly 5 rows per feature (materialized on create + guaranteed by the
-    // composite unique index on (FeatureId, Stage)).
     public List<FeatureStagePlan> StagePlans { get; init; } = [];
 
-    // Optimistic-concurrency token bumped by every feature-scoped and
-    // stage-scoped PATCH so clients can detect "updated by someone else" and
-    // reconcile. EF Core's IsConcurrencyToken mapping lives in
-    // FeaturesDbContext.OnModelCreating.
     public int Version { get; private set; }
+
+    public FeatureStagePlan? ResolveStage(int stageOrdinal) =>
+        StagePlans.FirstOrDefault(sp => sp.Stage == stageOrdinal);
 
     public void RenameTitle(string newTitle, DateTime now)
     {

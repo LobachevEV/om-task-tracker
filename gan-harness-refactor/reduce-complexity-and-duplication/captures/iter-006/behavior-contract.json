@@ -1,0 +1,1373 @@
+{
+  "version": 1,
+  "captured_at": "2026-04-29T19:39:41.753Z",
+  "label": "iter-006",
+  "track": "backend",
+  "surfaces": [
+    {
+      "id": "openapi_json",
+      "kind": "json",
+      "command": "cat OneMoreTaskTracker.Api/openapi.json",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": {
+        "openapi": "3.0.3",
+        "info": {
+          "title": "OneMoreTaskTracker Plan API",
+          "version": "v1",
+          "description": "REST surface emitted by OneMoreTaskTracker.Api for the feature planning (Gantt) experience. Backed by gRPC into OneMoreTaskTracker.Features / .Tasks / .Users. All dates are ISO yyyy-MM-dd strings or null. Hand-rolled for iteration 1 of the feature-stage-planning feature (api-contract.md v1); Swashbuckle is a follow-up."
+        },
+        "servers": [
+          {
+            "url": "http://localhost:5000",
+            "description": "Local dev"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "paths": {
+          "/api/auth/health": {
+            "get": {
+              "summary": "Liveness probe — returns {status:'ok'}.",
+              "description": "Anonymous, no upstream calls. Used by deployment + GAN harness (BE_HEALTH_URL).",
+              "tags": [
+                "auth"
+              ],
+              "security": [],
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "ok"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "/api/plan/features": {
+            "get": {
+              "summary": "List features visible to the caller.",
+              "description": "Optional `windowStart` / `windowEnd` query params (ISO yyyy-MM-dd) constrain results to features whose plan overlaps the window. Window semantics: `windowStart` is inclusive on `plannedEnd`; `windowEnd` is exclusive on `plannedStart`; features with null `plannedStart` and/or `plannedEnd` are always included. Bad date format or `windowStart > windowEnd` returns 400 `Invalid request data` and the upstream gRPC service is NOT called.",
+              "tags": [
+                "plan"
+              ],
+              "parameters": [
+                {
+                  "name": "scope",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "string",
+                    "enum": [
+                      "mine",
+                      "all"
+                    ]
+                  }
+                },
+                {
+                  "name": "state",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "$ref": "#/components/schemas/FeatureState"
+                  }
+                },
+                {
+                  "name": "windowStart",
+                  "in": "query",
+                  "required": false,
+                  "description": "ISO yyyy-MM-dd. Inclusive on plannedEnd.",
+                  "schema": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                },
+                {
+                  "name": "windowEnd",
+                  "in": "query",
+                  "required": false,
+                  "description": "ISO yyyy-MM-dd. Exclusive on plannedStart.",
+                  "schema": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/FeatureSummary"
+                        }
+                      }
+                    }
+                  }
+                },
+                "400": {
+                  "$ref": "#/components/responses/BadRequest"
+                },
+                "401": {
+                  "$ref": "#/components/responses/Unauthorized"
+                }
+              }
+            },
+            "post": {
+              "summary": "Create a new feature (Manager only).",
+              "description": "Creates the feature and atomically materializes 5 empty stage plans (one per FeatureState ordinal). `managerUserId` is derived from the caller's JWT and MUST NOT be sent in the body.",
+              "tags": [
+                "plan"
+              ],
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/CreateFeaturePayload"
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "Created",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/FeatureSummary"
+                      }
+                    }
+                  }
+                },
+                "400": {
+                  "$ref": "#/components/responses/BadRequest"
+                },
+                "401": {
+                  "$ref": "#/components/responses/Unauthorized"
+                },
+                "403": {
+                  "$ref": "#/components/responses/Forbidden"
+                }
+              }
+            }
+          },
+          "/api/plan/features/{id}": {
+            "parameters": [
+              {
+                "name": "id",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            ],
+            "get": {
+              "summary": "Get a single feature with attached tasks, lead, mini-team, and resolved stage-plan performers.",
+              "tags": [
+                "plan"
+              ],
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/FeatureDetail"
+                      }
+                    }
+                  }
+                },
+                "401": {
+                  "$ref": "#/components/responses/Unauthorized"
+                },
+                "404": {
+                  "$ref": "#/components/responses/NotFound"
+                }
+              }
+            },
+            "patch": {
+              "summary": "Update a feature (Manager only).",
+              "description": "All body fields are optional — omitted means unchanged. When `stagePlans` is present it MUST contain exactly 5 entries, one per FeatureState value, in any order. The server re-orders canonically. Omitted stagePlans leaves existing plans untouched. Empty array (`[]`) is rejected with 400. Derived `plannedStart` / `plannedEnd` on the feature are recomputed server-side as min/max over populated stage dates.",
+              "tags": [
+                "plan"
+              ],
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/UpdateFeaturePayload"
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/FeatureSummary"
+                      }
+                    }
+                  }
+                },
+                "400": {
+                  "$ref": "#/components/responses/BadRequest"
+                },
+                "401": {
+                  "$ref": "#/components/responses/Unauthorized"
+                },
+                "403": {
+                  "$ref": "#/components/responses/Forbidden"
+                },
+                "404": {
+                  "$ref": "#/components/responses/NotFound"
+                },
+                "502": {
+                  "$ref": "#/components/responses/BadGateway"
+                }
+              }
+            }
+          },
+          "/api/plan/features/{id}/title": {
+            "parameters": [
+              {
+                "name": "id",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              {
+                "name": "If-Match",
+                "in": "header",
+                "required": false,
+                "description": "Optional optimistic-concurrency token; current feature.version from the last read. Missing header = advisory mode (last-write-wins) in iter 1.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "patch": {
+              "summary": "Update a feature's title in place (inline edit — Manager only).",
+              "description": "Trimmed server-side; 1..200 chars after trim. Empty or whitespace-only titles are rejected as 400. Returns the refreshed FeatureSummary with a bumped `version`.",
+              "tags": [
+                "plan"
+              ],
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/UpdateFeatureTitlePayload"
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/FeatureSummary"
+                      }
+                    }
+                  }
+                },
+                "400": {
+                  "$ref": "#/components/responses/BadRequest"
+                },
+                "401": {
+                  "$ref": "#/components/responses/Unauthorized"
+                },
+                "403": {
+                  "$ref": "#/components/responses/Forbidden"
+                },
+                "404": {
+                  "$ref": "#/components/responses/NotFound"
+                },
+                "409": {
+                  "$ref": "#/components/responses/Conflict"
+                },
+                "422": {
+                  "$ref": "#/components/responses/UnprocessableEntity"
+                },
+                "502": {
+                  "$ref": "#/components/responses/BadGateway"
+                }
+              }
+            }
+          },
+          "/api/plan/features/{id}/description": {
+            "parameters": [
+              {
+                "name": "id",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              {
+                "name": "If-Match",
+                "in": "header",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "patch": {
+              "summary": "Update a feature's description (inline edit — Manager only).",
+              "description": "0..4000 chars after trim; empty or null clears the field. Leading whitespace preserved; trailing whitespace trimmed.",
+              "tags": [
+                "plan"
+              ],
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/UpdateFeatureDescriptionPayload"
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/FeatureSummary"
+                      }
+                    }
+                  }
+                },
+                "400": {
+                  "$ref": "#/components/responses/BadRequest"
+                },
+                "401": {
+                  "$ref": "#/components/responses/Unauthorized"
+                },
+                "403": {
+                  "$ref": "#/components/responses/Forbidden"
+                },
+                "404": {
+                  "$ref": "#/components/responses/NotFound"
+                },
+                "409": {
+                  "$ref": "#/components/responses/Conflict"
+                },
+                "422": {
+                  "$ref": "#/components/responses/UnprocessableEntity"
+                },
+                "502": {
+                  "$ref": "#/components/responses/BadGateway"
+                }
+              }
+            }
+          },
+          "/api/plan/features/{id}/stages/{stage}/owner": {
+            "parameters": [
+              {
+                "name": "id",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              {
+                "name": "stage",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureState"
+                }
+              },
+              {
+                "name": "If-Match",
+                "in": "header",
+                "required": false,
+                "description": "Optional stage-scoped optimistic-concurrency token (stagePlans[].stageVersion).",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "patch": {
+              "summary": "Reassign a single stage's owner (inline edit — Manager only).",
+              "description": "`stageOwnerUserId` must be null (clear) or a positive integer on the feature manager's roster. Role-prefixed naming per microservices/contracts.md. Stage path segment is case-insensitive (`development`, `Development`, `DEVELOPMENT` all canonicalise to the same FeatureState).",
+              "tags": [
+                "plan"
+              ],
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/UpdateStageOwnerPayload"
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/FeatureSummary"
+                      }
+                    }
+                  }
+                },
+                "400": {
+                  "$ref": "#/components/responses/BadRequest"
+                },
+                "401": {
+                  "$ref": "#/components/responses/Unauthorized"
+                },
+                "403": {
+                  "$ref": "#/components/responses/Forbidden"
+                },
+                "404": {
+                  "$ref": "#/components/responses/NotFound"
+                },
+                "409": {
+                  "$ref": "#/components/responses/Conflict"
+                },
+                "422": {
+                  "$ref": "#/components/responses/UnprocessableEntity"
+                },
+                "502": {
+                  "$ref": "#/components/responses/BadGateway"
+                }
+              }
+            }
+          },
+          "/api/plan/features/{id}/stages/{stage}/planned-start": {
+            "parameters": [
+              {
+                "name": "id",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              {
+                "name": "stage",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureState"
+                }
+              },
+              {
+                "name": "If-Match",
+                "in": "header",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "patch": {
+              "summary": "Update a single stage's planned start date (inline edit — Manager only).",
+              "description": "ISO yyyy-MM-dd string or null to clear. Year must be 2000..2100 inclusive (`Use a real release date` otherwise). Must be on or before the stage's existing plannedEnd when both are set. Cross-stage chronological order is enforced — violation returns 422 with `conflict.kind = 'overlap'` and `conflict.with` set to the neighbour stage. Stage path segment is case-insensitive. Derived feature.plannedStart recomputed server-side.",
+              "tags": [
+                "plan"
+              ],
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/UpdateStagePlannedStartPayload"
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/FeatureSummary"
+                      }
+                    }
+                  }
+                },
+                "400": {
+                  "$ref": "#/components/responses/BadRequest"
+                },
+                "401": {
+                  "$ref": "#/components/responses/Unauthorized"
+                },
+                "403": {
+                  "$ref": "#/components/responses/Forbidden"
+                },
+                "404": {
+                  "$ref": "#/components/responses/NotFound"
+                },
+                "409": {
+                  "$ref": "#/components/responses/Conflict"
+                },
+                "422": {
+                  "$ref": "#/components/responses/UnprocessableEntity"
+                },
+                "502": {
+                  "$ref": "#/components/responses/BadGateway"
+                }
+              }
+            }
+          },
+          "/api/plan/features/{id}/stages/{stage}/planned-end": {
+            "parameters": [
+              {
+                "name": "id",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              {
+                "name": "stage",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureState"
+                }
+              },
+              {
+                "name": "If-Match",
+                "in": "header",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "patch": {
+              "summary": "Update a single stage's planned end date (inline edit — Manager only).",
+              "description": "Symmetric to planned-start. Year must be 2000..2100 inclusive. Must be on or after the stage's existing plannedStart. Cross-stage chronological order is enforced — violation returns 422 with `conflict.kind = 'overlap'` and `conflict.with` set to the neighbour stage. Stage path segment is case-insensitive.",
+              "tags": [
+                "plan"
+              ],
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/UpdateStagePlannedEndPayload"
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/FeatureSummary"
+                      }
+                    }
+                  }
+                },
+                "400": {
+                  "$ref": "#/components/responses/BadRequest"
+                },
+                "401": {
+                  "$ref": "#/components/responses/Unauthorized"
+                },
+                "403": {
+                  "$ref": "#/components/responses/Forbidden"
+                },
+                "404": {
+                  "$ref": "#/components/responses/NotFound"
+                },
+                "409": {
+                  "$ref": "#/components/responses/Conflict"
+                },
+                "422": {
+                  "$ref": "#/components/responses/UnprocessableEntity"
+                },
+                "502": {
+                  "$ref": "#/components/responses/BadGateway"
+                }
+              }
+            }
+          },
+          "/api/plan/features/{id}/tasks/{jiraId}": {
+            "parameters": [
+              {
+                "name": "id",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              {
+                "name": "jiraId",
+                "in": "path",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "post": {
+              "summary": "Attach a task (by Jira id) to a feature (Manager only).",
+              "tags": [
+                "plan"
+              ],
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/FeatureSummary"
+                      }
+                    }
+                  }
+                },
+                "401": {
+                  "$ref": "#/components/responses/Unauthorized"
+                },
+                "403": {
+                  "$ref": "#/components/responses/Forbidden"
+                },
+                "404": {
+                  "$ref": "#/components/responses/NotFound"
+                }
+              }
+            },
+            "delete": {
+              "summary": "Detach a task from a feature, reassigning it to another feature (Manager only).",
+              "tags": [
+                "plan"
+              ],
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/DetachTaskBody"
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "OK",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/FeatureSummary"
+                      }
+                    }
+                  }
+                },
+                "401": {
+                  "$ref": "#/components/responses/Unauthorized"
+                },
+                "403": {
+                  "$ref": "#/components/responses/Forbidden"
+                },
+                "404": {
+                  "$ref": "#/components/responses/NotFound"
+                },
+                "422": {
+                  "$ref": "#/components/responses/UnprocessableEntity"
+                }
+              }
+            }
+          }
+        },
+        "components": {
+          "securitySchemes": {
+            "bearerAuth": {
+              "type": "http",
+              "scheme": "bearer",
+              "bearerFormat": "JWT"
+            }
+          },
+          "responses": {
+            "BadRequest": {
+              "description": "Invalid request data.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "Unauthorized": {
+              "description": "Authentication required.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "Forbidden": {
+              "description": "Permission denied.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "NotFound": {
+              "description": "Resource not found.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "UnprocessableEntity": {
+              "description": "Validation error. On cross-stage chronological-order violations the body extends to `{ error, conflict: { kind: 'overlap' | 'order' | 'rangeInvalid', with: <stage> } }` so the FE can highlight the offending neighbour stage.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ConflictError"
+                  }
+                }
+              }
+            },
+            "BadGateway": {
+              "description": "Upstream service temporarily unavailable.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "Conflict": {
+              "description": "Version mismatch (concurrent edit detected). Body includes a `conflict` object with `kind:'version'` and the server's current `currentVersion` when the handler reports a concurrency conflict.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ConflictError"
+                  }
+                }
+              }
+            }
+          },
+          "schemas": {
+            "Error": {
+              "type": "object",
+              "required": [
+                "error"
+              ],
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            },
+            "ConflictError": {
+              "type": "object",
+              "description": "Extended error envelope emitted on 409/422 when the handler reports a concurrency or stage-order conflict. Clients unaware of `conflict` fall back to the bare `error` string.",
+              "required": [
+                "error"
+              ],
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "description": "Public-facing message such as 'Updated by someone else' or 'Stage order violation'."
+                },
+                "conflict": {
+                  "type": "object",
+                  "description": "Structured conflict context. Absent when the upstream did not supply one.",
+                  "required": [
+                    "kind"
+                  ],
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "version",
+                        "overlap"
+                      ]
+                    },
+                    "currentVersion": {
+                      "type": "integer",
+                      "format": "int32",
+                      "description": "Server's current version (kind='version')."
+                    },
+                    "with": {
+                      "$ref": "#/components/schemas/FeatureState"
+                    }
+                  }
+                }
+              }
+            },
+            "FeatureState": {
+              "type": "string",
+              "enum": [
+                "CsApproving",
+                "Development",
+                "Testing",
+                "EthalonTesting",
+                "LiveRelease"
+              ]
+            },
+            "StagePlan": {
+              "type": "object",
+              "description": "List-row stage plan — id-only performer. `stageVersion` is rolled out additively (api-contract.md §rollout-tolerance) and is therefore NOT in the required set; old payloads that predate the inline-edit feature may omit it.",
+              "required": [
+                "stage",
+                "plannedStart",
+                "plannedEnd",
+                "performerUserId"
+              ],
+              "properties": {
+                "stage": {
+                  "$ref": "#/components/schemas/FeatureState"
+                },
+                "plannedStart": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                },
+                "plannedEnd": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                },
+                "performerUserId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "nullable": true
+                },
+                "stageVersion": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Per-stage optimistic-concurrency token; consumed by the FE inline editor's If-Match header for stage-scoped PATCHes."
+                }
+              }
+            },
+            "StagePlanDetail": {
+              "type": "object",
+              "description": "Detail stage plan — resolved performer mini-member. `performer` is null when the stage is unassigned OR when the stored performer id is no longer on the manager's roster (stale). In the stale case `performerUserId` is still emitted so the FE can render the 'Performer no longer on team' state.",
+              "required": [
+                "stage",
+                "plannedStart",
+                "plannedEnd",
+                "performerUserId",
+                "performer"
+              ],
+              "properties": {
+                "stage": {
+                  "$ref": "#/components/schemas/FeatureState"
+                },
+                "plannedStart": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                },
+                "plannedEnd": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                },
+                "performerUserId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "nullable": true
+                },
+                "performer": {
+                  "nullable": true,
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/MiniTeamMember"
+                    }
+                  ]
+                },
+                "stageVersion": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Per-stage optimistic-concurrency token."
+                }
+              }
+            },
+            "StagePlanPayload": {
+              "type": "object",
+              "required": [
+                "stage"
+              ],
+              "properties": {
+                "stage": {
+                  "$ref": "#/components/schemas/FeatureState"
+                },
+                "plannedStart": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                },
+                "plannedEnd": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                },
+                "performerUserId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "nullable": true
+                }
+              }
+            },
+            "MiniTeamMember": {
+              "type": "object",
+              "required": [
+                "userId",
+                "email",
+                "displayName",
+                "role"
+              ],
+              "properties": {
+                "userId": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "displayName": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                }
+              }
+            },
+            "AttachedTask": {
+              "type": "object",
+              "required": [
+                "id",
+                "jiraId",
+                "state",
+                "userId"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "jiraId": {
+                  "type": "string"
+                },
+                "state": {
+                  "type": "string"
+                },
+                "userId": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "FeatureSummary": {
+              "type": "object",
+              "required": [
+                "id",
+                "title",
+                "description",
+                "state",
+                "plannedStart",
+                "plannedEnd",
+                "leadUserId",
+                "managerUserId",
+                "taskCount",
+                "taskIds",
+                "stagePlans"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "title": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "description": {
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 4000
+                },
+                "state": {
+                  "$ref": "#/components/schemas/FeatureState"
+                },
+                "plannedStart": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true,
+                  "description": "Derived server-side as min(stagePlans[].plannedStart)."
+                },
+                "plannedEnd": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true,
+                  "description": "Derived server-side as max(stagePlans[].plannedEnd)."
+                },
+                "leadUserId": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "managerUserId": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "taskCount": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "taskIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                },
+                "stagePlans": {
+                  "type": "array",
+                  "minItems": 5,
+                  "maxItems": 5,
+                  "items": {
+                    "$ref": "#/components/schemas/StagePlan"
+                  },
+                  "description": "Always length 5, canonical FeatureState order. Performer is id-only on list rows."
+                },
+                "version": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "Monotonically-increasing row version used as an optimistic-concurrency token. Bumped by every inline-edit PATCH."
+                }
+              }
+            },
+            "FeatureDetail": {
+              "type": "object",
+              "required": [
+                "feature",
+                "tasks",
+                "lead",
+                "miniTeam",
+                "stagePlans"
+              ],
+              "properties": {
+                "feature": {
+                  "$ref": "#/components/schemas/FeatureSummary"
+                },
+                "tasks": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AttachedTask"
+                  }
+                },
+                "lead": {
+                  "$ref": "#/components/schemas/MiniTeamMember"
+                },
+                "miniTeam": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MiniTeamMember"
+                  },
+                  "description": "Deduped union of task assignees, lead, and every populated stage-plan performer."
+                },
+                "stagePlans": {
+                  "type": "array",
+                  "minItems": 5,
+                  "maxItems": 5,
+                  "items": {
+                    "$ref": "#/components/schemas/StagePlanDetail"
+                  },
+                  "description": "Always length 5, canonical FeatureState order. Each entry carries a resolved performer mini-member."
+                }
+              }
+            },
+            "CreateFeaturePayload": {
+              "type": "object",
+              "required": [
+                "title"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "description": {
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 4000
+                },
+                "leadUserId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "nullable": true
+                },
+                "plannedStart": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true,
+                  "description": "Legacy feature-level date; prefer authoring per-stage plans via PATCH."
+                },
+                "plannedEnd": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true,
+                  "description": "Legacy feature-level date; prefer authoring per-stage plans via PATCH."
+                }
+              }
+            },
+            "UpdateFeaturePayload": {
+              "type": "object",
+              "description": "All fields optional. Omitted `stagePlans` means do-not-touch; when present MUST have exactly 5 entries with unique stage names.",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 200
+                },
+                "description": {
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 4000
+                },
+                "leadUserId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "nullable": true
+                },
+                "plannedStart": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                },
+                "plannedEnd": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                },
+                "state": {
+                  "$ref": "#/components/schemas/FeatureState"
+                },
+                "stagePlans": {
+                  "type": "array",
+                  "nullable": true,
+                  "minItems": 5,
+                  "maxItems": 5,
+                  "items": {
+                    "$ref": "#/components/schemas/StagePlanPayload"
+                  }
+                }
+              }
+            },
+            "DetachTaskBody": {
+              "type": "object",
+              "required": [
+                "reassignToFeatureId"
+              ],
+              "properties": {
+                "reassignToFeatureId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 1
+                }
+              }
+            },
+            "UpdateFeatureTitlePayload": {
+              "type": "object",
+              "required": [
+                "title"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              }
+            },
+            "UpdateFeatureDescriptionPayload": {
+              "type": "object",
+              "required": [
+                "description"
+              ],
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 4000
+                }
+              }
+            },
+            "UpdateStageOwnerPayload": {
+              "type": "object",
+              "required": [
+                "stageOwnerUserId"
+              ],
+              "description": "Role-prefixed naming: `stageOwnerUserId` is an opaque cross-service reference to the Users service. Null clears the assignment.",
+              "properties": {
+                "stageOwnerUserId": {
+                  "type": "integer",
+                  "format": "int32",
+                  "nullable": true,
+                  "minimum": 1
+                }
+              }
+            },
+            "UpdateStagePlannedStartPayload": {
+              "type": "object",
+              "required": [
+                "plannedStart"
+              ],
+              "properties": {
+                "plannedStart": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                }
+              }
+            },
+            "UpdateStagePlannedEndPayload": {
+              "type": "object",
+              "required": [
+                "plannedEnd"
+              ],
+              "properties": {
+                "plannedEnd": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "features_proto_surface",
+      "kind": "text",
+      "command": "find OneMoreTaskTracker.Features/Protos -type f -name '*.proto' | sort | xargs -I {} sh -c 'echo \"# FILE: {}\"; cat \"{}\"'",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": "# FILE: OneMoreTaskTracker.Features/Protos/CreateFeatureCommand/create_feature_command_handler.proto\nsyntax = \"proto3\";\nimport \"feature_state.proto\";\nimport \"feature_stage_plan.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Features.CreateFeatureCommand\";\npackage mr_helper.features;\n\nservice FeatureCreator {\n  rpc Create (CreateFeatureRequest) returns (FeatureDto);\n}\n\nmessage CreateFeatureRequest {\n  string title            = 1;\n  string description      = 2;\n  int32  lead_user_id     = 3;\n  int32  manager_user_id  = 4;\n  string planned_start    = 5;\n  string planned_end      = 6;\n}\n\nmessage FeatureDto {\n  int32        id                 = 1;\n  string       title              = 2;\n  string       description        = 3;\n  FeatureState state              = 4;\n  string       planned_start      = 5;\n  string       planned_end        = 6;\n  int32        lead_user_id       = 7;\n  int32        manager_user_id    = 8;\n  string       created_at         = 9;\n  string       updated_at         = 10;\n  repeated     FeatureStagePlan stage_plans = 11;\n  int32        version            = 12;\n}\n# FILE: OneMoreTaskTracker.Features/Protos/feature_stage_plan.proto\nsyntax = \"proto3\";\nimport \"feature_state.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Features\";\npackage mr_helper.features;\n\n// Canonical per-stage plan message shared by every FeatureDto carrier.\n// Mirrors api-contract.md: exactly 5 entries per feature (one per FeatureState\n// ordinal), upserted atomically by UpdateFeatureHandler.\n//\n// Wire conventions:\n//   planned_start / planned_end = \"\"   → null (matches the existing planned_*\n//                                        string-empty convention on FeatureDto).\n//   performer_user_id           =  0   → unassigned (proto3 scalar default;\n//                                        the gateway surfaces this as `null`).\nmessage FeatureStagePlan {\n  FeatureState stage              = 1;\n  string       planned_start      = 2;\n  string       planned_end        = 3;\n  int32        performer_user_id  = 4;\n  // Per-stage optimistic-concurrency token (see api-contract.md\n  // § \"Optimistic Concurrency\"). Bumped by every stage-scoped PATCH.\n  int32        version            = 5;\n}\n# FILE: OneMoreTaskTracker.Features/Protos/feature_state.proto\nsyntax = \"proto3\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Features\";\npackage mr_helper.features;\n\n// Ordinals mirror the C# FeatureState enum (CsApproving = 0) to match the\n// Tasks service's task_state.proto style (see task_state.proto, which also\n// forgoes the proto3 *_UNSPECIFIED = 0 convention to share ordinals with\n// the C# enum). Spec 02 § \"FeatureState proto enum ordinals\" explicitly\n// tolerates this and directs us to replicate task_state.proto.\nenum FeatureState {\n  CS_APPROVING = 0;\n  DEVELOPMENT = 1;\n  TESTING = 2;\n  ETHALON_TESTING = 3;\n  LIVE_RELEASE = 4;\n}\n# FILE: OneMoreTaskTracker.Features/Protos/GetFeatureQuery/get_feature_query_handler.proto\nsyntax = \"proto3\";\nimport \"feature_state.proto\";\nimport \"feature_stage_plan.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Features.GetFeatureQuery\";\npackage mr_helper.features;\n\nservice FeatureGetter {\n  rpc Get (GetFeatureRequest) returns (FeatureDto);\n}\n\nmessage GetFeatureRequest {\n  int32 id = 1;\n}\n\nmessage FeatureDto {\n  int32        id                 = 1;\n  string       title              = 2;\n  string       description        = 3;\n  FeatureState state              = 4;\n  string       planned_start      = 5;\n  string       planned_end        = 6;\n  int32        lead_user_id       = 7;\n  int32        manager_user_id    = 8;\n  string       created_at         = 9;\n  string       updated_at         = 10;\n  repeated     FeatureStagePlan stage_plans = 11;\n  int32        version            = 12;\n}\n# FILE: OneMoreTaskTracker.Features/Protos/ListFeaturesQuery/list_features_query_handler.proto\nsyntax = \"proto3\";\nimport \"feature_state.proto\";\nimport \"feature_stage_plan.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Features.ListFeaturesQuery\";\npackage mr_helper.features;\n\nservice FeaturesLister {\n  rpc List (ListFeaturesRequest) returns (ListFeaturesResponse);\n}\n\nmessage ListFeaturesRequest {\n  int32  manager_user_id = 1;\n  string window_start    = 2;\n  string window_end      = 3;\n}\n\nmessage ListFeaturesResponse {\n  repeated FeatureDto features = 1;\n}\n\nmessage FeatureDto {\n  int32        id                 = 1;\n  string       title              = 2;\n  string       description        = 3;\n  FeatureState state              = 4;\n  string       planned_start      = 5;\n  string       planned_end        = 6;\n  int32        lead_user_id       = 7;\n  int32        manager_user_id    = 8;\n  string       created_at         = 9;\n  string       updated_at         = 10;\n  repeated     FeatureStagePlan stage_plans = 11;\n  int32        version            = 12;\n}\n# FILE: OneMoreTaskTracker.Features/Protos/UpdateFeatureCommand/update_feature_command_handler.proto\nsyntax = \"proto3\";\nimport \"feature_state.proto\";\nimport \"feature_stage_plan.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Features.UpdateFeatureCommand\";\npackage mr_helper.features;\n\nservice FeatureUpdater {\n  rpc Update (UpdateFeatureRequest) returns (FeatureDto);\n}\n\nmessage UpdateFeatureRequest {\n  int32        id              = 1;\n  string       title           = 2;\n  string       description     = 3;\n  FeatureState state           = 4;\n  string       planned_start   = 5;\n  string       planned_end     = 6;\n  int32        lead_user_id    = 7;\n  // Empty repeated = \"do not touch stage plans\" (partial update).\n  // Non-empty = exactly 5 entries, one per FeatureState ordinal; upserted atomically.\n  repeated     FeatureStagePlan stage_plans = 8;\n  // Authenticated caller's user id (propagated from the gateway JWT).\n  // Required at the service boundary so the Features service can re-verify\n  // that the caller owns the target feature (`feature.ManagerUserId`).\n  // 0 is an invalid value and yields PermissionDenied.\n  // Double-defense per ~/.claude/rules/microservices/security.md.\n  int32        caller_user_id  = 9;\n}\n\nmessage FeatureDto {\n  int32        id                 = 1;\n  string       title              = 2;\n  string       description        = 3;\n  FeatureState state              = 4;\n  string       planned_start      = 5;\n  string       planned_end        = 6;\n  int32        lead_user_id       = 7;\n  int32        manager_user_id    = 8;\n  string       created_at         = 9;\n  string       updated_at         = 10;\n  repeated     FeatureStagePlan stage_plans = 11;\n  // Monotonically-increasing row version used for optimistic concurrency.\n  // Bumped by every feature- and stage-scoped PATCH (see api-contract.md\n  // § \"Optimistic Concurrency\"). Additive — legacy clients ignore this field.\n  int32        version            = 12;\n}\n# FILE: OneMoreTaskTracker.Features/Protos/UpdateFeatureDescriptionCommand/update_feature_description_command_handler.proto\nsyntax = \"proto3\";\nimport \"feature_state.proto\";\nimport \"feature_stage_plan.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Features.UpdateFeatureDescriptionCommand\";\npackage mr_helper.features;\n\nservice FeatureDescriptionUpdater {\n  rpc Update (UpdateFeatureDescriptionRequest) returns (FeatureDto);\n}\n\nmessage UpdateFeatureDescriptionRequest {\n  int32  id               = 1;\n  // Empty string \"\" is coerced to null server-side (matches the existing\n  // feature.Description nullable semantics).\n  string description      = 2;\n  int32  caller_user_id   = 3;\n  // `optional` so the wire can distinguish missing-header (advisory mode)\n  // from `If-Match: 0`. Absent → last-write-wins; present + mismatch → 409.\n  optional int32 expected_version = 4;\n}\n\nmessage FeatureDto {\n  int32        id                 = 1;\n  string       title              = 2;\n  string       description        = 3;\n  FeatureState state              = 4;\n  string       planned_start      = 5;\n  string       planned_end        = 6;\n  int32        lead_user_id       = 7;\n  int32        manager_user_id    = 8;\n  string       created_at         = 9;\n  string       updated_at         = 10;\n  repeated     FeatureStagePlan stage_plans = 11;\n  int32        version            = 12;\n}\n# FILE: OneMoreTaskTracker.Features/Protos/UpdateFeatureLeadCommand/update_feature_lead_command_handler.proto\nsyntax = \"proto3\";\nimport \"feature_state.proto\";\nimport \"feature_stage_plan.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Features.UpdateFeatureLeadCommand\";\npackage mr_helper.features;\n\nservice FeatureLeadUpdater {\n  rpc Update (UpdateFeatureLeadRequest) returns (FeatureDto);\n}\n\nmessage UpdateFeatureLeadRequest {\n  int32 id               = 1;\n  int32 lead_user_id     = 2;\n  int32 caller_user_id   = 3;\n  optional int32 expected_version = 4;\n}\n\nmessage FeatureDto {\n  int32        id                 = 1;\n  string       title              = 2;\n  string       description        = 3;\n  FeatureState state              = 4;\n  string       planned_start      = 5;\n  string       planned_end        = 6;\n  int32        lead_user_id       = 7;\n  int32        manager_user_id    = 8;\n  string       created_at         = 9;\n  string       updated_at         = 10;\n  repeated     FeatureStagePlan stage_plans = 11;\n  int32        version            = 12;\n}\n# FILE: OneMoreTaskTracker.Features/Protos/UpdateFeatureTitleCommand/update_feature_title_command_handler.proto\nsyntax = \"proto3\";\nimport \"feature_state.proto\";\nimport \"feature_stage_plan.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Features.UpdateFeatureTitleCommand\";\npackage mr_helper.features;\n\n// Narrow per-field PATCH surface for the Gantt inline-edit feature.\n// The feature-scoped ownership guard and Feature.Version optimistic-concurrency\n// token are enforced in UpdateFeatureTitleHandler (see backend-plan.md).\nservice FeatureTitleUpdater {\n  rpc Update (UpdateFeatureTitleRequest) returns (FeatureDto);\n}\n\nmessage UpdateFeatureTitleRequest {\n  int32  id               = 1;\n  string title            = 2;\n  // Authenticated caller's user id propagated from the gateway JWT. The\n  // Features service re-verifies feature ownership via this field regardless\n  // of what the gateway's [Authorize] enforces. Double-defense per\n  // ~/.claude/rules/microservices/security.md.\n  int32  caller_user_id   = 3;\n  // Client's If-Match version. `optional` so the wire can distinguish\n  // \"no header sent\" (advisory mode) from `If-Match: 0` (legitimate v=0\n  // freshly-created feature). When present and the stored Feature.Version\n  // differs, the handler throws RpcException(AlreadyExists) → HTTP 409.\n  // When absent: advisory / last-write-wins.\n  optional int32 expected_version = 4;\n}\n\n// Duplicated per-command so each proto file is independently routable by\n// Mapster (see FeatureMappingConfig). Kept in lockstep with UpdateFeatureCommand.FeatureDto.\nmessage FeatureDto {\n  int32        id                 = 1;\n  string       title              = 2;\n  string       description        = 3;\n  FeatureState state              = 4;\n  string       planned_start      = 5;\n  string       planned_end        = 6;\n  int32        lead_user_id       = 7;\n  int32        manager_user_id    = 8;\n  string       created_at         = 9;\n  string       updated_at         = 10;\n  repeated     FeatureStagePlan stage_plans = 11;\n  int32        version            = 12;\n}\n# FILE: OneMoreTaskTracker.Features/Protos/UpdateStageOwnerCommand/update_stage_owner_command_handler.proto\nsyntax = \"proto3\";\nimport \"feature_state.proto\";\nimport \"feature_stage_plan.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Features.UpdateStageOwnerCommand\";\npackage mr_helper.features;\n\nservice StageOwnerUpdater {\n  rpc Update (UpdateStageOwnerRequest) returns (FeatureDto);\n}\n\n// Role-prefixed `stage_owner_user_id` matches the per-field wire vocabulary.\n// The legacy FeatureStagePlan.performer_user_id on the READ contract is\n// untouched.\nmessage UpdateStageOwnerRequest {\n  int32        feature_id             = 1;\n  FeatureState stage                  = 2;\n  // Soft cross-service FK to the Users service. 0 = unassign (clear owner).\n  // Negative values are coerced to 0 by the handler.\n  int32        stage_owner_user_id    = 3;\n  int32        caller_user_id         = 4;\n  // Stage-scoped optimistic-concurrency token (FeatureStagePlan.Version).\n  // `optional` so the wire can distinguish missing-header (advisory mode)\n  // from `If-Match: 0`. Absent → last-write-wins; present + mismatch → 409.\n  optional int32 expected_stage_version = 5;\n}\n\nmessage FeatureDto {\n  int32        id                 = 1;\n  string       title              = 2;\n  string       description        = 3;\n  FeatureState state              = 4;\n  string       planned_start      = 5;\n  string       planned_end        = 6;\n  int32        lead_user_id       = 7;\n  int32        manager_user_id    = 8;\n  string       created_at         = 9;\n  string       updated_at         = 10;\n  repeated     FeatureStagePlan stage_plans = 11;\n  int32        version            = 12;\n}\n# FILE: OneMoreTaskTracker.Features/Protos/UpdateStagePlannedEndCommand/update_stage_planned_end_command_handler.proto\nsyntax = \"proto3\";\nimport \"feature_state.proto\";\nimport \"feature_stage_plan.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Features.UpdateStagePlannedEndCommand\";\npackage mr_helper.features;\n\nservice StagePlannedEndUpdater {\n  rpc Update (UpdateStagePlannedEndRequest) returns (FeatureDto);\n}\n\nmessage UpdateStagePlannedEndRequest {\n  int32        feature_id             = 1;\n  FeatureState stage                  = 2;\n  string       planned_end            = 3;\n  int32        caller_user_id         = 4;\n  // `optional` so the wire can distinguish missing-header (advisory mode)\n  // from `If-Match: 0`. Absent → last-write-wins; present + mismatch → 409.\n  optional int32 expected_stage_version = 5;\n}\n\nmessage FeatureDto {\n  int32        id                 = 1;\n  string       title              = 2;\n  string       description        = 3;\n  FeatureState state              = 4;\n  string       planned_start      = 5;\n  string       planned_end        = 6;\n  int32        lead_user_id       = 7;\n  int32        manager_user_id    = 8;\n  string       created_at         = 9;\n  string       updated_at         = 10;\n  repeated     FeatureStagePlan stage_plans = 11;\n  int32        version            = 12;\n}\n# FILE: OneMoreTaskTracker.Features/Protos/UpdateStagePlannedStartCommand/update_stage_planned_start_command_handler.proto\nsyntax = \"proto3\";\nimport \"feature_state.proto\";\nimport \"feature_stage_plan.proto\";\n\noption csharp_namespace = \"OneMoreTaskTracker.Proto.Features.UpdateStagePlannedStartCommand\";\npackage mr_helper.features;\n\nservice StagePlannedStartUpdater {\n  rpc Update (UpdateStagePlannedStartRequest) returns (FeatureDto);\n}\n\nmessage UpdateStagePlannedStartRequest {\n  int32        feature_id             = 1;\n  FeatureState stage                  = 2;\n  // ISO yyyy-MM-dd string. \"\" = clear the plan (mirrors the existing\n  // FeatureStagePlan.planned_start empty-string = null convention).\n  string       planned_start          = 3;\n  int32        caller_user_id         = 4;\n  // `optional` so the wire can distinguish missing-header (advisory mode)\n  // from `If-Match: 0`. Absent → last-write-wins; present + mismatch → 409.\n  optional int32 expected_stage_version = 5;\n}\n\nmessage FeatureDto {\n  int32        id                 = 1;\n  string       title              = 2;\n  string       description        = 3;\n  FeatureState state              = 4;\n  string       planned_start      = 5;\n  string       planned_end        = 6;\n  int32        lead_user_id       = 7;\n  int32        manager_user_id    = 8;\n  string       created_at         = 9;\n  string       updated_at         = 10;\n  repeated     FeatureStagePlan stage_plans = 11;\n  int32        version            = 12;\n}\n"
+    },
+    {
+      "id": "ef_migrations_history",
+      "kind": "text",
+      "command": "ls -1 OneMoreTaskTracker.Features/Migrations/ | grep -Ev 'Designer|Snapshot' | sort",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": "20260422084830_InitialCreate.cs\n20260423104631_AddFeatureStagePlans.cs\n20260424120000_AddFeatureAndStageVersion.cs\n"
+    },
+    {
+      "id": "ef_schema_columns",
+      "kind": "text",
+      "command": "grep -hn 'table\\.Column' OneMoreTaskTracker.Features/Migrations/*.cs | sort",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": "20:                    Id = table.Column<int>(type: \"integer\", nullable: false)\n22:                    FeatureId = table.Column<int>(type: \"integer\", nullable: false),\n23:                    Id = table.Column<int>(type: \"integer\", nullable: false)\n23:                    Stage = table.Column<int>(type: \"integer\", nullable: false),\n24:                    PlannedStart = table.Column<DateOnly>(type: \"date\", nullable: true),\n25:                    PlannedEnd = table.Column<DateOnly>(type: \"date\", nullable: true),\n25:                    Title = table.Column<string>(type: \"character varying(200)\", maxLength: 200, nullable: false),\n26:                    Description = table.Column<string>(type: \"character varying(4000)\", maxLength: 4000, nullable: true),\n26:                    PerformerUserId = table.Column<int>(type: \"integer\", nullable: false),\n27:                    CreatedAt = table.Column<DateTime>(type: \"timestamp with time zone\", nullable: false),\n27:                    State = table.Column<int>(type: \"integer\", nullable: false),\n28:                    PlannedStart = table.Column<DateOnly>(type: \"date\", nullable: true),\n28:                    UpdatedAt = table.Column<DateTime>(type: \"timestamp with time zone\", nullable: false)\n29:                    PlannedEnd = table.Column<DateOnly>(type: \"date\", nullable: true),\n30:                    LeadUserId = table.Column<int>(type: \"integer\", nullable: false),\n31:                    ManagerUserId = table.Column<int>(type: \"integer\", nullable: false),\n32:                    CreatedAt = table.Column<DateTime>(type: \"timestamp with time zone\", nullable: false),\n33:                    UpdatedAt = table.Column<DateTime>(type: \"timestamp with time zone\", nullable: false)\n"
+    },
+    {
+      "id": "feature_entity_shape",
+      "kind": "text",
+      "command": "for f in OneMoreTaskTracker.Features/Features/Data/Feature.cs OneMoreTaskTracker.Features/Features/Data/FeatureStagePlan.cs OneMoreTaskTracker.Features/Features/Data/FeatureState.cs; do echo \"# FILE: $f\"; grep -nE '^(\\s*)(public|internal|private|protected)?\\s*(partial\\s+)?(class|record|enum|interface)\\s|public\\s+[^()]+\\s+[A-Za-z_][A-Za-z0-9_]*\\s*\\{\\s*(get|set|init|private)' \"$f\" | sed -E 's/(\\})[[:space:]]*=[[:space:]]*[^;]+;/\\1/' || true; done",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": "# FILE: OneMoreTaskTracker.Features/Features/Data/Feature.cs\n3:public class Feature\n5:    public int Id { get; init; }\n6:    public required string Title { get; set; }\n7:    public string? Description { get; set; }\n8:    public int State { get; set; }\n12:    public DateOnly? PlannedStart { get; set; }\n13:    public DateOnly? PlannedEnd { get; set; }\n15:    public int LeadUserId { get; set; }\n16:    public int ManagerUserId { get; set; }\n18:    public DateTime CreatedAt { get; init; }\n19:    public DateTime UpdatedAt { get; set; }\n24:    public List<FeatureStagePlan> StagePlans { get; init; }\n30:    public int Version { get; set; }\n# FILE: OneMoreTaskTracker.Features/Features/Data/FeatureStagePlan.cs\n8:public class FeatureStagePlan\n10:    public int Id { get; init; }\n11:    public int FeatureId { get; init; }\n13:    public int Stage { get; set; }\n15:    public DateOnly? PlannedStart { get; set; }\n16:    public DateOnly? PlannedEnd { get; set; }\n20:    public int PerformerUserId { get; set; }\n22:    public DateTime CreatedAt { get; init; }\n23:    public DateTime UpdatedAt { get; set; }\n28:    public int Version { get; set; }\n# FILE: OneMoreTaskTracker.Features/Features/Data/FeatureState.cs\n3:public enum FeatureState\n"
+    },
+    {
+      "id": "api_endpoint_matrix",
+      "kind": "text",
+      "command": "grep -rEn '^\\s*\\[(HttpGet|HttpPost|HttpPut|HttpPatch|HttpDelete|Route|Authorize|AllowAnonymous|ApiController)' OneMoreTaskTracker.Api/Controllers --include='*.cs' | sort",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": "OneMoreTaskTracker.Api/Controllers/Auth/AuthController.cs:13:    [HttpPost(\"register\")]\nOneMoreTaskTracker.Api/Controllers/Auth/AuthController.cs:32:    [HttpGet(\"health\")]\nOneMoreTaskTracker.Api/Controllers/Auth/AuthController.cs:36:    [HttpPost(\"login\")]\nOneMoreTaskTracker.Api/Controllers/Auth/AuthController.cs:7:[ApiController]\nOneMoreTaskTracker.Api/Controllers/Auth/AuthController.cs:8:[Route(\"api/auth\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/FeaturesController.cs:100:    [Authorize(Roles = Roles.Manager)]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/FeaturesController.cs:114:    [HttpPatch(\"{id:int}\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/FeaturesController.cs:115:    [Authorize(Roles = Roles.Manager)]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/FeaturesController.cs:16:[ApiController]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/FeaturesController.cs:17:[Authorize]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/FeaturesController.cs:18:[Route(\"api/plan/features\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/FeaturesController.cs:29:    [HttpGet]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/FeaturesController.cs:69:    [HttpGet(\"{id:int}\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/FeaturesController.cs:99:    [HttpPost]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Fields/FeatureFieldsController.cs:13:[ApiController]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Fields/FeatureFieldsController.cs:14:[Authorize(Roles = Roles.Manager)]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Fields/FeatureFieldsController.cs:15:[Route(\"api/plan/features/{id:int}\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Fields/FeatureFieldsController.cs:22:    [HttpPatch(\"title\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Fields/FeatureFieldsController.cs:49:    [HttpPatch(\"description\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Fields/FeatureFieldsController.cs:76:    [HttpPatch(\"lead\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Stages/FeatureStagesController.cs:11:[ApiController]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Stages/FeatureStagesController.cs:12:[Authorize(Roles = Roles.Manager)]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Stages/FeatureStagesController.cs:13:[Route(\"api/plan/features/{id:int}/stages/{stage}\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Stages/FeatureStagesController.cs:21:    [HttpPatch(\"owner\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Stages/FeatureStagesController.cs:64:    [HttpPatch(\"planned-start\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Stages/FeatureStagesController.cs:96:    [HttpPatch(\"planned-end\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Tasks/FeatureTasksController.cs:10:[Authorize(Roles = Roles.Manager)]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Tasks/FeatureTasksController.cs:11:[Route(\"api/plan/features/{id:int}/tasks\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Tasks/FeatureTasksController.cs:17:    [HttpPost(\"{jiraId}\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Tasks/FeatureTasksController.cs:37:    [HttpDelete(\"{jiraId}\")]\nOneMoreTaskTracker.Api/Controllers/Plan/Feature/Tasks/FeatureTasksController.cs:9:[ApiController]\nOneMoreTaskTracker.Api/Controllers/Tasks/TasksController.cs:15:[ApiController]\nOneMoreTaskTracker.Api/Controllers/Tasks/TasksController.cs:16:[Authorize]\nOneMoreTaskTracker.Api/Controllers/Tasks/TasksController.cs:17:[Route(\"api/tasks\")]\nOneMoreTaskTracker.Api/Controllers/Tasks/TasksController.cs:26:    [HttpGet]\nOneMoreTaskTracker.Api/Controllers/Tasks/TasksController.cs:45:    [HttpGet(\"{jiraId}\")]\nOneMoreTaskTracker.Api/Controllers/Tasks/TasksController.cs:72:    [HttpPost]\nOneMoreTaskTracker.Api/Controllers/Tasks/TasksController.cs:97:    [HttpPost(\"{jiraId}/move\")]\nOneMoreTaskTracker.Api/Controllers/Team/TeamController.cs:11:[ApiController]\nOneMoreTaskTracker.Api/Controllers/Team/TeamController.cs:111:    [HttpPost]\nOneMoreTaskTracker.Api/Controllers/Team/TeamController.cs:112:    [Authorize(Roles = Roles.Manager)]\nOneMoreTaskTracker.Api/Controllers/Team/TeamController.cs:12:[Route(\"api/team/members\")]\nOneMoreTaskTracker.Api/Controllers/Team/TeamController.cs:13:[Authorize]\nOneMoreTaskTracker.Api/Controllers/Team/TeamController.cs:18:    [HttpGet]\nOneMoreTaskTracker.Api/Controllers/Team/TeamController.cs:91:    [HttpDelete(\"{userId}\")]\nOneMoreTaskTracker.Api/Controllers/Team/TeamController.cs:92:    [Authorize(Roles = Roles.Manager)]\n"
+    },
+    {
+      "id": "grpc_status_code_emit_sites",
+      "kind": "text",
+      "command": "grep -rEn 'new RpcException\\(new Status\\(StatusCode\\.[A-Za-z]+' OneMoreTaskTracker.Features/Features --include='*.cs' | sed -E 's/^([^:]+):([0-9]+):.*StatusCode\\.([A-Za-z]+).*/\\1 :: \\3/' | sort | uniq -c | sort -k2",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": "   2 OneMoreTaskTracker.Features/Features/Create/CreateFeatureHandler.cs :: InvalidArgument\n   6 OneMoreTaskTracker.Features/Features/Data/FeatureValidation.cs :: InvalidArgument\n   1 OneMoreTaskTracker.Features/Features/Get/GetFeatureHandler.cs :: InvalidArgument\n   1 OneMoreTaskTracker.Features/Features/Get/GetFeatureHandler.cs :: NotFound\n   1 OneMoreTaskTracker.Features/Features/List/ListFeaturesHandler.cs :: InvalidArgument\n   2 OneMoreTaskTracker.Features/Features/Update/FeatureConcurrencySaver.cs :: AlreadyExists\n   2 OneMoreTaskTracker.Features/Features/Update/FeatureLoader.cs :: NotFound\n   1 OneMoreTaskTracker.Features/Features/Update/FeatureOwnershipGuard.cs :: PermissionDenied\n   2 OneMoreTaskTracker.Features/Features/Update/FeatureVersionGuard.cs :: AlreadyExists\n   2 OneMoreTaskTracker.Features/Features/Update/StageEditContextLoader.cs :: InvalidArgument\n   2 OneMoreTaskTracker.Features/Features/Update/UpdateFeatureDescriptionHandler.cs :: InvalidArgument\n   1 OneMoreTaskTracker.Features/Features/Update/UpdateFeatureHandler.cs :: InvalidArgument\n   2 OneMoreTaskTracker.Features/Features/Update/UpdateFeatureLeadHandler.cs :: InvalidArgument\n   3 OneMoreTaskTracker.Features/Features/Update/UpdateFeatureTitleHandler.cs :: InvalidArgument\n"
+    },
+    {
+      "id": "feature_inline_edit_log_format",
+      "kind": "text",
+      "command": "grep -hEn 'Feature inline edit applied' OneMoreTaskTracker.Features/Features/Update/*.cs | sed -E 's/[[:space:]]+/ /g' | sort",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": "32: \"Feature inline edit applied: feature_id={FeatureId} stage={Stage} field=owner old_value={Old} new_value={New} actor_user_id={ActorUserId} stage_version_before={SV0} stage_version_after={SV1}\",\n33: \"Feature inline edit applied: feature_id={FeatureId} field=lead lead_before={Before} lead_after={After} actor_user_id={ActorUserId} version_before={V0} version_after={V1}\",\n38: \"Feature inline edit applied: feature_id={FeatureId} field=title title_len_before={Before} title_len_after={After} actor_user_id={ActorUserId} version_before={V0} version_after={V1}\",\n38: \"Feature inline edit applied: feature_id={FeatureId} stage={Stage} field=plannedEnd old_value={Old} new_value={New} actor_user_id={ActorUserId} stage_version_before={SV0} stage_version_after={SV1}\",\n38: \"Feature inline edit applied: feature_id={FeatureId} stage={Stage} field=plannedStart old_value={Old} new_value={New} actor_user_id={ActorUserId} stage_version_before={SV0} stage_version_after={SV1}\",\n40: \"Feature inline edit applied: feature_id={FeatureId} field=description description_length={DescriptionLength} description_len_before={Before} description_len_after={After} actor_user_id={ActorUserId} version_before={V0} version_after={V1}\",\n"
+    },
+    {
+      "id": "test_corpus_assertion_count",
+      "kind": "text",
+      "command": "grep -rEn '\\b(Should|Be|Equal|Contain|Throw|NotBeNull|BeNull|HaveCount|BeEquivalentTo|Match)\\(' tests --include='*.cs' | wc -l | tr -d ' '",
+      "tolerance": {
+        "kind": "exact"
+      },
+      "data": "905\n"
+    }
+  ]
+}

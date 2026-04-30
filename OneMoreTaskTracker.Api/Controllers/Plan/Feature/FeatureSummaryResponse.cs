@@ -16,4 +16,24 @@ public record FeatureSummaryResponse(
     IReadOnlyList<StagePlanResponse> StagePlans,
     // Optimistic-concurrency token. Bumped by every inline-edit PATCH;
     // legacy clients that ignore it stay last-write-wins.
-    int Version);
+    int Version)
+{
+    internal static FeatureSummaryResponse From<T>(T f, IReadOnlyDictionary<int, List<int>> tasksByFeature)
+        where T : IFeatureSummaryProjection
+    {
+        IReadOnlyList<int> taskIds = tasksByFeature.TryGetValue(f.Id, out var ids) ? ids : [];
+        return new FeatureSummaryResponse(
+            f.Id,
+            f.Title,
+            string.IsNullOrEmpty(f.Description) ? null : f.Description,
+            f.State.ToWireString(),
+            string.IsNullOrEmpty(f.PlannedStart) ? null : f.PlannedStart,
+            string.IsNullOrEmpty(f.PlannedEnd) ? null : f.PlannedEnd,
+            f.LeadUserId,
+            f.ManagerUserId,
+            taskIds.Count,
+            taskIds,
+            f.StagePlans.Select(StagePlanResponse.From).ToList(),
+            f.Version);
+    }
+}

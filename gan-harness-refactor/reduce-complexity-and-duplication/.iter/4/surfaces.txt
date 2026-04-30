@@ -1,0 +1,20 @@
+=== openapi_json (sha) ===
+e1011ffd96c5148a5d41ccefaa3183a58ae483e6677623657fb8cd4b5b215b4f
+=== features_proto_surface (sha of all proto bytes concatenated, sorted) ===
+8660974fb0cb02fdb1e43e678611cf7007d456da2b1453e6978c31d5ec883955
+=== api_endpoint_matrix ===
+c2522df0507ef7321d53b512f9efd4f650343e516834d3349c171335d649d308
+=== ef_migrations_history (Features) ===
+f43ac83e2e6fb245974087f1d1da519e92e84c275ca384de7274e9e5edc66ea0
+=== feature_entity_shape (sed-stripped per behavior-contract.md filter) ===
+ab00dd9f00e7efed36eb11d7f9abc7e4bef6c853720c1efd71a907c9b6b48c93
+=== grpc status code emission set inside Features/Features ===
+AlreadyExists
+FailedPrecondition
+InvalidArgument
+NotFound
+PermissionDenied
+=== grpc status code emission count inside Features/Features (per file) ===
+29
+=== test corpus assertion count (Should/Be/Equal/Throw) ===
+17

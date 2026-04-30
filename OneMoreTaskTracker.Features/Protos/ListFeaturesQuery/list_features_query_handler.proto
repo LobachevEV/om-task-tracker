@@ -13,6 +13,9 @@ message ListFeaturesRequest {
   int32  manager_user_id = 1;
   string window_start    = 2;
   string window_end      = 3;
+  string state           = 4;
+  string scope           = 5;
+  int32  caller_user_id  = 6;
 }
 
 message ListFeaturesResponse {
