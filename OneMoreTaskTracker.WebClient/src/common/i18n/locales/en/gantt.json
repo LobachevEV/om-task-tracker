@@ -152,6 +152,8 @@
     "unrejectAria": "Reopen {{name}} gate",
     "reasonAria": "Rejection reason for {{name}}",
     "reasonPlaceholder": "Reason (required)",
+    "reasonHint": "Up to {{max}} characters",
+    "reasonCounter": "{{n}} / {{max}}",
     "reasonSubmit": "Reject",
     "reasonCancel": "Cancel",
     "rejectReasonRequired": "A reason is required to reject",

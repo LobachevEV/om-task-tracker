@@ -160,6 +160,47 @@ describe('GanttGateChip — reject flow with inline reason', () => {
   });
 });
 
+describe('GanttGateChip — reject editor a11y polish', () => {
+  it('reason input has aria-describedby pointing at the cap hint span', () => {
+    render(
+      <GanttGateChip gate={makeGate({ status: 'waiting' })} leftPx={40} canEdit onChangeStatus={vi.fn()} />,
+    );
+    fireEvent.click(screen.getByTestId('gate-chip-spec-reject'));
+    const input = screen.getByTestId('gate-chip-spec-reason-input');
+    const describedBy = input.getAttribute('aria-describedby') ?? '';
+    expect(describedBy).toContain('gate-chip-spec-reason-hint');
+    const hint = screen.getByTestId('gate-chip-spec-reason-hint');
+    expect(hint.id).toBe('gate-chip-spec-reason-hint');
+    expect(hint.textContent).toMatch(/500/);
+  });
+
+  it('renders an n/500 character counter that updates as the user types', () => {
+    render(
+      <GanttGateChip gate={makeGate({ status: 'waiting' })} leftPx={40} canEdit onChangeStatus={vi.fn()} />,
+    );
+    fireEvent.click(screen.getByTestId('gate-chip-spec-reject'));
+    const counter = screen.getByTestId('gate-chip-spec-reason-counter');
+    expect(counter.textContent).toMatch(/^\s*0\s*\/\s*500\s*$/);
+    fireEvent.change(screen.getByTestId('gate-chip-spec-reason-input'), {
+      target: { value: 'hello' },
+    });
+    expect(counter.textContent).toMatch(/^\s*5\s*\/\s*500\s*$/);
+  });
+
+  it('renders the rejection reason readout with role=status so AT announces updates', () => {
+    render(
+      <GanttGateChip
+        gate={makeGate({ status: 'rejected', rejectionReason: 'spec gaps' })}
+        leftPx={40}
+        canEdit={false}
+      />,
+    );
+    const readout = screen.getByTestId('gate-chip-spec-rejection-reason');
+    expect(readout.getAttribute('role')).toBe('status');
+    expect(readout.textContent).toBe('spec gaps');
+  });
+});
+
 describe('GanttGateChip — re-open from rejected', () => {
   it('reject button on a rejected gate fires onChangeStatus(waiting, null) without opening editor', () => {
     const onChange = vi.fn().mockResolvedValue(undefined);

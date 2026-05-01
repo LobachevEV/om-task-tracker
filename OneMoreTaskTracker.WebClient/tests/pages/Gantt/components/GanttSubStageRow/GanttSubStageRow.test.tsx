@@ -45,7 +45,7 @@ function makeGeom(
 ): SubStageBarGeometry {
   return {
     subStage: makeSubStage(track, phase, ordinal),
-    bar: { leftPx: 0, widthPx: 64 },
+    bar: { leftPx: 0, widthPx: 64, clampedLeft: false, clampedRight: false },
     ghost: null,
     isOverdue: false,
     ...overrides,

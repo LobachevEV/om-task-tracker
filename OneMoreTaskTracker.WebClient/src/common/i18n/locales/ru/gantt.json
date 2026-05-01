@@ -160,6 +160,8 @@
     "unrejectAria": "Вернуть гейт {{name}} в работу",
     "reasonAria": "Причина отклонения для {{name}}",
     "reasonPlaceholder": "Причина (обязательно)",
+    "reasonHint": "До {{max}} символов",
+    "reasonCounter": "{{n}} / {{max}}",
     "reasonSubmit": "Отклонить",
     "reasonCancel": "Отмена",
     "rejectReasonRequired": "Нужна причина для отклонения",

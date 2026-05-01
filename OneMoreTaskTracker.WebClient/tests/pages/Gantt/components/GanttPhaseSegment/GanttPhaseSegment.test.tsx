@@ -36,7 +36,7 @@ function makeSubStage(track: Track, phase: PhaseKind, ordinal: number): FeatureS
 function makeSubGeom(track: Track, phase: PhaseKind, ordinal: number): SubStageBarGeometry {
   return {
     subStage: makeSubStage(track, phase, ordinal),
-    bar: { leftPx: 0, widthPx: 80 },
+    bar: { leftPx: 0, widthPx: 80, clampedLeft: false, clampedRight: false },
     ghost: null,
     isOverdue: false,
   };
@@ -56,7 +56,7 @@ function makePhaseGeom(overrides: Partial<PhaseBarGeometry> & {
     cap: overrides.multiOwner ? 6 : 1,
     derivedPlannedStart: '2026-04-15',
     derivedPlannedEnd: '2026-04-20',
-    bar: 'bar' in overrides ? (overrides.bar as PhaseBarGeometry['bar']) : { leftPx: 100, widthPx: 240 },
+    bar: 'bar' in overrides ? (overrides.bar as PhaseBarGeometry['bar']) : { leftPx: 100, widthPx: 240, clampedLeft: false, clampedRight: false },
     ghost: 'ghost' in overrides ? (overrides.ghost as PhaseBarGeometry['ghost']) : null,
     status: overrides.status ?? 'current',
     isOverdue: overrides.isOverdue ?? false,
@@ -166,7 +166,7 @@ describe('GanttPhaseSegment — hairlines (multi-owner split rendering)', () => 
           multiOwner: true,
           subStageCount: 3,
           bar: null,
-          ghost: { leftPx: 0, widthPx: 48 },
+          ghost: { leftPx: 0, widthPx: 48, clampedLeft: false, clampedRight: false },
         })}
         dimmed={false}
         expanded={false}
@@ -228,7 +228,7 @@ describe('GanttPhaseSegment — data attributes', () => {
           multiOwner: true,
           subStageCount: 1,
           bar: null,
-          ghost: { leftPx: 10, widthPx: 32 },
+          ghost: { leftPx: 10, widthPx: 32, clampedLeft: false, clampedRight: false },
           status: 'ghost',
         })}
         dimmed={false}

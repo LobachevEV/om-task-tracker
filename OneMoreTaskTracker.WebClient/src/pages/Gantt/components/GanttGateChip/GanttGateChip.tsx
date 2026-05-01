@@ -222,6 +222,7 @@ export function GanttGateChip({
               defaultValue: 'Rejection reason for {{name}}',
               name: gateLabel,
             })}
+            aria-describedby={`${testIdBase}-reason-hint ${testIdBase}-reason-counter`}
             value={reasonDraft}
             maxLength={REJECTION_REASON_MAX}
             placeholder={t('gates.reasonPlaceholder', {
@@ -235,6 +236,28 @@ export function GanttGateChip({
             aria-invalid={reasonError != null || undefined}
             disabled={pending}
           />
+          <span
+            id={`${testIdBase}-reason-hint`}
+            className="gantt-gate-chip__reason-hint"
+            data-testid={`${testIdBase}-reason-hint`}
+          >
+            {t('gates.reasonHint', {
+              defaultValue: 'Up to {{max}} characters',
+              max: REJECTION_REASON_MAX,
+            })}
+          </span>
+          <span
+            id={`${testIdBase}-reason-counter`}
+            className="gantt-gate-chip__reason-counter"
+            data-testid={`${testIdBase}-reason-counter`}
+            aria-live="polite"
+          >
+            {t('gates.reasonCounter', {
+              defaultValue: '{{n}} / {{max}}',
+              n: reasonDraft.length,
+              max: REJECTION_REASON_MAX,
+            })}
+          </span>
           <button
             type="button"
             className="gantt-gate-chip__reason-submit"
@@ -267,6 +290,7 @@ export function GanttGateChip({
         <span
           className="gantt-gate-chip__rejection-reason"
           data-testid={`${testIdBase}-rejection-reason`}
+          role="status"
         >
           {gate.rejectionReason}
         </span>
