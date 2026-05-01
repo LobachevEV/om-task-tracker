@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using OneMoreTaskTracker.Api.Auth;
 using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Taxonomy;
 using OneMoreTaskTracker.Proto.Features.AppendFeatureSubStageCommand;
+using OneMoreTaskTracker.Proto.Users;
 
 namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.SubStages;
 
@@ -10,7 +11,9 @@ namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.SubStages;
 [Authorize(Roles = Roles.Manager)]
 [Route("api/plan/features/{featureId:int}/phases/{track}/{phase}/sub-stages")]
 public class AppendFeatureSubStageController(
-    FeatureSubStageAppender.FeatureSubStageAppenderClient subStageAppender) : ControllerBase
+    FeatureSubStageAppender.FeatureSubStageAppenderClient subStageAppender,
+    UserService.UserServiceClient userService,
+    ILogger<AppendFeatureSubStageController> logger) : ControllerBase
 {
     [HttpPost]
     public async Task<ActionResult<SubStageMutationResponse>> Append(
@@ -24,6 +27,15 @@ public class AppendFeatureSubStageController(
             return BadRequest(ModelState);
 
         var callerUserId = User.GetUserId();
+
+        if (body.OwnerUserId is { } ownerId)
+        {
+            if (ownerId < 1)
+                return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
+            var roster = await userService.LoadRosterForManagerAsync(callerUserId, logger, ct);
+            if (!roster.ContainsKey(ownerId))
+                return BadRequest(new { error = "Pick a teammate from the list" });
+        }
 
         var request = new AppendFeatureSubStageRequest
         {

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using OneMoreTaskTracker.Api.Auth;
 using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Taxonomy;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureSubStageCommand;
+using OneMoreTaskTracker.Proto.Users;
 
 namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.SubStages;
 
@@ -11,6 +12,7 @@ namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.SubStages;
 [Route("api/plan/features/{featureId:int}/sub-stages")]
 public class PatchFeatureSubStageController(
     FeatureSubStagePatcher.FeatureSubStagePatcherClient subStagePatcher,
+    UserService.UserServiceClient userService,
     ILogger<PatchFeatureSubStageController> logger) : ControllerBase
 {
     [HttpPatch("{subStageId:int}")]
@@ -25,6 +27,16 @@ public class PatchFeatureSubStageController(
             return BadRequest(ModelState);
 
         var callerUserId = User.GetUserId();
+
+        if (body.OwnerUserId is { } ownerId)
+        {
+            if (ownerId < 1)
+                return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
+            var roster = await userService.LoadRosterForManagerAsync(callerUserId, logger, ct);
+            if (!roster.ContainsKey(ownerId))
+                return BadRequest(new { error = "Pick a teammate from the list" });
+        }
+
         var headerVersion = PlanRequestHelpers.ParseIfMatch(ifMatch, logger);
         var expectedVersion = body.ExpectedVersion ?? headerVersion;
 
