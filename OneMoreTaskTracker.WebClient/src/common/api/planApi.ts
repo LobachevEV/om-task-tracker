@@ -3,15 +3,24 @@ import {
   featureDetailSchema,
   featureSummaryListSchema,
   featureSummarySchema,
+  patchFeatureGateResponseSchema,
+  subStageMutationResponseSchema,
 } from './schemas';
 import type {
+  AppendFeatureSubStagePayload,
   CreateFeaturePayload,
   FeatureDetail,
   FeatureScope,
   FeatureState,
   FeatureSummary,
+  GateKey,
+  PatchFeatureGatePayload,
+  PatchFeatureGateResponse,
   PatchFeaturePayload,
-  PatchFeatureStagePayload,
+  PatchFeatureSubStagePayload,
+  PhaseKind,
+  SubStageMutationResponse,
+  Track,
 } from '../types/feature';
 
 function jsonHeaders(ifMatch?: number): Record<string, string> {
@@ -28,11 +37,8 @@ function jsonHeaders(ifMatch?: number): Record<string, string> {
 export interface ListFeaturesParams {
   scope?: FeatureScope;
   state?: FeatureState;
-  /** Inclusive ISO yyyy-MM-dd; pairs with `windowEnd`. */
   windowStart?: string;
-  /** Inclusive ISO yyyy-MM-dd; pairs with `windowStart`. */
   windowEnd?: string;
-  /** Optional AbortSignal — caller cancels stale chunk fetches on fast pan. */
   signal?: AbortSignal;
 }
 
@@ -110,29 +116,84 @@ export async function patchFeature(
   return featureSummarySchema.parse(data);
 }
 
-export async function patchFeatureStage(
+export async function patchFeatureGate(
   featureId: number,
-  stage: FeatureState,
-  body: PatchFeatureStagePayload,
-): Promise<FeatureSummary> {
+  gateKey: GateKey,
+  body: PatchFeatureGatePayload,
+): Promise<PatchFeatureGateResponse> {
   const response = await fetch(
-    `${API_BASE_URL}/api/plan/features/${featureId}/stages/${stage}`,
+    `${API_BASE_URL}/api/plan/features/${featureId}/gates/${gateKey}`,
     {
       method: 'PATCH',
-      headers: jsonHeaders(body.expectedStageVersion),
+      headers: jsonHeaders(body.expectedVersion),
       body: JSON.stringify(body),
     },
   );
   const data = await handleResponse<unknown>(response);
-  return featureSummarySchema.parse(data);
+  return patchFeatureGateResponseSchema.parse(data);
+}
+
+export async function patchFeatureSubStage(
+  featureId: number,
+  subStageId: number,
+  body: PatchFeatureSubStagePayload,
+): Promise<SubStageMutationResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/plan/features/${featureId}/sub-stages/${subStageId}`,
+    {
+      method: 'PATCH',
+      headers: jsonHeaders(body.expectedVersion),
+      body: JSON.stringify(body),
+    },
+  );
+  const data = await handleResponse<unknown>(response);
+  return subStageMutationResponseSchema.parse(data);
+}
+
+export async function appendFeatureSubStage(
+  featureId: number,
+  track: Track,
+  phase: PhaseKind,
+  body: AppendFeatureSubStagePayload,
+): Promise<SubStageMutationResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/plan/features/${featureId}/phases/${track}/${phase}/sub-stages`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify(body),
+    },
+  );
+  const data = await handleResponse<unknown>(response);
+  return subStageMutationResponseSchema.parse(data);
+}
+
+export async function deleteFeatureSubStage(
+  featureId: number,
+  subStageId: number,
+  expectedVersion?: number,
+): Promise<SubStageMutationResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/plan/features/${featureId}/sub-stages/${subStageId}`,
+    { method: 'DELETE', headers: jsonHeaders(expectedVersion) },
+  );
+  const data = await handleResponse<unknown>(response);
+  return subStageMutationResponseSchema.parse(data);
 }
 
 export type {
+  AppendFeatureSubStagePayload,
   CreateFeaturePayload,
   FeatureDetail,
   FeatureScope,
   FeatureState,
   FeatureSummary,
+  GateKey,
+  PatchFeatureGatePayload,
+  PatchFeatureGateResponse,
   PatchFeaturePayload,
-  PatchFeatureStagePayload,
+  PatchFeatureSubStagePayload,
+  PhaseKind,
+  SubStageMutationResponse,
+  Track,
 } from '../types/feature';

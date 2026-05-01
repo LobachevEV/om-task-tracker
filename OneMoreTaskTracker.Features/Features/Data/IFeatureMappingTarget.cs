@@ -13,4 +13,5 @@ internal interface IFeatureMappingTarget
     string CreatedAt { get; set; }
     string UpdatedAt { get; set; }
     int Version { get; set; }
+    OneMoreTaskTracker.Proto.Features.FeatureTaxonomyDto Taxonomy { get; set; }
 }

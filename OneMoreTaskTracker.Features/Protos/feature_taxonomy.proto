@@ -1,0 +1,11 @@
+syntax = "proto3";
+import "feature_gate.proto";
+import "feature_sub_stage.proto";
+
+option csharp_namespace = "OneMoreTaskTracker.Proto.Features";
+package mr_helper.features;
+
+message FeatureTaxonomyDto {
+  repeated FeatureGateDto     gates      = 1;
+  repeated FeatureSubStageDto sub_stages = 2;
+}

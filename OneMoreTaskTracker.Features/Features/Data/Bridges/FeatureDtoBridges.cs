@@ -27,10 +27,3 @@ namespace OneMoreTaskTracker.Proto.Features.PatchFeatureCommand
     {
     }
 }
-
-namespace OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand
-{
-    public sealed partial class FeatureDto : IFeatureMappingTarget
-    {
-    }
-}

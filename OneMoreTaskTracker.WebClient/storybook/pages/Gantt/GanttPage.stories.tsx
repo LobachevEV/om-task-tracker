@@ -61,6 +61,7 @@ function PageHarness({
       onRetry={() => {}}
       state={state}
       onFeatureUpdated={() => {}}
+      resolveFeature={(id) => features.find((f) => f.id === id)}
       loadChunk={async () => {}}
     />
   );

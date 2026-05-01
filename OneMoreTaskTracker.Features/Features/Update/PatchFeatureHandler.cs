@@ -12,7 +12,7 @@ public sealed class PatchFeatureHandler(
 {
     public override async Task<FeatureDto> Patch(PatchFeatureRequest request, ServerCallContext context)
     {
-        var feature = await db.LoadFeatureWithStagePlansAsync(request.Id, context.CancellationToken);
+        var feature = await db.LoadFeatureWithTaxonomyAsync(request.Id, context.CancellationToken);
         FeatureOwnershipGuard.EnsureManager(feature, request.CallerUserId);
         FeatureVersionGuard.EnsureFeatureVersion(feature, request.HasExpectedVersion, request.ExpectedVersion);
 
@@ -56,7 +56,7 @@ public sealed class PatchFeatureHandler(
         }
 
         var dto = feature.Adapt<FeatureDto>();
-        dto.StagePlans.Add(FeatureMappingConfig.BuildProtoStagePlans(feature));
+        dto.Taxonomy = FeatureMappingConfig.BuildProtoTaxonomy(feature);
         return dto;
     }
 }

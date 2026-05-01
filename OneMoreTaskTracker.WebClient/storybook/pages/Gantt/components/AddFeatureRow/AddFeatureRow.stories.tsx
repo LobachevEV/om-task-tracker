@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 import { AddFeatureRow } from '../../../../../src/pages/Gantt/components/AddFeatureRow';
 import type { FeatureSummary } from '../../../../../src/common/types/feature';
+import { UNSCHEDULED_FEATURE } from '../../../../../src/pages/Gantt/__fixtures__/FeatureFixtures';
 
 const summary: FeatureSummary = {
   id: 1,
@@ -14,7 +15,7 @@ const summary: FeatureSummary = {
   managerUserId: 1,
   taskCount: 0,
   taskIds: [],
-  stagePlans: [],
+  taxonomy: UNSCHEDULED_FEATURE.taxonomy,
   version: 0,
 };
 

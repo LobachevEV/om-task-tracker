@@ -59,38 +59,72 @@ export const featureStateSchema = z.enum([
   'LiveRelease',
 ]);
 
+export const gateKindSchema = z.enum(['spec', 'cs', 'sr']);
+export const gateStatusSchema = z.enum(['waiting', 'approved', 'rejected']);
+export const trackSchema = z.enum(['backend', 'frontend']);
+export const phaseKindSchema = z.enum([
+  'development',
+  'stand-testing',
+  'ethalon-testing',
+  'live-release',
+]);
+export const gateKeySchema = z.enum(['spec', 'backend.prep-gate', 'frontend.prep-gate']);
+
 const isoDateOrNull = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD')
   .nullable();
 
+const isoDateTimeOrNull = z.string().min(1).nullable();
+
 const miniTeamMemberSchema = z.object({
   userId: z.number().int().positive(),
-  email: z.string().email(),
+  email: z.string().email().nullable(),
   displayName: z.string().min(1),
   role: userRoleSchema,
 });
 
-/**
- * `stageVersion` is optional on the wire; absent values are treated as 0
- * so older payloads that predate optimistic concurrency keep parsing.
- */
-export const stagePlanSchema = z.object({
-  stage: featureStateSchema,
-  plannedStart: isoDateOrNull,
-  plannedEnd: isoDateOrNull,
-  performerUserId: z.number().int().positive().nullable(),
-  stageVersion: z.number().int().nonnegative().optional(),
+export const featureGateSchema = z.object({
+  id: z.number().int().nonnegative(),
+  gateKey: gateKeySchema,
+  kind: gateKindSchema,
+  track: trackSchema.nullable().default(null),
+  status: gateStatusSchema,
+  approverUserId: z.number().int().nullable().default(null),
+  approver: miniTeamMemberSchema.nullable().optional(),
+  approvedAtUtc: isoDateTimeOrNull.default(null),
+  requestedAtUtc: isoDateTimeOrNull.default(null),
+  rejectionReason: z.string().max(500).nullable().default(null),
+  version: z.number().int().nonnegative(),
 });
 
-/**
- * Detail stage plan. Same as `stagePlanSchema` but carries a resolved
- * `performer` mini-member. The field is required on the wire but may be
- * null either because `performerUserId` is null OR because the referenced
- * user is no longer on the manager's roster ("stale performer").
- */
-export const detailStagePlanSchema = stagePlanSchema.extend({
-  performer: miniTeamMemberSchema.nullable(),
+export const featureSubStageSchema = z.object({
+  id: z.number().int().nonnegative(),
+  track: trackSchema,
+  phase: phaseKindSchema,
+  ordinal: z.number().int().nonnegative(),
+  ownerUserId: z.number().int().nullable().default(null),
+  owner: miniTeamMemberSchema.nullable().optional(),
+  plannedStart: isoDateOrNull.default(null),
+  plannedEnd: isoDateOrNull.default(null),
+  version: z.number().int().nonnegative(),
+});
+
+export const featurePhaseTaxonomySchema = z.object({
+  phase: phaseKindSchema,
+  multiOwner: z.boolean(),
+  cap: z.number().int().min(1),
+  subStages: z.array(featureSubStageSchema),
+});
+
+export const featureTrackTaxonomySchema = z.object({
+  track: trackSchema,
+  phases: z.array(featurePhaseTaxonomySchema).length(4),
+});
+
+export const featureTaxonomySchema = z.object({
+  gates: z.array(featureGateSchema).length(3),
+  tracks: z.array(featureTrackTaxonomySchema).length(2),
 });
 
 export const featureSummarySchema = z.object({
@@ -107,21 +141,10 @@ export const featureSummarySchema = z.object({
   managerUserId: z.number().int().positive(),
   taskCount: z.number().int().nonnegative(),
   taskIds: z.array(z.number().int().positive()),
-  /** Always length 5 — see api-contract.md. */
-  stagePlans: z.array(stagePlanSchema).length(5),
-  /**
-   * Feature-level optimistic-concurrency token. Optional on the wire so
-   * older payloads keep parsing; absent values are treated as 0.
-   */
+  taxonomy: featureTaxonomySchema,
   version: z.number().int().nonnegative().optional(),
 });
 
-/**
- * Sparse PATCH request schemas for the consolidated endpoints. Every field is
- * optional; callers send only the fields the user actually changed plus the
- * version token. The gateway returns a refreshed `FeatureSummary` validated
- * via `featureSummarySchema`.
- */
 export const patchFeatureRequestSchema = z.object({
   title: z.string().min(1).max(200).optional(),
   description: z.string().max(4000).nullable().optional(),
@@ -129,11 +152,23 @@ export const patchFeatureRequestSchema = z.object({
   expectedVersion: z.number().int().nonnegative().optional(),
 });
 
-export const patchFeatureStageRequestSchema = z.object({
-  stageOwnerUserId: z.number().int().positive().nullable().optional(),
+export const patchFeatureGateRequestSchema = z.object({
+  status: gateStatusSchema.optional(),
+  rejectionReason: z.string().max(500).nullable().optional(),
+  expectedVersion: z.number().int().nonnegative().optional(),
+});
+
+export const patchFeatureSubStageRequestSchema = z.object({
+  ownerUserId: z.number().int().nullable().optional(),
   plannedStart: isoDateOrNull.optional(),
   plannedEnd: isoDateOrNull.optional(),
-  expectedStageVersion: z.number().int().nonnegative().optional(),
+  expectedVersion: z.number().int().nonnegative().optional(),
+});
+
+export const appendFeatureSubStageRequestSchema = z.object({
+  ownerUserId: z.number().int().nullable().optional(),
+  plannedStart: isoDateOrNull.optional(),
+  plannedEnd: isoDateOrNull.optional(),
 });
 
 export const featureSummaryListSchema = z.array(featureSummarySchema);
@@ -150,6 +185,17 @@ export const featureDetailSchema = z.object({
   tasks: z.array(attachedTaskSchema),
   lead: miniTeamMemberSchema,
   miniTeam: z.array(miniTeamMemberSchema),
-  /** Always length 5 — see api-contract.md. */
-  stagePlans: z.array(detailStagePlanSchema).length(5),
+});
+
+export const patchFeatureGateResponseSchema = z.object({
+  featureId: z.number().int().positive(),
+  featureVersion: z.number().int().nonnegative(),
+  taxonomy: featureTaxonomySchema,
+});
+
+export const subStageMutationResponseSchema = z.object({
+  featureId: z.number().int().positive(),
+  featureVersion: z.number().int().nonnegative(),
+  createdSubStageId: z.number().int().nullable().default(null),
+  taxonomy: featureTaxonomySchema,
 });

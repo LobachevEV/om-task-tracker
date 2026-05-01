@@ -1,14 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OneMoreTaskTracker.Api.Auth;
-using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
-using OneMoreTaskTracker.Proto.Features;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureCommand;
 using OneMoreTaskTracker.Proto.Users;
-using ProtoFeatureStagePlan = OneMoreTaskTracker.Proto.Features.FeatureStagePlan;
 
 namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature;
 
@@ -23,7 +20,6 @@ public class FeaturesController(
     UserService.UserServiceClient userService,
     ILogger<FeaturesController> logger) : ControllerBase
 {
-
     [HttpGet]
     public async Task<ActionResult<IEnumerable<FeatureSummaryResponse>>> List(
         [FromQuery] string? scope,
@@ -49,9 +45,6 @@ public class FeaturesController(
             },
             cancellationToken: ct);
 
-        // tasksByFeature stays empty: TaskDto has no feature_id, so per-feature
-        // task counts can't be computed from ListTasks. Calling Tasks/Users
-        // here would only add an unused dependency.
         var summaries = listResponse.Features
             .Select(f => FeatureSummaryResponse.From(f, PlanRequestHelpers.EmptyTasks))
             .ToList();
@@ -71,14 +64,16 @@ public class FeaturesController(
         var roster = await userService.LoadRosterForManagerAsync(feature.ManagerUserId, logger, ct);
 
         var lead = MiniTeamMemberResponse.From(feature.LeadUserId, roster);
-        var detailStagePlans = feature.StagePlans
-            .Select(sp => BuildDetailStagePlan(sp, roster, feature.Id, feature.ManagerUserId))
-            .ToList();
 
         var miniTeamIds = new HashSet<int>();
         if (feature.LeadUserId > 0) miniTeamIds.Add(feature.LeadUserId);
-        foreach (var sp in feature.StagePlans)
-            if (sp.PerformerUserId > 0) miniTeamIds.Add(sp.PerformerUserId);
+        if (feature.Taxonomy is not null)
+        {
+            foreach (var sub in feature.Taxonomy.SubStages)
+                if (sub.OwnerUserId > 0) miniTeamIds.Add(sub.OwnerUserId);
+            foreach (var gate in feature.Taxonomy.Gates)
+                if (gate.ApproverUserId > 0) miniTeamIds.Add(gate.ApproverUserId);
+        }
 
         var miniTeam = miniTeamIds
             .Select(uid => MiniTeamMemberResponse.From(uid, roster))
@@ -86,7 +81,7 @@ public class FeaturesController(
 
         var summary = FeatureSummaryResponse.From(feature, PlanRequestHelpers.EmptyTasks);
 
-        return Ok(new FeatureDetailResponse(summary, [], lead, miniTeam, detailStagePlans));
+        return Ok(new FeatureDetailResponse(summary, [], lead, miniTeam));
     }
 
     [HttpPost]
@@ -150,50 +145,5 @@ public class FeaturesController(
 
         var dto = await featurePatcher.PatchAsync(request, cancellationToken: ct);
         return Ok(FeatureSummaryResponse.From(dto, PlanRequestHelpers.EmptyTasks));
-    }
-
-    private StagePlanDetailResponse BuildDetailStagePlan(
-        ProtoFeatureStagePlan sp,
-        IReadOnlyDictionary<int, TeamRosterMember> roster,
-        int featureId,
-        int managerUserId)
-    {
-        var performerUserId = sp.PerformerUserId > 0 ? (int?)sp.PerformerUserId : null;
-        var performer = ResolvePerformer(performerUserId, roster, featureId, managerUserId, sp.Stage);
-
-        return new StagePlanDetailResponse(
-            sp.Stage.ToWireString(),
-            string.IsNullOrEmpty(sp.PlannedStart) ? null : sp.PlannedStart,
-            string.IsNullOrEmpty(sp.PlannedEnd) ? null : sp.PlannedEnd,
-            performerUserId,
-            performer,
-            sp.Version);
-    }
-
-    private MiniTeamMemberResponse? ResolvePerformer(
-        int? performerUserId,
-        IReadOnlyDictionary<int, TeamRosterMember> roster,
-        int featureId,
-        int managerUserId,
-        FeatureState stage)
-    {
-        if (performerUserId is not int pid)
-            return null;
-
-        if (roster.TryGetValue(pid, out var member))
-            return new MiniTeamMemberResponse(
-                member.UserId,
-                member.Email,
-                DisplayNameHelper.ExtractDisplayName(member.Email),
-                member.Role);
-
-        // Stale id: emit performer:null (not a placeholder); id stays on the wire.
-        logger.LogWarning(
-            "Stage performer {PerformerUserId} not on manager {ManagerUserId}'s roster (feature {FeatureId}, stage {Stage})",
-            pid,
-            managerUserId,
-            featureId,
-            stage);
-        return null;
     }
 }

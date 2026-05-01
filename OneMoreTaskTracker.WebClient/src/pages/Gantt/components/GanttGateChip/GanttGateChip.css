@@ -1,0 +1,177 @@
+.gantt-gate-chip {
+  position: absolute;
+  top: 50%;
+  left: var(--gate-left, 0px);
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  height: 18px;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.gantt-gate-chip[data-readonly='true'] {
+  cursor: default;
+}
+
+.gantt-gate-chip[data-rejecting='true'] {
+  height: auto;
+  align-items: center;
+}
+
+.gantt-gate-chip__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--text-muted);
+}
+
+.gantt-gate-chip__label {
+  font-family: var(--font-sans, inherit);
+}
+
+.gantt-gate-chip[data-status='waiting'] .gantt-gate-chip__dot {
+  background: var(--warning);
+}
+
+.gantt-gate-chip[data-status='approved'] {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.gantt-gate-chip[data-status='approved'] .gantt-gate-chip__dot {
+  background: var(--success);
+}
+
+.gantt-gate-chip[data-status='rejected'] {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.gantt-gate-chip[data-status='rejected'] .gantt-gate-chip__dot {
+  background: var(--danger);
+}
+
+.gantt-gate-chip__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-inline-start: var(--space-1);
+}
+
+.gantt-gate-chip__action {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  font-size: 10px;
+  line-height: 1;
+  color: var(--text-muted);
+}
+
+.gantt-gate-chip__action:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--surface-3, var(--surface-2));
+}
+
+.gantt-gate-chip__action:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.gantt-gate-chip__action--approve:hover:not(:disabled) {
+  color: var(--success);
+}
+
+.gantt-gate-chip__action--reject:hover:not(:disabled) {
+  color: var(--danger);
+}
+
+.gantt-gate-chip__action:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.gantt-gate-chip__reason {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-inline-start: var(--space-1);
+}
+
+.gantt-gate-chip__reason-input {
+  all: unset;
+  box-sizing: border-box;
+  inline-size: 18ch;
+  padding-block: 2px;
+  padding-inline: 4px;
+  border-block-end: 1px solid var(--accent);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+}
+
+.gantt-gate-chip__reason-input[aria-invalid='true'] {
+  border-block-end: 1px solid var(--danger);
+}
+
+.gantt-gate-chip__reason-submit,
+.gantt-gate-chip__reason-cancel {
+  all: unset;
+  cursor: pointer;
+  font-size: var(--text-xs);
+  padding-inline: 6px;
+  border-radius: 4px;
+}
+
+.gantt-gate-chip__reason-submit {
+  color: var(--danger);
+}
+
+.gantt-gate-chip__reason-submit:hover:not(:disabled) {
+  background: var(--surface-3, var(--surface-2));
+}
+
+.gantt-gate-chip__reason-cancel {
+  color: var(--text-muted);
+}
+
+.gantt-gate-chip__reason-cancel:hover {
+  color: var(--text);
+}
+
+.gantt-gate-chip__reason-error {
+  color: var(--danger);
+  font-size: var(--text-xs);
+}
+
+.gantt-gate-chip__reason-hint {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+.gantt-gate-chip__reason-counter {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.gantt-gate-chip__rejection-reason {
+  margin-inline-start: var(--space-1);
+  color: var(--danger);
+  font-size: var(--text-xs);
+  font-style: italic;
+}

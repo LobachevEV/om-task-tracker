@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { UserRole } from '../../common/auth/auth';
-import type { FeatureScope, FeatureState } from '../../common/types/feature';
+import type { FeatureScope, FeatureState, PhaseKind, Track } from '../../common/types/feature';
 import { ZOOM_DAYS, type ZoomLevel } from './ganttMath';
 import { toIsoDate } from './ganttMath';
 
@@ -15,7 +15,6 @@ function readPersistedZoom(): ZoomLevel {
   try {
     const raw = localStorage.getItem(ZOOM_STORAGE_KEY);
     if (!raw) return DEFAULT_ZOOM;
-    // Persisted either as JSON string ("week") or plain string (week). Accept both.
     let candidate: unknown = raw;
     if (raw.startsWith('"')) {
       try {
@@ -34,7 +33,7 @@ function persistZoom(zoom: ZoomLevel): void {
   try {
     localStorage.setItem(ZOOM_STORAGE_KEY, JSON.stringify(zoom));
   } catch {
-    // Storage can be unavailable (SSR, privacy mode). Silently ignore.
+    // Storage may be unavailable in SSR / private modes.
   }
 }
 
@@ -42,21 +41,26 @@ function initialTodayIso(): string {
   return toIsoDate(new Date());
 }
 
+export type FeaturePhaseExpansion = ReadonlyMap<Track, ReadonlySet<PhaseKind>>;
+
 export interface GanttPageState {
   zoom: ZoomLevel;
   scope: FeatureScope;
   stateFilter: FeatureState | 'all';
   revealedFeatureId: number | null;
-  /** Session-scoped: ids of features whose stage timeline is expanded inline. */
   expandedFeatureIds: ReadonlySet<number>;
+  /** Outer key: feature id; inner: track → set of expanded phases. */
+  expandedPhases: ReadonlyMap<number, FeaturePhaseExpansion>;
   today: string;
   setZoom: (z: ZoomLevel) => void;
   setScope: (s: FeatureScope) => void;
   setStateFilter: (s: FeatureState | 'all') => void;
   revealTasks: (id: number | null) => void;
-  /** Flip the expansion state for one feature id. */
   toggleFeatureExpanded: (id: number) => void;
+  togglePhaseExpanded: (featureId: number, track: Track, phase: PhaseKind) => void;
 }
+
+const EMPTY_FEATURE_PHASES: FeaturePhaseExpansion = new Map();
 
 export function useGanttPageState(role: UserRole): GanttPageState {
   const [zoom, setZoomState] = useState<ZoomLevel>(() => readPersistedZoom());
@@ -68,10 +72,10 @@ export function useGanttPageState(role: UserRole): GanttPageState {
   const [expandedFeatureIds, setExpandedFeatureIds] = useState<ReadonlySet<number>>(
     () => new Set<number>(),
   );
+  const [expandedPhases, setExpandedPhases] = useState<
+    ReadonlyMap<number, FeaturePhaseExpansion>
+  >(() => new Map());
 
-  // `today` is snapshotted on mount; reload to advance. useState with a
-  // lazy initializer gives us a stable, render-safe value (refs can't be
-  // read during render under the strict React Compiler lint).
   const [today] = useState<string>(() => initialTodayIso());
 
   const setZoom = useCallback((z: ZoomLevel) => {
@@ -80,6 +84,7 @@ export function useGanttPageState(role: UserRole): GanttPageState {
   }, []);
 
   const revealTasks = useCallback((id: number | null) => setRevealedFeatureId(id), []);
+
   const toggleFeatureExpanded = useCallback((id: number) => {
     setExpandedFeatureIds((prev) => {
       const next = new Set(prev);
@@ -89,6 +94,24 @@ export function useGanttPageState(role: UserRole): GanttPageState {
     });
   }, []);
 
+  const togglePhaseExpanded = useCallback(
+    (featureId: number, track: Track, phase: PhaseKind) => {
+      setExpandedPhases((prev) => {
+        const nextOuter = new Map(prev);
+        const featureMap = new Map(prev.get(featureId) ?? EMPTY_FEATURE_PHASES);
+        const trackSet = new Set(featureMap.get(track) ?? []);
+        if (trackSet.has(phase)) trackSet.delete(phase);
+        else trackSet.add(phase);
+        if (trackSet.size === 0) featureMap.delete(track);
+        else featureMap.set(track, trackSet);
+        if (featureMap.size === 0) nextOuter.delete(featureId);
+        else nextOuter.set(featureId, featureMap);
+        return nextOuter;
+      });
+    },
+    [],
+  );
+
   return useMemo(
     () => ({
       zoom,
@@ -96,12 +119,14 @@ export function useGanttPageState(role: UserRole): GanttPageState {
       stateFilter,
       revealedFeatureId,
       expandedFeatureIds,
+      expandedPhases,
       today,
       setZoom,
       setScope,
       setStateFilter,
       revealTasks,
       toggleFeatureExpanded,
+      togglePhaseExpanded,
     }),
     [
       zoom,
@@ -109,10 +134,12 @@ export function useGanttPageState(role: UserRole): GanttPageState {
       stateFilter,
       revealedFeatureId,
       expandedFeatureIds,
+      expandedPhases,
       today,
       setZoom,
       revealTasks,
       toggleFeatureExpanded,
+      togglePhaseExpanded,
     ],
   );
 }

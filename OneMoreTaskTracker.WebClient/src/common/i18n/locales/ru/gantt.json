@@ -145,6 +145,55 @@
     "EthalonTesting": "Тестирование на эталоне",
     "LiveRelease": "Релиз в прод"
   },
+  "tracks": {
+    "backend": "Бэкенд",
+    "frontend": "Фронтенд"
+  },
+  "gates": {
+    "spec": "Спека",
+    "backend.prep-gate": "BE согл.",
+    "frontend.prep-gate": "FE согл.",
+    "aria": "Гейт «{{name}}», {{status}}",
+    "approveAria": "Утвердить гейт {{name}}",
+    "unapproveAria": "Сбросить гейт {{name}} в ожидание",
+    "rejectAria": "Отклонить гейт {{name}}",
+    "unrejectAria": "Вернуть гейт {{name}} в работу",
+    "reasonAria": "Причина отклонения для {{name}}",
+    "reasonPlaceholder": "Причина (обязательно)",
+    "reasonHint": "До {{max}} символов",
+    "reasonCounter": "{{n}} / {{max}}",
+    "reasonSubmit": "Отклонить",
+    "reasonCancel": "Отмена",
+    "rejectReasonRequired": "Нужна причина для отклонения",
+    "rejectReasonTooLong": "Максимум {{max}} символов",
+    "rejectFailed": "Не удалось отклонить. Попробуйте ещё раз.",
+    "inFlightAria": "{{track}} в работе: {{phase}}"
+  },
+  "gateStatus": {
+    "waiting": "Ожидание",
+    "approved": "Одобрено",
+    "rejected": "Отклонено"
+  },
+  "phases": {
+    "development": "Разработка",
+    "stand-testing": "Тестирование на стенде",
+    "ethalon-testing": "Тестирование на эталоне",
+    "live-release": "Релиз в прод"
+  },
+  "phaseSegment": {
+    "aria": "{{track}} {{phase}} — суб-этапов: {{count}}."
+  },
+  "subStage": {
+    "indexOf": "{{index}} из {{total}}",
+    "label": "{{track}} · {{phase}}"
+  },
+  "actions": {
+    "addSubStage": "+ Добавить суб-этап",
+    "removeSubStage": "Удалить"
+  },
+  "validation": {
+    "subStageCap": "Достигнут предел в {{cap}} суб-этапов."
+  },
   "inlineEdit": {
     "titleAria": "Название фичи: {{title}}",
     "ownerAria": "Ответственный за этап {{stage}} фичи «{{title}}»",
@@ -158,6 +207,8 @@
       "endBeforeStart": "Дата окончания не раньше {{date}}",
       "startAfterEnd": "Дата начала не позже {{date}}",
       "stageOverlap": "Пересекается с этапом «{{neighbour}}»",
+      "subStageOverlap": "Пересекается с подэтапом #{{ordinal}}",
+      "subStageCap": "{{phase}}: достигнут предел {{cap}} подэтапов",
       "conflict": "Кто-то уже обновил это поле; обновите страницу",
       "network": "Не удалось сохранить. Повторить?"
     },
@@ -174,8 +225,17 @@
       "startSaved": "Плановое начало {{stage}} сохранено.",
       "startError": "Изменение планового начала {{stage}} отклонено.",
       "endSaved": "Плановое окончание {{stage}} сохранено.",
-      "endError": "Изменение планового окончания {{stage}} отклонено."
-    }
+      "endError": "Изменение планового окончания {{stage}} отклонено.",
+      "subStageOwnerSaved": "Ответственный за суб-этап {{phase}} сохранён.",
+      "subStageOwnerError": "Смена ответственного за суб-этап {{phase}} отклонена.",
+      "subStageStartSaved": "Плановое начало суб-этапа {{phase}} сохранено.",
+      "subStageStartError": "Изменение планового начала суб-этапа {{phase}} отклонено.",
+      "subStageEndSaved": "Плановое окончание суб-этапа {{phase}} сохранено.",
+      "subStageEndError": "Изменение планового окончания суб-этапа {{phase}} отклонено."
+    },
+    "subStageOwnerAria": "Ответственный за суб-этап {{phase}} фичи «{{title}}»",
+    "subStagePlannedStartAria": "Плановое начало суб-этапа {{phase}} фичи «{{title}}»",
+    "subStagePlannedEndAria": "Плановое окончание суб-этапа {{phase}} фичи «{{title}}»"
   },
   "stagePlan": {
     "title": "План этапов",

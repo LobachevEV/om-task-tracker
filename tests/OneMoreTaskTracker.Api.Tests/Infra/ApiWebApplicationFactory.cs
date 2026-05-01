@@ -8,7 +8,10 @@ using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureCommand;
-using OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand;
+using OneMoreTaskTracker.Proto.Features.PatchFeatureGateCommand;
+using OneMoreTaskTracker.Proto.Features.PatchFeatureSubStageCommand;
+using OneMoreTaskTracker.Proto.Features.AppendFeatureSubStageCommand;
+using OneMoreTaskTracker.Proto.Features.DeleteFeatureSubStageCommand;
 using OneMoreTaskTracker.Proto.Tasks;
 using OneMoreTaskTracker.Proto.Tasks.AttachTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.CreateTaskCommand;
@@ -53,7 +56,10 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
                 d.ServiceType == typeof(FeaturesLister.FeaturesListerClient) ||
                 d.ServiceType == typeof(FeatureGetter.FeatureGetterClient) ||
                 d.ServiceType == typeof(FeaturePatcher.FeaturePatcherClient) ||
-                d.ServiceType == typeof(FeatureStagePatcher.FeatureStagePatcherClient)
+                d.ServiceType == typeof(FeatureGatePatcher.FeatureGatePatcherClient) ||
+                d.ServiceType == typeof(FeatureSubStagePatcher.FeatureSubStagePatcherClient) ||
+                d.ServiceType == typeof(FeatureSubStageAppender.FeatureSubStageAppenderClient) ||
+                d.ServiceType == typeof(FeatureSubStageDeleter.FeatureSubStageDeleterClient)
             ).ToList();
 
             foreach (var descriptor in descriptors)
@@ -69,7 +75,10 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
             services.AddSingleton(Substitute.For<FeaturesLister.FeaturesListerClient>());
             services.AddSingleton(Substitute.For<FeatureGetter.FeatureGetterClient>());
             services.AddSingleton(Substitute.For<FeaturePatcher.FeaturePatcherClient>());
-            services.AddSingleton(Substitute.For<FeatureStagePatcher.FeatureStagePatcherClient>());
+            services.AddSingleton(Substitute.For<FeatureGatePatcher.FeatureGatePatcherClient>());
+            services.AddSingleton(Substitute.For<FeatureSubStagePatcher.FeatureSubStagePatcherClient>());
+            services.AddSingleton(Substitute.For<FeatureSubStageAppender.FeatureSubStageAppenderClient>());
+            services.AddSingleton(Substitute.For<FeatureSubStageDeleter.FeatureSubStageDeleterClient>());
         });
     }
 }

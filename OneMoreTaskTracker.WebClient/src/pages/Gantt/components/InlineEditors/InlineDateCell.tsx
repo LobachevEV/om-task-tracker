@@ -143,6 +143,27 @@ function resolveDateCellMessage(
       neighbour: error.conflict.with,
     });
   }
+  if (
+    error.kind === 'conflict' &&
+    error.conflict?.kind === 'subStageOverlap' &&
+    error.conflict.neighborOrdinal != null
+  ) {
+    return translate('inlineEdit.errors.subStageOverlap', {
+      defaultValue: 'Overlaps sub-stage #{{ordinal}}',
+      ordinal: error.conflict.neighborOrdinal + 1,
+    });
+  }
+  if (
+    error.kind === 'conflict' &&
+    error.conflict?.kind === 'subStageCap' &&
+    error.conflict.cap != null
+  ) {
+    return translate('inlineEdit.errors.subStageCap', {
+      defaultValue: '{{phase}} is at the {{cap}}-sub-stage cap',
+      phase: error.conflict.phase ?? '',
+      cap: error.conflict.cap,
+    });
+  }
   if (error.kind === 'validation' && /real release date/i.test(error.message)) {
     return translate('inlineEdit.errors.invalidDate', {
       defaultValue: 'Use a real release date',

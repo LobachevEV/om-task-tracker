@@ -1,16 +1,28 @@
-import { memo, useCallback, useMemo, useState, type KeyboardEvent } from 'react';
+import {
+  memo,
+  useCallback,
+  useMemo,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
-  FeatureState,
   FeatureSummary,
   MiniTeamMember,
+  PhaseKind,
+  Track,
 } from '../../../../common/types/feature';
 import type { TeamRosterMember } from '../../../../common/api/teamApi';
-import { daysBetween, type BarGeometryPx } from '../../ganttMath';
-import type { StageBarGeometry } from '../../ganttStageGeometry';
-import { featureIsOverdue, plannedStageCount } from '../../ganttStageGeometry';
-import { GanttSegmentedBar } from '../GanttSegmentedBar';
-import { GanttStageSubRow } from '../GanttStageSubRow';
+import { daysBetween } from '../../ganttMath';
+import {
+  featureIsOverdue,
+  plannedSubStageCount,
+  type FeatureBarGeometry,
+} from '../../ganttStageGeometry';
+import { GanttGateChip } from '../GanttGateChip';
+import { GanttPhaseSegment } from '../GanttPhaseSegment';
+import { GanttTrackRow } from '../GanttTrackRow';
 import type { GanttLaneVariant } from '../../useGanttLayout';
 import {
   InlineLiveRegion,
@@ -22,63 +34,55 @@ import './GanttFeatureRow.css';
 
 export interface GanttFeatureRowProps {
   feature: FeatureSummary;
-  stageBars: StageBarGeometry[];
-  /** Feature-level span; forwarded to GanttSegmentedBar as the summary fallback. */
-  bar?: BarGeometryPx | null;
+  geometry: FeatureBarGeometry;
   today: string;
   lead: MiniTeamMember;
-  /**
-   * Why this lane renders the way it does. `planned` is the normal case;
-   * `noPlan` and `outOfWindow` render a ghost lane so the manager still sees
-   * the row and can triage from the info panel.
-   */
   variant?: GanttLaneVariant;
-  /** Inline expansion of the stage sub-rows (session-scoped). */
   expanded: boolean;
-  /**
-   * Toggle handler. Receives the feature id so the page can pass a single
-   * stable callback for every row (enabling React.memo on the row).
-   */
+  expandedPhases: ReadonlyMap<Track, ReadonlySet<PhaseKind>>;
   onToggleExpand: (featureId: number) => void;
-  /** Click handler for per-stage cells (segmented bar + sub-row numeral). */
-  onOpenStage: (featureId: number, stage: FeatureState) => void;
-  /** Resolve a performer id against the cached roster for sub-row owner rendering. */
+  onTogglePhase: (featureId: number, track: Track, phase: PhaseKind) => void;
   resolvePerformer: (userId: number | null | undefined) => MiniTeamMember | undefined;
-  /**
-   * True when the signed-in user may edit this feature (manager + owner).
-   * Gates the inline editors; non-managers see the existing read-only row.
-   */
   canEdit?: boolean;
-  /** Wired by GanttPage — the five per-field PATCH callers. */
   mutations?: FeatureMutationCallbacks;
-  /** Roster used by the stage-owner picker inside expanded sub-rows. */
   roster?: readonly TeamRosterMember[];
 }
 
 function computeFeatureDtr(
+  geometry: FeatureBarGeometry,
   feature: FeatureSummary,
   today: string,
   doneLabel: string,
 ): string {
   if (feature.state === 'LiveRelease') return doneLabel;
-  const active = feature.stagePlans.find((p) => p.stage === feature.state);
-  const plannedEnd = active?.plannedEnd ?? feature.plannedEnd;
+  let plannedEnd: string | null = null;
+  for (const t of geometry.tracks) {
+    for (const phase of t.phases) {
+      if (phase.derivedPlannedEnd != null) {
+        if (plannedEnd == null || phase.derivedPlannedEnd > plannedEnd) {
+          plannedEnd = phase.derivedPlannedEnd;
+        }
+      }
+    }
+  }
   if (plannedEnd == null) return '—';
   const delta = daysBetween(today, plannedEnd);
   if (delta < 0) return `-${Math.abs(delta)}d`;
   return `${delta}d`;
 }
 
+const EMPTY_PHASE_SET: ReadonlySet<PhaseKind> = new Set();
+
 function GanttFeatureRowInner({
   feature,
-  stageBars,
-  bar,
+  geometry,
   today,
   lead,
   variant = 'planned',
   expanded,
+  expandedPhases,
   onToggleExpand,
-  onOpenStage,
+  onTogglePhase,
   resolvePerformer,
   canEdit = false,
   mutations,
@@ -87,13 +91,12 @@ function GanttFeatureRowInner({
   const { t } = useTranslation('gantt');
 
   const isOverdue = useMemo(() => featureIsOverdue(feature, today), [feature, today]);
-  const planned = useMemo(() => plannedStageCount(feature), [feature]);
+  const planned = useMemo(() => plannedSubStageCount(feature), [feature]);
   const doneLabel = t('row.done', { defaultValue: 'Done' });
   const dtr = useMemo(
-    () => computeFeatureDtr(feature, today, doneLabel),
-    [feature, today, doneLabel],
+    () => computeFeatureDtr(geometry, feature, today, doneLabel),
+    [geometry, feature, today, doneLabel],
   );
-  const totalStages = feature.stagePlans.length;
 
   const ariaLabel = t('row.rowAria', {
     title: feature.title,
@@ -106,10 +109,6 @@ function GanttFeatureRowInner({
     () => onToggleExpand(feature.id),
     [onToggleExpand, feature.id],
   );
-  const handleOpenStage = useCallback(
-    (stage: FeatureState) => onOpenStage(feature.id, stage),
-    [onOpenStage, feature.id],
-  );
 
   const handleTitleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -120,17 +119,12 @@ function GanttFeatureRowInner({
 
   const inlineEnabled = canEdit && mutations != null;
 
-  // Per-row aria-live region for inline-edit outcome announcements. Stored
-  // here (not at page level) so each row reads the same pattern and the
-  // screen reader hears feature-scoped context.
   const [announcement, setAnnouncement] = useState<string>('');
   const handleAnnounce = useCallback((message: string) => setAnnouncement(message), []);
   const buildTitleAnnouncement = useCallback(
     (outcome: 'saved' | 'error') =>
       outcome === 'saved'
-        ? t('inlineEdit.announce.titleSaved', {
-            defaultValue: 'Feature title saved.',
-          })
+        ? t('inlineEdit.announce.titleSaved', { defaultValue: 'Feature title saved.' })
         : t('inlineEdit.announce.titleError', {
             defaultValue: 'Feature title change was rejected.',
           }),
@@ -139,14 +133,52 @@ function GanttFeatureRowInner({
   const buildLeadAnnouncement = useCallback(
     (outcome: 'saved' | 'error') =>
       outcome === 'saved'
-        ? t('inlineEdit.announce.leadSaved', {
-            defaultValue: 'Feature lead saved.',
-          })
+        ? t('inlineEdit.announce.leadSaved', { defaultValue: 'Feature lead saved.' })
         : t('inlineEdit.announce.leadError', {
             defaultValue: 'Feature lead change was rejected.',
           }),
     [t],
   );
+
+  const handleSpecGate = useMemo(() => {
+    if (!inlineEnabled || mutations == null) return undefined;
+    return async (
+      gateKey: Parameters<FeatureMutationCallbacks['saveGateStatus']>[1],
+      next: Parameters<FeatureMutationCallbacks['saveGateStatus']>[2],
+      rejectionReason: Parameters<FeatureMutationCallbacks['saveGateStatus']>[3],
+      gateVersion: Parameters<FeatureMutationCallbacks['saveGateStatus']>[4],
+    ) => {
+      await mutations.saveGateStatus(
+        feature.id,
+        gateKey,
+        next,
+        rejectionReason,
+        gateVersion,
+      );
+    };
+  }, [feature.id, inlineEnabled, mutations]);
+
+  const handleTogglePhase = useCallback(
+    (track: Track, phase: PhaseKind) => onTogglePhase(feature.id, track, phase),
+    [feature.id, onTogglePhase],
+  );
+
+  const summaryStyle = useMemo<CSSProperties | undefined>(() => {
+    const summary = geometry.summaryBar;
+    if (summary == null) return undefined;
+    return {
+      ['--summary-left' as string]: `${summary.leftPx}px`,
+      ['--summary-width' as string]: `${summary.widthPx}px`,
+    } as CSSProperties;
+  }, [geometry.summaryBar]);
+
+  const trackBarStyle = useCallback((bar: { leftPx: number; widthPx: number } | null) => {
+    if (bar == null) return undefined;
+    return {
+      ['--track-summary-left' as string]: `${bar.leftPx}px`,
+      ['--track-summary-width' as string]: `${bar.widthPx}px`,
+    } as CSSProperties;
+  }, []);
 
   return (
     <>
@@ -156,6 +188,7 @@ function GanttFeatureRowInner({
         data-feature-row={feature.id}
         data-testid={`feature-row-${feature.id}`}
         data-variant={variant}
+        data-spec-blocked={geometry.specBlocked ? 'true' : 'false'}
       >
         <div className="gantt-row__gutter" data-testid="feature-info-panel">
           <div className="gantt-row__title-line">
@@ -260,46 +293,100 @@ function GanttFeatureRowInner({
             <span
               className="gantt-row__planned-counter"
               data-testid="feature-planned-counter"
-              data-partial={planned < totalStages ? 'true' : 'false'}
+              data-partial={planned.planned < planned.total ? 'true' : 'false'}
             >
-              {t('row.plannedCounter', { planned, total: totalStages })}
+              {t('row.plannedCounter', {
+                planned: planned.planned,
+                total: planned.total,
+              })}
             </span>
           </div>
         </div>
 
         <div className="gantt-row__lane" data-variant={variant}>
-          <GanttSegmentedBar
-            feature={feature}
-            stageBars={stageBars}
-            today={today}
-            resolvePerformer={resolvePerformer}
-            onOpenStage={handleOpenStage}
-            laneVariant={variant}
-            summaryBar={bar}
+          {geometry.summaryBar != null ? (
+            <span
+              className="gantt-row__summary"
+              data-testid="feature-summary-bar"
+              style={summaryStyle}
+              aria-hidden="true"
+            />
+          ) : (
+            <span className="gantt-row__empty-label" aria-hidden="true">
+              {t('row.notPlannedYet')}
+            </span>
+          )}
+          {geometry.tracks.map((trackGeom) => (
+            <div
+              key={`${feature.id}-${trackGeom.track}-summary`}
+              className="gantt-row__track-summary"
+              data-testid={`feature-track-summary-${feature.id}-${trackGeom.track}`}
+              data-track={trackGeom.track}
+              data-dimmed={trackGeom.dimmed ? 'true' : 'false'}
+              data-in-flight={trackGeom.inFlightPhase != null ? trackGeom.inFlightPhase.phase : 'none'}
+              aria-label={
+                trackGeom.inFlightPhase != null
+                  ? t('gates.inFlightAria', {
+                      defaultValue: '{{track}} in flight: {{phase}}',
+                      track: t(`tracks.${trackGeom.track}`),
+                      phase: t(`phases.${trackGeom.inFlightPhase.phase}`),
+                    })
+                  : undefined
+              }
+            >
+              {trackGeom.trackBar != null ? (
+                <span
+                  className="gantt-row__track-summary-bar"
+                  style={trackBarStyle(trackGeom.trackBar)}
+                  aria-hidden="true"
+                />
+              ) : null}
+              {trackGeom.inFlightPhase != null && trackGeom.inFlightPhase.bar != null ? (
+                <GanttPhaseSegment
+                  track={trackGeom.track}
+                  phaseGeom={trackGeom.inFlightPhase}
+                  dimmed={trackGeom.dimmed}
+                  expanded={false}
+                  onToggleExpand={handleTogglePhase}
+                />
+              ) : null}
+            </div>
+          ))}
+          <GanttGateChip
+            gate={geometry.specGate.gate}
+            leftPx={geometry.specGate.leftPx}
+            canEdit={inlineEnabled}
+            onChangeStatus={handleSpecGate}
           />
+          {geometry.tracks.map((trackGeom) => (
+            <GanttGateChip
+              key={`${feature.id}-${trackGeom.track}-prep-collapsed`}
+              gate={trackGeom.prepGate.gate}
+              leftPx={trackGeom.prepGate.leftPx}
+              canEdit={inlineEnabled}
+              testIdScope="collapsed"
+              onChangeStatus={handleSpecGate}
+            />
+          ))}
         </div>
       </div>
 
-      {expanded ? (
-        <>
-          {stageBars.map((seg, index) => (
-            <GanttStageSubRow
-              key={seg.stage}
+      {expanded
+        ? geometry.tracks.map((trackGeom) => (
+            <GanttTrackRow
+              key={`${feature.id}-${trackGeom.track}`}
               feature={feature}
-              seg={seg}
-              today={today}
-              resolvePerformer={resolvePerformer}
-              removedPerformerName={null}
-              index={index}
-              onOpenStage={handleOpenStage}
+              trackGeom={trackGeom}
+              expandedPhases={expandedPhases.get(trackGeom.track) ?? EMPTY_PHASE_SET}
               canEdit={inlineEnabled}
               mutations={mutations}
               roster={roster}
+              resolvePerformer={resolvePerformer}
+              onTogglePhase={handleTogglePhase}
               onAnnounce={handleAnnounce}
             />
-          ))}
-        </>
-      ) : null}
+          ))
+        : null}
       {inlineEnabled ? <InlineLiveRegion message={announcement} /> : null}
     </>
   );

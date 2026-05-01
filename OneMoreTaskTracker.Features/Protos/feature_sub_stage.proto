@@ -1,0 +1,25 @@
+syntax = "proto3";
+import "feature_gate.proto";
+
+option csharp_namespace = "OneMoreTaskTracker.Proto.Features";
+package mr_helper.features;
+
+enum FeaturePhaseKind {
+  PHASE_KIND_DEVELOPMENT     = 0;
+  PHASE_KIND_STAND_TESTING   = 1;
+  PHASE_KIND_ETHALON_TESTING = 2;
+  PHASE_KIND_LIVE_RELEASE    = 3;
+}
+
+message FeatureSubStageDto {
+  int32            id              = 1;
+  FeatureTrack     track           = 2;
+  FeaturePhaseKind phase_kind      = 3;
+  int32            ordinal         = 4;
+  int32            owner_user_id   = 5;
+  string           planned_start   = 6;
+  string           planned_end     = 7;
+  int32            version         = 8;
+  string           created_at      = 9;
+  string           updated_at      = 10;
+}

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { InlineOwnerPicker } from '../../../../../src/pages/Gantt/components/InlineEditors/InlineOwnerPicker';
+import { ApiError } from '../../../../../src/common/api/ApiError';
 import type { TeamRosterMember } from '../../../../../src/common/api/teamApi';
 
 function flush(): Promise<void> {
@@ -98,6 +99,30 @@ describe('InlineOwnerPicker', () => {
     fireEvent.mouseDown(clear!);
     await act(flush);
     expect(onSave).toHaveBeenCalledWith(null);
+  });
+
+  it('renders gateway 400 "Pick a teammate from the list" inline next to the picker', async () => {
+    const onSave = vi.fn().mockRejectedValue(
+      new ApiError(400, 'Request failed (400): Pick a teammate from the list'),
+    );
+    render(
+      <InlineOwnerPicker
+        value={null}
+        roster={ROSTER}
+        displayName={null}
+        ariaLabel="Owner"
+        onSave={onSave}
+      />,
+    );
+    const input = screen.getByLabelText('Owner') as HTMLInputElement;
+    fireEvent.focus(input);
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await act(flush);
+    expect(onSave).toHaveBeenCalledWith(11);
+    const alert = await screen.findByRole('alert');
+    expect(alert.getAttribute('data-kind')).toBe('validation');
+    expect(alert.textContent).toMatch(/Pick a teammate from the list/);
+    expect(input.getAttribute('aria-invalid')).toBe('true');
   });
 
   it('renders as read-only span when readOnly=true', () => {

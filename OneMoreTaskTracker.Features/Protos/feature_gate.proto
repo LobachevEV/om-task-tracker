@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+option csharp_namespace = "OneMoreTaskTracker.Proto.Features";
+package mr_helper.features;
+
+enum FeatureGateKind {
+  GATE_KIND_SPEC = 0;
+  GATE_KIND_CS   = 1;
+  GATE_KIND_SR   = 2;
+}
+
+enum FeatureGateStatus {
+  GATE_STATUS_WAITING  = 0;
+  GATE_STATUS_APPROVED = 1;
+  GATE_STATUS_REJECTED = 2;
+}
+
+enum FeatureTrack {
+  TRACK_BACKEND  = 0;
+  TRACK_FRONTEND = 1;
+}
+
+message FeatureGateDto {
+  int32             id                 = 1;
+  string            gate_key           = 2;
+  FeatureGateKind   kind               = 3;
+  FeatureGateStatus status             = 4;
+  optional FeatureTrack track          = 5;
+  int32             approver_user_id   = 6;
+  string            approved_at_utc    = 7;
+  string            requested_at_utc   = 8;
+  string            rejection_reason   = 9;
+  int32             version            = 10;
+  string            created_at         = 11;
+  string            updated_at         = 12;
+}

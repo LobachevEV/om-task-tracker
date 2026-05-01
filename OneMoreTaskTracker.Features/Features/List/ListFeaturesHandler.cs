@@ -11,7 +11,8 @@ public class ListFeaturesHandler(FeaturesDbContext db) : FeaturesLister.Features
     public override async Task<ListFeaturesResponse> List(ListFeaturesRequest request, ServerCallContext context)
     {
         IQueryable<Feature> q = db.Features.AsNoTracking()
-            .Include(f => f.StagePlans);
+            .Include(f => f.Gates)
+            .Include(f => f.SubStages);
 
         if (request.ManagerUserId > 0)
             q = q.Where(f => f.ManagerUserId == request.ManagerUserId);
@@ -48,7 +49,7 @@ public class ListFeaturesHandler(FeaturesDbContext db) : FeaturesLister.Features
         foreach (var row in rows)
         {
             var dto = row.Adapt<FeatureDto>();
-            dto.StagePlans.Add(FeatureMappingConfig.BuildProtoStagePlans(row));
+            dto.Taxonomy = FeatureMappingConfig.BuildProtoTaxonomy(row);
             response.Features.Add(dto);
         }
         return response;

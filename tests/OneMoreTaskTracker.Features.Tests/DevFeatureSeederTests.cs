@@ -30,6 +30,7 @@ public sealed class DevFeatureSeederTests
             "Checkout redesign",
             "Search infra upgrade",
             "Legacy API sunset",
+            "QA hardening pass",
         });
     }
 
@@ -75,10 +76,6 @@ public sealed class DevFeatureSeederTests
 
         await NewSeeder().SeedAsync(db);
 
-        // Legacy Feature.PlannedStart/End is derived from the stage plans (min/max
-        // of populated dates). Empty seed feature ("Legacy API sunset") has all
-        // null stage dates → both feature dates null. Constrain the assertion to
-        // features that have any populated stage plans.
         var features = await db.Features.AsNoTracking().ToListAsync();
         features.Select(f => f.State).Distinct().Should().HaveCountGreaterThan(1, "seed should exercise multiple lifecycle states");
 
@@ -87,37 +84,39 @@ public sealed class DevFeatureSeederTests
     }
 
     [Fact]
-    public async Task SeedAsync_MaterializesFiveStagePlansPerFeature()
+    public async Task SeedAsync_MaterializesThreeGatesAndEightSubStagesPerFeature()
     {
         await using var db = NewDb();
 
         await NewSeeder().SeedAsync(db);
 
-        var features = await db.Features.AsNoTracking().Include(f => f.StagePlans).ToListAsync();
-        features.Should().OnlyContain(f => f.StagePlans.Count == 5);
+        var features = await db.Features
+            .AsNoTracking()
+            .Include(f => f.Gates)
+            .Include(f => f.SubStages)
+            .ToListAsync();
+
+        features.Should().OnlyContain(f => f.Gates.Count == 3);
+        features.Should().OnlyContain(f => f.SubStages.Count == FeatureStageLayout.AllTracks.Length * FeatureStageLayout.AllPhases.Length);
+
         foreach (var feature in features)
         {
-            feature.StagePlans.Select(sp => sp.Stage).Distinct().Should().HaveCount(5);
+            feature.Gates.Select(g => g.GateKey).Should().BeEquivalentTo(new[]
+            {
+                FeatureStageLayout.SpecGateKey,
+                FeatureStageLayout.BackendPrepGateKey,
+                FeatureStageLayout.FrontendPrepGateKey,
+            });
+
+            foreach (var track in FeatureStageLayout.AllTracks)
+            {
+                foreach (var phase in FeatureStageLayout.AllPhases)
+                {
+                    var slice = feature.SubStages.Where(s => s.Track == track && s.PhaseKind == phase).ToList();
+                    slice.Should().ContainSingle();
+                    slice[0].Ordinal.Should().Be(1);
+                }
+            }
         }
-    }
-
-    [Fact]
-    public async Task SeedAsync_IncludesFullyPartiallyAndEmptyVariants()
-    {
-        await using var db = NewDb();
-
-        await NewSeeder().SeedAsync(db);
-
-        var features = await db.Features.AsNoTracking().Include(f => f.StagePlans).ToListAsync();
-
-        var fully  = features.Single(f => f.Title == "Checkout redesign");
-        var partial = features.Single(f => f.Title == "Search infra upgrade");
-        var empty  = features.Single(f => f.Title == "Legacy API sunset");
-
-        fully.StagePlans.Should().OnlyContain(sp => sp.PlannedStart != null && sp.PlannedEnd != null);
-        partial.StagePlans.Count(sp => sp.PlannedStart != null).Should().Be(2);
-        empty.StagePlans.Should().OnlyContain(sp => sp.PlannedStart == null && sp.PlannedEnd == null);
-        empty.PlannedStart.Should().BeNull();
-        empty.PlannedEnd.Should().BeNull();
     }
 }
