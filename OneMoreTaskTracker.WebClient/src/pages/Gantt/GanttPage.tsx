@@ -1,14 +1,6 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type CSSProperties,
-} from 'react';
-import { useTranslation } from 'react-i18next';
+import { useCallback, useMemo, type CSSProperties } from 'react';
 import { useAuth } from '../../common/auth/AuthContext';
-import { Spinner, Button, Callout } from '../../common/ds';
-import { isUserRole, type UserRole } from '../../common/auth/roles';
+import type { UserRole } from '../../common/auth/roles';
 import type {
   FeatureSummary,
   MiniTeamMember,
@@ -16,27 +8,24 @@ import type {
   Track,
 } from '../../common/types/feature';
 import type { TeamRosterMember } from '../../common/api/teamApi';
-import { AddFeatureRow } from './components/AddFeatureRow';
-import { GanttChunkStripe } from './components/GanttChunkStripe';
-import { GanttDateHeader } from './components/GanttDateHeader';
 import { GanttEmpty } from './components/GanttEmpty';
-import { GanttFeatureRow } from './components/GanttFeatureRow';
 import { GanttGoToDate } from './components/GanttGoToDate';
-import { GanttTimelineScroller } from './components/GanttTimelineScroller';
-import { GanttToolbar } from './components/GanttToolbar';
+import { GanttPageHeader } from './components/GanttPageHeader';
+import { GanttPageStateBanners } from './components/GanttPageStateBanners';
+import { GanttTimelineSection } from './components/GanttTimelineSection';
 import { usePlanFeatures } from './usePlanFeatures';
 import { useTeamRoster } from './useTeamRoster';
-import { useGanttLayout, type GanttLane } from './useGanttLayout';
+import { useGanttLayout } from './useGanttLayout';
 import { useGanttPageState, type GanttPageState } from './useGanttPageState';
+import { useGoToDateShortcut } from './useGoToDateShortcut';
 import {
   useGanttTimelineScroll,
   type ScrollChunkRequest,
 } from './useGanttTimelineScroll';
 import type { ZoomLevel } from './ganttMath';
 import { useFeatureMutationCallbacks } from './components/InlineEditors';
+import { placeholderMember, toMiniMember } from './utils/miniTeamMembers';
 import './GanttPage.css';
-
-const PLACEHOLDER_ROLE: MiniTeamMember['role'] = 'FrontendDeveloper';
 
 const DAY_PX_BY_ZOOM: Readonly<Record<ZoomLevel, number>> = {
   week: 48,
@@ -55,24 +44,6 @@ const CHUNK_DAYS = 14;
 const GUTTER_WIDTH_PX = 280;
 
 const EMPTY_PHASE_EXPANSION: ReadonlyMap<Track, ReadonlySet<PhaseKind>> = new Map();
-
-function toMiniMember(row: TeamRosterMember): MiniTeamMember {
-  return {
-    userId: row.userId,
-    email: row.email,
-    displayName: row.displayName,
-    role: isUserRole(row.role) ? row.role : PLACEHOLDER_ROLE,
-  };
-}
-
-function placeholderMember(userId: number): MiniTeamMember {
-  return {
-    userId,
-    email: null,
-    displayName: `#${userId}`,
-    role: PLACEHOLDER_ROLE,
-  };
-}
 
 export interface GanttPageInternalProps {
   role: UserRole;
@@ -103,35 +74,6 @@ export interface GanttPageInternalProps {
   loadChunk: (req: ScrollChunkRequest) => Promise<unknown>;
 }
 
-interface UnscheduledSectionProps {
-  features: FeatureSummary[];
-  onOpen: (id: number) => void;
-}
-
-function UnscheduledSection({ features, onOpen }: UnscheduledSectionProps) {
-  const { t } = useTranslation('gantt');
-  if (features.length === 0) return null;
-  return (
-    <section className="gantt-page__unscheduled" aria-label={t('row.unscheduled')}>
-      <h3 className="gantt-page__section-title">{t('row.unscheduled')}</h3>
-      <ul className="gantt-page__unscheduled-list">
-        {features.map((feature) => (
-          <li key={feature.id}>
-            <button
-              type="button"
-              className="gantt-page__unscheduled-item"
-              onClick={() => onOpen(feature.id)}
-            >
-              <span>{feature.title}</span>
-              <span className="gantt-page__unscheduled-state">{t(`state.${feature.state}`)}</span>
-            </button>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
 export function GanttPageInternal({
   role,
   features,
@@ -148,8 +90,7 @@ export function GanttPageInternal({
   resolveFeature,
   loadChunk,
 }: GanttPageInternalProps) {
-  const { t } = useTranslation('gantt');
-  const [goToOpen, setGoToOpen] = useState(false);
+  const goTo = useGoToDateShortcut();
 
   const dayPx = DAY_PX_BY_ZOOM[state.zoom];
   const isManager = role === 'Manager';
@@ -213,34 +154,12 @@ export function GanttPageInternal({
     [state, onRetry],
   );
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && (e.key === 'g' || e.key === 'G')) {
-        const target = e.target as HTMLElement | null;
-        if (
-          target &&
-          (target.tagName === 'INPUT' ||
-            target.tagName === 'TEXTAREA' ||
-            target.isContentEditable)
-        ) {
-          return;
-        }
-        e.preventDefault();
-        setGoToOpen((prev) => !prev);
-      } else if (e.key === 'Escape' && goToOpen) {
-        setGoToOpen(false);
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [goToOpen]);
-
   const handleGoToSubmit = useCallback(
     (iso: string) => {
-      setGoToOpen(false);
+      goTo.close();
       void scrollToDate(iso);
     },
-    [scrollToDate],
+    [goTo, scrollToDate],
   );
 
   const hasAnyFeatures = layout.lanes.length + layout.unscheduled.length > 0;
@@ -265,147 +184,47 @@ export function GanttPageInternal({
 
   return (
     <main className="gantt-page" style={pageStyle} data-testid="gantt-page">
-      <GanttToolbar
-        zoom={state.zoom}
-        scope={state.scope}
-        stateFilter={state.stateFilter}
-        onZoomChange={state.setZoom}
-        onScopeChange={state.setScope}
-        onStateFilterChange={state.setStateFilter}
+      <GanttPageHeader
+        state={state}
+        rosterError={rosterError}
+        rosterLoading={rosterLoading}
+        onRosterRetry={onRosterRetry}
       />
 
-      <div className="gantt-page__narrow-notice" role="note">
-        {t('narrowViewport.notice')}
-      </div>
-
-      {rosterError ? (
-        <Callout
-          tone="warning"
-          layout="banner"
-          aria-label={t('row.team')}
-          action={
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={onRosterRetry}
-              loading={rosterLoading}
-            >
-              {t('retry')}
-            </Button>
-          }
-        >
-          {t('row.team')}: {t('failed')}
-        </Callout>
-      ) : null}
-
-      {loading ? (
-        <div className="gantt-page__centered">
-          <Spinner label={t('loading')} />
-        </div>
-      ) : error ? (
-        <div className="gantt-page__centered">
-          <Callout
-            tone="danger"
-            action={
-              <Button type="button" variant="primary" onClick={onRetry}>
-                {t('retry')}
-              </Button>
-            }
-          >
-            {t('failed')}
-          </Callout>
-        </div>
+      {loading || error ? (
+        <GanttPageStateBanners loading={loading} error={error} onRetry={onRetry} />
       ) : !hasAnyFeatures ? (
         <GanttEmpty isManager={isManager} onCreated={handleCreated} />
       ) : (
-        <section className="gantt-page__timeline-wrap">
-          <GanttTimelineScroller
-            ref={attachScroller}
-            contentWidthPx={contentWidthPx}
-            todayPx={todayPxAbs}
-            onJumpToToday={scrollToToday}
-          >
-            <div className="gantt-page__header-row">
-              <div
-                className="gantt-page__header-flank gantt-page__header-flank--leading"
-                aria-hidden="true"
-              />
-              <GanttDateHeader
-                loadedRange={loadedRange}
-                today={state.today}
-                dayPx={dayPx}
-                className="gantt-page__date-header"
-              />
-              {showTrailingStripe ? (
-                <div
-                  className="gantt-page__header-flank gantt-page__header-flank--trailing"
-                  aria-hidden="true"
-                />
-              ) : null}
-            </div>
-
-            <div
-              className="gantt-page__today-hairline"
-              aria-hidden="true"
-            />
-
-            <div className="gantt-page__lanes-row">
-              <div
-                className="gantt-page__lanes"
-                role="list"
-              >
-                {isManager ? <AddFeatureRow onCreated={handleCreated} /> : null}
-                {layout.lanes.map((lane: GanttLane) => {
-                  const lead = resolveMember(lane.feature.leadUserId);
-                  const expanded = state.expandedFeatureIds.has(lane.feature.id);
-                  const phaseExpansion =
-                    state.expandedPhases.get(lane.feature.id) ?? EMPTY_PHASE_EXPANSION;
-                  return (
-                    <GanttFeatureRow
-                      key={lane.feature.id}
-                      feature={lane.feature}
-                      geometry={lane.geometry}
-                      today={state.today}
-                      lead={lead}
-                      variant={lane.variant}
-                      expanded={expanded}
-                      expandedPhases={phaseExpansion}
-                      onToggleExpand={state.toggleFeatureExpanded}
-                      onTogglePhase={state.togglePhaseExpanded}
-                      resolvePerformer={resolvePerformer}
-                      canEdit={isManager}
-                      mutations={isManager ? mutations : undefined}
-                      roster={isManager ? rawRoster : undefined}
-                    />
-                  );
-                })}
-              </div>
-
-              {showTrailingStripe ? (
-                <GanttChunkStripe
-                  side="trailing"
-                  mode={isFetchingTrailing ? 'loading' : 'failed'}
-                  widthPx={trailingStripeWidthPx}
-                  onRetry={
-                    loadError?.direction === 'trailing' ? retryFailedChunk : undefined
-                  }
-                />
-              ) : null}
-            </div>
-          </GanttTimelineScroller>
-
-          <UnscheduledSection
-            features={layout.unscheduled}
-            onOpen={state.toggleFeatureExpanded}
-          />
-        </section>
+        <GanttTimelineSection
+          state={state}
+          isManager={isManager}
+          lanes={layout.lanes}
+          unscheduled={layout.unscheduled}
+          loadedRange={loadedRange}
+          dayPx={dayPx}
+          contentWidthPx={contentWidthPx}
+          todayPxAbs={todayPxAbs}
+          showTrailingStripe={showTrailingStripe}
+          isFetchingTrailing={isFetchingTrailing}
+          trailingStripeWidthPx={trailingStripeWidthPx}
+          attachScroller={attachScroller}
+          scrollToToday={scrollToToday}
+          retryFailedChunk={retryFailedChunk}
+          loadErrorIsTrailing={loadError?.direction === 'trailing'}
+          resolveMember={resolveMember}
+          resolvePerformer={resolvePerformer}
+          emptyPhaseExpansion={EMPTY_PHASE_EXPANSION}
+          mutations={mutations}
+          rawRoster={rawRoster}
+          onCreated={handleCreated}
+        />
       )}
 
       <GanttGoToDate
-        open={goToOpen}
+        open={goTo.open}
         onSubmit={handleGoToSubmit}
-        onClose={() => setGoToOpen(false)}
+        onClose={goTo.close}
       />
     </main>
   );

@@ -1,14 +1,9 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-  type KeyboardEvent,
-} from 'react';
+import { useMemo, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FeatureGate, GateKey, GateStatus } from '../../../../common/types/feature';
+import { GanttGateChipActions } from './GanttGateChipActions';
+import { GanttGateChipRejectEditor } from './GanttGateChipRejectEditor';
+import { useGateRejectionEditor } from './useGateRejectionEditor';
 import './GanttGateChip.css';
 
 export interface GanttGateChipProps {
@@ -26,13 +21,6 @@ export interface GanttGateChipProps {
   ) => Promise<void> | void;
 }
 
-const REJECTION_REASON_MAX = 500;
-
-function approveTarget(current: GateStatus): GateStatus {
-  if (current === 'approved') return 'waiting';
-  return 'approved';
-}
-
 export function GanttGateChip({
   gate,
   leftPx,
@@ -46,11 +34,7 @@ export function GanttGateChip({
     : testIdScope != null
       ? `gate-chip-${testIdScope}-${gate.gateKey}`
       : `gate-chip-${gate.gateKey}`;
-  const [rejecting, setRejecting] = useState(false);
-  const [reasonDraft, setReasonDraft] = useState('');
-  const [reasonError, setReasonError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
-  const reasonInputRef = useRef<HTMLInputElement>(null);
+  const editor = useGateRejectionEditor({ gate, canEdit, onChangeStatus });
 
   const labelKey = useMemo<`gates.${GateKey}`>(() => `gates.${gate.gateKey}`, [gate.gateKey]);
   const statusLabel = t(`gateStatus.${gate.status}`);
@@ -70,101 +54,11 @@ export function GanttGateChip({
     return style;
   }, [leftPx]);
 
-  useEffect(() => {
-    if (rejecting) {
-      reasonInputRef.current?.focus();
-    }
-  }, [rejecting]);
-
-  const closeRejectEditor = useCallback(() => {
-    setRejecting(false);
-    setReasonDraft('');
-    setReasonError(null);
-  }, []);
-
-  const handleApprove = useCallback(async () => {
-    if (!canEdit || onChangeStatus == null || pending) return;
-    const next = approveTarget(gate.status);
-    setPending(true);
-    try {
-      await onChangeStatus(gate.gateKey, next, null, gate.version);
-    } finally {
-      setPending(false);
-    }
-  }, [canEdit, onChangeStatus, pending, gate.gateKey, gate.status, gate.version]);
-
-  const handleReject = useCallback(() => {
-    if (!canEdit || onChangeStatus == null || pending) return;
-    if (gate.status === 'rejected') {
-      setPending(true);
-      void Promise.resolve(onChangeStatus(gate.gateKey, 'waiting', null, gate.version)).finally(
-        () => setPending(false),
-      );
-      return;
-    }
-    setRejecting(true);
-    setReasonDraft(gate.rejectionReason ?? '');
-    setReasonError(null);
-  }, [canEdit, onChangeStatus, pending, gate.gateKey, gate.status, gate.version, gate.rejectionReason]);
-
-  const submitReject = useCallback(async () => {
-    if (onChangeStatus == null) return;
-    const trimmed = reasonDraft.trim();
-    if (trimmed.length === 0) {
-      setReasonError(
-        t('gates.rejectReasonRequired', {
-          defaultValue: 'A reason is required to reject',
-        }),
-      );
-      return;
-    }
-    if (trimmed.length > REJECTION_REASON_MAX) {
-      setReasonError(
-        t('gates.rejectReasonTooLong', {
-          defaultValue: 'Max {{max}} characters',
-          max: REJECTION_REASON_MAX,
-        }),
-      );
-      return;
-    }
-    setPending(true);
-    try {
-      await onChangeStatus(gate.gateKey, 'rejected', trimmed, gate.version);
-      closeRejectEditor();
-    } catch {
-      setReasonError(
-        t('gates.rejectFailed', {
-          defaultValue: "Couldn't reject. Try again.",
-        }),
-      );
-    } finally {
-      setPending(false);
-    }
-  }, [onChangeStatus, reasonDraft, t, gate.gateKey, gate.version, closeRejectEditor]);
-
-  const handleReasonKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      void submitReject();
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      closeRejectEditor();
-    }
-  };
-
   if (leftPx == null || gate == null || testIdBase == null) {
     return null;
   }
 
   const showReadonly = !canEdit;
-  const approveLabel =
-    gate.status === 'approved'
-      ? t('gates.unapproveAria', { defaultValue: 'Unapprove {{name}} gate', name: gateLabel })
-      : t('gates.approveAria', { defaultValue: 'Approve {{name}} gate', name: gateLabel });
-  const rejectLabel =
-    gate.status === 'rejected'
-      ? t('gates.unrejectAria', { defaultValue: 'Reopen {{name}} gate', name: gateLabel })
-      : t('gates.rejectAria', { defaultValue: 'Reject {{name}} gate', name: gateLabel });
 
   return (
     <span
@@ -173,8 +67,8 @@ export function GanttGateChip({
       data-status={gate.status}
       data-gate-key={gate.gateKey}
       data-readonly={showReadonly ? 'true' : 'false'}
-      data-rejecting={rejecting ? 'true' : 'false'}
-      data-pending={pending ? 'true' : 'false'}
+      data-rejecting={editor.rejecting ? 'true' : 'false'}
+      data-pending={editor.pending ? 'true' : 'false'}
       style={chipStyle}
       aria-label={ariaLabel}
       title={`${gateLabel} · ${statusLabel}`}
@@ -183,110 +77,32 @@ export function GanttGateChip({
       <span className="gantt-gate-chip__dot" aria-hidden="true" />
       <span className="gantt-gate-chip__label">{gateLabel}</span>
       {showReadonly ? null : (
-        <span className="gantt-gate-chip__actions">
-          <button
-            type="button"
-            className="gantt-gate-chip__action gantt-gate-chip__action--approve"
-            data-testid={`${testIdBase}-approve`}
-            aria-label={approveLabel}
-            title={approveLabel}
-            disabled={pending}
-            onClick={() => void handleApprove()}
-          >
-            {gate.status === 'approved' ? '↺' : '✓'}
-          </button>
-          <button
-            type="button"
-            className="gantt-gate-chip__action gantt-gate-chip__action--reject"
-            data-testid={`${testIdBase}-reject`}
-            aria-label={rejectLabel}
-            title={rejectLabel}
-            disabled={pending}
-            onClick={handleReject}
-          >
-            {gate.status === 'rejected' ? '↺' : '✕'}
-          </button>
-        </span>
+        <GanttGateChipActions
+          testIdBase={testIdBase}
+          gateLabel={gateLabel}
+          status={gate.status}
+          pending={editor.pending}
+          onApprove={() => void editor.handleApprove()}
+          onReject={editor.beginReject}
+        />
       )}
-      {rejecting ? (
-        <span
-          className="gantt-gate-chip__reason"
-          data-testid={`${testIdBase}-reason`}
-        >
-          <input
-            ref={reasonInputRef}
-            type="text"
-            className="gantt-gate-chip__reason-input"
-            data-testid={`${testIdBase}-reason-input`}
-            aria-label={t('gates.reasonAria', {
-              defaultValue: 'Rejection reason for {{name}}',
-              name: gateLabel,
-            })}
-            aria-describedby={`${testIdBase}-reason-hint ${testIdBase}-reason-counter`}
-            value={reasonDraft}
-            maxLength={REJECTION_REASON_MAX}
-            placeholder={t('gates.reasonPlaceholder', {
-              defaultValue: 'Reason (required)',
-            })}
-            onChange={(e) => {
-              setReasonDraft(e.currentTarget.value);
-              if (reasonError != null) setReasonError(null);
-            }}
-            onKeyDown={handleReasonKeyDown}
-            aria-invalid={reasonError != null || undefined}
-            disabled={pending}
-          />
-          <span
-            id={`${testIdBase}-reason-hint`}
-            className="gantt-gate-chip__reason-hint"
-            data-testid={`${testIdBase}-reason-hint`}
-          >
-            {t('gates.reasonHint', {
-              defaultValue: 'Up to {{max}} characters',
-              max: REJECTION_REASON_MAX,
-            })}
-          </span>
-          <span
-            id={`${testIdBase}-reason-counter`}
-            className="gantt-gate-chip__reason-counter"
-            data-testid={`${testIdBase}-reason-counter`}
-            aria-live="polite"
-          >
-            {t('gates.reasonCounter', {
-              defaultValue: '{{n}} / {{max}}',
-              n: reasonDraft.length,
-              max: REJECTION_REASON_MAX,
-            })}
-          </span>
-          <button
-            type="button"
-            className="gantt-gate-chip__reason-submit"
-            data-testid={`${testIdBase}-reason-submit`}
-            disabled={pending}
-            onClick={() => void submitReject()}
-          >
-            {t('gates.reasonSubmit', { defaultValue: 'Reject' })}
-          </button>
-          <button
-            type="button"
-            className="gantt-gate-chip__reason-cancel"
-            data-testid={`${testIdBase}-reason-cancel`}
-            onClick={closeRejectEditor}
-          >
-            {t('gates.reasonCancel', { defaultValue: 'Cancel' })}
-          </button>
-          {reasonError != null ? (
-            <span
-              className="gantt-gate-chip__reason-error"
-              data-testid={`${testIdBase}-reason-error`}
-              role="alert"
-            >
-              {reasonError}
-            </span>
-          ) : null}
-        </span>
+      {editor.rejecting ? (
+        <GanttGateChipRejectEditor
+          testIdBase={testIdBase}
+          gateLabel={gateLabel}
+          reasonInputRef={editor.reasonInputRef}
+          reasonDraft={editor.reasonDraft}
+          reasonError={editor.reasonError}
+          pending={editor.pending}
+          onChange={(next) => {
+            editor.setReasonDraft(next);
+            if (editor.reasonError != null) editor.setReasonError(null);
+          }}
+          onSubmit={() => void editor.submitReject()}
+          onCancel={editor.closeRejectEditor}
+        />
       ) : null}
-      {gate.status === 'rejected' && !rejecting && gate.rejectionReason != null ? (
+      {gate.status === 'rejected' && !editor.rejecting && gate.rejectionReason != null ? (
         <span
           className="gantt-gate-chip__rejection-reason"
           data-testid={`${testIdBase}-rejection-reason`}

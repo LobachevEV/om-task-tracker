@@ -21,10 +21,7 @@ public sealed class AppendFeatureSubStageHandlerTests
 
     private const int ManagerUserId = 21;
 
-    private static FeaturesDbContext NewDb() => new(
-        new DbContextOptionsBuilder<FeaturesDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options);
+    private static FeaturesDbContext NewDb() => TestFeaturesDbContext.NewInMemory();
 
     private static AppendFeatureSubStageHandler Handler(FeaturesDbContext db) =>
         new(db, NullLogger<AppendFeatureSubStageHandler>.Instance, TestRequestClock.System());
@@ -132,7 +129,7 @@ public sealed class AppendFeatureSubStageHandlerTests
         var seedSubStageId = (await db.Features.Include(f => f.SubStages).AsNoTracking().SingleAsync(f => f.Id == featureId))
             .SubStages.Single(s => s.Track == Track.Backend && s.PhaseKind == PhaseKind.Development).Id;
 
-        await new PatchFeatureSubStageHandler(db, NullLogger<PatchFeatureSubStageHandler>.Instance, TestRequestClock.System())
+        await new PatchFeatureSubStageHandler(db, NullLogger<PatchFeatureSubStageHandler>.Instance)
             .Patch(
                 new PatchFeatureSubStageRequest
                 {

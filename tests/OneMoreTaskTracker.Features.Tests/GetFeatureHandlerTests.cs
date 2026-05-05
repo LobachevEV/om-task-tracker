@@ -14,10 +14,7 @@ public sealed class GetFeatureHandlerTests
 {
     public GetFeatureHandlerTests() => FeatureMappingConfig.Register();
 
-    private static FeaturesDbContext NewDb() => new(
-        new DbContextOptionsBuilder<FeaturesDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options);
+    private static FeaturesDbContext NewDb() => TestFeaturesDbContext.NewInMemory();
 
     [Fact]
     public async Task Get_IdZero_ThrowsInvalidArgument()
@@ -57,7 +54,6 @@ public sealed class GetFeatureHandlerTests
             LeadUserId    = 2,
             CreatedAt     = DateTime.UtcNow,
         };
-        feature.Touch(DateTime.UtcNow);
         db.Features.Add(feature);
         await db.SaveChangesAsync();
 

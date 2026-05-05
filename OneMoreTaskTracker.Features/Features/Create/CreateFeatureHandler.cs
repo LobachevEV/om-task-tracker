@@ -25,7 +25,6 @@ public class CreateFeatureHandler(FeaturesDbContext db, IRequestClock clock) : F
             ManagerUserId = request.ManagerUserId,
             CreatedAt     = now,
         };
-        feature.Touch(now);
 
         FeatureStageLayout.Materialize(feature, now);
 

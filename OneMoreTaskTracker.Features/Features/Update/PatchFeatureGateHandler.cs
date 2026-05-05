@@ -9,10 +9,6 @@ public sealed class PatchFeatureGateHandler(
     ILogger<PatchFeatureGateHandler> logger,
     IRequestClock clock) : FeatureGatePatcher.FeatureGatePatcherBase
 {
-    private const string StatusApproved = "approved";
-    private const string StatusRejected = "rejected";
-    private const string StatusWaiting  = "waiting";
-
     public override async Task<FeatureTaxonomyResponse> Patch(PatchFeatureGateRequest request, ServerCallContext context)
     {
         var feature = await db.LoadFeatureWithTaxonomyAsync(request.FeatureId, context.CancellationToken);
@@ -28,30 +24,12 @@ public sealed class PatchFeatureGateHandler(
 
         if (request.HasStatus)
         {
-            var status = (request.Status ?? string.Empty).ToLowerInvariant();
-            switch (status)
-            {
-                case StatusApproved:
-                    gate.Approve(request.CallerUserId, now);
-                    mutated = true;
-                    break;
-                case StatusRejected:
-                    var reason = (request.RejectionReason ?? string.Empty).Trim();
-                    gate.Reject(reason, request.CallerUserId, now);
-                    mutated = true;
-                    break;
-                case StatusWaiting:
-                    gate.ResetToWaiting(now);
-                    mutated = true;
-                    break;
-                default:
-                    throw new RpcException(new Status(StatusCode.InvalidArgument, "status must be approved|rejected|waiting"));
-            }
+            gate.ApplyStatusPatch(request.Status, request.RejectionReason, request.CallerUserId, now);
+            mutated = true;
         }
 
         if (mutated)
         {
-            feature.RecordGateFlip(now);
             await db.SaveGateAsync(gate, context.CancellationToken);
 
             logger.LogInformation(

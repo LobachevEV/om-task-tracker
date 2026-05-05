@@ -7,8 +7,7 @@ namespace OneMoreTaskTracker.Features.Features.Update;
 
 public sealed class PatchFeatureHandler(
     FeaturesDbContext db,
-    ILogger<PatchFeatureHandler> logger,
-    IRequestClock clock) : FeaturePatcher.FeaturePatcherBase
+    ILogger<PatchFeatureHandler> logger) : FeaturePatcher.FeaturePatcherBase
 {
     public override async Task<FeatureDto> Patch(PatchFeatureRequest request, ServerCallContext context)
     {
@@ -16,25 +15,24 @@ public sealed class PatchFeatureHandler(
         FeatureOwnershipGuard.EnsureManager(feature, request.CallerUserId);
         FeatureVersionGuard.EnsureFeatureVersion(feature, request.HasExpectedVersion, request.ExpectedVersion);
 
-        var now = clock.GetUtcNow();
         var anyMutation = false;
 
         if (request.HasTitle)
         {
-            feature.RenameTitle((request.Title ?? string.Empty).Trim(), now);
+            feature.RenameTitle((request.Title ?? string.Empty).Trim());
             anyMutation = true;
         }
 
         if (request.HasDescription)
         {
             var trimmed = (request.Description ?? string.Empty).TrimEnd();
-            feature.SetDescription(string.IsNullOrWhiteSpace(trimmed) ? null : trimmed, now);
+            feature.SetDescription(string.IsNullOrWhiteSpace(trimmed) ? null : trimmed);
             anyMutation = true;
         }
 
         if (request.HasLeadUserId)
         {
-            feature.AssignLead(request.LeadUserId, now);
+            feature.AssignLead(request.LeadUserId);
             anyMutation = true;
         }
 

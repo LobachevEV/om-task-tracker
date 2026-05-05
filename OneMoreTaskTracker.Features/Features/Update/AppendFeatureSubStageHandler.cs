@@ -46,8 +46,6 @@ public sealed class AppendFeatureSubStageHandler(
                 ConflictDetail.SubStageOverlap(track.ToString(), phase.ToString(), neighborOrdinal)));
         }
 
-        feature.RecordSubStageMutation(now);
-
         await db.SaveFeatureAsync(feature, context.CancellationToken);
 
         logger.LogInformation(

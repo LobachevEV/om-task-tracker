@@ -62,7 +62,6 @@ public sealed class DevFeatureSeeder(IRequestClock clock)
                 ManagerUserId = SeededManagerUserId,
                 CreatedAt     = now,
             };
-            feature.Touch(now);
 
             FeatureStageLayout.Materialize(feature, now);
 

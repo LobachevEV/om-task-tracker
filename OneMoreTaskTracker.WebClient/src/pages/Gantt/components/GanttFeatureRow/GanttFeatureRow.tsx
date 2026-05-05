@@ -1,11 +1,4 @@
-import {
-  memo,
-  useCallback,
-  useMemo,
-  useState,
-  type CSSProperties,
-  type KeyboardEvent,
-} from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
   FeatureSummary,
@@ -14,22 +7,17 @@ import type {
   Track,
 } from '../../../../common/types/feature';
 import type { TeamRosterMember } from '../../../../common/api/teamApi';
-import { daysBetween } from '../../ganttMath';
 import {
   featureIsOverdue,
   plannedSubStageCount,
   type FeatureBarGeometry,
 } from '../../ganttStageGeometry';
-import { GanttGateChip } from '../GanttGateChip';
-import { GanttPhaseSegment } from '../GanttPhaseSegment';
 import { GanttTrackRow } from '../GanttTrackRow';
 import type { GanttLaneVariant } from '../../useGanttLayout';
-import {
-  InlineLiveRegion,
-  InlineOwnerPicker,
-  InlineTextCell,
-  type FeatureMutationCallbacks,
-} from '../InlineEditors';
+import { InlineLiveRegion, type FeatureMutationCallbacks } from '../InlineEditors';
+import { GanttFeatureRowGutter } from './GanttFeatureRowGutter';
+import { GanttFeatureRowLane } from './GanttFeatureRowLane';
+import { computeFeatureDtr } from './computeFeatureDtr';
 import './GanttFeatureRow.css';
 
 export interface GanttFeatureRowProps {
@@ -46,29 +34,6 @@ export interface GanttFeatureRowProps {
   canEdit?: boolean;
   mutations?: FeatureMutationCallbacks;
   roster?: readonly TeamRosterMember[];
-}
-
-function computeFeatureDtr(
-  geometry: FeatureBarGeometry,
-  feature: FeatureSummary,
-  today: string,
-  doneLabel: string,
-): string {
-  if (feature.state === 'LiveRelease') return doneLabel;
-  let plannedEnd: string | null = null;
-  for (const t of geometry.tracks) {
-    for (const phase of t.phases) {
-      if (phase.derivedPlannedEnd != null) {
-        if (plannedEnd == null || phase.derivedPlannedEnd > plannedEnd) {
-          plannedEnd = phase.derivedPlannedEnd;
-        }
-      }
-    }
-  }
-  if (plannedEnd == null) return '—';
-  const delta = daysBetween(today, plannedEnd);
-  if (delta < 0) return `-${Math.abs(delta)}d`;
-  return `${delta}d`;
 }
 
 const EMPTY_PHASE_SET: ReadonlySet<PhaseKind> = new Set();
@@ -110,12 +75,10 @@ function GanttFeatureRowInner({
     [onToggleExpand, feature.id],
   );
 
-  const handleTitleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      handleToggleExpand();
-    }
-  };
+  const handleTogglePhase = useCallback(
+    (track: Track, phase: PhaseKind) => onTogglePhase(feature.id, track, phase),
+    [feature.id, onTogglePhase],
+  );
 
   const inlineEnabled = canEdit && mutations != null;
 
@@ -140,46 +103,6 @@ function GanttFeatureRowInner({
     [t],
   );
 
-  const handleSpecGate = useMemo(() => {
-    if (!inlineEnabled || mutations == null) return undefined;
-    return async (
-      gateKey: Parameters<FeatureMutationCallbacks['saveGateStatus']>[1],
-      next: Parameters<FeatureMutationCallbacks['saveGateStatus']>[2],
-      rejectionReason: Parameters<FeatureMutationCallbacks['saveGateStatus']>[3],
-      gateVersion: Parameters<FeatureMutationCallbacks['saveGateStatus']>[4],
-    ) => {
-      await mutations.saveGateStatus(
-        feature.id,
-        gateKey,
-        next,
-        rejectionReason,
-        gateVersion,
-      );
-    };
-  }, [feature.id, inlineEnabled, mutations]);
-
-  const handleTogglePhase = useCallback(
-    (track: Track, phase: PhaseKind) => onTogglePhase(feature.id, track, phase),
-    [feature.id, onTogglePhase],
-  );
-
-  const summaryStyle = useMemo<CSSProperties | undefined>(() => {
-    const summary = geometry.summaryBar;
-    if (summary == null) return undefined;
-    return {
-      ['--summary-left' as string]: `${summary.leftPx}px`,
-      ['--summary-width' as string]: `${summary.widthPx}px`,
-    } as CSSProperties;
-  }, [geometry.summaryBar]);
-
-  const trackBarStyle = useCallback((bar: { leftPx: number; widthPx: number } | null) => {
-    if (bar == null) return undefined;
-    return {
-      ['--track-summary-left' as string]: `${bar.leftPx}px`,
-      ['--track-summary-width' as string]: `${bar.widthPx}px`,
-    } as CSSProperties;
-  }, []);
-
   return (
     <>
       <div
@@ -190,185 +113,31 @@ function GanttFeatureRowInner({
         data-variant={variant}
         data-spec-blocked={geometry.specBlocked ? 'true' : 'false'}
       >
-        <div className="gantt-row__gutter" data-testid="feature-info-panel">
-          <div className="gantt-row__title-line">
-            <button
-              type="button"
-              className="gantt-row__caret"
-              data-testid="expand-caret"
-              aria-expanded={expanded}
-              aria-label={
-                expanded
-                  ? t('row.collapseAria', { title: feature.title })
-                  : t('row.expandAria', { title: feature.title })
-              }
-              onClick={handleToggleExpand}
-            >
-              {expanded ? '▾' : '▸'}
-            </button>
-            {inlineEnabled && mutations != null ? (
-              <InlineTextCell
-                value={feature.title}
-                ariaLabel={t('inlineEdit.titleAria', {
-                  defaultValue: 'Feature title: {{title}}',
-                  title: feature.title,
-                })}
-                className="gantt-row__title-editor"
-                testId={`feature-title-editor-${feature.id}`}
-                validate={(next) => {
-                  const trimmed = next.trim();
-                  if (trimmed.length === 0) {
-                    return t('inlineEdit.errors.titleEmpty', {
-                      defaultValue: "Title can't be empty",
-                    });
-                  }
-                  if (trimmed.length > 200) {
-                    return t('inlineEdit.errors.titleTooLong', {
-                      defaultValue: 'Title is too long (max 200 chars)',
-                    });
-                  }
-                  return null;
-                }}
-                onSave={async (next) => {
-                  await mutations.saveTitle(feature.id, next.trim(), feature.version ?? 0);
-                }}
-                onAnnounce={handleAnnounce}
-                buildAnnouncement={buildTitleAnnouncement}
-              />
-            ) : (
-              <button
-                type="button"
-                className="gantt-row__title"
-                aria-label={ariaLabel}
-                onClick={handleToggleExpand}
-                onKeyDown={handleTitleKeyDown}
-              >
-                <span>{feature.title}</span>
-              </button>
-            )}
-          </div>
-          <div className="gantt-row__lead">
-            <span className="gantt-row__lead-label">{t('row.lead')}:</span>
-            {inlineEnabled && mutations != null && roster ? (
-              <InlineOwnerPicker
-                value={feature.leadUserId}
-                displayName={lead.displayName}
-                roster={roster}
-                clearable={false}
-                ariaLabel={t('inlineEdit.leadAria', {
-                  defaultValue: 'Lead for "{{title}}"',
-                  title: feature.title,
-                })}
-                testId={`feature-lead-editor-${feature.id}`}
-                onSave={async (next) => {
-                  if (next == null) return;
-                  await mutations.saveLead(feature.id, next, feature.version ?? 0);
-                }}
-                onAnnounce={handleAnnounce}
-                buildAnnouncement={buildLeadAnnouncement}
-              />
-            ) : (
-              <span className="gantt-row__lead-value">{lead.displayName}</span>
-            )}
-          </div>
-          <div className="gantt-row__meta">
-            {variant === 'noPlan' ? (
-              <span className="gantt-row__no-plan-label">{t('row.notPlannedYet')}</span>
-            ) : (
-              <span className="gantt-row__dates">
-                {feature.plannedStart ?? '—'}
-                <span className="gantt-row__meta-sep">{' · '}</span>
-                {feature.plannedEnd ?? '—'}
-              </span>
-            )}
-            <span className="gantt-row__meta-sep">{'·'}</span>
-            <span
-              className="gantt-row__dtr"
-              data-testid="feature-dtr"
-              data-overdue={isOverdue ? 'true' : 'false'}
-            >
-              {dtr}
-            </span>
-            <span className="gantt-row__meta-sep">{'·'}</span>
-            <span
-              className="gantt-row__planned-counter"
-              data-testid="feature-planned-counter"
-              data-partial={planned.planned < planned.total ? 'true' : 'false'}
-            >
-              {t('row.plannedCounter', {
-                planned: planned.planned,
-                total: planned.total,
-              })}
-            </span>
-          </div>
-        </div>
-
-        <div className="gantt-row__lane" data-variant={variant}>
-          {geometry.summaryBar != null ? (
-            <span
-              className="gantt-row__summary"
-              data-testid="feature-summary-bar"
-              style={summaryStyle}
-              aria-hidden="true"
-            />
-          ) : (
-            <span className="gantt-row__empty-label" aria-hidden="true">
-              {t('row.notPlannedYet')}
-            </span>
-          )}
-          {geometry.tracks.map((trackGeom) => (
-            <div
-              key={`${feature.id}-${trackGeom.track}-summary`}
-              className="gantt-row__track-summary"
-              data-testid={`feature-track-summary-${feature.id}-${trackGeom.track}`}
-              data-track={trackGeom.track}
-              data-dimmed={trackGeom.dimmed ? 'true' : 'false'}
-              data-in-flight={trackGeom.inFlightPhase != null ? trackGeom.inFlightPhase.phase : 'none'}
-              aria-label={
-                trackGeom.inFlightPhase != null
-                  ? t('gates.inFlightAria', {
-                      defaultValue: '{{track}} in flight: {{phase}}',
-                      track: t(`tracks.${trackGeom.track}`),
-                      phase: t(`phases.${trackGeom.inFlightPhase.phase}`),
-                    })
-                  : undefined
-              }
-            >
-              {trackGeom.trackBar != null ? (
-                <span
-                  className="gantt-row__track-summary-bar"
-                  style={trackBarStyle(trackGeom.trackBar)}
-                  aria-hidden="true"
-                />
-              ) : null}
-              {trackGeom.inFlightPhase != null && trackGeom.inFlightPhase.bar != null ? (
-                <GanttPhaseSegment
-                  track={trackGeom.track}
-                  phaseGeom={trackGeom.inFlightPhase}
-                  dimmed={trackGeom.dimmed}
-                  expanded={false}
-                  onToggleExpand={handleTogglePhase}
-                />
-              ) : null}
-            </div>
-          ))}
-          <GanttGateChip
-            gate={geometry.specGate.gate}
-            leftPx={geometry.specGate.leftPx}
-            canEdit={inlineEnabled}
-            onChangeStatus={handleSpecGate}
-          />
-          {geometry.tracks.map((trackGeom) => (
-            <GanttGateChip
-              key={`${feature.id}-${trackGeom.track}-prep-collapsed`}
-              gate={trackGeom.prepGate.gate}
-              leftPx={trackGeom.prepGate.leftPx}
-              canEdit={inlineEnabled}
-              testIdScope="collapsed"
-              onChangeStatus={handleSpecGate}
-            />
-          ))}
-        </div>
+        <GanttFeatureRowGutter
+          feature={feature}
+          lead={lead}
+          variant={variant}
+          expanded={expanded}
+          isOverdue={isOverdue}
+          planned={planned}
+          dtr={dtr}
+          ariaLabel={ariaLabel}
+          inlineEnabled={inlineEnabled}
+          mutations={mutations}
+          roster={roster}
+          onToggleExpand={handleToggleExpand}
+          onAnnounce={handleAnnounce}
+          buildTitleAnnouncement={buildTitleAnnouncement}
+          buildLeadAnnouncement={buildLeadAnnouncement}
+        />
+        <GanttFeatureRowLane
+          feature={feature}
+          geometry={geometry}
+          variant={variant}
+          inlineEnabled={inlineEnabled}
+          mutations={mutations}
+          onTogglePhase={handleTogglePhase}
+        />
       </div>
 
       {expanded

@@ -112,15 +112,8 @@ public class FeaturesController(
 
         var callerUserId = User.GetUserId();
 
-        if (body.LeadUserId is { } leadUserId)
-        {
-            if (leadUserId < 1)
-                return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
-
-            var roster = await userService.LoadRosterForManagerAsync(callerUserId, logger, ct);
-            if (!roster.ContainsKey(leadUserId))
-                return BadRequest(new { error = "Pick a teammate from the list" });
-        }
+        if (await TeammateRosterValidator.ValidateAsync(body, userService, callerUserId, logger, ct) is { } error)
+            return error;
 
         var headerVersion = PlanRequestHelpers.ParseIfMatch(ifMatch, logger);
         var expectedVersion = body.ExpectedVersion ?? headerVersion;

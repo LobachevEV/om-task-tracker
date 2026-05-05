@@ -21,13 +21,10 @@ public sealed class DeleteFeatureSubStageHandlerTests
 
     private const int ManagerUserId = 31;
 
-    private static FeaturesDbContext NewDb() => new(
-        new DbContextOptionsBuilder<FeaturesDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options);
+    private static FeaturesDbContext NewDb() => TestFeaturesDbContext.NewInMemory();
 
     private static DeleteFeatureSubStageHandler Handler(FeaturesDbContext db) =>
-        new(db, NullLogger<DeleteFeatureSubStageHandler>.Instance, TestRequestClock.System());
+        new(db, NullLogger<DeleteFeatureSubStageHandler>.Instance);
 
     private static AppendFeatureSubStageHandler AppendHandler(FeaturesDbContext db) =>
         new(db, NullLogger<AppendFeatureSubStageHandler>.Instance, TestRequestClock.System());

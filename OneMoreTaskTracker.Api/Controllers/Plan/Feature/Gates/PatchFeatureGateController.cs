@@ -24,21 +24,19 @@ public class PatchFeatureGateController(
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var callerUserId = User.GetUserId();
-        var headerVersion = PlanRequestHelpers.ParseIfMatch(ifMatch, logger);
-        var expectedVersion = body.ExpectedVersion ?? headerVersion;
-
         var request = new PatchFeatureGateRequest
         {
             FeatureId = featureId,
             GateKey = gateKey,
-            CallerUserId = callerUserId,
+            CallerUserId = User.GetUserId(),
         };
 
         if (body.Status is not null)
             request.Status = body.Status;
         if (body.RejectionReason is not null)
             request.RejectionReason = body.RejectionReason;
+
+        var expectedVersion = body.ExpectedVersion ?? PlanRequestHelpers.ParseIfMatch(ifMatch, logger);
         if (expectedVersion.HasValue)
             request.ExpectedVersion = expectedVersion.Value;
 

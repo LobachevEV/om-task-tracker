@@ -4,4 +4,7 @@ public record PatchFeatureSubStagePayload(
     int? OwnerUserId,
     string? PlannedStart,
     string? PlannedEnd,
-    int? ExpectedVersion);
+    int? ExpectedVersion) : IHasTeammateUserId
+{
+    int? IHasTeammateUserId.TeammateUserId => OwnerUserId;
+}

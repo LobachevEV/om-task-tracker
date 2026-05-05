@@ -9,14 +9,11 @@ public static class FeatureSubStageMappingConfig
     public static void Register()
     {
         TypeAdapterConfig<FeatureSubStage, FeatureSubStageDto>.NewConfig()
-            .Map(d => d.Id,            s => s.Id)
             .Map(d => d.Track,         s => FeatureGateMappingConfig.MapTrack(s.Track))
             .Map(d => d.PhaseKind,     s => MapPhase(s.PhaseKind))
             .Map(d => d.Ordinal,       s => (int)s.Ordinal)
-            .Map(d => d.OwnerUserId,   s => s.OwnerUserId)
             .Map(d => d.PlannedStart,  s => s.PlannedStart == null ? string.Empty : s.PlannedStart.Value.ToString("yyyy-MM-dd"))
             .Map(d => d.PlannedEnd,    s => s.PlannedEnd   == null ? string.Empty : s.PlannedEnd.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.Version,       s => s.Version)
             .Map(d => d.CreatedAt,     s => s.CreatedAt.ToString("O"))
             .Map(d => d.UpdatedAt,     s => s.UpdatedAt.ToString("O"));
     }

@@ -14,10 +14,7 @@ public sealed class CreateFeatureHandlerTests
 {
     public CreateFeatureHandlerTests() => FeatureMappingConfig.Register();
 
-    private static FeaturesDbContext NewDb() => new(
-        new DbContextOptionsBuilder<FeaturesDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options);
+    private static FeaturesDbContext NewDb() => TestFeaturesDbContext.NewInMemory();
 
     [Fact]
     public async Task Create_HappyPath_ReturnsDtoWithCsApprovingStateAndLeadDefaultedToManager()

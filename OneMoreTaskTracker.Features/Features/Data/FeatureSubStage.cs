@@ -1,6 +1,6 @@
 namespace OneMoreTaskTracker.Features.Features.Data;
 
-public class FeatureSubStage
+public class FeatureSubStage : ITrackedEntity
 {
     public int Id { get; init; }
     public int FeatureId { get; init; }
@@ -18,31 +18,36 @@ public class FeatureSubStage
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; private set; }
 
-    public void AssignOwner(int ownerUserId, DateTime now)
+    int ITrackedEntity.Version
+    {
+        get => Version;
+        set => Version = value;
+    }
+
+    DateTime ITrackedEntity.UpdatedAt
+    {
+        get => UpdatedAt;
+        set => UpdatedAt = value;
+    }
+
+    public void AssignOwner(int ownerUserId)
     {
         OwnerUserId = ownerUserId;
-        Version += 1;
-        UpdatedAt = now;
     }
 
-    public void SetPlannedStart(DateOnly? plannedStart, DateTime now)
+    public void SetPlannedStart(DateOnly? plannedStart)
     {
         PlannedStart = plannedStart;
-        Version += 1;
-        UpdatedAt = now;
     }
 
-    public void SetPlannedEnd(DateOnly? plannedEnd, DateTime now)
+    public void SetPlannedEnd(DateOnly? plannedEnd)
     {
         PlannedEnd = plannedEnd;
-        Version += 1;
-        UpdatedAt = now;
     }
 
-    public void Reposition(short ordinal, DateTime now)
+    public void Reposition(short ordinal)
     {
         Ordinal = ordinal;
-        UpdatedAt = now;
     }
 
     public void SeedOrdinal(short ordinal)
@@ -59,10 +64,5 @@ public class FeatureSubStage
     {
         PlannedStart = plannedStart;
         PlannedEnd = plannedEnd;
-    }
-
-    public void Touch(DateTime now)
-    {
-        UpdatedAt = now;
     }
 }

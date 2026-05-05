@@ -20,16 +20,14 @@ public class DeleteFeatureSubStageController(
         [FromHeader(Name = "If-Match")] string? ifMatch,
         CancellationToken ct)
     {
-        var callerUserId = User.GetUserId();
-        var headerVersion = PlanRequestHelpers.ParseIfMatch(ifMatch, logger);
-
         var request = new DeleteFeatureSubStageRequest
         {
             FeatureId = featureId,
             SubStageId = subStageId,
-            CallerUserId = callerUserId,
+            CallerUserId = User.GetUserId(),
         };
 
+        var headerVersion = PlanRequestHelpers.ParseIfMatch(ifMatch, logger);
         if (headerVersion.HasValue)
             request.ExpectedVersion = headerVersion.Value;
 

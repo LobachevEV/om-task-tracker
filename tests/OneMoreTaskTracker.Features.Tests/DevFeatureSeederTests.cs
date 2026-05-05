@@ -8,10 +8,7 @@ namespace OneMoreTaskTracker.Features.Tests;
 
 public sealed class DevFeatureSeederTests
 {
-    private static FeaturesDbContext NewDb() => new(
-        new DbContextOptionsBuilder<FeaturesDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options);
+    private static FeaturesDbContext NewDb() => TestFeaturesDbContext.NewInMemory();
 
     private static DevFeatureSeeder NewSeeder() => new(TestRequestClock.System());
 
@@ -59,7 +56,6 @@ public sealed class DevFeatureSeederTests
             LeadUserId    = DevFeatureSeeder.SeededManagerUserId,
             CreatedAt     = DateTime.UtcNow,
         };
-        preExisting.Touch(DateTime.UtcNow);
         db.Features.Add(preExisting);
         await db.SaveChangesAsync();
 

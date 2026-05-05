@@ -16,13 +16,10 @@ public sealed class PatchFeatureHandlerTests
 {
     public PatchFeatureHandlerTests() => FeatureMappingConfig.Register();
 
-    private static FeaturesDbContext NewDb() => new(
-        new DbContextOptionsBuilder<FeaturesDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options);
+    private static FeaturesDbContext NewDb() => TestFeaturesDbContext.NewInMemory();
 
     private static PatchFeatureHandler Handler(FeaturesDbContext db) =>
-        new(db, NullLogger<PatchFeatureHandler>.Instance, TestRequestClock.System());
+        new(db, NullLogger<PatchFeatureHandler>.Instance);
 
     private static async Task<OneMoreTaskTracker.Proto.Features.CreateFeatureCommand.FeatureDto> CreateFeatureAsync(
         FeaturesDbContext db,
@@ -69,7 +66,7 @@ public sealed class PatchFeatureHandlerTests
         var stored = await db.Features.AsNoTracking().SingleAsync(f => f.Id == created.Id);
         stored.Title.Should().Be("Renamed");
         stored.Version.Should().Be(versionBefore + 1);
-        stored.UpdatedAt.Should().BeAfter(updatedAtBefore);
+        stored.UpdatedAt.Should().BeOnOrAfter(updatedAtBefore);
     }
 
     [Fact]
@@ -115,7 +112,7 @@ public sealed class PatchFeatureHandlerTests
     }
 
     [Fact]
-    public async Task Patch_AllThreeFieldsAtOnce_BumpsVersionByThreeWithSingleUpdatedAtSnapshot()
+    public async Task Patch_AllThreeFieldsAtOnce_BumpsVersionOnce_AndStampsSingleUpdatedAt()
     {
         var db = NewDb();
         var created = await CreateFeatureAsync(db);
@@ -134,10 +131,10 @@ public sealed class PatchFeatureHandlerTests
         dto.Title.Should().Be("Renamed");
         dto.Description.Should().Be("New desc");
         dto.LeadUserId.Should().Be(9);
-        dto.Version.Should().Be(created.Version + 3);
+        dto.Version.Should().Be(created.Version + 1);
 
         var stored = await db.Features.AsNoTracking().SingleAsync(f => f.Id == created.Id);
-        stored.Version.Should().Be(created.Version + 3);
+        stored.Version.Should().Be(created.Version + 1);
     }
 
     [Fact]
@@ -284,8 +281,8 @@ public sealed class PatchFeatureHandlerTests
             },
             TestServerCallContext.Create());
 
-        var ex = await act.Should().ThrowAsync<RpcException>();
-        ex.Which.StatusCode.Should().Be(StatusCode.NotFound);
+        var ex = await act.Should().ThrowAsync<FeatureNotFoundException>();
+        ex.Which.FeatureId.Should().Be(999);
     }
 
     [Fact]

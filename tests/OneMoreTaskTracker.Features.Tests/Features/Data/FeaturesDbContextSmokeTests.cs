@@ -23,7 +23,6 @@ public sealed class FeaturesDbContextSmokeTests
             ManagerUserId = 2,
             CreatedAt = DateTime.UtcNow,
         };
-        feature.Touch(DateTime.UtcNow);
         ctx.Features.Add(feature);
         ctx.SaveChanges();
 

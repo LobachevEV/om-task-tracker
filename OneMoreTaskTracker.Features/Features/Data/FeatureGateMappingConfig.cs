@@ -11,8 +11,6 @@ public static class FeatureGateMappingConfig
     public static void Register()
     {
         TypeAdapterConfig<FeatureGate, FeatureGateDto>.NewConfig()
-            .Map(d => d.Id,             s => s.Id)
-            .Map(d => d.GateKey,        s => s.GateKey)
             .Map(d => d.Kind,           s => MapKind(s.Kind))
             .Map(d => d.Status,         s => MapStatus(s.Status))
             .Map(d => d.Track,          s => s.Track == null ? (ProtoTrack?)null : MapTrack(s.Track.Value))
@@ -20,7 +18,6 @@ public static class FeatureGateMappingConfig
             .Map(d => d.ApprovedAtUtc,  s => s.ApprovedAtUtc == null ? string.Empty : s.ApprovedAtUtc.Value.ToString("O"))
             .Map(d => d.RequestedAtUtc, s => s.RequestedAtUtc == null ? string.Empty : s.RequestedAtUtc.Value.ToString("O"))
             .Map(d => d.RejectionReason,s => s.RejectionReason ?? string.Empty)
-            .Map(d => d.Version,        s => s.Version)
             .Map(d => d.CreatedAt,      s => s.CreatedAt.ToString("O"))
             .Map(d => d.UpdatedAt,      s => s.UpdatedAt.ToString("O"));
     }

@@ -1,0 +1,7 @@
+OneMoreTaskTracker.Features/Features/Data/DevFeatureSeeder.cs
+OneMoreTaskTracker.Features/Features/Data/Feature.cs
+OneMoreTaskTracker.Features/Features/Data/FeatureStagePlan.cs
+OneMoreTaskTracker.Features/Program.cs
+tests/OneMoreTaskTracker.Features.Tests/DevFeatureSeederTests.cs
+tests/OneMoreTaskTracker.Features.Tests/Features/Data/FeaturesDbContextSmokeTests.cs
+tests/OneMoreTaskTracker.Features.Tests/GetFeatureHandlerTests.cs

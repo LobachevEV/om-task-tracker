@@ -1,6 +1,6 @@
 namespace OneMoreTaskTracker.Features.Features.Data;
 
-public class Feature
+public class Feature : ITrackedEntity
 {
     public int Id { get; init; }
     public required string Title { get; set; }
@@ -20,47 +20,36 @@ public class Feature
 
     public int Version { get; private set; }
 
+    int ITrackedEntity.Version
+    {
+        get => Version;
+        set => Version = value;
+    }
+
+    DateTime ITrackedEntity.UpdatedAt
+    {
+        get => UpdatedAt;
+        set => UpdatedAt = value;
+    }
+
     public FeatureGate? ResolveGate(string gateKey) =>
         Gates.FirstOrDefault(g => g.GateKey == gateKey);
 
     public FeatureSubStage? ResolveSubStage(int subStageId) =>
         SubStages.FirstOrDefault(s => s.Id == subStageId);
 
-    public void RenameTitle(string newTitle, DateTime now)
+    public void RenameTitle(string newTitle)
     {
         Title = newTitle ?? throw new ArgumentNullException(nameof(newTitle));
-        Version += 1;
-        UpdatedAt = now;
     }
 
-    public void SetDescription(string? newDescription, DateTime now)
+    public void SetDescription(string? newDescription)
     {
         Description = newDescription;
-        Version += 1;
-        UpdatedAt = now;
     }
 
-    public void AssignLead(int leadUserId, DateTime now)
+    public void AssignLead(int leadUserId)
     {
         LeadUserId = leadUserId;
-        Version += 1;
-        UpdatedAt = now;
-    }
-
-    public void RecordGateFlip(DateTime now)
-    {
-        Version += 1;
-        UpdatedAt = now;
-    }
-
-    public void RecordSubStageMutation(DateTime now)
-    {
-        Version += 1;
-        UpdatedAt = now;
-    }
-
-    public void Touch(DateTime now)
-    {
-        UpdatedAt = now;
     }
 }

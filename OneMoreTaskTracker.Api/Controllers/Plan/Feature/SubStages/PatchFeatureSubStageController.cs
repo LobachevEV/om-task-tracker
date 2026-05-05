@@ -28,17 +28,8 @@ public class PatchFeatureSubStageController(
 
         var callerUserId = User.GetUserId();
 
-        if (body.OwnerUserId is { } ownerId)
-        {
-            if (ownerId < 1)
-                return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
-            var roster = await userService.LoadRosterForManagerAsync(callerUserId, logger, ct);
-            if (!roster.ContainsKey(ownerId))
-                return BadRequest(new { error = "Pick a teammate from the list" });
-        }
-
-        var headerVersion = PlanRequestHelpers.ParseIfMatch(ifMatch, logger);
-        var expectedVersion = body.ExpectedVersion ?? headerVersion;
+        if (await TeammateRosterValidator.ValidateAsync(body, userService, callerUserId, logger, ct) is { } error)
+            return error;
 
         var request = new PatchFeatureSubStageRequest
         {
@@ -53,6 +44,8 @@ public class PatchFeatureSubStageController(
             request.PlannedStart = body.PlannedStart;
         if (body.PlannedEnd is not null)
             request.PlannedEnd = body.PlannedEnd;
+
+        var expectedVersion = body.ExpectedVersion ?? PlanRequestHelpers.ParseIfMatch(ifMatch, logger);
         if (expectedVersion.HasValue)
             request.ExpectedVersion = expectedVersion.Value;
 

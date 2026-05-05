@@ -6,8 +6,7 @@ namespace OneMoreTaskTracker.Features.Features.Update;
 
 public sealed class DeleteFeatureSubStageHandler(
     FeaturesDbContext db,
-    ILogger<DeleteFeatureSubStageHandler> logger,
-    IRequestClock clock) : FeatureSubStageDeleter.FeatureSubStageDeleterBase
+    ILogger<DeleteFeatureSubStageHandler> logger) : FeatureSubStageDeleter.FeatureSubStageDeleterBase
 {
     public override async Task<FeatureTaxonomyResponse> Delete(DeleteFeatureSubStageRequest request, ServerCallContext context)
     {
@@ -27,15 +26,13 @@ public sealed class DeleteFeatureSubStageHandler(
             throw new RpcException(new Status(StatusCode.FailedPrecondition,
                 "cannot delete the last sub-stage in this phase"));
 
-        var now = clock.GetUtcNow();
         var track = subStage.Track;
         var phase = subStage.PhaseKind;
 
         feature.SubStages.Remove(subStage);
         db.FeatureSubStages.Remove(subStage);
 
-        FeatureStageLayout.RecomputeOrdinals(feature, track, phase, now);
-        feature.RecordSubStageMutation(now);
+        FeatureStageLayout.RecomputeOrdinals(feature, track, phase);
 
         await db.SaveFeatureAsync(feature, context.CancellationToken);
 

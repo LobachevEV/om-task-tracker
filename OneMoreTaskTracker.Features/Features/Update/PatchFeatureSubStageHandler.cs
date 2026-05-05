@@ -6,8 +6,7 @@ namespace OneMoreTaskTracker.Features.Features.Update;
 
 public sealed class PatchFeatureSubStageHandler(
     FeaturesDbContext db,
-    ILogger<PatchFeatureSubStageHandler> logger,
-    IRequestClock clock) : FeatureSubStagePatcher.FeatureSubStagePatcherBase
+    ILogger<PatchFeatureSubStageHandler> logger) : FeatureSubStagePatcher.FeatureSubStagePatcherBase
 {
     public override async Task<FeatureTaxonomyResponse> Patch(PatchFeatureSubStageRequest request, ServerCallContext context)
     {
@@ -19,26 +18,25 @@ public sealed class PatchFeatureSubStageHandler(
 
         FeatureVersionGuard.EnsureSubStageVersion(subStage, request.HasExpectedVersion, request.ExpectedVersion);
 
-        var now = clock.GetUtcNow();
         var mutated = false;
         var datesTouched = false;
 
         if (request.HasOwnerUserId)
         {
-            subStage.AssignOwner(request.OwnerUserId, now);
+            subStage.AssignOwner(request.OwnerUserId);
             mutated = true;
         }
 
         if (request.HasPlannedStart)
         {
-            subStage.SetPlannedStart(ParseOptionalDate(request.PlannedStart), now);
+            subStage.SetPlannedStart(ParseOptionalDate(request.PlannedStart));
             mutated = true;
             datesTouched = true;
         }
 
         if (request.HasPlannedEnd)
         {
-            subStage.SetPlannedEnd(ParseOptionalDate(request.PlannedEnd), now);
+            subStage.SetPlannedEnd(ParseOptionalDate(request.PlannedEnd));
             mutated = true;
             datesTouched = true;
         }
@@ -62,7 +60,6 @@ public sealed class PatchFeatureSubStageHandler(
 
         if (mutated)
         {
-            feature.RecordSubStageMutation(now);
             await db.SaveSubStageAsync(subStage, context.CancellationToken);
 
             logger.LogInformation(

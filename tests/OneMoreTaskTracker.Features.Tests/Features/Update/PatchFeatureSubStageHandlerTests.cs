@@ -20,13 +20,10 @@ public sealed class PatchFeatureSubStageHandlerTests
 
     private const int ManagerUserId = 41;
 
-    private static FeaturesDbContext NewDb() => new(
-        new DbContextOptionsBuilder<FeaturesDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options);
+    private static FeaturesDbContext NewDb() => TestFeaturesDbContext.NewInMemory();
 
     private static PatchFeatureSubStageHandler Handler(FeaturesDbContext db) =>
-        new(db, NullLogger<PatchFeatureSubStageHandler>.Instance, TestRequestClock.System());
+        new(db, NullLogger<PatchFeatureSubStageHandler>.Instance);
 
     private static async Task<(int featureId, int subStageId)> CreateFeatureAsync(FeaturesDbContext db)
     {

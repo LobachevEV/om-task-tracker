@@ -19,10 +19,7 @@ public sealed class PatchFeatureGateHandlerTests
 
     private const int ManagerUserId = 11;
 
-    private static FeaturesDbContext NewDb() => new(
-        new DbContextOptionsBuilder<FeaturesDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options);
+    private static FeaturesDbContext NewDb() => TestFeaturesDbContext.NewInMemory();
 
     private static PatchFeatureGateHandler Handler(FeaturesDbContext db) =>
         new(db, NullLogger<PatchFeatureGateHandler>.Instance, TestRequestClock.System());
@@ -144,7 +141,6 @@ public sealed class PatchFeatureGateHandlerTests
             LeadUserId = ManagerUserId,
             CreatedAt = DateTime.UtcNow,
         };
-        feature.Touch(DateTime.UtcNow);
         db.Features.Add(feature);
         await db.SaveChangesAsync();
 

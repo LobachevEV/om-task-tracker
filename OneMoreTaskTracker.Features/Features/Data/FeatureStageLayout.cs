@@ -61,7 +61,6 @@ public static class FeatureStageLayout
                     CreatedAt = now,
                 };
                 sub.SeedOrdinal(1);
-                sub.Touch(now);
                 feature.SubStages.Add(sub);
             }
         }
@@ -96,13 +95,12 @@ public static class FeatureStageLayout
         sub.SeedOrdinal(nextOrdinal);
         sub.SeedOwner(ownerUserId > 0 ? ownerUserId : 0);
         sub.SeedDates(resolvedStart, resolvedEnd);
-        sub.Touch(now);
 
         feature.SubStages.Add(sub);
         return sub;
     }
 
-    public static void RecomputeOrdinals(Feature feature, Track track, PhaseKind phase, DateTime now)
+    public static void RecomputeOrdinals(Feature feature, Track track, PhaseKind phase)
     {
         var siblings = feature.SubStages
             .Where(s => s.Track == track && s.PhaseKind == phase)
@@ -113,7 +111,7 @@ public static class FeatureStageLayout
         {
             var expected = (short)(i + 1);
             if (siblings[i].Ordinal != expected)
-                siblings[i].Reposition(expected, now);
+                siblings[i].Reposition(expected);
         }
     }
 

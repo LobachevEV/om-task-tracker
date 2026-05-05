@@ -1,0 +1,76 @@
+{
+  "note": "Computed manually via worktree-based axis evaluation because score-must-improve-axes.mjs refused to run with the harness's own untracked artifacts in the working tree. Each axis's source-of-truth command from refactor-plan.md was executed at b96117e (baseline) and 3c4deca (HEAD = GEN_COMMIT + interim 3c4deca). The interim commit reshapes 3 Features handlers (variable-lifetime tightening + ParseDate dedup into PlannedDate) but does not touch the IRequestClock surfaces or call sites — its presence does not affect axis 1/2/3/4 measurements at HEAD vs the iter-1 generator commit d2a9c029.",
+  "baseline_sha": "b96117ef27e9f4aab5b6176520825d864157b4b6",
+  "current_sha": "3c4deca2eb55ea3ced365139f76f4d947cd2831a",
+  "axes": [
+    {
+      "id": "in_scope_datetime_utcnow_reads",
+      "command": "grep -rEn 'DateTime(Offset)?\\.UtcNow' OneMoreTaskTracker.Features OneMoreTaskTracker.Api/Controllers OneMoreTaskTracker.Api/Middleware --include='*.cs' | wc -l",
+      "baseline": 10,
+      "target": 0,
+      "current": 10,
+      "status": "partial",
+      "verdict": "unchanged — by design (call-site migration deferred to iter 2+ per planned-commits §1)"
+    },
+    {
+      "id": "irequestclock_callers",
+      "command": "grep -rEln 'IRequestClock\\b' OneMoreTaskTracker.Features/Features OneMoreTaskTracker.Api/Controllers --include='*.cs' | sort -u | wc -l",
+      "baseline": 0,
+      "target": 5,
+      "current": 2,
+      "status": "partial",
+      "verdict": "moved 0 → 2, but the 2 matches are the impl pair (IRequestClock.cs + RequestClock.cs in Features/Data), not the 5 target consumers (CreateFeatureHandler, PatchFeatureHandler, PatchFeatureStageHandler, DevFeatureSeeder, TasksController). Semantically zero progress; metric inflation is a planner-grep artifact."
+    },
+    {
+      "id": "entity_initializer_clock_reads",
+      "command": "grep -E 'DateTime\\.UtcNow' OneMoreTaskTracker.Features/Features/Data/Feature.cs OneMoreTaskTracker.Features/Features/Data/FeatureStagePlan.cs | wc -l",
+      "baseline": 4,
+      "target": 0,
+      "current": 4,
+      "status": "partial",
+      "verdict": "unchanged — by design (entity-initializer migration is planned-commits §3)"
+    },
+    {
+      "id": "per_request_integration_test",
+      "command": "grep -rEln 'IRequestClock.*same|capture.*once|PerRequest.*Same' tests --include='*.cs' | wc -l",
+      "baseline": 0,
+      "target": 1,
+      "current": 0,
+      "status": "partial",
+      "verdict": "unchanged — by design (integration test is planned-commits §5)"
+    },
+    {
+      "id": "request_clock_unit_tests",
+      "command": "grep -rEn '\\[Fact\\]|\\[Theory\\]' tests --include='*RequestClock*Tests.cs' | wc -l",
+      "baseline": 0,
+      "target": 3,
+      "current": 4,
+      "status": "met",
+      "verdict": "0 → 4 (2 per service, both files added in iter-1). Target ≥ 3 met."
+    },
+    {
+      "id": "build_errors",
+      "command": "dotnet build OneMoreTaskTracker.slnx -c Debug --nologo",
+      "baseline": 0,
+      "target": 0,
+      "current": 0,
+      "status": "met",
+      "verdict": "green at HEAD"
+    },
+    {
+      "id": "test_pass_count",
+      "command": "dotnet test OneMoreTaskTracker.slnx --nologo --logger:\"console;verbosity=normal\"",
+      "baseline": 466,
+      "target": ">= 466",
+      "current": 470,
+      "status": "met",
+      "verdict": "470 / 470 passing (= 466 baseline + 4 new RequestClock tests). Strict-superset additive."
+    }
+  ],
+  "summary": {
+    "met": 3,
+    "partial": 4,
+    "regressed": 0,
+    "score_band": "mostly partial → 5–6 per agent-spec band"
+  }
+}

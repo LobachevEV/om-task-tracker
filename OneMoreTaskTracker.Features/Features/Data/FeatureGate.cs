@@ -1,6 +1,8 @@
+using OneMoreTaskTracker.Features.Features.Update;
+
 namespace OneMoreTaskTracker.Features.Features.Data;
 
-public class FeatureGate
+public class FeatureGate : ITrackedEntity
 {
     public int Id { get; init; }
     public int FeatureId { get; init; }
@@ -19,10 +21,21 @@ public class FeatureGate
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; private set; }
 
+    int ITrackedEntity.Version
+    {
+        get => Version;
+        set => Version = value;
+    }
+
+    DateTime ITrackedEntity.UpdatedAt
+    {
+        get => UpdatedAt;
+        set => UpdatedAt = value;
+    }
+
     public void MarkRequested(DateTime now)
     {
         RequestedAtUtc = now;
-        UpdatedAt = now;
     }
 
     public void Approve(int callerUserId, DateTime now)
@@ -31,18 +44,14 @@ public class FeatureGate
         ApproverUserId = callerUserId;
         ApprovedAtUtc = now;
         RejectionReason = null;
-        Version += 1;
-        UpdatedAt = now;
     }
 
-    public void Reject(string reason, int callerUserId, DateTime now)
+    public void Reject(string reason, int callerUserId)
     {
         Status = GateStatus.Rejected;
         ApproverUserId = callerUserId;
         ApprovedAtUtc = null;
         RejectionReason = reason;
-        Version += 1;
-        UpdatedAt = now;
     }
 
     public void ResetToWaiting(DateTime now)
@@ -52,12 +61,23 @@ public class FeatureGate
         ApprovedAtUtc = null;
         RejectionReason = null;
         RequestedAtUtc = now;
-        Version += 1;
-        UpdatedAt = now;
     }
 
-    public void Touch(DateTime now)
+    public void ApplyStatusPatch(string status, string? rejectionReason, int callerUserId, DateTime now)
     {
-        UpdatedAt = now;
+        switch ((status ?? string.Empty).ToLowerInvariant())
+        {
+            case "approved":
+                Approve(callerUserId, now);
+                break;
+            case "rejected":
+                Reject((rejectionReason ?? string.Empty).Trim(), callerUserId);
+                break;
+            case "waiting":
+                ResetToWaiting(now);
+                break;
+            default:
+                throw new InvalidGateStatusException(status ?? string.Empty);
+        }
     }
 }

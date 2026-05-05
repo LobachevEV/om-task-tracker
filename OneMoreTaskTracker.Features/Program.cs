@@ -14,14 +14,21 @@ builder.Configuration
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
 
-builder.Services.AddGrpc(o => o.Interceptors.Add<ValidationExceptionInterceptor>());
+builder.Services.AddGrpc(o =>
+{
+    o.Interceptors.Add<DomainExceptionInterceptor>();
+    o.Interceptors.Add<ValidationExceptionInterceptor>();
+});
 builder.Services.AddValidatorsFromAssemblyContaining<CreateFeatureRequestValidator>();
 FeatureMappingConfig.Register();
 builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
 builder.Services.AddScoped<IRequestClock, RequestClock>();
+builder.Services.AddScoped<TrackedEntitySaveChangesInterceptor>();
 builder.Services.AddScoped<DevFeatureSeeder>();
-builder.Services.AddDbContextPool<FeaturesDbContext>(opt =>
-    opt.UseNpgsql(builder.Configuration.GetConnectionString("FeaturesContext")));
+builder.Services.AddDbContextPool<FeaturesDbContext>((sp, opt) =>
+    opt
+        .UseNpgsql(builder.Configuration.GetConnectionString("FeaturesContext"))
+        .AddInterceptors(sp.GetRequiredService<TrackedEntitySaveChangesInterceptor>()));
 
 if (builder.Environment.IsDevelopment())
     builder.Services.AddGrpcReflection();

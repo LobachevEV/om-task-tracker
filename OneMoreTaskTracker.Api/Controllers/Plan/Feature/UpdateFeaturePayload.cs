@@ -6,4 +6,7 @@ public record UpdateFeaturePayload(
     [MaxLength(200)] string? Title,
     [MaxLength(4000)] string? Description,
     int? LeadUserId,
-    int? ExpectedVersion = null);
+    int? ExpectedVersion = null) : IHasTeammateUserId
+{
+    int? IHasTeammateUserId.TeammateUserId => LeadUserId;
+}

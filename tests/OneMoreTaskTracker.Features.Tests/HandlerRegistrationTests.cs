@@ -24,10 +24,7 @@ public sealed class HandlerRegistrationTests
 {
     public HandlerRegistrationTests() => FeatureMappingConfig.Register();
 
-    private static FeaturesDbContext NewDb() => new(
-        new DbContextOptionsBuilder<FeaturesDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options);
+    private static FeaturesDbContext NewDb() => TestFeaturesDbContext.NewInMemory();
 
     [Fact]
     public async Task CreateFeatureHandler_RejectsMissingTitle()
@@ -43,12 +40,12 @@ public sealed class HandlerRegistrationTests
     [Fact]
     public async Task PatchFeatureHandler_ReturnsNotFoundForUnknownId()
     {
-        var handler = new PatchFeatureHandler(NewDb(), NullLogger<PatchFeatureHandler>.Instance, TestRequestClock.System());
+        var handler = new PatchFeatureHandler(NewDb(), NullLogger<PatchFeatureHandler>.Instance);
 
         var act = () => handler.Patch(new PatchFeatureRequest { Id = 999, Title = "x" }, TestServerCallContext.Create());
 
-        var ex = await act.Should().ThrowAsync<RpcException>();
-        ex.Which.StatusCode.Should().Be(StatusCode.NotFound);
+        var ex = await act.Should().ThrowAsync<FeatureNotFoundException>();
+        ex.Which.FeatureId.Should().Be(999);
     }
 
     [Fact]

@@ -13,10 +13,7 @@ public sealed class ListFeaturesHandlerTests
 {
     public ListFeaturesHandlerTests() => FeatureMappingConfig.Register();
 
-    private static FeaturesDbContext NewDb() => new(
-        new DbContextOptionsBuilder<FeaturesDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options);
+    private static FeaturesDbContext NewDb() => TestFeaturesDbContext.NewInMemory();
 
     private static Feature NewFeature(string title, int manager, DateOnly? start = null, DateOnly? end = null) =>
         new()

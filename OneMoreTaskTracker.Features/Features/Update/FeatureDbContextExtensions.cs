@@ -1,4 +1,3 @@
-using Grpc.Core;
 using Microsoft.EntityFrameworkCore;
 using OneMoreTaskTracker.Features.Features.Data;
 
@@ -19,7 +18,7 @@ public static class FeatureDbContextExtensions
             catch (DbUpdateConcurrencyException)
             {
                 await db.Entry(feature).ReloadAsync(cancellationToken);
-                throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));
+                throw new OptimisticConcurrencyConflictException(feature.Version);
             }
         }
 
@@ -34,7 +33,7 @@ public static class FeatureDbContextExtensions
             catch (DbUpdateConcurrencyException)
             {
                 await db.Entry(gate).ReloadAsync(cancellationToken);
-                throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(gate.Version)));
+                throw new OptimisticConcurrencyConflictException(gate.Version);
             }
         }
 
@@ -49,7 +48,7 @@ public static class FeatureDbContextExtensions
             catch (DbUpdateConcurrencyException)
             {
                 await db.Entry(subStage).ReloadAsync(cancellationToken);
-                throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(subStage.Version)));
+                throw new OptimisticConcurrencyConflictException(subStage.Version);
             }
         }
 
@@ -61,7 +60,7 @@ public static class FeatureDbContextExtensions
                        .Include(f => f.Gates)
                        .Include(f => f.SubStages)
                        .FirstOrDefaultAsync(f => f.Id == featureId, cancellationToken)
-                   ?? throw new RpcException(new Status(StatusCode.NotFound, $"feature {featureId} not found"));
+                   ?? throw new FeatureNotFoundException(featureId);
         }
     }
 }

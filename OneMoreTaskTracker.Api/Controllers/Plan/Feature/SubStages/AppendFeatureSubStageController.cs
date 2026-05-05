@@ -28,14 +28,8 @@ public class AppendFeatureSubStageController(
 
         var callerUserId = User.GetUserId();
 
-        if (body.OwnerUserId is { } ownerId)
-        {
-            if (ownerId < 1)
-                return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
-            var roster = await userService.LoadRosterForManagerAsync(callerUserId, logger, ct);
-            if (!roster.ContainsKey(ownerId))
-                return BadRequest(new { error = "Pick a teammate from the list" });
-        }
+        if (await TeammateRosterValidator.ValidateAsync(body, userService, callerUserId, logger, ct) is { } error)
+            return error;
 
         var request = new AppendFeatureSubStageRequest
         {
