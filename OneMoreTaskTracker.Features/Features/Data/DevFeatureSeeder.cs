@@ -69,18 +69,6 @@ public sealed class DevFeatureSeeder(TimeProvider timeProvider)
             await dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        var legacyFeatures = await dbContext.Features
-            .Include(f => f.Gates)
-            .Include(f => f.SubStages)
-            .Where(f => f.Gates.Count == 0 && f.SubStages.Count == 0)
-            .ToListAsync(cancellationToken);
-
-        if (legacyFeatures.Count == 0)
-            return;
-
-        foreach (var feature in legacyFeatures)
-            FeatureStageLayout.Materialize(feature, now);
-
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 

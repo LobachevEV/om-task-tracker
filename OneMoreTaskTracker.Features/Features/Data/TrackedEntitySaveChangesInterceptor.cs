@@ -29,6 +29,7 @@ public sealed class TrackedEntitySaveChangesInterceptor(TimeProvider timeProvide
         var changeTracker = context.ChangeTracker;
 
         var featuresById = changeTracker.Entries<Feature>()
+            .Where(e => e.State is EntityState.Unchanged or EntityState.Modified)
             .ToDictionary(e => e.Entity.Id);
 
         var childFeatureIds = new HashSet<int>();
