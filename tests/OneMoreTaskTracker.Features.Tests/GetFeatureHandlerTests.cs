@@ -52,7 +52,6 @@ public sealed class GetFeatureHandlerTests
             PlannedEnd = new DateOnly(2026, 5, 10),
             ManagerUserId = 1,
             LeadUserId = 2,
-            CreatedAt = DateTime.UtcNow,
         };
         db.Features.Add(feature);
         await db.SaveChangesAsync();

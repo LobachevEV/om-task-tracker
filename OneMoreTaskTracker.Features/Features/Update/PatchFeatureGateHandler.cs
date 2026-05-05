@@ -7,7 +7,7 @@ namespace OneMoreTaskTracker.Features.Features.Update;
 public sealed class PatchFeatureGateHandler(
     FeaturesDbContext db,
     ILogger<PatchFeatureGateHandler> logger,
-    IRequestClock clock) : FeatureGatePatcher.FeatureGatePatcherBase
+    TimeProvider timeProvider) : FeatureGatePatcher.FeatureGatePatcherBase
 {
     public override async Task<FeatureTaxonomyResponse> Patch(PatchFeatureGateRequest request, ServerCallContext context)
     {
@@ -19,12 +19,11 @@ public sealed class PatchFeatureGateHandler(
 
         FeatureVersionGuard.EnsureGateVersion(gate, request.HasExpectedVersion, request.ExpectedVersion);
 
-        var now = clock.GetUtcNow();
         var mutated = false;
 
         if (request.HasStatus)
         {
-            gate.ApplyStatusPatch(request.Status, request.RejectionReason, request.CallerUserId, now);
+            gate.ApplyStatusPatch(request.Status, request.RejectionReason, request.CallerUserId, timeProvider.GetUtcNow().UtcDateTime);
             mutated = true;
         }
 

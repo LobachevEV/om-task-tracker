@@ -27,7 +27,7 @@ public sealed class PatchFeatureSubStageHandlerTests
 
     private static async Task<(int featureId, int subStageId)> CreateFeatureAsync(FeaturesDbContext db)
     {
-        var dto = await new CreateFeatureHandler(db, TestRequestClock.System()).Create(
+        var dto = await new CreateFeatureHandler(db, TimeProvider.System).Create(
             new CreateFeatureRequest { Title = "Patchy", ManagerUserId = ManagerUserId },
             TestServerCallContext.Create());
 
@@ -109,7 +109,7 @@ public sealed class PatchFeatureSubStageHandlerTests
         var db = NewDb();
         var (featureId, firstSubStageId) = await CreateFeatureAsync(db);
 
-        var appendResponse = await new AppendFeatureSubStageHandler(db, NullLogger<AppendFeatureSubStageHandler>.Instance, TestRequestClock.System())
+        var appendResponse = await new AppendFeatureSubStageHandler(db, NullLogger<AppendFeatureSubStageHandler>.Instance)
             .Append(
                 new OneMoreTaskTracker.Proto.Features.AppendFeatureSubStageCommand.AppendFeatureSubStageRequest
                 {
@@ -167,7 +167,7 @@ public sealed class PatchFeatureSubStageHandlerTests
         var db = NewDb();
         var (featureId, firstSubStageId) = await CreateFeatureAsync(db);
 
-        var appendResponse = await new AppendFeatureSubStageHandler(db, NullLogger<AppendFeatureSubStageHandler>.Instance, TestRequestClock.System())
+        var appendResponse = await new AppendFeatureSubStageHandler(db, NullLogger<AppendFeatureSubStageHandler>.Instance)
             .Append(
                 new OneMoreTaskTracker.Proto.Features.AppendFeatureSubStageCommand.AppendFeatureSubStageRequest
                 {

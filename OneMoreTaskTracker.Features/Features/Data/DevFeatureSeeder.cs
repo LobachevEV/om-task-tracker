@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace OneMoreTaskTracker.Features.Features.Data;
 
-public sealed class DevFeatureSeeder(IRequestClock clock)
+public sealed class DevFeatureSeeder(TimeProvider timeProvider)
 {
     public const int SeededManagerUserId = 1;
 
@@ -44,29 +44,42 @@ public sealed class DevFeatureSeeder(IRequestClock clock)
 
     public async Task SeedAsync(FeaturesDbContext dbContext, CancellationToken cancellationToken = default)
     {
-        if (await dbContext.Features.AnyAsync(f => f.ManagerUserId == SeededManagerUserId, cancellationToken))
+        var now = timeProvider.GetUtcNow().UtcDateTime;
+
+        if (!await dbContext.Features.AnyAsync(f => f.ManagerUserId == SeededManagerUserId, cancellationToken))
+        {
+            foreach (var f in Features)
+            {
+                var feature = new Feature
+                {
+                    Title         = f.Title,
+                    Description   = f.Description,
+                    State         = (int)f.State,
+                    PlannedStart  = f.PlannedStart,
+                    PlannedEnd    = f.PlannedEnd,
+                    LeadUserId    = f.LeadUserId,
+                    ManagerUserId = SeededManagerUserId,
+                };
+
+                FeatureStageLayout.Materialize(feature, now);
+
+                dbContext.Features.Add(feature);
+            }
+
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        var legacyFeatures = await dbContext.Features
+            .Include(f => f.Gates)
+            .Include(f => f.SubStages)
+            .Where(f => f.Gates.Count == 0 && f.SubStages.Count == 0)
+            .ToListAsync(cancellationToken);
+
+        if (legacyFeatures.Count == 0)
             return;
 
-        var now = clock.GetUtcNow();
-
-        foreach (var f in Features)
-        {
-            var feature = new Feature
-            {
-                Title         = f.Title,
-                Description   = f.Description,
-                State         = (int)f.State,
-                PlannedStart  = f.PlannedStart,
-                PlannedEnd    = f.PlannedEnd,
-                LeadUserId    = f.LeadUserId,
-                ManagerUserId = SeededManagerUserId,
-                CreatedAt     = now,
-            };
-
+        foreach (var feature in legacyFeatures)
             FeatureStageLayout.Materialize(feature, now);
-
-            dbContext.Features.Add(feature);
-        }
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }

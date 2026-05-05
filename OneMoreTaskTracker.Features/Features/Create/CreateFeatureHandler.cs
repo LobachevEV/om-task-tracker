@@ -5,14 +5,12 @@ using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 
 namespace OneMoreTaskTracker.Features.Features.Create;
 
-public class CreateFeatureHandler(FeaturesDbContext db, IRequestClock clock) : FeatureCreator.FeatureCreatorBase
+public class CreateFeatureHandler(FeaturesDbContext db, TimeProvider timeProvider) : FeatureCreator.FeatureCreatorBase
 {
     public override async Task<FeatureDto> Create(CreateFeatureRequest request, ServerCallContext context)
     {
         var plannedStart = PlannedDate.Parse(request.PlannedStart);
         var plannedEnd   = PlannedDate.Parse(request.PlannedEnd);
-
-        var now = clock.GetUtcNow();
 
         var feature = new Feature
         {
@@ -23,10 +21,9 @@ public class CreateFeatureHandler(FeaturesDbContext db, IRequestClock clock) : F
             PlannedEnd    = plannedEnd,
             LeadUserId    = request.LeadUserId > 0 ? request.LeadUserId : request.ManagerUserId,
             ManagerUserId = request.ManagerUserId,
-            CreatedAt     = now,
         };
 
-        FeatureStageLayout.Materialize(feature, now);
+        FeatureStageLayout.Materialize(feature, timeProvider.GetUtcNow().UtcDateTime);
 
         db.Features.Add(feature);
         await db.SaveChangesAsync(context.CancellationToken);

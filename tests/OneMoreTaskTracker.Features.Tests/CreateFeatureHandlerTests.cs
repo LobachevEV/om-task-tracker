@@ -19,7 +19,7 @@ public sealed class CreateFeatureHandlerTests
     [Fact]
     public async Task Create_HappyPath_ReturnsDtoWithCsApprovingStateAndLeadDefaultedToManager()
     {
-        var handler = new CreateFeatureHandler(NewDb(), TestRequestClock.System());
+        var handler = new CreateFeatureHandler(NewDb(), TimeProvider.System);
 
         var dto = await handler.Create(
             new CreateFeatureRequest { Title = "Rollout", ManagerUserId = 42 },
@@ -100,7 +100,7 @@ public sealed class CreateFeatureHandlerTests
     public async Task Create_EmptyDescription_StoresNullAndReturnsEmptyString()
     {
         var db = NewDb();
-        var handler = new CreateFeatureHandler(db, TestRequestClock.System());
+        var handler = new CreateFeatureHandler(db, TimeProvider.System);
 
         var dto = await handler.Create(
             new CreateFeatureRequest { Title = "X", ManagerUserId = 1, Description = "" },
@@ -114,7 +114,7 @@ public sealed class CreateFeatureHandlerTests
     [Fact]
     public async Task Create_ExplicitLeadUserId_IsHonoured()
     {
-        var handler = new CreateFeatureHandler(NewDb(), TestRequestClock.System());
+        var handler = new CreateFeatureHandler(NewDb(), TimeProvider.System);
 
         var dto = await handler.Create(
             new CreateFeatureRequest { Title = "X", ManagerUserId = 1, LeadUserId = 7 },

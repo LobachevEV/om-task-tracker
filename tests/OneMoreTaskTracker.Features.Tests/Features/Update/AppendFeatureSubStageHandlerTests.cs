@@ -24,11 +24,11 @@ public sealed class AppendFeatureSubStageHandlerTests
     private static FeaturesDbContext NewDb() => TestFeaturesDbContext.NewInMemory();
 
     private static AppendFeatureSubStageHandler Handler(FeaturesDbContext db) =>
-        new(db, NullLogger<AppendFeatureSubStageHandler>.Instance, TestRequestClock.System());
+        new(db, NullLogger<AppendFeatureSubStageHandler>.Instance);
 
     private static async Task<int> CreateFeatureAsync(FeaturesDbContext db)
     {
-        var dto = await new CreateFeatureHandler(db, TestRequestClock.System()).Create(
+        var dto = await new CreateFeatureHandler(db, TimeProvider.System).Create(
             new CreateFeatureRequest { Title = "Branchy", ManagerUserId = ManagerUserId },
             TestServerCallContext.Create());
         return dto.Id;

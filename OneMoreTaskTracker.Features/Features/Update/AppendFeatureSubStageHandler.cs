@@ -6,8 +6,7 @@ namespace OneMoreTaskTracker.Features.Features.Update;
 
 public sealed class AppendFeatureSubStageHandler(
     FeaturesDbContext db,
-    ILogger<AppendFeatureSubStageHandler> logger,
-    IRequestClock clock) : FeatureSubStageAppender.FeatureSubStageAppenderBase
+    ILogger<AppendFeatureSubStageHandler> logger) : FeatureSubStageAppender.FeatureSubStageAppenderBase
 {
     public override async Task<AppendFeatureSubStageResponse> Append(AppendFeatureSubStageRequest request, ServerCallContext context)
     {
@@ -25,12 +24,11 @@ public sealed class AppendFeatureSubStageHandler(
             throw new RpcException(new Status(StatusCode.FailedPrecondition,
                 ConflictDetail.SubStageCapReached(track.ToString(), phase.ToString(), FeatureStageLayout.SubStageHardCap)));
 
-        var now = clock.GetUtcNow();
         var ownerUserId = request.HasOwnerUserId ? request.OwnerUserId : 0;
         var plannedStart = ParseOptionalDate(request.HasPlannedStart ? request.PlannedStart : null);
         var plannedEnd   = ParseOptionalDate(request.HasPlannedEnd   ? request.PlannedEnd   : null);
 
-        var sub = FeatureStageLayout.Append(feature, track, phase, ownerUserId, plannedStart, plannedEnd, now);
+        var sub = FeatureStageLayout.Append(feature, track, phase, ownerUserId, plannedStart, plannedEnd);
 
         var others = feature.SubStages.Where(s =>
             s.Track == track && s.PhaseKind == phase && !ReferenceEquals(s, sub));

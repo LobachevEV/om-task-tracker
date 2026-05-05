@@ -22,11 +22,11 @@ public sealed class PatchFeatureGateHandlerTests
     private static FeaturesDbContext NewDb() => TestFeaturesDbContext.NewInMemory();
 
     private static PatchFeatureGateHandler Handler(FeaturesDbContext db) =>
-        new(db, NullLogger<PatchFeatureGateHandler>.Instance, TestRequestClock.System());
+        new(db, NullLogger<PatchFeatureGateHandler>.Instance, TimeProvider.System);
 
     private static async Task<int> CreateFeatureAsync(FeaturesDbContext db)
     {
-        var dto = await new CreateFeatureHandler(db, TestRequestClock.System()).Create(
+        var dto = await new CreateFeatureHandler(db, TimeProvider.System).Create(
             new CreateFeatureRequest { Title = "Gated", ManagerUserId = ManagerUserId },
             TestServerCallContext.Create());
         return dto.Id;
@@ -139,7 +139,6 @@ public sealed class PatchFeatureGateHandlerTests
             Title = "No gates",
             ManagerUserId = ManagerUserId,
             LeadUserId = ManagerUserId,
-            CreatedAt = DateTime.UtcNow,
         };
         db.Features.Add(feature);
         await db.SaveChangesAsync();

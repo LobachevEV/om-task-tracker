@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace OneMoreTaskTracker.Features.Features.Data;
 
-public sealed class TrackedEntitySaveChangesInterceptor(IRequestClock clock) : SaveChangesInterceptor
+public sealed class TrackedEntitySaveChangesInterceptor(TimeProvider timeProvider) : SaveChangesInterceptor
 {
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
@@ -26,7 +26,6 @@ public sealed class TrackedEntitySaveChangesInterceptor(IRequestClock clock) : S
     private void Apply(DbContext? context)
     {
         if (context == null) return;
-        var now = clock.GetUtcNow();
         var changeTracker = context.ChangeTracker;
 
         var featuresById = changeTracker.Entries<Feature>()
@@ -44,11 +43,13 @@ public sealed class TrackedEntitySaveChangesInterceptor(IRequestClock clock) : S
             if (featuresById.TryGetValue(featureId, out var parent) && parent.State == EntityState.Unchanged)
                 parent.State = EntityState.Modified;
 
+        var now = timeProvider.GetUtcNow().UtcDateTime;
         foreach (var entry in changeTracker.Entries<ITrackedEntity>().ToList())
         {
             switch (entry.State)
             {
                 case EntityState.Added:
+                    entry.Entity.CreatedAt = now;
                     entry.Entity.UpdatedAt = now;
                     break;
                 case EntityState.Modified:

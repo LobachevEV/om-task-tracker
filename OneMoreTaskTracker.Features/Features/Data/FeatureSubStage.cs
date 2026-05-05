@@ -15,13 +15,19 @@ public class FeatureSubStage : ITrackedEntity
     public DateOnly? PlannedEnd { get; private set; }
 
     public int Version { get; private set; }
-    public DateTime CreatedAt { get; init; }
+    public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
     int ITrackedEntity.Version
     {
         get => Version;
         set => Version = value;
+    }
+
+    DateTime ITrackedEntity.CreatedAt
+    {
+        get => CreatedAt;
+        set => CreatedAt = value;
     }
 
     DateTime ITrackedEntity.UpdatedAt

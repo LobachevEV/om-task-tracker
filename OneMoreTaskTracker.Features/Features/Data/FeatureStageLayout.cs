@@ -28,21 +28,18 @@ public static class FeatureStageLayout
             GateKey = SpecGateKey,
             Kind = GateKind.Spec,
             Track = null,
-            CreatedAt = now,
         });
         feature.Gates.Add(new FeatureGate
         {
             GateKey = BackendPrepGateKey,
             Kind = GateKind.Cs,
             Track = Track.Backend,
-            CreatedAt = now,
         });
         feature.Gates.Add(new FeatureGate
         {
             GateKey = FrontendPrepGateKey,
             Kind = GateKind.Sr,
             Track = Track.Frontend,
-            CreatedAt = now,
         });
 
         foreach (var gate in feature.Gates)
@@ -58,7 +55,6 @@ public static class FeatureStageLayout
                 {
                     Track = track,
                     PhaseKind = phase,
-                    CreatedAt = now,
                 };
                 sub.SeedOrdinal(1);
                 feature.SubStages.Add(sub);
@@ -72,8 +68,7 @@ public static class FeatureStageLayout
         PhaseKind phase,
         int ownerUserId,
         DateOnly? plannedStart,
-        DateOnly? plannedEnd,
-        DateTime now)
+        DateOnly? plannedEnd)
     {
         var siblings = feature.SubStages
             .Where(s => s.Track == track && s.PhaseKind == phase)
@@ -90,7 +85,6 @@ public static class FeatureStageLayout
         {
             Track = track,
             PhaseKind = phase,
-            CreatedAt = now,
         };
         sub.SeedOrdinal(nextOrdinal);
         sub.SeedOwner(ownerUserId > 0 ? ownerUserId : 0);

@@ -27,11 +27,11 @@ public sealed class DeleteFeatureSubStageHandlerTests
         new(db, NullLogger<DeleteFeatureSubStageHandler>.Instance);
 
     private static AppendFeatureSubStageHandler AppendHandler(FeaturesDbContext db) =>
-        new(db, NullLogger<AppendFeatureSubStageHandler>.Instance, TestRequestClock.System());
+        new(db, NullLogger<AppendFeatureSubStageHandler>.Instance);
 
     private static async Task<int> CreateFeatureAsync(FeaturesDbContext db)
     {
-        var dto = await new CreateFeatureHandler(db, TestRequestClock.System()).Create(
+        var dto = await new CreateFeatureHandler(db, TimeProvider.System).Create(
             new CreateFeatureRequest { Title = "Deletable", ManagerUserId = ManagerUserId },
             TestServerCallContext.Create());
         return dto.Id;

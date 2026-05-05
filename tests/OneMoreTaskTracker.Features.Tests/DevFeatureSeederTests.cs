@@ -10,7 +10,7 @@ public sealed class DevFeatureSeederTests
 {
     private static FeaturesDbContext NewDb() => TestFeaturesDbContext.NewInMemory();
 
-    private static DevFeatureSeeder NewSeeder() => new(TestRequestClock.System());
+    private static DevFeatureSeeder NewSeeder() => new(TimeProvider.System);
 
     [Fact]
     public async Task SeedAsync_OnEmptyDb_InsertsSeedFeaturesForSeededManager()
@@ -54,7 +54,6 @@ public sealed class DevFeatureSeederTests
             Title = "Pre-existing",
             ManagerUserId = DevFeatureSeeder.SeededManagerUserId,
             LeadUserId = DevFeatureSeeder.SeededManagerUserId,
-            CreatedAt = DateTime.UtcNow,
         };
         db.Features.Add(preExisting);
         await db.SaveChangesAsync();
@@ -114,5 +113,30 @@ public sealed class DevFeatureSeederTests
                 }
             }
         }
+    }
+
+    [Fact]
+    public async Task SeedAsync_BackfillsTaxonomyOnLegacyFeaturesMissingChildren()
+    {
+        await using var db = NewDb();
+        var legacy = new Feature
+        {
+            Title = "Legacy pre-V2",
+            ManagerUserId = DevFeatureSeeder.SeededManagerUserId,
+            LeadUserId = DevFeatureSeeder.SeededManagerUserId,
+        };
+        db.Features.Add(legacy);
+        await db.SaveChangesAsync();
+
+        await NewSeeder().SeedAsync(db);
+
+        var reloaded = await db.Features
+            .AsNoTracking()
+            .Include(f => f.Gates)
+            .Include(f => f.SubStages)
+            .SingleAsync(f => f.Id == legacy.Id);
+
+        reloaded.Gates.Should().HaveCount(3);
+        reloaded.SubStages.Should().HaveCount(FeatureStageLayout.AllTracks.Length * FeatureStageLayout.AllPhases.Length);
     }
 }

@@ -36,7 +36,7 @@ public sealed class PatchFeatureHandlerTests
         };
         if (description is not null)
             request.Description = description;
-        return await new CreateFeatureHandler(db, TestRequestClock.System()).Create(request, TestServerCallContext.Create());
+        return await new CreateFeatureHandler(db, TimeProvider.System).Create(request, TestServerCallContext.Create());
     }
 
     [Fact]

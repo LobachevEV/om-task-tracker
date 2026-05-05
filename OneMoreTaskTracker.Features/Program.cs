@@ -22,8 +22,7 @@ builder.Services.AddGrpc(o =>
 builder.Services.AddValidatorsFromAssemblyContaining<CreateFeatureRequestValidator>();
 FeatureMappingConfig.Register();
 builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
-builder.Services.AddScoped<IRequestClock, RequestClock>();
-builder.Services.AddScoped<TrackedEntitySaveChangesInterceptor>();
+builder.Services.AddSingleton<TrackedEntitySaveChangesInterceptor>();
 builder.Services.AddScoped<DevFeatureSeeder>();
 builder.Services.AddDbContextPool<FeaturesDbContext>((sp, opt) =>
     opt
