@@ -127,6 +127,15 @@ public class UserServiceHandler(UsersDbContext dbContext) : UserService.UserServ
         return response;
     }
 
+    public override async Task<IsTeamMemberResponse> IsTeamMember(
+        IsTeamMemberRequest request, ServerCallContext context)
+    {
+        var exists = await dbContext.Users
+            .AnyAsync(u => u.ManagerId == request.ManagerId && u.Id == request.UserId, context.CancellationToken);
+
+        return new IsTeamMemberResponse { Exists = exists };
+    }
+
     public override async Task<DeleteUserResponse> DeleteUser(
         DeleteUserRequest request, ServerCallContext context)
     {

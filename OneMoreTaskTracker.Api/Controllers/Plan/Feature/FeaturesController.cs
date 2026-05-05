@@ -1,11 +1,12 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OneMoreTaskTracker.Api.Auth;
+using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Rosters;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureCommand;
-using OneMoreTaskTracker.Proto.Users;
 
 namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature;
 
@@ -17,7 +18,8 @@ public class FeaturesController(
     FeaturePatcher.FeaturePatcherClient featurePatcher,
     FeaturesLister.FeaturesListerClient featuresLister,
     FeatureGetter.FeatureGetterClient featureGetter,
-    UserService.UserServiceClient userService,
+    ITeamRosterProvider rosterProvider,
+    IValidator<IHasTeammateUserId> teammateValidator,
     ILogger<FeaturesController> logger) : ControllerBase
 {
     [HttpGet]
@@ -61,7 +63,7 @@ public class FeaturesController(
             new GetFeatureRequest { Id = id },
             cancellationToken: ct);
 
-        var roster = await userService.LoadRosterForManagerAsync(feature.ManagerUserId, logger, ct);
+        var roster = await rosterProvider.GetRosterForManagerAsync(feature.ManagerUserId, ct);
 
         var lead = MiniTeamMemberResponse.From(feature.LeadUserId, roster);
 
@@ -112,8 +114,10 @@ public class FeaturesController(
 
         var callerUserId = User.GetUserId();
 
-        if (await TeammateRosterValidator.ValidateAsync(body, userService, callerUserId, logger, ct) is { } error)
-            return error;
+        var teammateResult = await teammateValidator.ValidateAsync(
+            TeammateValidationContext.ForCaller(body, callerUserId), ct);
+        if (!teammateResult.IsValid)
+            return BadRequest(new { error = teammateResult.Errors[0].ErrorMessage });
 
         var headerVersion = PlanRequestHelpers.ParseIfMatch(ifMatch, logger);
         var expectedVersion = body.ExpectedVersion ?? headerVersion;

@@ -87,7 +87,7 @@ public sealed class CreateFeatureHandlerTests
             Title = "X",
             ManagerUserId = 1,
             PlannedStart = "2026-05-10",
-            PlannedEnd   = "2026-05-01",
+            PlannedEnd = "2026-05-01",
         };
 
         var act = () => ValidationPipeline.ValidateAsync(validator, request);

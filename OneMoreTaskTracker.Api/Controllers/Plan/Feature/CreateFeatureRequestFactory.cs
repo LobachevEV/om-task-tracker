@@ -12,12 +12,12 @@ internal static class CreateFeatureRequestFactory
 
         return new CreateFeatureRequest
         {
-            Title         = body.Title,
-            Description   = body.Description ?? string.Empty,
-            LeadUserId    = leadUserId,
+            Title = body.Title,
+            Description = body.Description ?? string.Empty,
+            LeadUserId = leadUserId,
             ManagerUserId = managerUserId,
-            PlannedStart  = body.PlannedStart ?? string.Empty,
-            PlannedEnd    = body.PlannedEnd   ?? string.Empty,
+            PlannedStart = body.PlannedStart ?? string.Empty,
+            PlannedEnd = body.PlannedEnd ?? string.Empty,
         };
     }
 }

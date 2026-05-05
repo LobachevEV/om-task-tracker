@@ -51,10 +51,10 @@ public sealed class DevFeatureSeederTests
         await using var db = NewDb();
         var preExisting = new Feature
         {
-            Title         = "Pre-existing",
+            Title = "Pre-existing",
             ManagerUserId = DevFeatureSeeder.SeededManagerUserId,
-            LeadUserId    = DevFeatureSeeder.SeededManagerUserId,
-            CreatedAt     = DateTime.UtcNow,
+            LeadUserId = DevFeatureSeeder.SeededManagerUserId,
+            CreatedAt = DateTime.UtcNow,
         };
         db.Features.Add(preExisting);
         await db.SaveChangesAsync();

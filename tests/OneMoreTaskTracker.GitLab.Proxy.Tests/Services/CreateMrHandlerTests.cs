@@ -28,7 +28,11 @@ public sealed class CreateMrHandlerTests
 
         var requestStream = new QueueAsyncStreamReader<CreateMrRequest>(new CreateMrRequest
         {
-            ProjectId = 1, ProjectName = "repo", SourceBranch = "feature/test", TargetBranch = "develop", Title = "Test MR"
+            ProjectId = 1,
+            ProjectName = "repo",
+            SourceBranch = "feature/test",
+            TargetBranch = "develop",
+            Title = "Test MR"
         });
         var responseStream = new ListServerStreamWriter<CreateMrResponse>();
 
@@ -48,7 +52,11 @@ public sealed class CreateMrHandlerTests
 
         var requestStream = new QueueAsyncStreamReader<CreateMrRequest>(new CreateMrRequest
         {
-            ProjectId = 1, ProjectName = "repo", SourceBranch = "feature/test", TargetBranch = "develop", Title = "Test MR"
+            ProjectId = 1,
+            ProjectName = "repo",
+            SourceBranch = "feature/test",
+            TargetBranch = "develop",
+            Title = "Test MR"
         });
         var responseStream = new ListServerStreamWriter<CreateMrResponse>();
 
@@ -75,7 +83,11 @@ public sealed class CreateMrHandlerTests
 
         var requestStream = new QueueAsyncStreamReader<CreateMrRequest>(new CreateMrRequest
         {
-            ProjectId = 1, ProjectName = "repo", SourceBranch = "feature/test", TargetBranch = "master", Title = "Test MR"
+            ProjectId = 1,
+            ProjectName = "repo",
+            SourceBranch = "feature/test",
+            TargetBranch = "master",
+            Title = "Test MR"
         });
 
         await handler.Create(requestStream, new ListServerStreamWriter<CreateMrResponse>(), NoneContext());
@@ -95,7 +107,11 @@ public sealed class CreateMrHandlerTests
 
         static CreateMrRequest Req() => new()
         {
-            ProjectId = 1, ProjectName = "repo", SourceBranch = "s", TargetBranch = "develop", Title = "t"
+            ProjectId = 1,
+            ProjectName = "repo",
+            SourceBranch = "s",
+            TargetBranch = "develop",
+            Title = "t"
         };
         var requestStream = new QueueAsyncStreamReader<CreateMrRequest>(Req(), Req(), Req());
         var responseStream = new ListServerStreamWriter<CreateMrResponse>();

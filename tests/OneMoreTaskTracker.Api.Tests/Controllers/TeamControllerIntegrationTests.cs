@@ -91,7 +91,7 @@ public sealed class TeamControllerIntegrationTests(TasksControllerWebApplication
     {
         const int developerId = 10;
         const int managerUserId = 7;
-        var client = ClientWithToken(userId: developerId, role: Roles.FrontendDeveloper, 
+        var client = ClientWithToken(userId: developerId, role: Roles.FrontendDeveloper,
             email: "alice.dev@example.com", managerId: managerUserId);
 
         factory.MockUserService

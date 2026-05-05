@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using FluentValidation;
 using OneMoreTaskTracker.Api.Auth;
+using OneMoreTaskTracker.Api.Controllers.Plan.Feature;
+using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Rosters;
 using OneMoreTaskTracker.Api.Middleware;
 using OneMoreTaskTracker.Api.Time;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
@@ -124,6 +127,9 @@ builder.Services
 
 builder.Services
     .AddGrpcClient<FeatureSubStageDeleter.FeatureSubStageDeleterClient>(o => o.Address = new Uri(featuresServiceAddress));
+
+builder.Services.AddScoped<ITeamRosterProvider, TeamRosterProvider>();
+builder.Services.AddScoped<IValidator<IHasTeammateUserId>, TeammateRosterValidator>();
 
 var app = builder.Build();
 

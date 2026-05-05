@@ -33,25 +33,19 @@ public sealed class SubStageControllersOwnerRosterTests(TasksControllerWebApplic
 
     private void StubRosterContaining(params int[] memberIds)
     {
-        var response = new GetTeamRosterResponse();
-        foreach (var id in memberIds)
-        {
-            response.Members.Add(new TeamRosterMember
-            {
-                UserId = id,
-                Email = $"user{id}@example.com",
-                Role = Roles.FrontendDeveloper,
-                ManagerId = ManagerUserId,
-            });
-        }
+        var memberSet = memberIds.ToHashSet();
 
         factory.MockUserService
-            .GetTeamRosterAsync(
-                Arg.Is<GetTeamRosterRequest>(req => req.ManagerId == ManagerUserId),
+            .IsTeamMemberAsync(
+                Arg.Is<IsTeamMemberRequest>(req => req.ManagerId == ManagerUserId),
                 Arg.Any<Metadata>(),
                 Arg.Any<DateTime?>(),
                 Arg.Any<CancellationToken>())
-            .Returns(GrpcTestHelpers.UnaryCall(response));
+            .Returns(call =>
+            {
+                var request = (IsTeamMemberRequest)call[0];
+                return GrpcTestHelpers.UnaryCall(new IsTeamMemberResponse { Exists = memberSet.Contains(request.UserId) });
+            });
     }
 
     private static StringContent JsonBody(object payload) =>

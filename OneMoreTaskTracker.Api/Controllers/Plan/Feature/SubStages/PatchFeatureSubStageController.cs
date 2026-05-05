@@ -1,9 +1,10 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OneMoreTaskTracker.Api.Auth;
+using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Rosters;
 using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Taxonomy;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureSubStageCommand;
-using OneMoreTaskTracker.Proto.Users;
 
 namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.SubStages;
 
@@ -12,7 +13,7 @@ namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.SubStages;
 [Route("api/plan/features/{featureId:int}/sub-stages")]
 public class PatchFeatureSubStageController(
     FeatureSubStagePatcher.FeatureSubStagePatcherClient subStagePatcher,
-    UserService.UserServiceClient userService,
+    IValidator<IHasTeammateUserId> teammateValidator,
     ILogger<PatchFeatureSubStageController> logger) : ControllerBase
 {
     [HttpPatch("{subStageId:int}")]
@@ -28,8 +29,10 @@ public class PatchFeatureSubStageController(
 
         var callerUserId = User.GetUserId();
 
-        if (await TeammateRosterValidator.ValidateAsync(body, userService, callerUserId, logger, ct) is { } error)
-            return error;
+        var teammateResult = await teammateValidator.ValidateAsync(
+            TeammateValidationContext.ForCaller(body, callerUserId), ct);
+        if (!teammateResult.IsValid)
+            return BadRequest(new { error = teammateResult.Errors[0].ErrorMessage });
 
         var request = new PatchFeatureSubStageRequest
         {

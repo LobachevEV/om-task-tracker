@@ -20,7 +20,7 @@ public sealed class GrpcExceptionMiddlewareTests
 
         RequestDelegate next = ex == null
             ? ctx => { ctx.Response.StatusCode = 200; return Task.CompletedTask; }
-            : _ => throw ex;
+        : _ => throw ex;
 
         var middleware = new GrpcExceptionMiddleware(next, logger);
         await middleware.InvokeAsync(context);

@@ -8,6 +8,7 @@ service UserService {
   rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
   rpc GetTeamMemberIds(GetTeamMemberIdsRequest) returns (GetTeamMemberIdsResponse);
   rpc GetTeamRoster(GetTeamRosterRequest) returns (GetTeamRosterResponse);
+  rpc IsTeamMember(IsTeamMemberRequest) returns (IsTeamMemberResponse);
   rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
 }
 
@@ -59,6 +60,15 @@ message TeamRosterMember {
 
 message GetTeamRosterResponse {
   repeated TeamRosterMember members = 1;
+}
+
+message IsTeamMemberRequest {
+  int32 manager_id = 1;
+  int32 user_id = 2;
+}
+
+message IsTeamMemberResponse {
+  bool exists = 1;
 }
 
 message DeleteUserRequest {

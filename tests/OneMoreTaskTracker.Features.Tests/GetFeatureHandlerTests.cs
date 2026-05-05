@@ -45,14 +45,14 @@ public sealed class GetFeatureHandlerTests
         var db = NewDb();
         var feature = new Feature
         {
-            Title         = "Rollout",
-            Description   = "detail",
-            State         = (int)FeatureState.Development,
-            PlannedStart  = new DateOnly(2026, 5, 1),
-            PlannedEnd    = new DateOnly(2026, 5, 10),
+            Title = "Rollout",
+            Description = "detail",
+            State = (int)FeatureState.Development,
+            PlannedStart = new DateOnly(2026, 5, 1),
+            PlannedEnd = new DateOnly(2026, 5, 10),
             ManagerUserId = 1,
-            LeadUserId    = 2,
-            CreatedAt     = DateTime.UtcNow,
+            LeadUserId = 2,
+            CreatedAt = DateTime.UtcNow,
         };
         db.Features.Add(feature);
         await db.SaveChangesAsync();

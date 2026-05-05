@@ -18,11 +18,11 @@ public sealed class ListFeaturesHandlerTests
     private static Feature NewFeature(string title, int manager, DateOnly? start = null, DateOnly? end = null) =>
         new()
         {
-            Title         = title,
+            Title = title,
             ManagerUserId = manager,
-            LeadUserId    = manager,
-            PlannedStart  = start,
-            PlannedEnd    = end,
+            LeadUserId = manager,
+            PlannedStart = start,
+            PlannedEnd = end,
         };
 
     [Fact]
@@ -40,8 +40,8 @@ public sealed class ListFeaturesHandlerTests
     {
         var db = NewDb();
         db.Features.Add(NewFeature("Unscheduled", 1));
-        db.Features.Add(NewFeature("Early",       1, new DateOnly(2026, 5, 1),  new DateOnly(2026, 5, 10)));
-        db.Features.Add(NewFeature("Later",       1, new DateOnly(2026, 6, 1),  new DateOnly(2026, 6, 10)));
+        db.Features.Add(NewFeature("Early", 1, new DateOnly(2026, 5, 1), new DateOnly(2026, 5, 10)));
+        db.Features.Add(NewFeature("Later", 1, new DateOnly(2026, 6, 1), new DateOnly(2026, 6, 10)));
         await db.SaveChangesAsync();
 
         var handler = new ListFeaturesHandler(db);
@@ -73,10 +73,10 @@ public sealed class ListFeaturesHandlerTests
     {
         var db = NewDb();
         db.Features.Add(NewFeature("Unscheduled", 1));
-        db.Features.Add(NewFeature("BeforeWindow", 1, new DateOnly(2026, 4, 1),  new DateOnly(2026, 4, 20))); // ends before 2026-05-01
+        db.Features.Add(NewFeature("BeforeWindow", 1, new DateOnly(2026, 4, 1), new DateOnly(2026, 4, 20))); // ends before 2026-05-01
         db.Features.Add(NewFeature("OverlapsStart", 1, new DateOnly(2026, 4, 25), new DateOnly(2026, 5, 5))); // ends inside window
-        db.Features.Add(NewFeature("Inside",       1, new DateOnly(2026, 5, 5),  new DateOnly(2026, 5, 10)));
-        db.Features.Add(NewFeature("StartsAtEnd",  1, new DateOnly(2026, 5, 15), new DateOnly(2026, 5, 20))); // start == window_end → excluded (exclusive)
+        db.Features.Add(NewFeature("Inside", 1, new DateOnly(2026, 5, 5), new DateOnly(2026, 5, 10)));
+        db.Features.Add(NewFeature("StartsAtEnd", 1, new DateOnly(2026, 5, 15), new DateOnly(2026, 5, 20))); // start == window_end → excluded (exclusive)
         await db.SaveChangesAsync();
 
         var handler = new ListFeaturesHandler(db);
@@ -84,7 +84,7 @@ public sealed class ListFeaturesHandlerTests
             new ListFeaturesRequest
             {
                 WindowStart = "2026-05-01",
-                WindowEnd   = "2026-05-15",
+                WindowEnd = "2026-05-15",
             },
             TestServerCallContext.Create());
 

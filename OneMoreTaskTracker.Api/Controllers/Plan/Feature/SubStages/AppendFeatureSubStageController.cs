@@ -1,9 +1,10 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OneMoreTaskTracker.Api.Auth;
+using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Rosters;
 using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Taxonomy;
 using OneMoreTaskTracker.Proto.Features.AppendFeatureSubStageCommand;
-using OneMoreTaskTracker.Proto.Users;
 
 namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.SubStages;
 
@@ -12,8 +13,7 @@ namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.SubStages;
 [Route("api/plan/features/{featureId:int}/phases/{track}/{phase}/sub-stages")]
 public class AppendFeatureSubStageController(
     FeatureSubStageAppender.FeatureSubStageAppenderClient subStageAppender,
-    UserService.UserServiceClient userService,
-    ILogger<AppendFeatureSubStageController> logger) : ControllerBase
+    IValidator<IHasTeammateUserId> teammateValidator) : ControllerBase
 {
     [HttpPost]
     public async Task<ActionResult<SubStageMutationResponse>> Append(
@@ -28,8 +28,10 @@ public class AppendFeatureSubStageController(
 
         var callerUserId = User.GetUserId();
 
-        if (await TeammateRosterValidator.ValidateAsync(body, userService, callerUserId, logger, ct) is { } error)
-            return error;
+        var teammateResult = await teammateValidator.ValidateAsync(
+            TeammateValidationContext.ForCaller(body, callerUserId), ct);
+        if (!teammateResult.IsValid)
+            return BadRequest(new { error = teammateResult.Errors[0].ErrorMessage });
 
         var request = new AppendFeatureSubStageRequest
         {
