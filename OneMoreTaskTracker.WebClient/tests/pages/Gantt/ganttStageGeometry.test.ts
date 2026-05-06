@@ -153,3 +153,48 @@ describe('computeFeatureGeometry — summaryBar', () => {
     expect(g.summaryBar!.leftPx).toBe(14 * DAY_PX);
   });
 });
+
+describe('computeFeatureGeometry — dim cascade (UX-004-07)', () => {
+  function withSpecStatus(status: 'approved' | 'waiting' | 'rejected') {
+    return {
+      ...MINI_TEAM_FEATURE,
+      taxonomy: {
+        ...MINI_TEAM_FEATURE.taxonomy,
+        gates: MINI_TEAM_FEATURE.taxonomy.gates.map((gate) =>
+          gate.gateKey === 'spec' ? { ...gate, status } : gate,
+        ),
+      },
+    };
+  }
+
+  it('dims all tracks when spec gate is rejected', () => {
+    const g = computeFeatureGeometry(RANGE, withSpecStatus('rejected'), FIXTURE_TODAY, DAY_PX);
+    for (const track of g.tracks) {
+      expect(track.dimmed).toBe(true);
+    }
+  });
+
+  it('dims all tracks when spec gate is waiting', () => {
+    const g = computeFeatureGeometry(RANGE, withSpecStatus('waiting'), FIXTURE_TODAY, DAY_PX);
+    for (const track of g.tracks) {
+      expect(track.dimmed).toBe(true);
+    }
+  });
+
+  it('does not dim a track purely due to spec when spec is approved and prep-gate is approved', () => {
+    // SOLO_FEATURE has spec=approved and both prep-gates=approved
+    const g = computeFeatureGeometry(RANGE, SOLO_FEATURE, FIXTURE_TODAY, DAY_PX);
+    for (const track of g.tracks) {
+      expect(track.dimmed).toBe(false);
+    }
+  });
+
+  it('dims only the FE track when only frontend prep-gate is waiting (spec approved)', () => {
+    // MINI_TEAM_FEATURE: spec=approved, be=approved, fe=waiting
+    const g = computeFeatureGeometry(RANGE, MINI_TEAM_FEATURE, FIXTURE_TODAY, DAY_PX);
+    const be = g.tracks.find((t) => t.track === 'backend');
+    const fe = g.tracks.find((t) => t.track === 'frontend');
+    expect(be?.dimmed).toBe(false);
+    expect(fe?.dimmed).toBe(true);
+  });
+});

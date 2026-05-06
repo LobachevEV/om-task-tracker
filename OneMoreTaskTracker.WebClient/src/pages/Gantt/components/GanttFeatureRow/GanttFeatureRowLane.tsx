@@ -1,6 +1,7 @@
 import { useCallback, useMemo, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FeatureSummary, PhaseKind, Track } from '../../../../common/types/feature';
+import type { TeamRosterMember } from '../../../../common/api/teamApi';
 import type { FeatureBarGeometry } from '../../ganttStageGeometry';
 import { GanttGateChip } from '../GanttGateChip';
 import { GanttPhaseSegment } from '../GanttPhaseSegment';
@@ -13,7 +14,9 @@ export interface GanttFeatureRowLaneProps {
   variant: GanttLaneVariant;
   inlineEnabled: boolean;
   mutations?: FeatureMutationCallbacks;
+  roster?: readonly TeamRosterMember[];
   onTogglePhase: (track: Track, phase: PhaseKind) => void;
+  onAnnounce?: (message: string) => void;
 }
 
 export function GanttFeatureRowLane({
@@ -22,7 +25,9 @@ export function GanttFeatureRowLane({
   variant,
   inlineEnabled,
   mutations,
+  roster,
   onTogglePhase,
+  onAnnounce,
 }: GanttFeatureRowLaneProps) {
   const { t } = useTranslation('gantt');
 
@@ -58,8 +63,14 @@ export function GanttFeatureRowLane({
         rejectionReason,
         gateVersion,
       );
+      onAnnounce?.(
+        t('gates.statusSavedAnnounce', {
+          defaultValue: '{{gate}} gate status saved.',
+          gate: t(`gates.${gateKey}`),
+        }),
+      );
     };
-  }, [feature.id, inlineEnabled, mutations]);
+  }, [feature.id, inlineEnabled, mutations, onAnnounce, t]);
 
   return (
     <div className="gantt-row__lane" data-variant={variant}>
@@ -114,14 +125,18 @@ export function GanttFeatureRowLane({
       <GanttGateChip
         gate={geometry.specGate.gate}
         leftPx={geometry.specGate.leftPx}
+        chipIndex={0}
+        roster={roster}
         canEdit={inlineEnabled}
         onChangeStatus={handleGateStatus}
       />
-      {geometry.tracks.map((trackGeom) => (
+      {geometry.tracks.map((trackGeom, idx) => (
         <GanttGateChip
           key={`${feature.id}-${trackGeom.track}-prep-collapsed`}
           gate={trackGeom.prepGate.gate}
           leftPx={trackGeom.prepGate.leftPx}
+          chipIndex={idx + 1}
+          roster={roster}
           canEdit={inlineEnabled}
           testIdScope="collapsed"
           onChangeStatus={handleGateStatus}

@@ -41,17 +41,23 @@ export function useGateRejectionEditor({
 
   const beginReject = useCallback(() => {
     if (!canEdit || onChangeStatus == null || pending) return;
-    if (gate.status === 'rejected') {
-      setPending(true);
-      void Promise.resolve(onChangeStatus(gate.gateKey, 'waiting', null, gate.version)).finally(
-        () => setPending(false),
-      );
-      return;
-    }
     setRejecting(true);
     setReasonDraft(gate.rejectionReason ?? '');
     setReasonError(null);
-  }, [canEdit, onChangeStatus, pending, gate.gateKey, gate.status, gate.version, gate.rejectionReason]);
+  }, [canEdit, onChangeStatus, pending, gate.rejectionReason]);
+
+  const handleStatusSelect = useCallback(
+    async (next: GateStatus) => {
+      if (!canEdit || onChangeStatus == null || pending) return;
+      setPending(true);
+      try {
+        await onChangeStatus(gate.gateKey, next, null, gate.version);
+      } finally {
+        setPending(false);
+      }
+    },
+    [canEdit, onChangeStatus, pending, gate.gateKey, gate.version],
+  );
 
   const submitReject = useCallback(async () => {
     if (onChangeStatus == null) return;
@@ -111,5 +117,6 @@ export function useGateRejectionEditor({
     beginReject,
     submitReject,
     handleApprove,
+    handleStatusSelect,
   };
 }

@@ -179,7 +179,9 @@ describe('GanttTrackRow — gate change wiring', () => {
         onTogglePhase={vi.fn()}
       />,
     );
-    fireEvent.click(screen.getByTestId('gate-chip-frontend.prep-gate-approve'));
+    // Open the status listbox then select 'approved'
+    fireEvent.click(screen.getByTestId('gate-chip-frontend.prep-gate-toggle'));
+    fireEvent.click(screen.getByTestId('gate-chip-frontend.prep-gate-option-approved'));
     expect(mutations.saveGateStatus).toHaveBeenCalledTimes(1);
     expect(mutations.saveGateStatus).toHaveBeenCalledWith(
       MINI_TEAM_FEATURE.id,

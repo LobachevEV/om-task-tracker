@@ -1,4 +1,4 @@
-import { useMemo, type CSSProperties } from 'react';
+import { useMemo, type CSSProperties, type RefObject } from 'react';
 import type {
   FeatureSummary,
   MiniTeamMember,
@@ -24,6 +24,7 @@ export interface GanttSubStageRowProps {
   roster?: readonly TeamRosterMember[];
   onAnnounce?: (message: string) => void;
   onRemove?: (subStageId: number, version: number) => void;
+  appendedSubStageIdRef?: RefObject<number | null>;
 }
 
 const PHASE_COLOR_BY_KIND: Readonly<Record<PhaseKind, string>> = {
@@ -46,6 +47,7 @@ export function GanttSubStageRow({
   roster,
   onAnnounce,
   onRemove,
+  appendedSubStageIdRef,
 }: GanttSubStageRowProps) {
   const subStage = geom.subStage;
   const performer = resolvePerformer(subStage.ownerUserId ?? null);
@@ -87,6 +89,7 @@ export function GanttSubStageRow({
         roster={roster}
         onAnnounce={onAnnounce}
         onRemove={onRemove}
+        appendedSubStageIdRef={appendedSubStageIdRef}
       />
       <div className="gantt-substage-row__lane">
         {segGeom ? (

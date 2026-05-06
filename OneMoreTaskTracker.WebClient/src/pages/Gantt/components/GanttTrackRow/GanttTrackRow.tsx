@@ -1,4 +1,4 @@
-import { useMemo, type CSSProperties } from 'react';
+import { useMemo, useRef, type CSSProperties, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
   FeatureSummary,
@@ -7,7 +7,7 @@ import type {
   Track,
 } from '../../../../common/types/feature';
 import type { TeamRosterMember } from '../../../../common/api/teamApi';
-import type { TrackBarGeometry } from '../../ganttStageGeometry';
+import type { PhaseBarGeometry, TrackBarGeometry } from '../../ganttStageGeometry';
 import { GanttGateChip } from '../GanttGateChip';
 import { GanttPhaseSegment } from '../GanttPhaseSegment';
 import { GanttSubStageRow } from '../GanttSubStageRow';
@@ -27,6 +27,71 @@ export interface GanttTrackRowProps {
   onAnnounce?: (message: string) => void;
 }
 
+interface PhaseCascadeProps {
+  feature: FeatureSummary;
+  track: Track;
+  phaseGeom: PhaseBarGeometry;
+  inlineEnabled: boolean;
+  mutations?: FeatureMutationCallbacks;
+  roster?: readonly TeamRosterMember[];
+  resolvePerformer: (userId: number | null | undefined) => MiniTeamMember | undefined;
+  onAnnounce?: (message: string) => void;
+  handleRemove?: (subStageId: number, version: number) => void;
+  handleAppend?: (phase: PhaseKind) => void;
+  appendedSubStageIdRef: RefObject<number | null>;
+  featureId: number;
+}
+
+function PhaseCascade({
+  feature,
+  track,
+  phaseGeom,
+  inlineEnabled,
+  mutations,
+  roster,
+  resolvePerformer,
+  onAnnounce,
+  handleRemove,
+  handleAppend,
+  appendedSubStageIdRef,
+  featureId,
+}: PhaseCascadeProps) {
+  const total = phaseGeom.subStages.length;
+  return (
+    <div
+      className="gantt-track-row__cascade"
+      data-phase={phaseGeom.phase}
+    >
+      {phaseGeom.subStages.map((subGeom, idx) => (
+        <GanttSubStageRow
+          key={subGeom.subStage.id}
+          feature={feature}
+          track={track}
+          phase={phaseGeom.phase}
+          geom={subGeom}
+          index={idx}
+          total={total}
+          resolvePerformer={resolvePerformer}
+          canEdit={inlineEnabled}
+          mutations={mutations}
+          roster={roster}
+          onAnnounce={onAnnounce}
+          onRemove={handleRemove}
+          appendedSubStageIdRef={appendedSubStageIdRef}
+        />
+      ))}
+      {phaseGeom.multiOwner && handleAppend != null ? (
+        <AddSubStageButton
+          atCap={total >= phaseGeom.cap}
+          cap={phaseGeom.cap}
+          onAppend={() => handleAppend(phaseGeom.phase)}
+          testId={`add-substage-${featureId}-${track}-${phaseGeom.phase}`}
+        />
+      ) : null}
+    </div>
+  );
+}
+
 export function GanttTrackRow({
   feature,
   trackGeom,
@@ -41,6 +106,7 @@ export function GanttTrackRow({
   const { t } = useTranslation('gantt');
   const { track, prepGate, phases, dimmed } = trackGeom;
   const inlineEnabled = canEdit && mutations != null;
+  const appendedSubStageIdRef = useRef<number | null>(null);
 
   const trackLabel = t(`tracks.${track}`);
 
@@ -65,7 +131,9 @@ export function GanttTrackRow({
   const handleAppend = useMemo(() => {
     if (!inlineEnabled || mutations == null) return undefined;
     return (phase: PhaseKind) => {
-      void mutations.appendSubStage(feature.id, track, phase);
+      void mutations.appendSubStage(feature.id, track, phase).then((id) => {
+        if (id != null) appendedSubStageIdRef.current = id;
+      });
     };
   }, [feature.id, inlineEnabled, mutations, track]);
 
@@ -114,43 +182,25 @@ export function GanttTrackRow({
           ))}
         </div>
       </div>
-      {phases.map((phaseGeom) => {
-        if (!expandedPhases.has(phaseGeom.phase)) return null;
-        const total = phaseGeom.subStages.length;
-        return (
-          <div
+      {phases.map((phaseGeom) =>
+        expandedPhases.has(phaseGeom.phase) ? (
+          <PhaseCascade
             key={`${track}-${phaseGeom.phase}-cascade`}
-            className="gantt-track-row__cascade"
-            data-phase={phaseGeom.phase}
-          >
-            {phaseGeom.subStages.map((subGeom, idx) => (
-              <GanttSubStageRow
-                key={subGeom.subStage.id}
-                feature={feature}
-                track={track}
-                phase={phaseGeom.phase}
-                geom={subGeom}
-                index={idx}
-                total={total}
-                resolvePerformer={resolvePerformer}
-                canEdit={inlineEnabled}
-                mutations={mutations}
-                roster={roster}
-                onAnnounce={onAnnounce}
-                onRemove={handleRemove}
-              />
-            ))}
-            {phaseGeom.multiOwner && handleAppend != null ? (
-              <AddSubStageButton
-                atCap={total >= phaseGeom.cap}
-                cap={phaseGeom.cap}
-                onAppend={() => handleAppend(phaseGeom.phase)}
-                testId={`add-substage-${feature.id}-${track}-${phaseGeom.phase}`}
-              />
-            ) : null}
-          </div>
-        );
-      })}
+            feature={feature}
+            track={track}
+            phaseGeom={phaseGeom}
+            inlineEnabled={inlineEnabled}
+            mutations={mutations}
+            roster={roster}
+            resolvePerformer={resolvePerformer}
+            onAnnounce={onAnnounce}
+            handleRemove={handleRemove}
+            handleAppend={handleAppend}
+            appendedSubStageIdRef={appendedSubStageIdRef}
+            featureId={feature.id}
+          />
+        ) : null,
+      )}
     </div>
   );
 }

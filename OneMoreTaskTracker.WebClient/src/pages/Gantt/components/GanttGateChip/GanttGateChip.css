@@ -66,6 +66,49 @@
   align-items: center;
   gap: 2px;
   margin-inline-start: var(--space-1);
+  position: relative;
+}
+
+.gantt-gate-chip__listbox {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  min-width: 110px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.gantt-gate-chip__listbox-option {
+  padding: 4px var(--space-3);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  white-space: nowrap;
+  color: var(--text);
+  outline: none;
+}
+
+.gantt-gate-chip__listbox-option:hover,
+.gantt-gate-chip__listbox-option:focus {
+  background: var(--surface-3, var(--surface-2));
+}
+
+.gantt-gate-chip__listbox-option[aria-selected='true'] {
+  font-weight: 600;
+}
+
+.gantt-gate-chip__listbox-option[data-status='approved'] {
+  color: var(--success);
+}
+
+.gantt-gate-chip__listbox-option[data-status='rejected'] {
+  color: var(--danger);
 }
 
 .gantt-gate-chip__action {

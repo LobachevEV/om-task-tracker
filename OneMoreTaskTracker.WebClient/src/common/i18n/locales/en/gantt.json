@@ -100,7 +100,8 @@
   },
   "empty": {
     "title": "Nothing in flight.",
-    "body": "No features match this scope. Widen the filter or add a feature to the plan."
+    "body": "No features match this scope. Widen the filter or add a feature to the plan.",
+    "bodyViewer": "No features match this scope. Ask your manager to add you to the team."
   },
   "loading": "Loading plan…",
   "failed": "Could not load the plan.",
@@ -146,6 +147,8 @@
     "backend.prep-gate": "BE prep",
     "frontend.prep-gate": "FE prep",
     "aria": "{{name}} gate, {{status}}",
+    "approvedAria": "{{name}} gate, {{status}}, approved by {{approver}} on {{date}}",
+    "approvedTooltip": "{{gate}} · {{status}} · {{approver}} · {{date}}",
     "approveAria": "Approve {{name}} gate",
     "unapproveAria": "Reset {{name}} gate to waiting",
     "rejectAria": "Reject {{name}} gate",
@@ -159,7 +162,10 @@
     "rejectReasonRequired": "A reason is required to reject",
     "rejectReasonTooLong": "Max {{max}} characters",
     "rejectFailed": "Couldn't reject. Try again.",
-    "inFlightAria": "{{track}} in flight: {{phase}}"
+    "inFlightAria": "{{track}} in flight: {{phase}}",
+    "statusSavedAnnounce": "{{gate}} gate status saved.",
+    "changeStatusAria": "Change {{name}} gate status",
+    "statusListAria": "Gate status options"
   },
   "gateStatus": {
     "waiting": "Waiting",
@@ -181,7 +187,9 @@
   },
   "actions": {
     "addSubStage": "+ Add sub-stage",
-    "removeSubStage": "Remove"
+    "removeSubStage": "Remove",
+    "confirmRemove": "Confirm remove",
+    "confirmRemoveAnnounce": "Press Confirm remove again to delete this sub-stage."
   },
   "validation": {
     "subStageCap": "Phase is at the {{cap}} sub-stage cap."

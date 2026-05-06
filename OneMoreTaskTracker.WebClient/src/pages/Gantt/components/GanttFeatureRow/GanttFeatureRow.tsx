@@ -136,7 +136,9 @@ function GanttFeatureRowInner({
           variant={variant}
           inlineEnabled={inlineEnabled}
           mutations={mutations}
+          roster={roster}
           onTogglePhase={handleTogglePhase}
+          onAnnounce={handleAnnounce}
         />
       </div>
 

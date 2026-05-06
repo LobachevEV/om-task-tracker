@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
   FeatureSummary,
@@ -14,6 +15,8 @@ import {
 } from '../InlineEditors';
 import { makeSubStageAnnouncements } from './announcements';
 
+const CONFIRM_REMOVE_TIMEOUT_MS = 4000;
+
 export interface GanttSubStageRowGutterProps {
   feature: FeatureSummary;
   track: Track;
@@ -27,6 +30,7 @@ export interface GanttSubStageRowGutterProps {
   roster?: readonly TeamRosterMember[];
   onAnnounce?: (message: string) => void;
   onRemove?: (subStageId: number, version: number) => void;
+  appendedSubStageIdRef?: RefObject<number | null>;
 }
 
 export function GanttSubStageRowGutter({
@@ -42,6 +46,7 @@ export function GanttSubStageRowGutter({
   roster,
   onAnnounce,
   onRemove,
+  appendedSubStageIdRef,
 }: GanttSubStageRowGutterProps) {
   const { t } = useTranslation('gantt');
   const subStage = geom.subStage;
@@ -55,6 +60,55 @@ export function GanttSubStageRowGutter({
   });
   const announce = makeSubStageAnnouncements(t, phaseLabel);
 
+  const [pendingRemove, setPendingRemove] = useState(false);
+  const cancelTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ownerCellRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (appendedSubStageIdRef == null) return;
+    if (appendedSubStageIdRef.current !== subStage.id) return;
+    appendedSubStageIdRef.current = null;
+    const btn = ownerCellRef.current?.querySelector<HTMLElement>('button, [tabindex="0"]');
+    btn?.focus();
+  }, [appendedSubStageIdRef, subStage.id]);
+
+  useEffect(() => {
+    return () => {
+      if (cancelTimerRef.current != null) {
+        clearTimeout(cancelTimerRef.current);
+      }
+    };
+  }, []);
+
+  function handleRemoveClick() {
+    if (!pendingRemove) {
+      setPendingRemove(true);
+      onAnnounce?.(
+        t('actions.confirmRemoveAnnounce', {
+          defaultValue: 'Press Confirm remove again to delete this sub-stage.',
+        }),
+      );
+      cancelTimerRef.current = setTimeout(() => {
+        setPendingRemove(false);
+      }, CONFIRM_REMOVE_TIMEOUT_MS);
+    } else {
+      if (cancelTimerRef.current != null) {
+        clearTimeout(cancelTimerRef.current);
+        cancelTimerRef.current = null;
+      }
+      setPendingRemove(false);
+      onRemove?.(subStage.id, subStageVersion);
+    }
+  }
+
+  function handleRemoveBlur() {
+    if (cancelTimerRef.current != null) {
+      clearTimeout(cancelTimerRef.current);
+      cancelTimerRef.current = null;
+    }
+    setPendingRemove(false);
+  }
+
   return (
     <div className="gantt-substage-row__gutter">
       <span className="gantt-substage-row__numeral" aria-hidden="true">
@@ -67,7 +121,7 @@ export function GanttSubStageRowGutter({
           phase: phaseLabel,
         })}
       </span>
-      <span className="gantt-substage-row__owner">
+      <span className="gantt-substage-row__owner" ref={ownerCellRef}>
         {inlineEnabled && mutations != null && roster ? (
           <InlineOwnerPicker
             value={subStage.ownerUserId ?? null}
@@ -158,14 +212,19 @@ export function GanttSubStageRowGutter({
       {inlineEnabled && onRemove != null && total > 1 ? (
         <button
           type="button"
-          className="gantt-substage-row__remove"
+          className={`gantt-substage-row__remove${pendingRemove ? ' gantt-substage-row__remove--pending' : ''}`}
           data-testid={`substage-remove-${feature.id}-${subStage.id}`}
-          onClick={() => onRemove(subStage.id, subStageVersion)}
-          aria-label={t('actions.removeSubStage', {
-            defaultValue: 'Remove sub-stage',
-          })}
+          onClick={handleRemoveClick}
+          onBlur={handleRemoveBlur}
+          aria-label={
+            pendingRemove
+              ? t('actions.confirmRemove', { defaultValue: 'Confirm remove' })
+              : t('actions.removeSubStage', { defaultValue: 'Remove sub-stage' })
+          }
         >
-          {t('actions.removeSubStage', { defaultValue: 'Remove' })}
+          {pendingRemove
+            ? t('actions.confirmRemove', { defaultValue: 'Confirm remove' })
+            : t('actions.removeSubStage', { defaultValue: 'Remove' })}
         </button>
       ) : null}
     </div>

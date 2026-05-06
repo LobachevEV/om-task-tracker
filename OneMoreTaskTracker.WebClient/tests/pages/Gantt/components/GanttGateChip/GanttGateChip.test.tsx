@@ -67,34 +67,73 @@ describe('GanttGateChip — render', () => {
   });
 });
 
-describe('GanttGateChip — approve flow', () => {
-  it('approve click fires onChangeStatus(next=approved, reason=null)', async () => {
+describe('GanttGateChip — approve flow (listbox)', () => {
+  it('opening listbox and selecting approved fires onChangeStatus(approved, null)', async () => {
     const onChange = vi.fn().mockResolvedValue(undefined);
     render(
       <GanttGateChip gate={makeGate({ status: 'waiting' })} leftPx={40} canEdit onChangeStatus={onChange} />,
     );
-    fireEvent.click(screen.getByTestId('gate-chip-spec-approve'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-toggle'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-option-approved'));
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(onChange).toHaveBeenCalledWith('spec', 'approved', null, 7);
   });
 
-  it('approve click on already-approved cycles back to waiting (reason=null)', async () => {
+  it('selecting waiting on already-approved chip fires onChangeStatus(waiting, null)', async () => {
     const onChange = vi.fn().mockResolvedValue(undefined);
     render(
       <GanttGateChip gate={makeGate({ status: 'approved' })} leftPx={40} canEdit onChangeStatus={onChange} />,
     );
-    fireEvent.click(screen.getByTestId('gate-chip-spec-approve'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-toggle'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-option-waiting'));
     expect(onChange).toHaveBeenCalledWith('spec', 'waiting', null, 7);
+  });
+
+  it('toggle button shows aria-expanded=false before opening', () => {
+    render(
+      <GanttGateChip gate={makeGate({ status: 'waiting' })} leftPx={40} canEdit onChangeStatus={vi.fn()} />,
+    );
+    const toggle = screen.getByTestId('gate-chip-spec-toggle');
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('toggle button shows aria-expanded=true after click', () => {
+    render(
+      <GanttGateChip gate={makeGate({ status: 'waiting' })} leftPx={40} canEdit onChangeStatus={vi.fn()} />,
+    );
+    fireEvent.click(screen.getByTestId('gate-chip-spec-toggle'));
+    expect(screen.getByTestId('gate-chip-spec-toggle').getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('listbox renders all three status options', () => {
+    render(
+      <GanttGateChip gate={makeGate({ status: 'waiting' })} leftPx={40} canEdit onChangeStatus={vi.fn()} />,
+    );
+    fireEvent.click(screen.getByTestId('gate-chip-spec-toggle'));
+    expect(screen.getByTestId('gate-chip-spec-option-approved')).toBeTruthy();
+    expect(screen.getByTestId('gate-chip-spec-option-waiting')).toBeTruthy();
+    expect(screen.getByTestId('gate-chip-spec-option-rejected')).toBeTruthy();
+  });
+
+  it('listbox closes after selecting an option', () => {
+    render(
+      <GanttGateChip gate={makeGate({ status: 'waiting' })} leftPx={40} canEdit onChangeStatus={vi.fn().mockResolvedValue(undefined)} />,
+    );
+    fireEvent.click(screen.getByTestId('gate-chip-spec-toggle'));
+    expect(screen.queryByTestId('gate-chip-spec-listbox')).not.toBeNull();
+    fireEvent.click(screen.getByTestId('gate-chip-spec-option-approved'));
+    expect(screen.queryByTestId('gate-chip-spec-listbox')).toBeNull();
   });
 });
 
 describe('GanttGateChip — reject flow with inline reason', () => {
-  it('reject click does NOT fire onChangeStatus immediately; opens reason editor', () => {
+  it('selecting rejected via listbox does NOT fire onChangeStatus immediately; opens reason editor', () => {
     const onChange = vi.fn().mockResolvedValue(undefined);
     render(
       <GanttGateChip gate={makeGate({ status: 'waiting' })} leftPx={40} canEdit onChangeStatus={onChange} />,
     );
-    fireEvent.click(screen.getByTestId('gate-chip-spec-reject'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-toggle'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-option-rejected'));
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.getByTestId('gate-chip-spec-reason-input')).toBeTruthy();
   });
@@ -104,7 +143,8 @@ describe('GanttGateChip — reject flow with inline reason', () => {
     render(
       <GanttGateChip gate={makeGate({ status: 'waiting' })} leftPx={40} canEdit onChangeStatus={onChange} />,
     );
-    fireEvent.click(screen.getByTestId('gate-chip-spec-reject'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-toggle'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-option-rejected'));
     fireEvent.click(screen.getByTestId('gate-chip-spec-reason-submit'));
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.getByTestId('gate-chip-spec-reason-error')).toBeTruthy();
@@ -115,7 +155,8 @@ describe('GanttGateChip — reject flow with inline reason', () => {
     render(
       <GanttGateChip gate={makeGate({ status: 'waiting' })} leftPx={40} canEdit onChangeStatus={onChange} />,
     );
-    fireEvent.click(screen.getByTestId('gate-chip-spec-reject'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-toggle'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-option-rejected'));
     fireEvent.change(screen.getByTestId('gate-chip-spec-reason-input'), {
       target: { value: '   \t  ' },
     });
@@ -128,7 +169,8 @@ describe('GanttGateChip — reject flow with inline reason', () => {
     render(
       <GanttGateChip gate={makeGate({ status: 'waiting' })} leftPx={40} canEdit onChangeStatus={onChange} />,
     );
-    fireEvent.click(screen.getByTestId('gate-chip-spec-reject'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-toggle'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-option-rejected'));
     fireEvent.change(screen.getByTestId('gate-chip-spec-reason-input'), {
       target: { value: '  scope unclear  ' },
     });
@@ -141,7 +183,8 @@ describe('GanttGateChip — reject flow with inline reason', () => {
     render(
       <GanttGateChip gate={makeGate({ status: 'waiting' })} leftPx={40} canEdit onChangeStatus={onChange} />,
     );
-    fireEvent.click(screen.getByTestId('gate-chip-spec-reject'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-toggle'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-option-rejected'));
     fireEvent.change(screen.getByTestId('gate-chip-spec-reason-input'), {
       target: { value: 'broken' },
     });
@@ -152,8 +195,10 @@ describe('GanttGateChip — reject flow with inline reason', () => {
     render(
       <GanttGateChip gate={makeGate({ status: 'waiting', id: 99 })} leftPx={40} canEdit onChangeStatus={onChange} />,
     );
-    const rejectBtns = screen.getAllByTestId('gate-chip-spec-reject');
-    fireEvent.click(rejectBtns[rejectBtns.length - 1]);
+    const toggleBtns = screen.getAllByTestId('gate-chip-spec-toggle');
+    fireEvent.click(toggleBtns[toggleBtns.length - 1]);
+    const rejectOptions = screen.getAllByTestId('gate-chip-spec-option-rejected');
+    fireEvent.click(rejectOptions[rejectOptions.length - 1]);
     const inputs = screen.getAllByTestId('gate-chip-spec-reason-input');
     fireEvent.keyDown(inputs[inputs.length - 1], { key: 'Escape' });
     expect(onChange).not.toHaveBeenCalled();
@@ -165,7 +210,8 @@ describe('GanttGateChip — reject editor a11y polish', () => {
     render(
       <GanttGateChip gate={makeGate({ status: 'waiting' })} leftPx={40} canEdit onChangeStatus={vi.fn()} />,
     );
-    fireEvent.click(screen.getByTestId('gate-chip-spec-reject'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-toggle'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-option-rejected'));
     const input = screen.getByTestId('gate-chip-spec-reason-input');
     const describedBy = input.getAttribute('aria-describedby') ?? '';
     expect(describedBy).toContain('gate-chip-spec-reason-hint');
@@ -178,7 +224,8 @@ describe('GanttGateChip — reject editor a11y polish', () => {
     render(
       <GanttGateChip gate={makeGate({ status: 'waiting' })} leftPx={40} canEdit onChangeStatus={vi.fn()} />,
     );
-    fireEvent.click(screen.getByTestId('gate-chip-spec-reject'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-toggle'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-option-rejected'));
     const counter = screen.getByTestId('gate-chip-spec-reason-counter');
     expect(counter.textContent).toMatch(/^\s*0\s*\/\s*500\s*$/);
     fireEvent.change(screen.getByTestId('gate-chip-spec-reason-input'), {
@@ -202,7 +249,7 @@ describe('GanttGateChip — reject editor a11y polish', () => {
 });
 
 describe('GanttGateChip — re-open from rejected', () => {
-  it('reject button on a rejected gate fires onChangeStatus(waiting, null) without opening editor', () => {
+  it('selecting waiting on a rejected gate fires onChangeStatus(waiting, null) without opening editor', () => {
     const onChange = vi.fn().mockResolvedValue(undefined);
     render(
       <GanttGateChip
@@ -212,8 +259,10 @@ describe('GanttGateChip — re-open from rejected', () => {
         onChangeStatus={onChange}
       />,
     );
-    fireEvent.click(screen.getByTestId('gate-chip-spec-reject'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-toggle'));
+    fireEvent.click(screen.getByTestId('gate-chip-spec-option-waiting'));
     expect(onChange).toHaveBeenCalledWith('spec', 'waiting', null, 7);
+    expect(screen.queryByTestId('gate-chip-spec-reason-input')).toBeNull();
   });
 
   it('renders the rejection reason text on a rejected gate', () => {
@@ -229,9 +278,35 @@ describe('GanttGateChip — re-open from rejected', () => {
 });
 
 describe('GanttGateChip — readonly', () => {
-  it('hides action buttons when canEdit is false', () => {
+  it('hides action toggle when canEdit is false', () => {
     render(<GanttGateChip gate={makeGate()} leftPx={40} canEdit={false} />);
-    expect(screen.queryByTestId('gate-chip-spec-approve')).toBeNull();
-    expect(screen.queryByTestId('gate-chip-spec-reject')).toBeNull();
+    expect(screen.queryByTestId('gate-chip-spec-toggle')).toBeNull();
+    expect(screen.queryByTestId('gate-chip-spec-listbox')).toBeNull();
+  });
+});
+
+describe('GanttGateChip — listbox keyboard navigation', () => {
+  it('ArrowDown moves focus to next option', () => {
+    render(
+      <GanttGateChip gate={makeGate({ status: 'approved' })} leftPx={40} canEdit onChangeStatus={vi.fn()} />,
+    );
+    fireEvent.click(screen.getByTestId('gate-chip-spec-toggle'));
+    const listbox = screen.getByTestId('gate-chip-spec-listbox');
+    fireEvent.keyDown(listbox, { key: 'ArrowDown' });
+    // After ArrowDown the second option should be focused (index wraps from 0 → 1)
+    const options = listbox.querySelectorAll('[role="option"]');
+    expect(options.length).toBe(3);
+  });
+
+  it('Escape closes the listbox without firing onChangeStatus', () => {
+    const onChange = vi.fn();
+    render(
+      <GanttGateChip gate={makeGate({ status: 'waiting' })} leftPx={40} canEdit onChangeStatus={onChange} />,
+    );
+    fireEvent.click(screen.getByTestId('gate-chip-spec-toggle'));
+    expect(screen.queryByTestId('gate-chip-spec-listbox')).not.toBeNull();
+    fireEvent.keyDown(screen.getByTestId('gate-chip-spec-listbox'), { key: 'Escape' });
+    expect(screen.queryByTestId('gate-chip-spec-listbox')).toBeNull();
+    expect(onChange).not.toHaveBeenCalled();
   });
 });

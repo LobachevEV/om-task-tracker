@@ -349,7 +349,9 @@ export function computeFeatureGeometry(
       prepGate,
       phases,
       trackBar,
-      dimmed: prepGate.gate != null && prepGate.gate.status !== 'approved',
+      dimmed:
+        (prepGate.gate != null && prepGate.gate.status !== 'approved') ||
+        (specGate.gate != null && specGate.gate.status !== 'approved'),
       inFlightPhase,
     };
   });

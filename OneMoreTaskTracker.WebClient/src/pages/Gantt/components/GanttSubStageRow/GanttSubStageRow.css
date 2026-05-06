@@ -7,6 +7,9 @@
 }
 
 .gantt-substage-row__gutter {
+  position: sticky;
+  left: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -17,6 +20,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  background: var(--surface, #fff);
 }
 
 .gantt-substage-row__numeral {
@@ -64,6 +68,11 @@
 
 .gantt-substage-row__remove:hover {
   color: var(--danger);
+}
+
+.gantt-substage-row__remove--pending {
+  color: var(--danger);
+  font-weight: 600;
 }
 
 .gantt-substage-row__lane {

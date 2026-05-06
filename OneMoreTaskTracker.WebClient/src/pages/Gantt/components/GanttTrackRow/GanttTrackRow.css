@@ -13,12 +13,16 @@
 }
 
 .gantt-track-row__gutter {
+  position: sticky;
+  left: 0;
+  z-index: 2;
   padding-left: var(--space-4);
   padding-right: var(--space-3);
   font-size: var(--text-xs);
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  background: var(--surface, #fff);
 }
 
 .gantt-track-row__label {

@@ -26,7 +26,9 @@ export function GanttEmpty({ isManager, onCreated }: GanttEmptyProps) {
         <line x1="40" y1="6" x2="40" y2="42" strokeDasharray="2 3" />
       </svg>
       <h3 className="gantt-empty__title">{t('empty.title')}</h3>
-      <p className="gantt-empty__body">{t('empty.body')}</p>
+      <p className="gantt-empty__body">
+        {isManager ? t('empty.body') : t('empty.bodyViewer')}
+      </p>
       {isManager ? (
         <AddFeatureRow variant="standalone" onCreated={onCreated} />
       ) : null}

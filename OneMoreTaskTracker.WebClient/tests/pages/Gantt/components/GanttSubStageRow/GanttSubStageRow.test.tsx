@@ -159,9 +159,12 @@ describe('GanttSubStageRow — remove button gating', () => {
     ).toBeNull();
   });
 
-  it('shows Remove when total > 1 and fires onRemove(subStageId, version)', () => {
+  it('shows Remove when total > 1 and fires onRemove(subStageId, version) after two-step confirm', () => {
     const onRemove = renderEditable(3);
     const btn = screen.getByTestId(`substage-remove-${SOLO_FEATURE.id}-9000`);
+    // First click enters pending-confirm state; second click commits the remove.
+    fireEvent.click(btn);
+    expect(onRemove).not.toHaveBeenCalled();
     fireEvent.click(btn);
     expect(onRemove).toHaveBeenCalledTimes(1);
     expect(onRemove).toHaveBeenCalledWith(9000, 3);
