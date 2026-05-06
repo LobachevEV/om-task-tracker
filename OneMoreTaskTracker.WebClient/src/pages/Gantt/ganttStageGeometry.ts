@@ -132,8 +132,8 @@ function deriveTrackRange(
 function deriveFeatureRange(
   feature: FeatureSummary,
 ): { start: string | null; end: string | null } {
-  const starts: (string | null)[] = [];
-  const ends: (string | null)[] = [];
+  const starts: (string | null)[] = [feature.plannedStart];
+  const ends: (string | null)[] = [feature.plannedEnd];
   for (const t of feature.taxonomy.tracks) {
     for (const phase of t.phases) {
       for (const ss of phase.subStages) {

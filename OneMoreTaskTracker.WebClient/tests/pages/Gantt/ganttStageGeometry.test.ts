@@ -11,6 +11,9 @@ import {
   UNSCHEDULED_FEATURE,
   OVERDUE_FEATURE,
   SHIPPED_FEATURE,
+  FEATURE_LEVEL_DATES_ONLY_FEATURE,
+  FEATURE_LEVEL_START_ONLY_FEATURE,
+  FEATURE_LEVEL_END_ONLY_FEATURE,
   FIXTURE_TODAY,
 } from '../../../src/pages/Gantt/__fixtures__/FeatureFixtures';
 
@@ -105,5 +108,48 @@ describe('featureIsOverdue', () => {
   });
   it('false for SHIPPED_FEATURE (state=LiveRelease)', () => {
     expect(featureIsOverdue(SHIPPED_FEATURE, FIXTURE_TODAY)).toBe(false);
+  });
+  it('true for a feature whose feature-level plannedEnd is in the past, even with no sub-stage dates', () => {
+    const overdue = {
+      ...FEATURE_LEVEL_DATES_ONLY_FEATURE,
+      state: 'Development' as const,
+      plannedStart: '2026-03-01',
+      plannedEnd:   '2026-04-01',
+    };
+    expect(featureIsOverdue(overdue, FIXTURE_TODAY)).toBe(true);
+  });
+});
+
+describe('computeFeatureGeometry — summaryBar', () => {
+  it('produces a non-null summaryBar from feature-level dates when sub-stages have no dates', () => {
+    const g = computeFeatureGeometry(RANGE, FEATURE_LEVEL_DATES_ONLY_FEATURE, FIXTURE_TODAY, DAY_PX);
+    expect(g.summaryBar).not.toBeNull();
+    expect(g.summaryBar!.widthPx).toBeGreaterThan(0);
+  });
+
+  it('produces a non-null summaryBar when only feature.plannedStart is set', () => {
+    const g = computeFeatureGeometry(RANGE, FEATURE_LEVEL_START_ONLY_FEATURE, FIXTURE_TODAY, DAY_PX);
+    expect(g.summaryBar).not.toBeNull();
+    expect(g.summaryBar!.widthPx).toBeGreaterThan(0);
+  });
+
+  it('produces a non-null summaryBar when only feature.plannedEnd is set', () => {
+    const g = computeFeatureGeometry(RANGE, FEATURE_LEVEL_END_ONLY_FEATURE, FIXTURE_TODAY, DAY_PX);
+    expect(g.summaryBar).not.toBeNull();
+    expect(g.summaryBar!.widthPx).toBeGreaterThan(0);
+  });
+
+  it('produces a null summaryBar when no dates exist anywhere', () => {
+    const g = computeFeatureGeometry(RANGE, UNSCHEDULED_FEATURE, FIXTURE_TODAY, DAY_PX);
+    expect(g.summaryBar).toBeNull();
+  });
+
+  it('summary bar reflects the union of feature-level and sub-stage dates', () => {
+    // SOLO_FEATURE: feature-level 2026-04-15..2026-04-28; sub-stages span 2026-04-17..2026-04-28.
+    // Union should reach back to 2026-04-15 (the feature.plannedStart) on the left edge.
+    const g = computeFeatureGeometry(RANGE, SOLO_FEATURE, FIXTURE_TODAY, DAY_PX);
+    expect(g.summaryBar).not.toBeNull();
+    // RANGE.start = '2026-04-01'; '2026-04-15' is 14 days in → leftPx = 14 * DAY_PX.
+    expect(g.summaryBar!.leftPx).toBe(14 * DAY_PX);
   });
 });

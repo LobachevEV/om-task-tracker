@@ -271,6 +271,35 @@ export const UNSCHEDULED_FEATURE: FeatureSummary = {
   version: 0,
 };
 
+export const FEATURE_LEVEL_DATES_ONLY_FEATURE: FeatureSummary = {
+  id: 106,
+  title: 'Newly created feature',
+  description: 'Just-materialized feature: feature-level dates set, sub-stages still null.',
+  state: 'CsApproving',
+  plannedStart: '2026-04-15',
+  plannedEnd:   '2026-05-10',
+  leadUserId: fe.userId,
+  managerUserId: mg.userId,
+  taskCount: 0,
+  taskIds: [],
+  taxonomy: EMPTY_TAXONOMY,
+  version: 0,
+};
+
+export const FEATURE_LEVEL_START_ONLY_FEATURE: FeatureSummary = {
+  ...FEATURE_LEVEL_DATES_ONLY_FEATURE,
+  id: 107,
+  plannedStart: '2026-04-20',
+  plannedEnd:   null,
+};
+
+export const FEATURE_LEVEL_END_ONLY_FEATURE: FeatureSummary = {
+  ...FEATURE_LEVEL_DATES_ONLY_FEATURE,
+  id: 108,
+  plannedStart: null,
+  plannedEnd:   '2026-05-01',
+};
+
 export const OVERDUE_FEATURE: FeatureSummary = {
   id: 104,
   title: 'Feature-flag rollout',
