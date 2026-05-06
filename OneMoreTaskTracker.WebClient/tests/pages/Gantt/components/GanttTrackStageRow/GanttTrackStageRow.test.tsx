@@ -88,7 +88,7 @@ describe('GanttTrackStageRow — read-only', () => {
     expect(screen.getByText(/Apr 25/)).toBeInTheDocument();
   });
 
-  it('renders dashes when stage has no dates', () => {
+  it('renders a single no-signal dash when stage has no owner and no dates', () => {
     const stage: FeatureTrackStage = {
       stageKey: 'StandTesting',
       plannedStart: null,
@@ -113,7 +113,7 @@ describe('GanttTrackStageRow — read-only', () => {
     );
 
     const allDashes = screen.getAllByText('—');
-    expect(allDashes.length).toBeGreaterThanOrEqual(2);
+    expect(allDashes).toHaveLength(1);
   });
 
   it('renders owner name when stage owner is resolved', () => {
@@ -143,11 +143,38 @@ describe('GanttTrackStageRow — read-only', () => {
     expect(screen.getByText(fe.displayName)).toBeInTheDocument();
   });
 
-  it('renders unassigned text when stage has no owner and track owner is also unresolvable', () => {
+  it('renders no-signal dash when stage has no owner, no track owner, and no dates', () => {
     const stage: FeatureTrackStage = {
       stageKey: 'Development',
       plannedStart: null,
       plannedEnd: null,
+      stageOwnerUserId: null,
+      stageVersion: 0,
+    };
+    const track = makeTrack([stage]);
+
+    render(
+      <GanttTrackStageRow
+        track={track}
+        stage={stage}
+        kind="Frontend"
+        featureTitle="Export to PDF"
+        today={FIXTURE_TODAY}
+        loadedRange={LOADED_RANGE}
+        dayPx={DAY_PX}
+        index={0}
+        resolveOwner={resolverFor([])}
+      />,
+    );
+
+    expect(screen.getByText('—')).toBeInTheDocument();
+  });
+
+  it('renders unassigned text when stage has no owner but has dates (not noSignal)', () => {
+    const stage: FeatureTrackStage = {
+      stageKey: 'Development',
+      plannedStart: '2026-04-15',
+      plannedEnd: '2026-04-25',
       stageOwnerUserId: null,
       stageVersion: 0,
     };

@@ -137,8 +137,20 @@ export function GanttTrackStageRow({
           stage: stageName,
         });
 
+  const noSignal =
+    !hasOwnerId &&
+    inheritedOwner == null &&
+    !stage.plannedStart &&
+    !stage.plannedEnd;
+
   let ownerNode;
-  if (inlineEnabled && mutations != null && roster && !isStale) {
+  if (noSignal) {
+    ownerNode = (
+      <span className="gantt-track-stage-row__empty-signal" aria-hidden="true">
+        —
+      </span>
+    );
+  } else if (inlineEnabled && mutations != null && roster && !isStale) {
     ownerNode = (
       <InlineOwnerPicker
         value={stage.stageOwnerUserId}
@@ -234,7 +246,7 @@ export function GanttTrackStageRow({
         <span className="gantt-track-stage-row__owner" data-testid="track-stage-owner">
           {ownerNode}
         </span>
-        {inlineEnabled && mutations != null ? (
+        {!noSignal && inlineEnabled && mutations != null ? (
           <span className="gantt-track-stage-row__dates">
             <InlineDateCell
               value={stage.plannedStart}
@@ -256,7 +268,7 @@ export function GanttTrackStageRow({
               onAnnounce={onAnnounce}
               buildAnnouncement={announceStart}
             />
-            <span className="gantt-track-stage-row__sep" aria-hidden="true">
+            <span className="gantt-track-stage-row__sep gantt-track-stage-row__sep--range" aria-hidden="true">
               {' – '}
             </span>
             <InlineDateCell
@@ -293,10 +305,10 @@ export function GanttTrackStageRow({
               {dtr}
             </span>
           </span>
-        ) : (
+        ) : !noSignal ? (
           <span className="gantt-track-stage-row__dates">
             <span className="gantt-track-stage-row__date">{shortStart}</span>
-            <span className="gantt-track-stage-row__sep" aria-hidden="true">
+            <span className="gantt-track-stage-row__sep gantt-track-stage-row__sep--range" aria-hidden="true">
               {' – '}
             </span>
             <span className="gantt-track-stage-row__date">{shortEnd}</span>
@@ -314,7 +326,7 @@ export function GanttTrackStageRow({
               {dtr}
             </span>
           </span>
-        )}
+        ) : null}
       </div>
       <div className="gantt-track-stage-row__lane" aria-hidden="true">
         {barNode}

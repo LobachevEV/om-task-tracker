@@ -15,7 +15,7 @@
 
 @media (min-width: 1440px) {
   .gantt-page {
-    --gantt-gutter-width: 360px;
+    --gantt-gutter-width: 480px;
   }
 }
 

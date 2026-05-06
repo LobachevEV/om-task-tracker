@@ -119,7 +119,7 @@ export const featureTrackSchema = z.object({
   kind: featureTrackKindSchema,
   trackOwnerUserId: z.number().int().positive(),
   version: z.number().int().nonnegative(),
-  stages: z.array(featureTrackStageSchema),
+  stages: z.array(featureTrackStageSchema).max(5),
   trackOwner: miniTeamMemberSchema.nullable().optional(),
 });
 

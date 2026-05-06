@@ -7,6 +7,7 @@ import { Avatar } from '../../../../common/ds';
 import type { DateWindow } from '../../ganttMath';
 import type { TrackMutationCallbacks } from '../InlineEditors/useTrackMutationCallbacks';
 import { GanttTrackStageRow } from '../GanttTrackStageRow';
+import { selectStagesForKind } from '../../selectStagesForKind';
 import './GanttFeatureTrackBand.css';
 
 function avatarTone(
@@ -108,7 +109,7 @@ export function GanttFeatureTrackBand({
 
       {expanded && (
         <div className="gantt-track-band__stages">
-          {track.stages.map((stage, index) => (
+          {selectStagesForKind(track.stages, kind).map((stage, index) => (
             <GanttTrackStageRow
               key={stage.stageKey}
               track={track}

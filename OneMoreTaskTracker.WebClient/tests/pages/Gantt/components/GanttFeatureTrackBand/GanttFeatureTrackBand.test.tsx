@@ -245,4 +245,37 @@ describe('GanttFeatureTrackBand', () => {
       ),
     ).not.toThrow();
   });
+
+  it('renders exactly 5 stage rows for Frontend when track has 6 stages (1 foreign key filtered out)', () => {
+    const track = makeTrack({
+      kind: 'Frontend',
+      stages: [
+        { stageKey: 'SrApproving', plannedStart: null, plannedEnd: null, stageOwnerUserId: null, stageVersion: 1 },
+        { stageKey: 'Development', plannedStart: null, plannedEnd: null, stageOwnerUserId: null, stageVersion: 1 },
+        { stageKey: 'StandTesting', plannedStart: null, plannedEnd: null, stageOwnerUserId: null, stageVersion: 1 },
+        { stageKey: 'EthalonTesting', plannedStart: null, plannedEnd: null, stageOwnerUserId: null, stageVersion: 1 },
+        { stageKey: 'ReleaseToLive', plannedStart: null, plannedEnd: null, stageOwnerUserId: null, stageVersion: 1 },
+        // CsApproving belongs to Backend — must be filtered out for Frontend
+        { stageKey: 'CsApproving', plannedStart: null, plannedEnd: null, stageOwnerUserId: null, stageVersion: 1 },
+      ],
+    });
+    render(
+      <GanttFeatureTrackBand
+        track={track}
+        kind="Frontend"
+        featureTitle="Regression: kind filter"
+        today={FIXTURE_TODAY}
+        loadedRange={LOADED_RANGE}
+        dayPx={DAY_PX}
+        resolveOwner={vi.fn().mockReturnValue(undefined)}
+      />,
+    );
+
+    expect(screen.queryByTestId('track-stage-row-101-Frontend-CsApproving')).toBeNull();
+    expect(screen.getByTestId('track-stage-row-101-Frontend-SrApproving')).toBeInTheDocument();
+    expect(screen.getByTestId('track-stage-row-101-Frontend-Development')).toBeInTheDocument();
+    expect(screen.getByTestId('track-stage-row-101-Frontend-StandTesting')).toBeInTheDocument();
+    expect(screen.getByTestId('track-stage-row-101-Frontend-EthalonTesting')).toBeInTheDocument();
+    expect(screen.getByTestId('track-stage-row-101-Frontend-ReleaseToLive')).toBeInTheDocument();
+  });
 });
