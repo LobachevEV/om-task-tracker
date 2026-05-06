@@ -6,6 +6,8 @@ public class FeaturesDbContext(DbContextOptions<FeaturesDbContext> options) : Db
 {
     public DbSet<Feature> Features { get; set; }
     public DbSet<FeatureStagePlan> FeatureStagePlans { get; set; }
+    public DbSet<FeatureTrack> FeatureTracks { get; set; }
+    public DbSet<FeatureTrackStage> FeatureTrackStages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,6 +33,11 @@ public class FeaturesDbContext(DbContextOptions<FeaturesDbContext> options) : Db
                 .WithOne()
                 .HasForeignKey(sp => sp.FeatureId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasMany(f => f.Tracks)
+                .WithOne()
+                .HasForeignKey(t => t.FeatureId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<FeatureStagePlan>(e =>
@@ -45,6 +52,31 @@ public class FeaturesDbContext(DbContextOptions<FeaturesDbContext> options) : Db
 
             // Per-stage optimistic-concurrency token (mirrors Feature.Version).
             e.Property(sp => sp.Version).IsConcurrencyToken();
+        });
+
+        modelBuilder.Entity<FeatureTrack>(e =>
+        {
+            // Unique composite index: one track per (feature, kind).
+            e.HasIndex(t => new { t.FeatureId, t.Kind }).IsUnique();
+
+            e.HasIndex(t => t.TrackOwnerUserId);
+
+            e.Property(t => t.Version).IsConcurrencyToken();
+
+            e.HasMany(t => t.Stages)
+                .WithOne()
+                .HasForeignKey(s => s.FeatureTrackId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<FeatureTrackStage>(e =>
+        {
+            // Unique composite index: one stage row per (track, stage_key).
+            e.HasIndex(s => new { s.FeatureTrackId, s.StageKey }).IsUnique();
+
+            e.HasIndex(s => s.StageOwnerUserId);
+
+            e.Property(s => s.Version).IsConcurrencyToken();
         });
     }
 }

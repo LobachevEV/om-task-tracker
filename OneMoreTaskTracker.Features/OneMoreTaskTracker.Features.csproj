@@ -63,5 +63,33 @@
       <ProtoRoot>Protos</ProtoRoot>
       <AdditionalImportDirs>Protos</AdditionalImportDirs>
     </Protobuf>
+    <Protobuf Include="Protos\feature_track_kind.proto">
+      <GrpcServices>None</GrpcServices>
+      <ProtoRoot>Protos</ProtoRoot>
+      <Access>Public</Access>
+    </Protobuf>
+    <Protobuf Include="Protos\feature_track_stage_key.proto">
+      <GrpcServices>None</GrpcServices>
+      <ProtoRoot>Protos</ProtoRoot>
+      <Access>Public</Access>
+    </Protobuf>
+    <Protobuf Include="Protos\feature_track.proto">
+      <GrpcServices>None</GrpcServices>
+      <ProtoRoot>Protos</ProtoRoot>
+      <Access>Public</Access>
+      <AdditionalImportDirs>Protos</AdditionalImportDirs>
+    </Protobuf>
+    <Protobuf Include="Protos\PatchFeatureTrackCommand\patch_feature_track_command_handler.proto">
+      <GrpcServices>Server</GrpcServices>
+      <Access>Public</Access>
+      <ProtoRoot>Protos</ProtoRoot>
+      <AdditionalImportDirs>Protos</AdditionalImportDirs>
+    </Protobuf>
+    <Protobuf Include="Protos\PatchFeatureTrackStageCommand\patch_feature_track_stage_command_handler.proto">
+      <GrpcServices>Server</GrpcServices>
+      <Access>Public</Access>
+      <ProtoRoot>Protos</ProtoRoot>
+      <AdditionalImportDirs>Protos</AdditionalImportDirs>
+    </Protobuf>
   </ItemGroup>
 </Project>

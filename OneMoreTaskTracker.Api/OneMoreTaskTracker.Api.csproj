@@ -130,6 +130,46 @@
       <CompileOutputs>True</CompileOutputs>
       <Generator>MSBuild:Compile</Generator>
     </Protobuf>
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\feature_track_kind.proto">
+      <GrpcServices>None</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
+      <CompileOutputs>True</CompileOutputs>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\feature_track_stage_key.proto">
+      <GrpcServices>None</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
+      <CompileOutputs>True</CompileOutputs>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\feature_track.proto">
+      <GrpcServices>None</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
+      <CompileOutputs>True</CompileOutputs>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\PatchFeatureTrackCommand\patch_feature_track_command_handler.proto">
+      <GrpcServices>Client</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
+      <CompileOutputs>True</CompileOutputs>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
+    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\PatchFeatureTrackStageCommand\patch_feature_track_stage_command_handler.proto">
+      <GrpcServices>Client</GrpcServices>
+      <Access>Public</Access>
+      <ProtoCompile>True</ProtoCompile>
+      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
+      <CompileOutputs>True</CompileOutputs>
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
   </ItemGroup>
   <ItemGroup>
     <Protobuf Include="..\OneMoreTaskTracker.Users\Protos\user_service.proto">

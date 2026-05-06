@@ -51,6 +51,8 @@ app.MapGrpcService<ListFeaturesHandler>();
 app.MapGrpcService<GetFeatureHandler>();
 app.MapGrpcService<PatchFeatureHandler>();
 app.MapGrpcService<PatchFeatureStageHandler>();
+app.MapGrpcService<PatchFeatureTrackHandler>();
+app.MapGrpcService<PatchFeatureTrackStageHandler>();
 
 app.Run();
 

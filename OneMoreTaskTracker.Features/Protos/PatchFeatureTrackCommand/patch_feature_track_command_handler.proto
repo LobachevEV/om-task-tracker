@@ -1,0 +1,17 @@
+syntax = "proto3";
+import "feature_track_kind.proto";
+import "feature_track.proto";
+option csharp_namespace = "OneMoreTaskTracker.Proto.Features.PatchFeatureTrackCommand";
+package mr_helper.features;
+
+service FeatureTrackPatcher {
+  rpc Patch (PatchFeatureTrackRequest) returns (FeatureTrackDto);
+}
+
+message PatchFeatureTrackRequest {
+  int32             feature_id              = 1;
+  FeatureTrackKind  kind                    = 2;
+  int32             caller_user_id          = 3;
+  optional int32    expected_version        = 4;
+  optional int32    track_owner_user_id     = 5;
+}

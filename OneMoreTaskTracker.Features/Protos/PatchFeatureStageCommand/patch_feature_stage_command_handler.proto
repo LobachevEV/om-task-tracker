@@ -1,6 +1,7 @@
 syntax = "proto3";
 import "feature_state.proto";
 import "feature_stage_plan.proto";
+import "feature_track.proto";
 
 option csharp_namespace = "OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand";
 package mr_helper.features;
@@ -32,4 +33,5 @@ message FeatureDto {
   string       updated_at         = 10;
   repeated     FeatureStagePlan stage_plans = 11;
   int32        version            = 12;
+  repeated     FeatureTrackDto   tracks     = 13;
 }

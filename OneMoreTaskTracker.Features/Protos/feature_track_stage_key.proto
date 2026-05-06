@@ -1,0 +1,13 @@
+syntax = "proto3";
+option csharp_namespace = "OneMoreTaskTracker.Proto.Features";
+package mr_helper.features;
+
+enum FeatureTrackStageKey {
+  TRACK_STAGE_KEY_UNSPECIFIED = 0;
+  TRACK_STAGE_SR_APPROVING    = 1;
+  TRACK_STAGE_CS_APPROVING    = 2;
+  TRACK_STAGE_DEVELOPMENT     = 3;
+  TRACK_STAGE_STAND_TESTING   = 4;
+  TRACK_STAGE_ETHALON_TESTING = 5;
+  TRACK_STAGE_RELEASE_TO_LIVE = 6;
+}

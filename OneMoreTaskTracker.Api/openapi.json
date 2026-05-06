@@ -155,6 +155,67 @@
         }
       }
     },
+    "/api/plan/features/{featureId}/tracks/{kind}": {
+      "parameters": [
+        { "name": "featureId", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } },
+        { "name": "kind", "in": "path", "required": true, "description": "Track kind: 'frontend' or 'backend' (case-insensitive).", "schema": { "$ref": "#/components/schemas/FeatureTrackKind" } },
+        { "name": "If-Match", "in": "header", "required": false, "description": "Optional track-scoped optimistic-concurrency token (track.version). Forwarded as expectedVersion.", "schema": { "type": "string" } }
+      ],
+      "patch": {
+        "summary": "Update a track — sparse PATCH (Manager only).",
+        "description": "Sparse fields supported: `trackOwnerUserId`, `expectedVersion`. Omitted fields are unchanged. `trackOwnerUserId` must be a positive integer on the feature manager's roster, or -1 to clear. Optimistic concurrency: include `If-Match` header with current track.version, or `expectedVersion` in the body. Body wins if both are supplied.",
+        "tags": ["plan"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/PatchFeatureTrackPayload" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FeatureSummary" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "502": { "$ref": "#/components/responses/BadGateway" }
+        }
+      }
+    },
+    "/api/plan/features/{featureId}/tracks/{kind}/stages/{stageKey}": {
+      "parameters": [
+        { "name": "featureId", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } },
+        { "name": "kind", "in": "path", "required": true, "description": "Track kind: 'frontend' or 'backend' (case-insensitive).", "schema": { "$ref": "#/components/schemas/FeatureTrackKind" } },
+        { "name": "stageKey", "in": "path", "required": true, "description": "Stage key (case-insensitive). Frontend tracks accept: srapproving, development, standtesting, ethalontesting, releasetolive. Backend tracks accept: csapproving, development, standtesting, ethalontesting, releasetolive.", "schema": { "$ref": "#/components/schemas/FeatureTrackStageKey" } },
+        { "name": "If-Match", "in": "header", "required": false, "description": "Optional stage-scoped optimistic-concurrency token (stage.stageVersion). Forwarded as expectedStageVersion.", "schema": { "type": "string" } }
+      ],
+      "patch": {
+        "summary": "Update a track stage — sparse PATCH (Manager only).",
+        "description": "Sparse fields supported: `stageOwnerUserId`, `plannedStart`, `plannedEnd`, `expectedStageVersion`. Omitted fields are unchanged. `stageOwnerUserId` must be a positive integer on the manager's roster, -1 to clear (revert to track owner inheritance), or null/omitted to leave unchanged. Optimistic concurrency: include `If-Match` header with current stage.stageVersion, or `expectedStageVersion` in the body. Body wins if both are supplied.",
+        "tags": ["plan"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/PatchFeatureTrackStagePayload" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FeatureSummary" } } }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "502": { "$ref": "#/components/responses/BadGateway" }
+        }
+      }
+    },
     "/api/plan/features/{id}/tasks/{jiraId}": {
       "parameters": [
         { "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "format": "int32" } },
@@ -330,7 +391,12 @@
             "items": { "$ref": "#/components/schemas/StagePlan" },
             "description": "Always length 5, canonical FeatureState order. Performer is id-only on list rows."
           },
-          "version": { "type": "integer", "format": "int32", "description": "Monotonically-increasing row version used as an optimistic-concurrency token. Bumped by every inline-edit PATCH." }
+          "version": { "type": "integer", "format": "int32", "description": "Monotonically-increasing row version used as an optimistic-concurrency token. Bumped by every inline-edit PATCH." },
+          "tracks": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/FeatureTrackSummary" },
+            "description": "Track summaries. Empty array for legacy features that predate the tracks feature. Optional for rollout tolerance."
+          }
         }
       },
       "FeatureDetail": {
@@ -347,6 +413,11 @@
             "maxItems": 5,
             "items": { "$ref": "#/components/schemas/StagePlanDetail" },
             "description": "Always length 5, canonical FeatureState order. Each entry carries a resolved performer mini-member."
+          },
+          "tracks": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/FeatureTrackSummary" },
+            "description": "Track summaries with resolved stageOwner and trackOwner members. Empty for legacy features."
           }
         }
       },
@@ -376,6 +447,75 @@
         "description": "All fields optional — send only the fields you want to change. Sparse fields: `stageOwnerUserId`, `plannedStart`, `plannedEnd`, `expectedStageVersion`.",
         "properties": {
           "stageOwnerUserId":     { "type": "integer", "format": "int32", "nullable": true, "minimum": 1 },
+          "plannedStart":         { "type": "string",  "format": "date",  "nullable": true },
+          "plannedEnd":           { "type": "string",  "format": "date",  "nullable": true },
+          "expectedStageVersion": { "type": "integer", "format": "int32", "nullable": true, "description": "Stage-scoped optimistic-concurrency token. Body wins over `If-Match` header when both are supplied." }
+        }
+      },
+      "FeatureTrackKind": {
+        "type": "string",
+        "enum": ["Frontend", "Backend"],
+        "description": "Which parallel development track. URL path segments are matched case-insensitively."
+      },
+      "FeatureTrackStageKey": {
+        "type": "string",
+        "enum": ["SrApproving", "CsApproving", "Development", "StandTesting", "EthalonTesting", "ReleaseToLive"],
+        "description": "Stage key within a track. Frontend tracks use SrApproving; Backend tracks use CsApproving. Both share Development, StandTesting, EthalonTesting, ReleaseToLive. URL path segments are matched case-insensitively."
+      },
+      "FeatureTrackStage": {
+        "type": "object",
+        "required": ["stageKey", "plannedStart", "plannedEnd", "stageOwnerUserId", "stageVersion"],
+        "description": "A single stage within a feature track.",
+        "properties": {
+          "stageKey":          { "$ref": "#/components/schemas/FeatureTrackStageKey" },
+          "plannedStart":      { "type": "string", "format": "date", "nullable": true },
+          "plannedEnd":        { "type": "string", "format": "date", "nullable": true },
+          "stageOwnerUserId":  { "type": "integer", "format": "int32", "nullable": true, "description": "Null means inherit from track owner." },
+          "stageVersion":      { "type": "integer", "format": "int32", "description": "Per-stage optimistic-concurrency token." },
+          "stageOwner": {
+            "nullable": true,
+            "description": "Resolved on FeatureDetail only; null on list rows or when unassigned/stale.",
+            "allOf": [ { "$ref": "#/components/schemas/MiniTeamMember" } ]
+          }
+        }
+      },
+      "FeatureTrackSummary": {
+        "type": "object",
+        "required": ["id", "featureId", "kind", "trackOwnerUserId", "version", "stages"],
+        "description": "A parallel dev track (Frontend or Backend) attached to a feature.",
+        "properties": {
+          "id":               { "type": "integer", "format": "int32" },
+          "featureId":        { "type": "integer", "format": "int32" },
+          "kind":             { "$ref": "#/components/schemas/FeatureTrackKind" },
+          "trackOwnerUserId": { "type": "integer", "format": "int32", "description": "Primary owner of this track." },
+          "version":          { "type": "integer", "format": "int32", "description": "Track-level optimistic-concurrency token." },
+          "stages": {
+            "type": "array",
+            "minItems": 5,
+            "maxItems": 5,
+            "items": { "$ref": "#/components/schemas/FeatureTrackStage" },
+            "description": "Always exactly 5 stages in canonical track-scoped order."
+          },
+          "trackOwner": {
+            "nullable": true,
+            "description": "Resolved on FeatureDetail only; null on list rows.",
+            "allOf": [ { "$ref": "#/components/schemas/MiniTeamMember" } ]
+          }
+        }
+      },
+      "PatchFeatureTrackPayload": {
+        "type": "object",
+        "description": "All fields optional — send only the fields you want to change. Sparse fields: `trackOwnerUserId`, `expectedVersion`.",
+        "properties": {
+          "trackOwnerUserId": { "type": "integer", "format": "int32", "nullable": true, "minimum": 1, "description": "Must be a positive integer from the manager's roster." },
+          "expectedVersion":  { "type": "integer", "format": "int32", "nullable": true, "description": "Track-level optimistic-concurrency token. Body wins over `If-Match` header when both are supplied." }
+        }
+      },
+      "PatchFeatureTrackStagePayload": {
+        "type": "object",
+        "description": "All fields optional — send only the fields you want to change. Sparse fields: `stageOwnerUserId`, `plannedStart`, `plannedEnd`, `expectedStageVersion`.",
+        "properties": {
+          "stageOwnerUserId":     { "type": "integer", "format": "int32", "nullable": true, "description": "Positive integer = assign from roster. -1 = clear (revert to track owner inheritance). Omitted = unchanged." },
           "plannedStart":         { "type": "string",  "format": "date",  "nullable": true },
           "plannedEnd":           { "type": "string",  "format": "date",  "nullable": true },
           "expectedStageVersion": { "type": "integer", "format": "int32", "nullable": true, "description": "Stage-scoped optimistic-concurrency token. Body wins over `If-Match` header when both are supplied." }

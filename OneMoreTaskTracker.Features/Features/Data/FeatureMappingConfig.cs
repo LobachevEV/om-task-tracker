@@ -1,6 +1,10 @@
 using Mapster;
 using ProtoFeatureState = OneMoreTaskTracker.Proto.Features.FeatureState;
 using ProtoFeatureStagePlan = OneMoreTaskTracker.Proto.Features.FeatureStagePlan;
+using ProtoFeatureTrackDto = OneMoreTaskTracker.Proto.Features.FeatureTrackDto;
+using ProtoFeatureTrackStageDto = OneMoreTaskTracker.Proto.Features.FeatureTrackStageDto;
+using ProtoFeatureTrackKind = OneMoreTaskTracker.Proto.Features.FeatureTrackKind;
+using ProtoFeatureTrackStageKey = OneMoreTaskTracker.Proto.Features.FeatureTrackStageKey;
 using CreateDto = OneMoreTaskTracker.Proto.Features.CreateFeatureCommand.FeatureDto;
 using ListDto = OneMoreTaskTracker.Proto.Features.ListFeaturesQuery.FeatureDto;
 using GetDto = OneMoreTaskTracker.Proto.Features.GetFeatureQuery.FeatureDto;
@@ -35,6 +39,37 @@ public static class FeatureMappingConfig
         feature.StagePlans
             .OrderBy(sp => sp.Stage)
             .Select(sp => sp.Adapt<ProtoFeatureStagePlan>());
+
+    public static IEnumerable<ProtoFeatureTrackDto> BuildProtoTracks(Feature feature) =>
+        feature.Tracks
+            .OrderBy(t => t.Kind)
+            .Select(BuildProtoTrack);
+
+    public static ProtoFeatureTrackDto BuildProtoTrack(FeatureTrack track)
+    {
+        var dto = new ProtoFeatureTrackDto
+        {
+            Id = track.Id,
+            FeatureId = track.FeatureId,
+            Kind = (ProtoFeatureTrackKind)track.Kind,
+            TrackOwnerUserId = track.TrackOwnerUserId,
+            Version = track.Version,
+        };
+        dto.Stages.AddRange(BuildProtoTrackStages(track));
+        return dto;
+    }
+
+    public static IEnumerable<ProtoFeatureTrackStageDto> BuildProtoTrackStages(FeatureTrack track) =>
+        track.Stages
+            .OrderBy(s => s.StageKey)
+            .Select(s => new ProtoFeatureTrackStageDto
+            {
+                StageKey = (ProtoFeatureTrackStageKey)s.StageKey,
+                PlannedStart = s.PlannedStart == null ? string.Empty : s.PlannedStart.Value.ToString("yyyy-MM-dd"),
+                PlannedEnd = s.PlannedEnd == null ? string.Empty : s.PlannedEnd.Value.ToString("yyyy-MM-dd"),
+                StageOwnerUserId = s.StageOwnerUserId ?? 0,
+                StageVersion = s.Version,
+            });
 
     private static void RegisterFeatureToDto<TDto>()
         where TDto : class, IFeatureMappingTarget, new() =>

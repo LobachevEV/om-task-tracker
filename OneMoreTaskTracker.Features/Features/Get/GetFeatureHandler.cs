@@ -16,11 +16,14 @@ public class GetFeatureHandler(FeaturesDbContext db) : FeatureGetter.FeatureGett
         // in-memory collection order cannot drift between providers.
         var feature = await db.Features.AsNoTracking()
             .Include(f => f.StagePlans)
+            .Include(f => f.Tracks)
+            .ThenInclude(t => t.Stages)
             .FirstOrDefaultAsync(f => f.Id == request.Id, context.CancellationToken)
             ?? throw new RpcException(new Status(StatusCode.NotFound, $"feature {request.Id} not found"));
 
         var dto = feature.Adapt<FeatureDto>();
         dto.StagePlans.Add(FeatureMappingConfig.BuildProtoStagePlans(feature));
+        dto.Tracks.AddRange(FeatureMappingConfig.BuildProtoTracks(feature));
         return dto;
     }
 }

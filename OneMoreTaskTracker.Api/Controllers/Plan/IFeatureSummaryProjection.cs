@@ -13,5 +13,6 @@ internal interface IFeatureSummaryProjection
     int LeadUserId { get; }
     int ManagerUserId { get; }
     IEnumerable<FeatureStagePlan> StagePlans { get; }
+    IEnumerable<FeatureTrackDto> Tracks { get; }
     int Version { get; }
 }

@@ -1,0 +1,22 @@
+syntax = "proto3";
+import "feature_track_kind.proto";
+import "feature_track_stage_key.proto";
+option csharp_namespace = "OneMoreTaskTracker.Proto.Features";
+package mr_helper.features;
+
+message FeatureTrackStageDto {
+  FeatureTrackStageKey stage_key            = 1;
+  string               planned_start        = 2;
+  string               planned_end          = 3;
+  int32                stage_owner_user_id  = 4;
+  int32                stage_version        = 5;
+}
+
+message FeatureTrackDto {
+  int32                         id                    = 1;
+  int32                         feature_id            = 2;
+  FeatureTrackKind              kind                  = 3;
+  int32                         track_owner_user_id   = 4;
+  int32                         version               = 5;
+  repeated FeatureTrackStageDto stages                = 6;
+}

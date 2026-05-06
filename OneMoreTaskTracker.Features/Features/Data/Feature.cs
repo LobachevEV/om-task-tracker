@@ -18,6 +18,8 @@ public class Feature
 
     public int Version { get; private set; }
 
+    public List<FeatureTrack> Tracks { get; init; } = [];
+
     public FeatureStagePlan? ResolveStage(int stageOrdinal) =>
         StagePlans.FirstOrDefault(sp => sp.Stage == stageOrdinal);
 

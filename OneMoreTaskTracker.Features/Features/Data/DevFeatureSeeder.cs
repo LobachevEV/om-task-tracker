@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using OneMoreTaskTracker.Proto.Features;
 
 namespace OneMoreTaskTracker.Features.Features.Data;
 
@@ -125,6 +126,62 @@ public sealed class DevFeatureSeeder(IRequestClock clock)
             }
 
             dbContext.Features.Add(feature);
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        var now2 = clock.GetUtcNow();
+
+        // Only the first two features get seeded tracks (indices 0 and 1).
+        // features[2] and [3] are intentionally left without tracks to exercise
+        // the "no tracks" code path in the list and detail responses.
+        var allStageKeys = new[]
+        {
+            FeatureTrackStageKey.TrackStageSrApproving,
+            FeatureTrackStageKey.TrackStageCsApproving,
+            FeatureTrackStageKey.TrackStageDevelopment,
+            FeatureTrackStageKey.TrackStageStandTesting,
+            FeatureTrackStageKey.TrackStageEthalonTesting,
+            FeatureTrackStageKey.TrackStageReleaseToLive,
+        };
+
+        var featureEntities = dbContext.Features
+            .Local
+            .OrderBy(f => f.Id)
+            .ToList();
+
+        // features[0]: FRONTEND (owner=Alice) + BACKEND (owner=Charlie)
+        var checkoutFeature = featureEntities[0];
+
+        var frontendTrack = FeatureTrack.Create(checkoutFeature.Id, (int)FeatureTrackKind.Frontend, AliceFrontendUserId, now2);
+        dbContext.FeatureTracks.Add(frontendTrack);
+
+        var backendTrack = FeatureTrack.Create(checkoutFeature.Id, (int)FeatureTrackKind.Backend, CharlieBackendUserId, now2);
+        dbContext.FeatureTracks.Add(backendTrack);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        var now3 = clock.GetUtcNow();
+        foreach (var stageKey in allStageKeys)
+        {
+            var frontendStage = FeatureTrackStage.Create(frontendTrack.Id, (int)stageKey, now3);
+            dbContext.FeatureTrackStages.Add(frontendStage);
+            var backendStage = FeatureTrackStage.Create(backendTrack.Id, (int)stageKey, now3);
+            dbContext.FeatureTrackStages.Add(backendStage);
+        }
+
+        // features[1]: BACKEND (owner=Dave)
+        var searchFeature = featureEntities[1];
+        var searchBackendTrack = FeatureTrack.Create(searchFeature.Id, (int)FeatureTrackKind.Backend, DaveBackendUserId, now3);
+        dbContext.FeatureTracks.Add(searchBackendTrack);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        var now4 = clock.GetUtcNow();
+        foreach (var stageKey in allStageKeys)
+        {
+            var stage = FeatureTrackStage.Create(searchBackendTrack.Id, (int)stageKey, now4);
+            dbContext.FeatureTrackStages.Add(stage);
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);

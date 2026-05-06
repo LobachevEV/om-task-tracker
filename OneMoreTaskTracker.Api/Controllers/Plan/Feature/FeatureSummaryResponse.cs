@@ -1,4 +1,5 @@
 using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
+using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Tracks;
 
 namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature;
 
@@ -14,14 +15,14 @@ public record FeatureSummaryResponse(
     int TaskCount,
     IReadOnlyList<int> TaskIds,
     IReadOnlyList<StagePlanResponse> StagePlans,
-    // Optimistic-concurrency token. Bumped by every inline-edit PATCH;
-    // legacy clients that ignore it stay last-write-wins.
-    int Version)
+    int Version,
+    IReadOnlyList<FeatureTrackSummaryResponse>? Tracks)
 {
     internal static FeatureSummaryResponse From<T>(T f, IReadOnlyDictionary<int, List<int>> tasksByFeature)
         where T : IFeatureSummaryProjection
     {
         IReadOnlyList<int> taskIds = tasksByFeature.TryGetValue(f.Id, out var ids) ? ids : [];
+        var trackList = f.Tracks.Select(FeatureTrackSummaryResponse.From).ToList();
         return new FeatureSummaryResponse(
             f.Id,
             f.Title,
@@ -34,6 +35,7 @@ public record FeatureSummaryResponse(
             taskIds.Count,
             taskIds,
             f.StagePlans.Select(StagePlanResponse.From).ToList(),
-            f.Version);
+            f.Version,
+            trackList.Count > 0 ? trackList : null);
     }
 }

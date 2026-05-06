@@ -1,0 +1,8 @@
+syntax = "proto3";
+option csharp_namespace = "OneMoreTaskTracker.Proto.Features";
+package mr_helper.features;
+
+enum FeatureTrackKind {
+  FRONTEND = 0;
+  BACKEND  = 1;
+}

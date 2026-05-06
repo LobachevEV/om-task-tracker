@@ -21,7 +21,7 @@ public sealed class PatchFeatureStageHandler(
 
     public override async Task<FeatureDto> Patch(PatchFeatureStageRequest request, ServerCallContext context)
     {
-        var feature = await db.LoadFeatureWithStagePlansAsync(request.FeatureId, context.CancellationToken);
+        var feature = await db.LoadFeatureWithTracksAsync(request.FeatureId, context.CancellationToken);
         FeatureOwnershipGuard.EnsureManager(feature, request.CallerUserId);
 
         var stageOrdinal = (int)request.Stage;
@@ -89,6 +89,7 @@ public sealed class PatchFeatureStageHandler(
 
         var dto = feature.Adapt<FeatureDto>();
         dto.StagePlans.Add(FeatureMappingConfig.BuildProtoStagePlans(feature));
+        dto.Tracks.AddRange(FeatureMappingConfig.BuildProtoTracks(feature));
         return dto;
     }
 
