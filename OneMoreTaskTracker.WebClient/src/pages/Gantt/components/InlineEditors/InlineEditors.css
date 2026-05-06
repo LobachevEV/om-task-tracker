@@ -254,6 +254,24 @@
   color: var(--text-muted);
 }
 
+/* Inherit-from-track sentinel option */
+.inline-cell__listbox-option--inherit {
+  color: var(--text-muted);
+  border-block-end: 1px solid var(--border);
+  margin-block-end: 2px;
+}
+
+.inline-cell__listbox-option--inherit[aria-selected='true'] {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.inline-cell__inherit-glyph {
+  font-size: 12px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
 .inline-cell__listbox-sep {
   color: var(--text-dim);
 }

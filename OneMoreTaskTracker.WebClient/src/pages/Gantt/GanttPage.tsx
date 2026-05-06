@@ -439,16 +439,18 @@ export function GanttPage() {
     state: state.stateFilter === 'all' ? undefined : state.stateFilter,
   });
   const roster = useTeamRoster();
-  const failCountRef = useRef(0);
+  const [failCount, setFailCount] = useState(0);
   const prevErrorRef = useRef<Error | null>(null);
 
-  if (features.error !== null && features.error !== prevErrorRef.current) {
-    prevErrorRef.current = features.error;
-    failCountRef.current += 1;
-  } else if (features.error === null && prevErrorRef.current !== null) {
-    prevErrorRef.current = null;
-    failCountRef.current = 0;
-  }
+  useEffect(() => {
+    if (features.error !== null && features.error !== prevErrorRef.current) {
+      prevErrorRef.current = features.error;
+      setFailCount((c) => c + 1);
+    } else if (features.error === null && prevErrorRef.current !== null) {
+      prevErrorRef.current = null;
+      setFailCount(0);
+    }
+  }, [features.error]);
 
   const rosterMembers = useMemo<MiniTeamMember[]>(
     () => (roster.data ?? []).map(toMiniMember),
@@ -481,7 +483,7 @@ export function GanttPage() {
       onRosterRetry={roster.refetch}
       loading={features.loading}
       error={features.error}
-      failCount={failCountRef.current}
+      failCount={failCount}
       onRetry={features.refetch}
       state={state}
       onFeatureUpdated={features.applyFeatureUpdate}

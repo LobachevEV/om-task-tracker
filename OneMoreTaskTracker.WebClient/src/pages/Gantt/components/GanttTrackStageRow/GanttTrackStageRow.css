@@ -66,29 +66,29 @@
   }
 }
 
-/* 1100px: hide the dates column entirely; info moves to bar tooltip. */
+/* 1100px: hide the stage-code chip (internal-id); dates stay stacked. */
 @media (max-width: 1099px) {
   .gantt-track-stage-row__gutter {
     grid-template-columns:
-      [code]  28px
+      [label] 100px
+      [owner] 1fr
+      [dates] 120px;
+  }
+
+  .gantt-track-stage-row__code {
+    display: none;
+  }
+}
+
+/* 1024px: compact — hide dates too; keep label + owner only. */
+@media (max-width: 1023px) {
+  .gantt-track-stage-row__gutter {
+    grid-template-columns:
       [label] 100px
       [owner] 1fr;
   }
 
   .gantt-track-stage-row__dates {
-    display: none;
-  }
-}
-
-/* 1024px: compact — hide label column too; show code + owner only. */
-@media (max-width: 1023px) {
-  .gantt-track-stage-row__gutter {
-    grid-template-columns:
-      [code]  28px
-      [owner] 1fr;
-  }
-
-  .gantt-track-stage-row__name {
     display: none;
   }
 }
@@ -168,6 +168,23 @@
   font-size: var(--text-xs);
   color: var(--fg-subtle);
   flex-shrink: 0;
+}
+
+/* Inline-edit wrapper for the owner picker — normalises layout for both
+   assigned and inherited states when editing is enabled. */
+.gantt-track-stage-row__owner-inline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Inherited state: dim everything to 0.65 opacity so the three-signal
+   affordance reads "set by track, not this stage". */
+.gantt-track-stage-row__owner-inline--inherited {
+  opacity: 0.65;
+  color: var(--fg-muted);
 }
 
 .gantt-track-stage-row__avatar-placeholder {

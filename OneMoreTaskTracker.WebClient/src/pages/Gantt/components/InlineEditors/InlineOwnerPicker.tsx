@@ -28,6 +28,8 @@ export interface InlineOwnerPickerProps {
   /** Build the announcement message. */
   buildAnnouncement?: (outcome: 'saved' | 'error', value: number | null, error: InlineEditorError | null) => string;
   clearable?: boolean;
+  /** When true, prepend an "Inherit from track" option that dispatches null. */
+  allowInherit?: boolean;
 }
 
 function rosterMatches(m: TeamRosterMember, q: string): boolean {
@@ -55,6 +57,7 @@ export function InlineOwnerPicker({
   onAnnounce,
   buildAnnouncement,
   clearable = true,
+  allowInherit = false,
 }: InlineOwnerPickerProps) {
   const { t } = useTranslation('gantt');
   const rootRef = useRef<HTMLDivElement>(null);
@@ -90,6 +93,17 @@ export function InlineOwnerPicker({
     if (displayName && trimmed === displayName) return roster;
     return roster.filter((m) => rosterMatches(m, trimmed));
   }, [displayName, query, roster]);
+
+  // Total option count including the optional inherit sentinel at index 0.
+  const totalOptions = allowInherit ? filtered.length + 1 : filtered.length;
+  // Map list highlight index to a resolved member (null = inherit sentinel).
+  function resolveHighlighted(idx: number): TeamRosterMember | null {
+    if (allowInherit) {
+      if (idx === 0) return null;
+      return filtered[idx - 1] ?? null;
+    }
+    return filtered[idx] ?? null;
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -136,7 +150,7 @@ export function InlineOwnerPicker({
             setOpen(true);
             setHighlight(0);
           } else {
-            setHighlight((h) => Math.min(h + 1, Math.max(filtered.length - 1, 0)));
+            setHighlight((h) => Math.min(h + 1, Math.max(totalOptions - 1, 0)));
           }
           break;
         case 'ArrowUp':
@@ -145,9 +159,14 @@ export function InlineOwnerPicker({
           break;
         case 'Enter': {
           e.preventDefault();
-          if (open && filtered[highlight]) {
-            void commitUser(filtered[highlight].userId);
-          } else if (!open) {
+          if (open) {
+            const resolved = resolveHighlighted(highlight);
+            if (allowInherit && highlight === 0) {
+              void commitUser(null);
+            } else if (resolved != null) {
+              void commitUser(resolved.userId);
+            }
+          } else {
             setOpen(true);
           }
           break;
@@ -252,7 +271,26 @@ export function InlineOwnerPicker({
       ) : null}
       {open ? (
         <ul className="inline-cell__listbox" role="listbox">
-          {filtered.length === 0 ? (
+          {allowInherit ? (
+            <li
+              key="__inherit__"
+              role="option"
+              aria-selected={value === null}
+              className="inline-cell__listbox-option inline-cell__listbox-option--inherit"
+              data-active={highlight === 0 ? 'true' : 'false'}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                void commitUser(null);
+              }}
+              onMouseEnter={() => setHighlight(0)}
+            >
+              <span className="inline-cell__inherit-glyph" aria-hidden="true">↘</span>
+              <span className="inline-cell__listbox-name">
+                {t('tracks.combobox.inheritFromTrack', { defaultValue: 'Унаследовать от трека' })}
+              </span>
+            </li>
+          ) : null}
+          {filtered.length === 0 && !allowInherit ? (
             <li className="inline-cell__listbox-empty" role="option" aria-selected="false">
               {t('stagePlan.performerEmpty', {
                 defaultValue: 'No teammate matches "{{query}}".',
@@ -261,7 +299,8 @@ export function InlineOwnerPicker({
             </li>
           ) : (
             filtered.map((m, idx) => {
-              const active = idx === highlight;
+              const listIdx = allowInherit ? idx + 1 : idx;
+              const active = listIdx === highlight;
               const isSelected = m.userId === value;
               return (
                 <li
@@ -274,7 +313,7 @@ export function InlineOwnerPicker({
                     e.preventDefault();
                     void commitUser(m.userId);
                   }}
-                  onMouseEnter={() => setHighlight(idx)}
+                  onMouseEnter={() => setHighlight(listIdx)}
                 >
                   <Avatar
                     className="inline-cell__avatar"

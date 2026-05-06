@@ -109,7 +109,7 @@ export function InlineDateCell({
         aria-label={ariaLabel}
         aria-invalid={editor.status === 'error' || undefined}
         value={editor.draft}
-        placeholder="YYYY-MM-DD"
+        placeholder="—"
         onFocus={editor.enterEdit}
         onChange={(e) => editor.setDraft(e.currentTarget.value)}
         onBlur={() => void editor.commit()}

@@ -83,6 +83,7 @@ export function GanttTrackStageRow({
   const hasOwnerId = stage.stageOwnerUserId != null;
   const isStale = hasOwnerId && owner == null;
   const inheritedOwner = !hasOwnerId ? resolveOwner(track.trackOwnerUserId) : undefined;
+  const isInherited = !hasOwnerId && inheritedOwner != null;
 
   const bars = computeTrackStageBars(loadedRange, track, today, dayPx);
   const barEntry = bars[index] ?? null;
@@ -147,35 +148,64 @@ export function GanttTrackStageRow({
   if (noSignal) {
     ownerNode = (
       <span className="gantt-track-stage-row__empty-signal" aria-hidden="true">
-        —
+        {'—'}
       </span>
     );
   } else if (inlineEnabled && mutations != null && roster && !isStale) {
+    const pickerDisplayName = isInherited
+      ? inheritedOwner!.displayName
+      : (owner?.displayName ?? null);
     ownerNode = (
-      <InlineOwnerPicker
-        value={stage.stageOwnerUserId}
-        displayName={owner?.displayName ?? null}
-        roster={roster}
-        ariaLabel={t('inlineEdit.ownerAria', {
-          defaultValue: 'Owner for {{stage}} stage of "{{title}}"',
-          stage: stageName,
-          title: featureTitle,
-        })}
-        testId={`track-stage-owner-${track.featureId}-${kind}-${stage.stageKey}`}
-        onSave={async (next) => {
-          await mutations.saveTrackStageOwner(
-            track.featureId,
-            kind,
-            stage.stageKey,
-            next,
-            stageVersion,
-          );
-        }}
-        onAnnounce={onAnnounce}
-        buildAnnouncement={announceOwner}
-      />
+      <span
+        className={
+          isInherited
+            ? 'gantt-track-stage-row__owner-inline gantt-track-stage-row__owner-inline--inherited'
+            : 'gantt-track-stage-row__owner-inline'
+        }
+        data-inherited={isInherited ? 'true' : undefined}
+        aria-label={
+          isInherited
+            ? t('tracks.row.ariaInheritedOwner', {
+                defaultValue: 'Owner inherited from track: {{name}}',
+                name: inheritedOwner!.displayName,
+              })
+            : undefined
+        }
+      >
+        {isInherited ? (
+          <span className="gantt-track-stage-row__inherit-glyph" aria-hidden="true">&#x2198;</span>
+        ) : null}
+        <InlineOwnerPicker
+          value={stage.stageOwnerUserId}
+          displayName={pickerDisplayName}
+          roster={roster}
+          ariaLabel={t('inlineEdit.ownerAria', {
+            defaultValue: 'Owner for {{stage}} stage of "{{title}}"',
+            stage: stageName,
+            title: featureTitle,
+          })}
+          testId={`track-stage-owner-${track.featureId}-${kind}-${stage.stageKey}`}
+          onSave={async (next) => {
+            await mutations.saveTrackStageOwner(
+              track.featureId,
+              kind,
+              stage.stageKey,
+              next,
+              stageVersion,
+            );
+          }}
+          onAnnounce={onAnnounce}
+          buildAnnouncement={announceOwner}
+          allowInherit={isInherited || hasOwnerId}
+        />
+        {isInherited ? (
+          <span className="gantt-track-stage-row__inherit-suffix" aria-hidden="true">
+            {t('tracks.row.inheritedOwnerSuffix', { defaultValue: '· по треку' })}
+          </span>
+        ) : null}
+      </span>
     );
-  } else if (!hasOwnerId && inheritedOwner != null) {
+  } else if (isInherited) {
     ownerNode = (
       <span
         className="gantt-track-stage-row__inherited"
@@ -187,12 +217,12 @@ export function GanttTrackStageRow({
         <Avatar name={inheritedOwner.displayName} size="sm" tone={avatarTone(inheritedOwner.role)} />
         <span className="gantt-track-stage-row__owner-text gantt-track-stage-row__owner-text--inherited">
           {inheritedOwner.displayName}
-          {' '}
+          {' '}
           <span className="gantt-track-stage-row__inherit-suffix" aria-hidden="true">
-            {t('tracks.row.inheritedOwnerSuffix', { defaultValue: '· via track' })}
+            {t('tracks.row.inheritedOwnerSuffix', { defaultValue: '· по треку' })}
           </span>
         </span>
-        <span className="gantt-track-stage-row__inherit-glyph" aria-hidden="true">↘</span>
+        <span className="gantt-track-stage-row__inherit-glyph" aria-hidden="true">&#x2198;</span>
       </span>
     );
   } else if (!hasOwnerId) {
