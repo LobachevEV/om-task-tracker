@@ -1,5 +1,6 @@
 using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
 using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Tracks;
+using OneMoreTaskTracker.Proto.Users;
 
 namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature;
 
@@ -18,11 +19,14 @@ public record FeatureSummaryResponse(
     int Version,
     IReadOnlyList<FeatureTrackSummaryResponse>? Tracks)
 {
-    internal static FeatureSummaryResponse From<T>(T f, IReadOnlyDictionary<int, List<int>> tasksByFeature)
+    internal static FeatureSummaryResponse From<T>(
+        T f,
+        IReadOnlyDictionary<int, List<int>> tasksByFeature,
+        IReadOnlyDictionary<int, TeamRosterMember>? roster = null)
         where T : IFeatureSummaryProjection
     {
         IReadOnlyList<int> taskIds = tasksByFeature.TryGetValue(f.Id, out var ids) ? ids : [];
-        var trackList = f.Tracks.Select(FeatureTrackSummaryResponse.From).ToList();
+        var trackList = f.Tracks.Select(t => FeatureTrackSummaryResponse.From(t, roster)).ToList();
         return new FeatureSummaryResponse(
             f.Id,
             f.Title,

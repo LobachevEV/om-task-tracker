@@ -326,7 +326,7 @@ public sealed class PatchFeatureStageHandlerTests
         ex.Which.StatusCode.Should().Be(StatusCode.FailedPrecondition);
         ex.Which.Status.Detail.Should().StartWith("Stage order violation|conflict=");
         ex.Which.Status.Detail.Should().Contain("\"kind\":\"overlap\"");
-        ex.Which.Status.Detail.Should().Contain("\"with\":\"Development\"");
+        ex.Which.Status.Detail.Should().Contain("\"neighbour\":\"Development\"");
     }
 
     [Fact]

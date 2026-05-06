@@ -12,14 +12,16 @@ public record FeatureTrackSummaryResponse(
     int Version,
     IReadOnlyList<FeatureTrackStageResponse> Stages)
 {
-    internal static FeatureTrackSummaryResponse From(FeatureTrackDto track) =>
+    internal static FeatureTrackSummaryResponse From(
+        FeatureTrackDto track,
+        IReadOnlyDictionary<int, TeamRosterMember>? roster = null) =>
         new(
             track.Id,
             track.FeatureId,
             track.Kind.ToWireString(),
             track.TrackOwnerUserId,
             track.Version,
-            track.Stages.Select(s => StageFrom(s, null)).ToList());
+            track.Stages.Select(s => StageFrom(s, roster)).ToList());
 
     internal static FeatureTrackDetailResponse FromDetail(
         FeatureTrackDto track,

@@ -126,13 +126,24 @@ public sealed class PatchFeatureTrackStageHandler(
 
             if (laterStart < earlierEnd)
             {
-                var neighbourKey = mutatedKey == earlier.StageKey ? later.StageKey : earlier.StageKey;
+                var neighbourKeyOrdinal = mutatedKey == earlier.StageKey ? later.StageKey : earlier.StageKey;
                 throw new RpcException(new Status(
                     StatusCode.FailedPrecondition,
-                    ConflictDetail.StageOrderOverlap($"stage_key {neighbourKey}")));
+                    ConflictDetail.StageOrderOverlap(StageKeyName(neighbourKeyOrdinal))));
             }
         }
     }
+
+    private static string StageKeyName(int ordinal) => ordinal switch
+    {
+        1 => "SrApproving",
+        2 => "CsApproving",
+        3 => "Development",
+        4 => "StandTesting",
+        5 => "EthalonTesting",
+        6 => "ReleaseToLive",
+        _ => ordinal.ToString()
+    };
 
     private readonly record struct TrackStageSnapshot(
         int StageKey,

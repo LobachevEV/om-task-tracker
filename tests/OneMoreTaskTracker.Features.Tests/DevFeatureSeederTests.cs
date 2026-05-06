@@ -120,4 +120,59 @@ public sealed class DevFeatureSeederTests
         empty.PlannedStart.Should().BeNull();
         empty.PlannedEnd.Should().BeNull();
     }
+
+    [Fact]
+    public async Task SeedAsync_EachSeededTrackHasExactlyFiveStages()
+    {
+        await using var db = NewDb();
+
+        await NewSeeder().SeedAsync(db);
+
+        var tracks = await db.FeatureTracks
+            .AsNoTracking()
+            .Include(t => t.Stages)
+            .ToListAsync();
+
+        tracks.Should().NotBeEmpty("seed should create at least one track");
+        tracks.Should().OnlyContain(t => t.Stages.Count == 5,
+            "each seeded track must have exactly 5 stage rows (one per admitted key)");
+    }
+
+    [Fact]
+    public async Task SeedAsync_FrontendTracksDoNotContainCsApprovingStageKey()
+    {
+        await using var db = NewDb();
+
+        await NewSeeder().SeedAsync(db);
+
+        var frontendTracks = await db.FeatureTracks
+            .AsNoTracking()
+            .Include(t => t.Stages)
+            .Where(t => t.Kind == 0)
+            .ToListAsync();
+
+        foreach (var track in frontendTracks)
+            track.Stages.Should().NotContain(
+                s => s.StageKey == 2,
+                "CsApproving (ordinal 2) is not a valid Frontend stage key");
+    }
+
+    [Fact]
+    public async Task SeedAsync_BackendTracksDoNotContainSrApprovingStageKey()
+    {
+        await using var db = NewDb();
+
+        await NewSeeder().SeedAsync(db);
+
+        var backendTracks = await db.FeatureTracks
+            .AsNoTracking()
+            .Include(t => t.Stages)
+            .Where(t => t.Kind == 1)
+            .ToListAsync();
+
+        foreach (var track in backendTracks)
+            track.Stages.Should().NotContain(
+                s => s.StageKey == 1,
+                "SrApproving (ordinal 1) is not a valid Backend stage key");
+    }
 }

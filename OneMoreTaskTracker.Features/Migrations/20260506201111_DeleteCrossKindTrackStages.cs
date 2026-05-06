@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -7,15 +7,10 @@ namespace OneMoreTaskTracker.Features.Migrations
     /// <inheritdoc />
     public partial class DeleteCrossKindTrackStages : Migration
     {
-        // Proto ordinals:
-        //   FeatureTrackKind.Frontend = 0, FeatureTrackKind.Backend = 1
-        //   FeatureTrackStageKey.TrackStageSrApproving = 1 (Frontend-only)
-        //   FeatureTrackStageKey.TrackStageCsApproving = 2 (Backend-only)
-
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Delete SrApproving (1) stages on Backend (kind=1) tracks.
+            // Delete SrApproving (ordinal 1) stages on Backend (kind=1) tracks.
             migrationBuilder.Sql(@"
                 DELETE FROM features.""FeatureTrackStages"" fts
                 USING features.""FeatureTracks"" ft
@@ -24,7 +19,7 @@ namespace OneMoreTaskTracker.Features.Migrations
                   AND fts.""StageKey"" = 1;
             ");
 
-            // Delete CsApproving (2) stages on Frontend (kind=0) tracks.
+            // Delete CsApproving (ordinal 2) stages on Frontend (kind=0) tracks.
             migrationBuilder.Sql(@"
                 DELETE FROM features.""FeatureTrackStages"" fts
                 USING features.""FeatureTracks"" ft
@@ -37,8 +32,8 @@ namespace OneMoreTaskTracker.Features.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // No rollback for a data-cleanup migration.
-            // Cross-kind rows are invalid by design; reintroducing them would corrupt state.
+            // Data-cleanup migration: cross-kind rows are invalid by design.
+            // Cannot reconstitute deleted data; rollback is intentionally a no-op.
         }
     }
 }

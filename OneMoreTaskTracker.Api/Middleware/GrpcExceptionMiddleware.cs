@@ -11,7 +11,7 @@ public class GrpcExceptionMiddleware(RequestDelegate next, ILogger<GrpcException
     // pipe delimiter in Status.Detail so the gateway can surface it as the
     // contract-declared `conflict` object. Example detail payloads:
     //   "Updated by someone else|conflict={\"kind\":\"version\",\"currentVersion\":3}"
-    //   "Stage order violation|conflict={\"kind\":\"overlap\",\"with\":\"Development\"}"
+    //   "Stage order violation|conflict={\"kind\":\"overlap\",\"neighbour\":\"Development\"}"
     private const string ConflictMarker = "|conflict=";
 
     public async Task InvokeAsync(HttpContext context)

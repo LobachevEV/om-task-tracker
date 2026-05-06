@@ -20,6 +20,6 @@ internal static class ConflictDetail
         $"Stage order violation{Marker}{JsonSerializer.Serialize(new
         {
             kind = "overlap",
-            with = neighbourStage
+            neighbour = neighbourStage
         })}";
 }

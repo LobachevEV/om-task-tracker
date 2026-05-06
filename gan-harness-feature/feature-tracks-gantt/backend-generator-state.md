@@ -2,7 +2,7 @@
 
 ## Iteration
 
-**Current**: 3
+**Current**: 4
 **Digest Version Consumed**: 1 (no bump)
 
 ---
@@ -21,44 +21,40 @@
 
 | Issue ID | Description | Resolution |
 |----------|-------------|------------|
-| BE-002-01 / CT-002-01 (AUTO-FAIL) | Server-side stage-key kind-validation absent; seeder emitted 6 shared keys per track; orphan rows in existing DBs | Created `FeatureTrackStageScope` single source of truth; added admission rule to `PatchFeatureTrackStageRequestValidator`; fixed `DevFeatureSeeder.SeedTracksAsync` to use per-kind key set; added data-fix migration `20260506150000_DeleteCrossKindTrackStages` |
-| BE-002-03 / CT-002-02 | `GET /api/plan/features/{id}` response missing `tracks` | Created `FeatureTrackDetailResponse` with `TrackOwner: MiniTeamMember?` and per-stage `StageOwner: MiniTeamMember?`; extended `FeatureDetailResponse` with `Tracks`; updated `FeaturesController.Get` to project tracks via `FeatureTrackSummaryResponse.FromDetail` with roster resolution; stale ids resolve to null |
+| CT-003-01 / BE-003-01 (AUTO-FAIL) | Migration `20260506150000_DeleteCrossKindTrackStages` was hand-written without a Designer.cs companion, so EF Core silently skipped it — orphan stage rows persisted; live DB still had 6 stages per track | Deleted the hand-written pair; re-generated via `dotnet ef migrations add DeleteCrossKindTrackStages` (timestamp `20260506201111`) — emits proper Designer.cs with `[DbContext]` + `[Migration]` attributes; migration now discovered and applied |
+| BE-003-02 | `EnsureStageOrder` overlap envelope used field `"with"` instead of contract-specified `"neighbour"` | Fixed `ConflictDetail.StageOrderOverlap()` to emit `neighbour`; added private `StageKeyName(int)` switch in `PatchFeatureTrackStageHandler` to replace the unavailable `ToWireString()` (which lives only in the API project) |
+| BE-003-03 | List endpoint `GET /api/plan/features` emitted null `stageOwner` for all stages (roster not loaded) | Loaded roster once per list call (safe: list is always single-manager-scoped); threaded optional `roster` parameter through `FeatureSummaryResponse.From()` and `FeatureTrackSummaryResponse.From()` |
 
 ### New Files
 
 | File | Purpose |
 |------|---------|
-| `OneMoreTaskTracker.Features/Features/Data/FeatureTrackStageScope.cs` | Per-kind admitted stage key sets (single source of truth for seeder, validator) |
-| `OneMoreTaskTracker.Features/Migrations/20260506150000_DeleteCrossKindTrackStages.cs` | Data-fix migration: delete orphan cross-kind stage rows from `feature_track_stages` |
-| `OneMoreTaskTracker.Api/Controllers/Plan/Feature/Tracks/FeatureTrackDetailResponse.cs` | Response record with TrackOwner and Stages with per-stage StageOwner |
+| `OneMoreTaskTracker.Features/Migrations/20260506201111_DeleteCrossKindTrackStages.cs` | EF-generated migration (replaces hand-written one) — deletes orphan cross-kind stage rows |
+| `OneMoreTaskTracker.Features/Migrations/20260506201111_DeleteCrossKindTrackStages.Designer.cs` | EF-generated designer companion with `[DbContext]` + `[Migration]` attributes |
+| `tests/OneMoreTaskTracker.Features.Tests/Features/Data/FeatureTrackStageScopeTests.cs` | 7 unit tests covering `AdmittedKeys()` and `IsAdmittedFor()` for Frontend and Backend kinds |
 
 ### Modified Files
 
 | File | Change |
 |------|--------|
-| `OneMoreTaskTracker.Features/Features/Data/DevFeatureSeeder.cs` | `SeedTracksAsync` uses `FeatureTrackStageScope.AdmittedKeys(kind)` per track (5 keys each, not 6 shared) |
-| `OneMoreTaskTracker.Features/Features/Update/PatchFeatureTrackStageRequestValidator.cs` | Added admission rule rejecting cross-kind stage keys with `InvalidArgument` |
-| `OneMoreTaskTracker.Api/Controllers/Plan/Feature/Tracks/FeatureTrackStageResponse.cs` | Added `StageOwner: MiniTeamMemberResponse?` field (5th parameter) |
-| `OneMoreTaskTracker.Api/Controllers/Plan/Feature/Tracks/FeatureTrackSummaryResponse.cs` | Added `FromDetail(track, roster)` factory; `StageFrom` now accepts optional roster for owner resolution |
-| `OneMoreTaskTracker.Api/Controllers/Plan/Feature/FeatureDetailResponse.cs` | Added `IReadOnlyList<FeatureTrackDetailResponse> Tracks` as 6th parameter |
-| `OneMoreTaskTracker.Api/Controllers/Plan/Feature/FeaturesController.cs` | `Get()` projects tracks via `FromDetail`, includes them in response |
-| `tests/.../Controllers/PatchFeatureTrackStageControllerTests.cs` | Added cross-kind rejection tests (Backend+SrApproving → 400, Frontend+CsApproving → 400) |
-| `tests/.../Controllers/PlanControllerStagePlansTests.cs` | Added `GetFeature_IncludesTracksWithResolvedTrackOwner` and `GetFeature_WhenTrackOwnerIdIsStale_TrackOwnerIsNull` |
-| `tests/.../Features/Update/PatchFeatureTrackStageHandlerTests.cs` | Added cross-kind handler tests; fixed existing overlap test to use `Development` instead of `CsApproving` |
+| `OneMoreTaskTracker.Features/Features/Update/ConflictDetail.cs` | `StageOrderOverlap()` emits `neighbour` field instead of `with` |
+| `OneMoreTaskTracker.Features/Features/Update/PatchFeatureTrackStageHandler.cs` | Added private `StageKeyName(int)` switch; `EnsureStageOrder` uses it for the conflict envelope |
+| `OneMoreTaskTracker.Api/Controllers/Plan/Feature/FeatureSummaryResponse.cs` | `From()` accepts optional `IReadOnlyDictionary<int, TeamRosterMember>? roster` parameter; passes it through to track mapping |
+| `OneMoreTaskTracker.Api/Controllers/Plan/Feature/Tracks/FeatureTrackSummaryResponse.cs` | `From()` accepts optional roster; `StageFrom` resolves `stageOwner` when roster is provided |
+| `OneMoreTaskTracker.Api/Controllers/Plan/Feature/FeaturesController.cs` | `List()` loads roster once and passes to `FeatureSummaryResponse.From()`; `Get()` passes roster to summary build |
+| `tests/OneMoreTaskTracker.Features.Tests/DevFeatureSeederTests.cs` | Added 3 tests: EachSeededTrackHasExactlyFiveStages, FrontendTracksDoNotContainCsApproving, BackendTracksDoNotContainSrApproving |
+| `tests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs` | Updated overlap test assertion from `"with"` to `"neighbour"` |
+| `tests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureTrackStageHandlerTests.cs` | Updated overlap test assertion from `"with"` to `"neighbour"` |
 
 ---
 
 ## Test Results
 
-All 547 tests pass across 5 test projects (0 failures, 0 skipped).
+All 158 tests pass in Features.Tests (0 failures, 0 skipped).
 
 | Project | Passed |
 |---------|--------|
-| Features.Tests | 143 |
-| Api.Tests | 228 |
-| Users.Tests | 45 |
-| Tasks.Tests | 68 |
-| GitLab.Proxy.Tests | 63 |
+| Features.Tests | 158 |
 
 ---
 
@@ -66,7 +62,7 @@ All 547 tests pass across 5 test projects (0 failures, 0 skipped).
 
 **Path**: `OneMoreTaskTracker.Api/openapi.json`
 **Version**: v1 (frozen; no changes this iteration)
-**Regenerated**: no — endpoint shapes unchanged; `tracks` array was always in contract, now populated
+**Regenerated**: no — endpoint shapes unchanged
 
 ---
 

@@ -50,11 +50,12 @@ public class FeaturesController(
             },
             cancellationToken: ct);
 
-        // tasksByFeature stays empty: TaskDto has no feature_id, so per-feature
-        // task counts can't be computed from ListTasks. Calling Tasks/Users
-        // here would only add an unused dependency.
+        // Load roster once for the caller — used to resolve track/stage owners.
+        // All features in the list share the same manager (userId = caller).
+        var roster = await userService.LoadRosterForManagerAsync(userId, logger, ct);
+
         var summaries = listResponse.Features
-            .Select(f => FeatureSummaryResponse.From(f, PlanRequestHelpers.EmptyTasks))
+            .Select(f => FeatureSummaryResponse.From(f, PlanRequestHelpers.EmptyTasks, roster))
             .ToList();
 
         return Ok(summaries);
@@ -89,7 +90,7 @@ public class FeaturesController(
             .Select(t => FeatureTrackSummaryResponse.FromDetail(t, roster))
             .ToList();
 
-        var summary = FeatureSummaryResponse.From(feature, PlanRequestHelpers.EmptyTasks);
+        var summary = FeatureSummaryResponse.From(feature, PlanRequestHelpers.EmptyTasks, roster);
 
         return Ok(new FeatureDetailResponse(summary, [], lead, miniTeam, detailStagePlans, tracks));
     }
