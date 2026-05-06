@@ -57,12 +57,12 @@ export function GanttFeatureTrackBand({
   const trackOwner = resolveOwner(track.trackOwnerUserId);
   const trackLabel =
     kind === 'Frontend'
-      ? t('track.labelFrontend', { defaultValue: 'Front' })
-      : t('track.labelBackend', { defaultValue: 'Back' });
+      ? t('tracks.labelFrontend', { defaultValue: 'Front' })
+      : t('tracks.labelBackend', { defaultValue: 'Back' });
 
   const toggleLabel = expanded
-    ? t('track.collapseAria', { defaultValue: 'Collapse {{kind}} track', kind: trackLabel })
-    : t('track.expandAria', { defaultValue: 'Expand {{kind}} track', kind: trackLabel });
+    ? t('tracks.collapseAria', { defaultValue: 'Collapse {{kind}} track', kind: trackLabel })
+    : t('tracks.expandAria', { defaultValue: 'Expand {{kind}} track', kind: trackLabel });
 
   return (
     <div

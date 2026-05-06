@@ -172,13 +172,15 @@
       "endError": "{{stage}} planned end change was rejected."
     }
   },
-  "track": {
+  "tracks": {
     "labelFrontend": "Front",
     "labelBackend": "Back",
     "expandAria": "Expand {{kind}} track",
-    "collapseAria": "Collapse {{kind}} track"
-  },
-  "tracks": {
+    "collapseAria": "Collapse {{kind}} track",
+    "row": {
+      "inheritedOwnerSuffix": "· via track",
+      "ariaInheritedOwner": "Owner inherited from track: {{name}}"
+    },
     "stage": {
       "sr_approving": "SR approving",
       "development": "Development",

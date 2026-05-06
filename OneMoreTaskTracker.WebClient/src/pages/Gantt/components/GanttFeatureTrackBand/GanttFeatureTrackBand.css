@@ -5,7 +5,7 @@
 
 .gantt-track-band__header {
   display: grid;
-  grid-template-columns: var(--gantt-gutter-width, 360px) 1fr;
+  grid-template-columns: var(--gantt-gutter-width, 280px) 1fr;
   min-height: 24px;
   align-items: center;
 }
@@ -16,6 +16,13 @@
   gap: var(--space-2);
   padding-inline: var(--space-2) var(--space-3);
   min-height: 24px;
+  position: sticky;
+  inset-inline-start: 0;
+  background: var(--surface);
+  border-inline-end: 1px solid var(--border);
+  z-index: 2;
+  max-inline-size: var(--gantt-gutter-width, 280px);
+  overflow: hidden;
 }
 
 .gantt-track-band__toggle {

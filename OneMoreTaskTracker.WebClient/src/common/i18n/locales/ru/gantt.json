@@ -177,13 +177,15 @@
       "endError": "Изменение планового окончания {{stage}} отклонено."
     }
   },
-  "track": {
+  "tracks": {
     "labelFrontend": "Фронт",
     "labelBackend": "Бэк",
     "expandAria": "Развернуть трек {{kind}}",
-    "collapseAria": "Свернуть трек {{kind}}"
-  },
-  "tracks": {
+    "collapseAria": "Свернуть трек {{kind}}",
+    "row": {
+      "inheritedOwnerSuffix": "· по треку",
+      "ariaInheritedOwner": "Ответственный унаследован от трека: {{name}}"
+    },
     "stage": {
       "sr_approving": "SR согласование",
       "development": "Разработка",

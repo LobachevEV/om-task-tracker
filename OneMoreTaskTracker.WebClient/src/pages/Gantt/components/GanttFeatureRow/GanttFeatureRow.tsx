@@ -291,43 +291,41 @@ function GanttFeatureRowInner({
         </div>
       </div>
 
-      {expanded ? (
-        <>
-          {feature.tracks && feature.tracks.length > 0 && loadedRange != null
-            ? feature.tracks.map((track) => (
-                <GanttFeatureTrackBand
-                  key={`${track.featureId}-${track.kind}`}
-                  track={track}
-                  kind={track.kind}
-                  featureTitle={feature.title}
-                  today={today}
-                  loadedRange={loadedRange}
-                  dayPx={dayPx}
-                  resolveOwner={resolvePerformer}
-                  canEdit={inlineEnabled}
-                  mutations={trackMutations}
-                  roster={roster}
-                  onAnnounce={handleAnnounce}
-                />
-              ))
-            : stageBars.map((seg, index) => (
-                <GanttStageSubRow
-                  key={seg.stage}
-                  feature={feature}
-                  seg={seg}
-                  today={today}
-                  resolvePerformer={resolvePerformer}
-                  removedPerformerName={null}
-                  index={index}
-                  onOpenStage={handleOpenStage}
-                  canEdit={inlineEnabled}
-                  mutations={mutations}
-                  roster={roster}
-                  onAnnounce={handleAnnounce}
-                />
-              ))}
-        </>
-      ) : null}
+      {feature.tracks && feature.tracks.length > 0 && loadedRange != null
+        ? feature.tracks.map((track) => (
+            <GanttFeatureTrackBand
+              key={`${track.featureId}-${track.kind}`}
+              track={track}
+              kind={track.kind}
+              featureTitle={feature.title}
+              today={today}
+              loadedRange={loadedRange}
+              dayPx={dayPx}
+              resolveOwner={resolvePerformer}
+              canEdit={inlineEnabled}
+              mutations={trackMutations}
+              roster={roster}
+              onAnnounce={handleAnnounce}
+            />
+          ))
+        : expanded
+          ? stageBars.map((seg, index) => (
+              <GanttStageSubRow
+                key={seg.stage}
+                feature={feature}
+                seg={seg}
+                today={today}
+                resolvePerformer={resolvePerformer}
+                removedPerformerName={null}
+                index={index}
+                onOpenStage={handleOpenStage}
+                canEdit={inlineEnabled}
+                mutations={mutations}
+                roster={roster}
+                onAnnounce={handleAnnounce}
+              />
+            ))
+          : null}
       {inlineEnabled ? <InlineLiveRegion message={announcement} /> : null}
     </>
   );

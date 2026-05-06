@@ -196,4 +196,5 @@ export const featureDetailSchema = z.object({
   miniTeam: z.array(miniTeamMemberSchema),
   /** Always length 5 — see api-contract.md. */
   stagePlans: z.array(detailStagePlanSchema).length(5),
+  tracks: z.array(featureTrackSchema).optional(),
 });

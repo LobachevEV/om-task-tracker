@@ -40,3 +40,15 @@ export interface FeatureTrack {
   stages: FeatureTrackStage[];
   trackOwner?: MiniTeamMember | null;
 }
+
+export interface PatchFeatureTrackPayload {
+  trackOwnerUserId?: number;
+  expectedVersion?: number;
+}
+
+export interface PatchFeatureTrackStagePayload {
+  stageOwnerUserId?: number | null;
+  plannedStart?: string | null;
+  plannedEnd?: string | null;
+  expectedStageVersion?: number;
+}

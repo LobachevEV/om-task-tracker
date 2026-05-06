@@ -82,6 +82,7 @@ export function GanttTrackStageRow({
   const owner = resolveOwner(stage.stageOwnerUserId);
   const hasOwnerId = stage.stageOwnerUserId != null;
   const isStale = hasOwnerId && owner == null;
+  const inheritedOwner = !hasOwnerId ? resolveOwner(track.trackOwnerUserId) : undefined;
 
   const bars = computeTrackStageBars(loadedRange, track, today, dayPx);
   const barEntry = bars[index] ?? null;
@@ -161,6 +162,26 @@ export function GanttTrackStageRow({
         onAnnounce={onAnnounce}
         buildAnnouncement={announceOwner}
       />
+    );
+  } else if (!hasOwnerId && inheritedOwner != null) {
+    ownerNode = (
+      <span
+        className="gantt-track-stage-row__inherited"
+        aria-label={t('tracks.row.ariaInheritedOwner', {
+          defaultValue: 'Owner inherited from track: {{name}}',
+          name: inheritedOwner.displayName,
+        })}
+      >
+        <Avatar name={inheritedOwner.displayName} size="sm" tone={avatarTone(inheritedOwner.role)} />
+        <span className="gantt-track-stage-row__owner-text gantt-track-stage-row__owner-text--inherited">
+          {inheritedOwner.displayName}
+          {' '}
+          <span className="gantt-track-stage-row__inherit-suffix" aria-hidden="true">
+            {t('tracks.row.inheritedOwnerSuffix', { defaultValue: '· via track' })}
+          </span>
+        </span>
+        <span className="gantt-track-stage-row__inherit-glyph" aria-hidden="true">↘</span>
+      </span>
     );
   } else if (!hasOwnerId) {
     ownerNode = (

@@ -143,7 +143,7 @@ describe('GanttTrackStageRow — read-only', () => {
     expect(screen.getByText(fe.displayName)).toBeInTheDocument();
   });
 
-  it('renders unassigned text when stage has no owner', () => {
+  it('renders unassigned text when stage has no owner and track owner is also unresolvable', () => {
     const stage: FeatureTrackStage = {
       stageKey: 'Development',
       plannedStart: null,
@@ -168,6 +168,35 @@ describe('GanttTrackStageRow — read-only', () => {
     );
 
     expect(screen.getByText(/unassigned/i)).toBeInTheDocument();
+  });
+
+  it('renders inherited affordance (↘ glyph and · via track suffix) when stage owner is null but track owner resolves', () => {
+    const stage: FeatureTrackStage = {
+      stageKey: 'Development',
+      plannedStart: null,
+      plannedEnd: null,
+      stageOwnerUserId: null,
+      stageVersion: 0,
+    };
+    const track = makeTrack([stage]);
+
+    render(
+      <GanttTrackStageRow
+        track={track}
+        stage={stage}
+        kind="Frontend"
+        featureTitle="Export to PDF"
+        today={FIXTURE_TODAY}
+        loadedRange={LOADED_RANGE}
+        dayPx={DAY_PX}
+        index={0}
+        resolveOwner={resolverFor([fe])}
+      />,
+    );
+
+    expect(screen.getByText('↘')).toBeInTheDocument();
+    expect(screen.getByText('· via track')).toBeInTheDocument();
+    expect(screen.getByText(fe.displayName)).toBeInTheDocument();
   });
 
   it('renders stale owner indicator when owner id is set but cannot be resolved', () => {

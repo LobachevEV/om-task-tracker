@@ -84,6 +84,7 @@ export interface FeatureDetail {
    * order. Duplicates the shape of `feature.stagePlans` but with `performer` populated.
    */
   stagePlans: FeatureStagePlan[];
+  tracks?: FeatureTrack[];
 }
 
 export interface CreateFeaturePayload {

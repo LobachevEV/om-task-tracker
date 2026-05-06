@@ -18,6 +18,8 @@ import type {
   FeatureTrack,
   FeatureTrackKind,
   FeatureTrackStageKey,
+  PatchFeatureTrackPayload,
+  PatchFeatureTrackStagePayload,
 } from '../types/featureTrack';
 
 function jsonHeaders(ifMatch?: number): Record<string, string> {
@@ -131,18 +133,6 @@ export async function patchFeatureStage(
   );
   const data = await handleResponse<unknown>(response);
   return featureSummarySchema.parse(data);
-}
-
-export interface PatchFeatureTrackPayload {
-  trackOwnerUserId?: number;
-  expectedVersion?: number;
-}
-
-export interface PatchFeatureTrackStagePayload {
-  stageOwnerUserId?: number | null;
-  plannedStart?: string | null;
-  plannedEnd?: string | null;
-  expectedStageVersion?: number;
 }
 
 export async function patchFeatureTrack(
