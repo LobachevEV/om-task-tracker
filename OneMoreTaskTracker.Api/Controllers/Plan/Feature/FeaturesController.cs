@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OneMoreTaskTracker.Api.Auth;
 using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
+using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Tracks;
 using OneMoreTaskTracker.Proto.Features;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
@@ -84,9 +85,13 @@ public class FeaturesController(
             .Select(uid => MiniTeamMemberResponse.From(uid, roster))
             .ToList();
 
+        var tracks = feature.Tracks
+            .Select(t => FeatureTrackSummaryResponse.FromDetail(t, roster))
+            .ToList();
+
         var summary = FeatureSummaryResponse.From(feature, PlanRequestHelpers.EmptyTasks);
 
-        return Ok(new FeatureDetailResponse(summary, [], lead, miniTeam, detailStagePlans));
+        return Ok(new FeatureDetailResponse(summary, [], lead, miniTeam, detailStagePlans, tracks));
     }
 
     [HttpPost]

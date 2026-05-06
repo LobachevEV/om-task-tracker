@@ -371,4 +371,38 @@ public sealed class PatchFeatureTrackStageControllerTests(TasksControllerWebAppl
 
         response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
     }
+
+    [Fact]
+    public async Task PatchTrackStage_BackendTrackWithSrApproving_Returns400()
+    {
+        var client = ClientWithToken(ManagerToken());
+        _factory.MockFeatureTrackStagePatcher
+            .PatchAsync(Arg.Any<PatchFeatureTrackStageRequest>(),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(_ => throw new RpcException(
+                new Status(StatusCode.InvalidArgument, "stage_key SrApproving is not valid for kind Backend")));
+
+        var response = await client.PatchAsync(
+            "/api/plan/features/1/tracks/Backend/stages/SrApproving",
+            JsonBody(new { }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task PatchTrackStage_FrontendTrackWithCsApproving_Returns400()
+    {
+        var client = ClientWithToken(ManagerToken());
+        _factory.MockFeatureTrackStagePatcher
+            .PatchAsync(Arg.Any<PatchFeatureTrackStageRequest>(),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(_ => throw new RpcException(
+                new Status(StatusCode.InvalidArgument, "stage_key CsApproving is not valid for kind Frontend")));
+
+        var response = await client.PatchAsync(
+            "/api/plan/features/1/tracks/Frontend/stages/CsApproving",
+            JsonBody(new { }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
 }

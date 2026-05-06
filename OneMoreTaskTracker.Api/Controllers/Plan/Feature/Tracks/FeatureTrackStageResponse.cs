@@ -5,4 +5,5 @@ public record FeatureTrackStageResponse(
     string? PlannedStart,
     string? PlannedEnd,
     int? StageOwnerUserId,
+    MiniTeamMemberResponse? StageOwner,
     int StageVersion);

@@ -145,16 +145,6 @@ public sealed class DevFeatureSeeder(IRequestClock clock)
         // Only the first two features get seeded tracks (indices 0 and 1).
         // features[2] and [3] are intentionally left without tracks to exercise
         // the "no tracks" code path in the list and detail responses.
-        var allStageKeys = new[]
-        {
-            FeatureTrackStageKey.TrackStageSrApproving,
-            FeatureTrackStageKey.TrackStageCsApproving,
-            FeatureTrackStageKey.TrackStageDevelopment,
-            FeatureTrackStageKey.TrackStageStandTesting,
-            FeatureTrackStageKey.TrackStageEthalonTesting,
-            FeatureTrackStageKey.TrackStageReleaseToLive,
-        };
-
         var seededFeatures = await dbContext.Features
             .Where(f => f.ManagerUserId == SeededManagerUserId)
             .OrderBy(f => f.Id)
@@ -177,27 +167,24 @@ public sealed class DevFeatureSeeder(IRequestClock clock)
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        var now2 = clock.GetUtcNow();
-        foreach (var stageKey in allStageKeys)
+        foreach (var stageKey in FeatureTrackStageScope.AdmittedKeys(FeatureTrackKind.Frontend))
         {
-            var frontendStage = FeatureTrackStage.Create(frontendTrack.Id, (int)stageKey, now2);
-            dbContext.FeatureTrackStages.Add(frontendStage);
-            var backendStage = FeatureTrackStage.Create(backendTrack.Id, (int)stageKey, now2);
-            dbContext.FeatureTrackStages.Add(backendStage);
+            dbContext.FeatureTrackStages.Add(FeatureTrackStage.Create(frontendTrack.Id, (int)stageKey, now));
+        }
+
+        foreach (var stageKey in FeatureTrackStageScope.AdmittedKeys(FeatureTrackKind.Backend))
+        {
+            dbContext.FeatureTrackStages.Add(FeatureTrackStage.Create(backendTrack.Id, (int)stageKey, now));
         }
 
         // features[1]: BACKEND (owner=Dave)
         var searchFeature = seededFeatures[1];
-        var searchBackendTrack = FeatureTrack.Create(searchFeature.Id, (int)FeatureTrackKind.Backend, DaveBackendUserId, now2);
+        var searchBackendTrack = FeatureTrack.Create(searchFeature.Id, (int)FeatureTrackKind.Backend, DaveBackendUserId, now);
         dbContext.FeatureTracks.Add(searchBackendTrack);
 
-        await dbContext.SaveChangesAsync(cancellationToken);
-
-        var now3 = clock.GetUtcNow();
-        foreach (var stageKey in allStageKeys)
+        foreach (var stageKey in FeatureTrackStageScope.AdmittedKeys(FeatureTrackKind.Backend))
         {
-            var stage = FeatureTrackStage.Create(searchBackendTrack.Id, (int)stageKey, now3);
-            dbContext.FeatureTrackStages.Add(stage);
+            dbContext.FeatureTrackStages.Add(FeatureTrackStage.Create(searchBackendTrack.Id, (int)stageKey, now));
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);

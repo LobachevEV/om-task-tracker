@@ -273,6 +273,7 @@ public sealed class PatchFeatureTrackStageHandlerTests
         var db = NewDb();
         var feature = await CreateFeatureAsync(db);
 
+        // Both stages belong to Frontend: SrApproving then Development
         await Handler(db).Patch(
             new PatchFeatureTrackStageRequest
             {
@@ -289,7 +290,7 @@ public sealed class PatchFeatureTrackStageHandlerTests
             {
                 FeatureId = feature.Id,
                 Kind = FeatureTrackKind.Frontend,
-                StageKey = FeatureTrackStageKey.TrackStageCsApproving,
+                StageKey = FeatureTrackStageKey.TrackStageDevelopment,
                 CallerUserId = 1,
                 PlannedStart = "2026-05-10",
             },
@@ -299,6 +300,44 @@ public sealed class PatchFeatureTrackStageHandlerTests
         ex.Which.StatusCode.Should().Be(StatusCode.FailedPrecondition);
         ex.Which.Status.Detail.Should().StartWith("Stage order violation|conflict=");
         ex.Which.Status.Detail.Should().Contain("\"kind\":\"overlap\"");
+    }
+
+    [Fact]
+    public async Task Patch_BackendTrackWithSrApprovingStageKey_ThrowsInvalidArgument()
+    {
+        var validator = new PatchFeatureTrackStageRequestValidator();
+        var request = new PatchFeatureTrackStageRequest
+        {
+            FeatureId = 1,
+            Kind = FeatureTrackKind.Backend,
+            StageKey = FeatureTrackStageKey.TrackStageSrApproving,
+            CallerUserId = 1,
+        };
+
+        var act = () => ValidationPipeline.ValidateAsync(validator, request);
+
+        var ex = await act.Should().ThrowAsync<RpcException>();
+        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
+        ex.Which.Status.Detail.Should().Contain("SrApproving");
+    }
+
+    [Fact]
+    public async Task Patch_FrontendTrackWithCsApprovingStageKey_ThrowsInvalidArgument()
+    {
+        var validator = new PatchFeatureTrackStageRequestValidator();
+        var request = new PatchFeatureTrackStageRequest
+        {
+            FeatureId = 1,
+            Kind = FeatureTrackKind.Frontend,
+            StageKey = FeatureTrackStageKey.TrackStageCsApproving,
+            CallerUserId = 1,
+        };
+
+        var act = () => ValidationPipeline.ValidateAsync(validator, request);
+
+        var ex = await act.Should().ThrowAsync<RpcException>();
+        ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
+        ex.Which.Status.Detail.Should().Contain("CsApproving");
     }
 
     [Fact]

@@ -1,4 +1,5 @@
 using FluentValidation;
+using OneMoreTaskTracker.Features.Features.Data;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureTrackStageCommand;
 
 namespace OneMoreTaskTracker.Features.Features.Update;
@@ -17,6 +18,10 @@ public sealed class PatchFeatureTrackStageRequestValidator : AbstractValidator<P
         RuleFor(r => r.CallerUserId)
             .GreaterThan(0)
             .WithMessage("caller_user_id is required");
+
+        RuleFor(r => r.StageKey)
+            .Must((r, stageKey) => FeatureTrackStageScope.IsAdmittedFor(r.Kind, stageKey))
+            .WithMessage(r => $"stage_key {r.StageKey} is not valid for kind {r.Kind}");
 
         When(r => r.HasPlannedStart && !string.IsNullOrWhiteSpace(r.PlannedStart), () =>
         {
