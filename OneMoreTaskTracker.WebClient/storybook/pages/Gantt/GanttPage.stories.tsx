@@ -58,6 +58,7 @@ function PageHarness({
       onRosterRetry={() => {}}
       loading={loading}
       error={error}
+      failCount={0}
       onRetry={() => {}}
       state={state}
       onFeatureUpdated={() => {}}

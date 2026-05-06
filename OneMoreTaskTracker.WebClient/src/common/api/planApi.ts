@@ -1,7 +1,6 @@
 import { API_BASE_URL, authHeaders, handleResponse } from './httpClient';
 import {
   featureDetailSchema,
-  featureSummaryListSchema,
   featureSummarySchema,
   featureTrackSchema,
 } from './schemas';
@@ -58,7 +57,19 @@ export async function listFeatures(
     { headers: authHeaders(), signal: params.signal },
   );
   const data = await handleResponse<unknown>(response);
-  return featureSummaryListSchema.parse(data);
+  if (!Array.isArray(data)) {
+    throw new Error('Expected array from /api/plan/features');
+  }
+  const features: FeatureSummary[] = [];
+  for (const item of data) {
+    const result = featureSummarySchema.safeParse(item);
+    if (result.success) {
+      features.push(result.data);
+    } else {
+      console.warn('[planApi] Skipping malformed feature row', result.error.issues);
+    }
+  }
+  return features;
 }
 
 export async function getFeature(id: number): Promise<FeatureDetail> {

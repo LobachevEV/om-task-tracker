@@ -90,12 +90,38 @@ describe('listFeatures', () => {
     );
   });
 
-  it('rejects when schema validation fails (missing taskIds)', async () => {
+  it('skips a malformed row and returns the remaining valid rows', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const bad = { ...sampleSummary } as Record<string, unknown>;
+    delete bad.taskIds;
+    mockFetch.mockResolvedValueOnce(makeResponse(200, [bad, sampleSummary]));
+
+    const result = await listFeatures({});
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ id: sampleSummary.id });
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('[planApi]'),
+      expect.anything(),
+    );
+    warnSpy.mockRestore();
+  });
+
+  it('returns empty array when all rows are malformed', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
     const bad = { ...sampleSummary } as Record<string, unknown>;
     delete bad.taskIds;
     mockFetch.mockResolvedValueOnce(makeResponse(200, [bad]));
 
-    await expect(listFeatures({})).rejects.toThrow();
+    const result = await listFeatures({});
+
+    expect(result).toHaveLength(0);
+  });
+
+  it('throws when the response body is not an array', async () => {
+    mockFetch.mockResolvedValueOnce(makeResponse(200, { notAnArray: true }));
+
+    await expect(listFeatures({})).rejects.toThrow('Expected array');
   });
 });
 

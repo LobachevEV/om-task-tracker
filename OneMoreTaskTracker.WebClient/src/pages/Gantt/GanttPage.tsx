@@ -2,6 +2,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type CSSProperties,
 } from 'react';
@@ -90,6 +91,8 @@ export interface GanttPageInternalProps {
   onRosterRetry: () => void;
   loading: boolean;
   error: Error | null;
+  /** Number of consecutive load failures so far (0 = first error). */
+  failCount: number;
   onRetry: () => void;
   state: GanttPageState;
   /**
@@ -145,6 +148,7 @@ export function GanttPageInternal({
   onRosterRetry,
   loading,
   error,
+  failCount,
   onRetry,
   state,
   onFeatureUpdated,
@@ -314,12 +318,18 @@ export function GanttPageInternal({
           <Callout
             tone="danger"
             action={
-              <Button type="button" variant="primary" onClick={onRetry}>
-                {t('retry')}
-              </Button>
+              failCount < 2 ? (
+                <Button type="button" variant="primary" onClick={onRetry}>
+                  {t('retry')}
+                </Button>
+              ) : (
+                <Button type="button" variant="secondary" onClick={() => window.location.reload()}>
+                  {t('reloadPage', { defaultValue: 'Обновить страницу' })}
+                </Button>
+              )
             }
           >
-            {t('failed')}
+            {failCount < 2 ? t('failed') : t('failedPersistent', { defaultValue: 'Не удалось загрузить план. Попробуйте обновить страницу.' })}
           </Callout>
         </div>
       ) : !hasAnyFeatures ? (
@@ -429,6 +439,16 @@ export function GanttPage() {
     state: state.stateFilter === 'all' ? undefined : state.stateFilter,
   });
   const roster = useTeamRoster();
+  const failCountRef = useRef(0);
+  const prevErrorRef = useRef<Error | null>(null);
+
+  if (features.error !== null && features.error !== prevErrorRef.current) {
+    prevErrorRef.current = features.error;
+    failCountRef.current += 1;
+  } else if (features.error === null && prevErrorRef.current !== null) {
+    prevErrorRef.current = null;
+    failCountRef.current = 0;
+  }
 
   const rosterMembers = useMemo<MiniTeamMember[]>(
     () => (roster.data ?? []).map(toMiniMember),
@@ -461,6 +481,7 @@ export function GanttPage() {
       onRosterRetry={roster.refetch}
       loading={features.loading}
       error={features.error}
+      failCount={failCountRef.current}
       onRetry={features.refetch}
       state={state}
       onFeatureUpdated={features.applyFeatureUpdate}

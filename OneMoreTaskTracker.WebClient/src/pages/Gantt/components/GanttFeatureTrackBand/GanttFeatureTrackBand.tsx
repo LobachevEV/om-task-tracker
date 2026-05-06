@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MiniTeamMember } from '../../../../common/types/feature';
 import type { FeatureTrack, FeatureTrackKind } from '../../../../common/types/featureTrack';
@@ -55,6 +55,11 @@ export function GanttFeatureTrackBand({
   const { t } = useTranslation('gantt');
   const [expanded, setExpanded] = useState(true);
 
+  const stagesForKind = useMemo(
+    () => selectStagesForKind(track.stages, kind),
+    [track.stages, kind],
+  );
+
   const trackOwner = resolveOwner(track.trackOwnerUserId);
   const trackLabel =
     kind === 'Frontend'
@@ -109,7 +114,7 @@ export function GanttFeatureTrackBand({
 
       {expanded && (
         <div className="gantt-track-band__stages">
-          {selectStagesForKind(track.stages, kind).map((stage, index) => (
+          {stagesForKind.map((stage, index) => (
             <GanttTrackStageRow
               key={stage.stageKey}
               track={track}

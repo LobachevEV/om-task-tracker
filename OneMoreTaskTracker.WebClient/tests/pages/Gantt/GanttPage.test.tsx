@@ -25,6 +25,7 @@ interface HarnessProps {
   features?: typeof ALL_FEATURES;
   loading?: boolean;
   error?: Error | null;
+  failCount?: number;
   onRetry?: () => void;
   rosterError?: Error | null;
   rosterLoading?: boolean;
@@ -36,6 +37,7 @@ function Harness({
   features = ALL_FEATURES,
   loading = false,
   error = null,
+  failCount = 0,
   onRetry = () => {},
   rosterError = null,
   rosterLoading = false,
@@ -53,6 +55,7 @@ function Harness({
       onRosterRetry={onRosterRetry}
       loading={loading}
       error={error}
+      failCount={failCount}
       onRetry={onRetry}
       state={state}
       onFeatureUpdated={() => {}}
@@ -157,6 +160,22 @@ describe('GanttPageInternal', () => {
     const retry = within(alert).getByRole('button');
     fireEvent.click(retry);
     expect(onRetry).toHaveBeenCalled();
+  });
+
+  it('shows a reload-page button instead of retry after two consecutive failures', () => {
+    const onRetry = vi.fn();
+    const reloadMock = vi.fn();
+    // jsdom's window.location is non-configurable; replace the whole location object.
+    const originalLocation = window.location;
+    vi.stubGlobal('location', { ...window.location, reload: reloadMock });
+    renderHarness({ role: 'Manager', error: new Error('boom'), features: [], onRetry, failCount: 2 });
+    const alert = screen.getByRole('alert');
+    const reloadBtn = within(alert).getByRole('button');
+    expect(reloadBtn.textContent).not.toBe('Retry');
+    fireEvent.click(reloadBtn);
+    expect(reloadMock).toHaveBeenCalled();
+    expect(onRetry).not.toHaveBeenCalled();
+    vi.stubGlobal('location', originalLocation);
   });
 
   it('roster warning banner includes a retry button that calls onRosterRetry', () => {
