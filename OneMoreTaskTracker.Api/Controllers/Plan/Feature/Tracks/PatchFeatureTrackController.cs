@@ -29,14 +29,15 @@ public class PatchFeatureTrackController(
             return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
 
         var callerUserId = User.GetUserId();
+        var (ownerHasValue, ownerProtoValue) = PlanRequestHelpers.DecodeOwnerField(body.TrackOwnerUserId);
 
-        if (body.TrackOwnerUserId is { } ownerId)
+        if (ownerHasValue && ownerProtoValue == 0)
+            return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
+
+        if (ownerHasValue && ownerProtoValue > 0)
         {
-            if (ownerId < 1)
-                return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
-
             var roster = await userService.LoadRosterForManagerAsync(callerUserId, logger, ct);
-            if (!roster.ContainsKey(ownerId))
+            if (!roster.ContainsKey(ownerProtoValue))
                 return BadRequest(new { error = "Pick a teammate from the list" });
         }
 
@@ -50,8 +51,8 @@ public class PatchFeatureTrackController(
             CallerUserId = callerUserId,
         };
 
-        if (body.TrackOwnerUserId is { } owner)
-            request.TrackOwnerUserId = owner;
+        if (ownerHasValue)
+            request.TrackOwnerUserId = ownerProtoValue;
 
         if (expectedVersion.HasValue)
             request.ExpectedVersion = expectedVersion.Value;

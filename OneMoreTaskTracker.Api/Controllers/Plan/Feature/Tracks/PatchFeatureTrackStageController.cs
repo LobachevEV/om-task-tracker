@@ -41,11 +41,15 @@ public class PatchFeatureTrackStageController(
             return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
 
         var callerUserId = User.GetUserId();
+        var (ownerHasValue, ownerProtoValue) = PlanRequestHelpers.DecodeOwnerField(body.StageOwnerUserId);
 
-        if (body.StageOwnerUserId is { } ownerId and > 0)
+        if (ownerHasValue && ownerProtoValue == 0)
+            return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
+
+        if (ownerHasValue && ownerProtoValue > 0)
         {
             var roster = await userService.LoadRosterForManagerAsync(callerUserId, logger, ct);
-            if (!roster.ContainsKey(ownerId))
+            if (!roster.ContainsKey(ownerProtoValue))
                 return BadRequest(new { error = "Pick a teammate from the list" });
         }
 
@@ -60,8 +64,8 @@ public class PatchFeatureTrackStageController(
             CallerUserId = callerUserId,
         };
 
-        if (body.StageOwnerUserId is { } owner)
-            request.StageOwnerUserId = owner;
+        if (ownerHasValue)
+            request.StageOwnerUserId = ownerProtoValue;
 
         if (expectedVersion.HasValue)
             request.ExpectedStageVersion = expectedVersion.Value;

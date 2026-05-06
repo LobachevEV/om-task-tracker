@@ -1,5 +1,7 @@
+using System.Text.Json;
+
 namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.Tracks;
 
 public record PatchFeatureTrackPayload(
-    int? TrackOwnerUserId,
+    JsonElement? TrackOwnerUserId,
     int? ExpectedVersion);

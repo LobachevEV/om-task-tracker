@@ -293,7 +293,7 @@ public sealed class AuthControllerIntegrationTests(ApiWebApplicationFactory fact
 
         await PostAsJsonAsync(_client, "/api/auth/login", payload);
 
-        factory.MockUserService.Received(1).AuthenticateAsync(
+        _ = factory.MockUserService.Received(1).AuthenticateAsync(
             Arg.Any<AuthenticateRequest>(),
             Arg.Any<Metadata>(),
             Arg.Any<DateTime?>(),

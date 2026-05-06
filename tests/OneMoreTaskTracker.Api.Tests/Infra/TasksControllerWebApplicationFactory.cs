@@ -1,4 +1,5 @@
 using System.Text;
+using Grpc.Core;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -68,6 +69,14 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
 
     public FeatureTrackStagePatcher.FeatureTrackStagePatcherClient MockFeatureTrackStagePatcher { get; } =
         Substitute.For<FeatureTrackStagePatcher.FeatureTrackStagePatcherClient>();
+
+    public TasksControllerWebApplicationFactory()
+    {
+        MockUserService
+            .GetTeamRosterAsync(Arg.Any<GetTeamRosterRequest>(),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new GetTeamRosterResponse()));
+    }
 
     public string GenerateToken(int userId, string email, string role, int? managerId = null)
     {

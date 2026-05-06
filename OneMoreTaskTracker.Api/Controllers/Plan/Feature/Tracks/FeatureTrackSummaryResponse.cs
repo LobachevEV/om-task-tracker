@@ -9,19 +9,27 @@ public record FeatureTrackSummaryResponse(
     int FeatureId,
     string Kind,
     int TrackOwnerUserId,
+    MiniTeamMemberResponse? TrackOwner,
     int Version,
     IReadOnlyList<FeatureTrackStageResponse> Stages)
 {
     internal static FeatureTrackSummaryResponse From(
         FeatureTrackDto track,
-        IReadOnlyDictionary<int, TeamRosterMember>? roster = null) =>
-        new(
+        IReadOnlyDictionary<int, TeamRosterMember>? roster = null)
+    {
+        var trackOwner = track.TrackOwnerUserId > 0 && roster is not null && roster.ContainsKey(track.TrackOwnerUserId)
+            ? MiniTeamMemberResponse.From(track.TrackOwnerUserId, roster)
+            : null;
+
+        return new(
             track.Id,
             track.FeatureId,
             track.Kind.ToWireString(),
             track.TrackOwnerUserId,
+            trackOwner,
             track.Version,
             track.Stages.Select(s => StageFrom(s, roster)).ToList());
+    }
 
     internal static FeatureTrackDetailResponse FromDetail(
         FeatureTrackDto track,

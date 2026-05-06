@@ -443,7 +443,7 @@ public sealed class TeamControllerIntegrationTests(TasksControllerWebApplication
 
         await client.DeleteAsync($"/api/team/members/{memberId}");
 
-        factory.MockUserService
+        _ = factory.MockUserService
             .Received(1)
             .DeleteUserAsync(
                 Arg.Is<DeleteUserRequest>(req => req.UserId == memberId && req.ManagerId == managerId),

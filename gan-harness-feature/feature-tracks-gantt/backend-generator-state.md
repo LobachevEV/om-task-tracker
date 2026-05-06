@@ -2,7 +2,7 @@
 
 ## Iteration
 
-**Current**: 4
+**Current**: 5
 **Digest Version Consumed**: 1 (no bump)
 
 ---
@@ -21,40 +21,49 @@
 
 | Issue ID | Description | Resolution |
 |----------|-------------|------------|
-| CT-003-01 / BE-003-01 (AUTO-FAIL) | Migration `20260506150000_DeleteCrossKindTrackStages` was hand-written without a Designer.cs companion, so EF Core silently skipped it — orphan stage rows persisted; live DB still had 6 stages per track | Deleted the hand-written pair; re-generated via `dotnet ef migrations add DeleteCrossKindTrackStages` (timestamp `20260506201111`) — emits proper Designer.cs with `[DbContext]` + `[Migration]` attributes; migration now discovered and applied |
-| BE-003-02 | `EnsureStageOrder` overlap envelope used field `"with"` instead of contract-specified `"neighbour"` | Fixed `ConflictDetail.StageOrderOverlap()` to emit `neighbour`; added private `StageKeyName(int)` switch in `PatchFeatureTrackStageHandler` to replace the unavailable `ToWireString()` (which lives only in the API project) |
-| BE-003-03 | List endpoint `GET /api/plan/features` emitted null `stageOwner` for all stages (roster not loaded) | Loaded roster once per list call (safe: list is always single-manager-scoped); threaded optional `roster` parameter through `FeatureSummaryResponse.From()` and `FeatureTrackSummaryResponse.From()` |
+| BE-004-01 / CT-004-01 | `PATCH .../tracks/{kind}/stages/{stageKey}` and `PATCH .../tracks/{kind}` silently ignored JSON `null` for `stageOwnerUserId` / `trackOwnerUserId` — should clear the owner (proto sentinel `-1`) | Changed payload fields from `int?` to `JsonElement?`; added `DecodeOwnerField()` tri-state helper in `PlanRequestHelpers` (absent → no-op, null → proto -1, `>0` → assign, `0` → 400); both PATCH controllers updated |
+| BE-004-02 | 4 Api.Tests failed because `MockUserService.GetTeamRosterAsync` was not stubbed in the test factory — NSubstitute returned a default `GetTeamRosterResponse` with null `Members`, causing NRE in `PlanRequestHelpers.LoadRosterForManagerAsync` | Added a default `GetTeamRosterAsync` stub in `TasksControllerWebApplicationFactory` constructor returning empty `GetTeamRosterResponse`; also added defensive `(roster.Members ?? [])` null-coalesce in `LoadRosterForManagerAsync` |
+| BE-004-03 | `trackOwner` was null on LIST endpoint (`GET /api/plan/features`) even though `trackOwnerUserId` was set; `FeatureTrackSummaryResponse.From()` did not resolve the owner from the roster | Added `MiniTeamMemberResponse? TrackOwner` field to `FeatureTrackSummaryResponse`; updated `From()` to resolve via `roster.TryGetValue(track.TrackOwnerUserId)` mirroring the DETAIL path in `FromDetail()` |
+| BE-004-04 | `migrate-features` was not auto-run on `docker compose up` | Already present in `compose.yaml` (`depends_on: migrate-features: condition: service_completed_successfully`) — no change needed |
+
+### Pre-existing build errors fixed (Boy Scout rule)
+
+| File | Fix |
+|------|-----|
+| `tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs:296` | Added `_ =` discard to suppress CS4014 on unawaited `Received(1).AuthenticateAsync(...)` |
+| `tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs:446` | Added `_ =` discard to suppress CS4014 on unawaited `Received(1).DeleteUserAsync(...)` |
 
 ### New Files
 
-| File | Purpose |
-|------|---------|
-| `OneMoreTaskTracker.Features/Migrations/20260506201111_DeleteCrossKindTrackStages.cs` | EF-generated migration (replaces hand-written one) — deletes orphan cross-kind stage rows |
-| `OneMoreTaskTracker.Features/Migrations/20260506201111_DeleteCrossKindTrackStages.Designer.cs` | EF-generated designer companion with `[DbContext]` + `[Migration]` attributes |
-| `tests/OneMoreTaskTracker.Features.Tests/Features/Data/FeatureTrackStageScopeTests.cs` | 7 unit tests covering `AdmittedKeys()` and `IsAdmittedFor()` for Frontend and Backend kinds |
+None.
 
 ### Modified Files
 
 | File | Change |
 |------|--------|
-| `OneMoreTaskTracker.Features/Features/Update/ConflictDetail.cs` | `StageOrderOverlap()` emits `neighbour` field instead of `with` |
-| `OneMoreTaskTracker.Features/Features/Update/PatchFeatureTrackStageHandler.cs` | Added private `StageKeyName(int)` switch; `EnsureStageOrder` uses it for the conflict envelope |
-| `OneMoreTaskTracker.Api/Controllers/Plan/Feature/FeatureSummaryResponse.cs` | `From()` accepts optional `IReadOnlyDictionary<int, TeamRosterMember>? roster` parameter; passes it through to track mapping |
-| `OneMoreTaskTracker.Api/Controllers/Plan/Feature/Tracks/FeatureTrackSummaryResponse.cs` | `From()` accepts optional roster; `StageFrom` resolves `stageOwner` when roster is provided |
-| `OneMoreTaskTracker.Api/Controllers/Plan/Feature/FeaturesController.cs` | `List()` loads roster once and passes to `FeatureSummaryResponse.From()`; `Get()` passes roster to summary build |
-| `tests/OneMoreTaskTracker.Features.Tests/DevFeatureSeederTests.cs` | Added 3 tests: EachSeededTrackHasExactlyFiveStages, FrontendTracksDoNotContainCsApproving, BackendTracksDoNotContainSrApproving |
-| `tests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureStageHandlerTests.cs` | Updated overlap test assertion from `"with"` to `"neighbour"` |
-| `tests/OneMoreTaskTracker.Features.Tests/Features/Update/PatchFeatureTrackStageHandlerTests.cs` | Updated overlap test assertion from `"with"` to `"neighbour"` |
+| `OneMoreTaskTracker.Api/Controllers/Plan/Feature/Tracks/PatchFeatureTrackPayload.cs` | `TrackOwnerUserId` changed from `int?` to `JsonElement?` |
+| `OneMoreTaskTracker.Api/Controllers/Plan/Feature/Tracks/PatchFeatureTrackStagePayload.cs` | `StageOwnerUserId` changed from `int?` to `JsonElement?` |
+| `OneMoreTaskTracker.Api/Controllers/Plan/PlanRequestHelpers.cs` | Added `DecodeOwnerField(JsonElement?)` helper; defensive `(roster.Members ?? [])` in `LoadRosterForManagerAsync` |
+| `OneMoreTaskTracker.Api/Controllers/Plan/Feature/Tracks/PatchFeatureTrackController.cs` | Uses `DecodeOwnerField`; rejects value `0` with 400; sets proto field only when `ownerHasValue` |
+| `OneMoreTaskTracker.Api/Controllers/Plan/Feature/Tracks/PatchFeatureTrackStageController.cs` | Uses `DecodeOwnerField`; rejects value `0` with 400; sets proto field only when `ownerHasValue` |
+| `OneMoreTaskTracker.Api/Controllers/Plan/Feature/Tracks/FeatureTrackSummaryResponse.cs` | Added `MiniTeamMemberResponse? TrackOwner` field; `From()` resolves it from roster |
+| `tests/OneMoreTaskTracker.Api.Tests/Infra/TasksControllerWebApplicationFactory.cs` | Constructor stubs `MockUserService.GetTeamRosterAsync` returning empty response |
+| `tests/OneMoreTaskTracker.Api.Tests/Controllers/AuthControllerIntegrationTests.cs` | CS4014 discard fix |
+| `tests/OneMoreTaskTracker.Api.Tests/Controllers/TeamControllerIntegrationTests.cs` | CS4014 discard fix |
 
 ---
 
 ## Test Results
 
-All 158 tests pass in Features.Tests (0 failures, 0 skipped).
+All 562 tests pass (0 failures, 0 skipped).
 
 | Project | Passed |
 |---------|--------|
+| Api.Tests | 228 |
 | Features.Tests | 158 |
+| Tasks.Tests | 68 |
+| Users.Tests | 45 |
+| GitLab.Proxy.Tests | 63 |
 
 ---
 
@@ -62,7 +71,7 @@ All 158 tests pass in Features.Tests (0 failures, 0 skipped).
 
 **Path**: `OneMoreTaskTracker.Api/openapi.json`
 **Version**: v1 (frozen; no changes this iteration)
-**Regenerated**: no — endpoint shapes unchanged
+**Regenerated**: no — endpoint shapes unchanged (field `TrackOwner` was already in `FeatureTrackSummaryResponse` per contract; was being emitted as null before; now resolved correctly)
 
 ---
 
