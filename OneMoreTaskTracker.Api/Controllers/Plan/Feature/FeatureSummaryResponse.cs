@@ -36,6 +36,6 @@ public record FeatureSummaryResponse(
             taskIds,
             f.StagePlans.Select(StagePlanResponse.From).ToList(),
             f.Version,
-            trackList.Count > 0 ? trackList : null);
+            trackList);
     }
 }

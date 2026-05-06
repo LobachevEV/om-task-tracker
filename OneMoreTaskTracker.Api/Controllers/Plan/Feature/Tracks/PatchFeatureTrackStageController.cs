@@ -32,6 +32,14 @@ public class PatchFeatureTrackStageController(
         if (!TrackStageKeyParser.TryParse(stageKey, out var parsedStageKey))
             return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
 
+        if (body.PlannedStart is { } rawStart &&
+            !DateOnly.TryParseExact(rawStart, "yyyy-MM-dd", out _))
+            return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
+
+        if (body.PlannedEnd is { } rawEnd &&
+            !DateOnly.TryParseExact(rawEnd, "yyyy-MM-dd", out _))
+            return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
+
         var callerUserId = User.GetUserId();
 
         if (body.StageOwnerUserId is { } ownerId and > 0)

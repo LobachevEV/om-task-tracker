@@ -85,6 +85,12 @@ public sealed class DevFeatureSeeder(IRequestClock clock)
 
     public async Task SeedAsync(FeaturesDbContext dbContext, CancellationToken cancellationToken = default)
     {
+        await SeedFeaturesAsync(dbContext, cancellationToken);
+        await SeedTracksAsync(dbContext, cancellationToken);
+    }
+
+    private async Task SeedFeaturesAsync(FeaturesDbContext dbContext, CancellationToken cancellationToken)
+    {
         if (await dbContext.Features.AnyAsync(f => f.ManagerUserId == SeededManagerUserId, cancellationToken))
             return;
 
@@ -129,8 +135,12 @@ public sealed class DevFeatureSeeder(IRequestClock clock)
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
+    }
 
-        var now2 = clock.GetUtcNow();
+    private async Task SeedTracksAsync(FeaturesDbContext dbContext, CancellationToken cancellationToken)
+    {
+        if (await dbContext.FeatureTracks.AnyAsync(cancellationToken))
+            return;
 
         // Only the first two features get seeded tracks (indices 0 and 1).
         // features[2] and [3] are intentionally left without tracks to exercise
@@ -145,42 +155,48 @@ public sealed class DevFeatureSeeder(IRequestClock clock)
             FeatureTrackStageKey.TrackStageReleaseToLive,
         };
 
-        var featureEntities = dbContext.Features
-            .Local
+        var seededFeatures = await dbContext.Features
+            .Where(f => f.ManagerUserId == SeededManagerUserId)
             .OrderBy(f => f.Id)
-            .ToList();
+            .Take(2)
+            .ToListAsync(cancellationToken);
+
+        if (seededFeatures.Count < 2)
+            return;
+
+        var now = clock.GetUtcNow();
 
         // features[0]: FRONTEND (owner=Alice) + BACKEND (owner=Charlie)
-        var checkoutFeature = featureEntities[0];
+        var checkoutFeature = seededFeatures[0];
 
-        var frontendTrack = FeatureTrack.Create(checkoutFeature.Id, (int)FeatureTrackKind.Frontend, AliceFrontendUserId, now2);
+        var frontendTrack = FeatureTrack.Create(checkoutFeature.Id, (int)FeatureTrackKind.Frontend, AliceFrontendUserId, now);
         dbContext.FeatureTracks.Add(frontendTrack);
 
-        var backendTrack = FeatureTrack.Create(checkoutFeature.Id, (int)FeatureTrackKind.Backend, CharlieBackendUserId, now2);
+        var backendTrack = FeatureTrack.Create(checkoutFeature.Id, (int)FeatureTrackKind.Backend, CharlieBackendUserId, now);
         dbContext.FeatureTracks.Add(backendTrack);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        var now2 = clock.GetUtcNow();
+        foreach (var stageKey in allStageKeys)
+        {
+            var frontendStage = FeatureTrackStage.Create(frontendTrack.Id, (int)stageKey, now2);
+            dbContext.FeatureTrackStages.Add(frontendStage);
+            var backendStage = FeatureTrackStage.Create(backendTrack.Id, (int)stageKey, now2);
+            dbContext.FeatureTrackStages.Add(backendStage);
+        }
+
+        // features[1]: BACKEND (owner=Dave)
+        var searchFeature = seededFeatures[1];
+        var searchBackendTrack = FeatureTrack.Create(searchFeature.Id, (int)FeatureTrackKind.Backend, DaveBackendUserId, now2);
+        dbContext.FeatureTracks.Add(searchBackendTrack);
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
         var now3 = clock.GetUtcNow();
         foreach (var stageKey in allStageKeys)
         {
-            var frontendStage = FeatureTrackStage.Create(frontendTrack.Id, (int)stageKey, now3);
-            dbContext.FeatureTrackStages.Add(frontendStage);
-            var backendStage = FeatureTrackStage.Create(backendTrack.Id, (int)stageKey, now3);
-            dbContext.FeatureTrackStages.Add(backendStage);
-        }
-
-        // features[1]: BACKEND (owner=Dave)
-        var searchFeature = featureEntities[1];
-        var searchBackendTrack = FeatureTrack.Create(searchFeature.Id, (int)FeatureTrackKind.Backend, DaveBackendUserId, now3);
-        dbContext.FeatureTracks.Add(searchBackendTrack);
-
-        await dbContext.SaveChangesAsync(cancellationToken);
-
-        var now4 = clock.GetUtcNow();
-        foreach (var stageKey in allStageKeys)
-        {
-            var stage = FeatureTrackStage.Create(searchBackendTrack.Id, (int)stageKey, now4);
+            var stage = FeatureTrackStage.Create(searchBackendTrack.Id, (int)stageKey, now3);
             dbContext.FeatureTrackStages.Add(stage);
         }
 

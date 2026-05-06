@@ -13,6 +13,8 @@ using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand;
+using OneMoreTaskTracker.Proto.Features.PatchFeatureTrackCommand;
+using OneMoreTaskTracker.Proto.Features.PatchFeatureTrackStageCommand;
 using OneMoreTaskTracker.Proto.Tasks;
 using OneMoreTaskTracker.Proto.Tasks.AttachTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.CreateTaskCommand;
@@ -61,6 +63,12 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
     public FeatureStagePatcher.FeatureStagePatcherClient MockFeatureStagePatcher { get; } =
         Substitute.For<FeatureStagePatcher.FeatureStagePatcherClient>();
 
+    public FeatureTrackPatcher.FeatureTrackPatcherClient MockFeatureTrackPatcher { get; } =
+        Substitute.For<FeatureTrackPatcher.FeatureTrackPatcherClient>();
+
+    public FeatureTrackStagePatcher.FeatureTrackStagePatcherClient MockFeatureTrackStagePatcher { get; } =
+        Substitute.For<FeatureTrackStagePatcher.FeatureTrackStagePatcherClient>();
+
     public string GenerateToken(int userId, string email, string role, int? managerId = null)
     {
         using var scope = Services.CreateScope();
@@ -99,7 +107,9 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
                 d.ServiceType == typeof(FeaturesLister.FeaturesListerClient) ||
                 d.ServiceType == typeof(FeatureGetter.FeatureGetterClient) ||
                 d.ServiceType == typeof(FeaturePatcher.FeaturePatcherClient) ||
-                d.ServiceType == typeof(FeatureStagePatcher.FeatureStagePatcherClient)
+                d.ServiceType == typeof(FeatureStagePatcher.FeatureStagePatcherClient) ||
+                d.ServiceType == typeof(FeatureTrackPatcher.FeatureTrackPatcherClient) ||
+                d.ServiceType == typeof(FeatureTrackStagePatcher.FeatureTrackStagePatcherClient)
             ).ToList();
 
             foreach (var descriptor in descriptors)
@@ -117,6 +127,8 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
             services.AddSingleton(MockFeatureGetter);
             services.AddSingleton(MockFeaturePatcher);
             services.AddSingleton(MockFeatureStagePatcher);
+            services.AddSingleton(MockFeatureTrackPatcher);
+            services.AddSingleton(MockFeatureTrackStagePatcher);
 
             services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
             {
