@@ -34,18 +34,21 @@ public class FeaturesController(
             return BadRequest(new { error = windowError });
 
         var userId = User.GetUserId();
+        var isManager = string.Equals(User.GetRole(), Roles.Manager, StringComparison.Ordinal);
 
-        var listResponse = await featuresLister.ListAsync(
-            new ListFeaturesRequest
-            {
-                ManagerUserId = userId,
-                CallerUserId = userId,
-                WindowStart = windowStart ?? string.Empty,
-                WindowEnd = windowEnd ?? string.Empty,
-                State = state ?? string.Empty,
-                Scope = scope ?? string.Empty,
-            },
-            cancellationToken: ct);
+        var listRequest = new ListFeaturesRequest
+        {
+            CallerUserId = userId,
+            WindowStart = windowStart ?? string.Empty,
+            WindowEnd = windowEnd ?? string.Empty,
+            State = state ?? string.Empty,
+            Scope = scope ?? string.Empty,
+        };
+
+        if (isManager)
+            listRequest.ManagerUserId = userId;
+
+        var listResponse = await featuresLister.ListAsync(listRequest, cancellationToken: ct);
 
         var summaries = listResponse.Features
             .Select(f => FeatureSummaryResponse.From(f, PlanRequestHelpers.EmptyTasks))
@@ -62,6 +65,12 @@ public class FeaturesController(
         var feature = await featureGetter.GetAsync(
             new GetFeatureRequest { Id = id },
             cancellationToken: ct);
+
+        var callerId = User.GetUserId();
+        var callerIsManager = string.Equals(User.GetRole(), Roles.Manager, StringComparison.Ordinal);
+
+        if (!callerIsManager && !IsParticipant(feature, callerId))
+            return Forbid();
 
         var roster = await rosterProvider.GetRosterForManagerAsync(feature.ManagerUserId, ct);
 
@@ -142,5 +151,24 @@ public class FeaturesController(
 
         var dto = await featurePatcher.PatchAsync(request, cancellationToken: ct);
         return Ok(FeatureSummaryResponse.From(dto, PlanRequestHelpers.EmptyTasks));
+    }
+
+    private static bool IsParticipant(
+        OneMoreTaskTracker.Proto.Features.GetFeatureQuery.FeatureDto feature,
+        int userId)
+    {
+        if (feature.LeadUserId == userId)
+            return true;
+
+        if (feature.Taxonomy is null)
+            return false;
+
+        foreach (var sub in feature.Taxonomy.SubStages)
+            if (sub.OwnerUserId == userId) return true;
+
+        foreach (var gate in feature.Taxonomy.Gates)
+            if (gate.ApproverUserId == userId) return true;
+
+        return false;
     }
 }

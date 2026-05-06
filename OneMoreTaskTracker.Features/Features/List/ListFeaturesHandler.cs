@@ -16,6 +16,12 @@ public class ListFeaturesHandler(FeaturesDbContext db) : FeaturesLister.Features
 
         if (request.ManagerUserId > 0)
             q = q.Where(f => f.ManagerUserId == request.ManagerUserId);
+        else if (request.CallerUserId > 0)
+            q = q.Where(f =>
+                f.ManagerUserId == request.CallerUserId ||
+                f.LeadUserId == request.CallerUserId ||
+                f.SubStages.Any(s => s.OwnerUserId == request.CallerUserId) ||
+                f.Gates.Any(g => g.ApproverUserId == request.CallerUserId));
 
         if (!string.IsNullOrEmpty(request.State))
         {
@@ -32,7 +38,11 @@ public class ListFeaturesHandler(FeaturesDbContext db) : FeaturesLister.Features
         }
 
         if (string.Equals(request.Scope, "mine", StringComparison.OrdinalIgnoreCase) && request.CallerUserId > 0)
-            q = q.Where(f => f.LeadUserId == request.CallerUserId || f.ManagerUserId == request.CallerUserId);
+            q = q.Where(f =>
+                f.LeadUserId == request.CallerUserId ||
+                f.ManagerUserId == request.CallerUserId ||
+                f.SubStages.Any(s => s.OwnerUserId == request.CallerUserId) ||
+                f.Gates.Any(g => g.ApproverUserId == request.CallerUserId));
 
         if (TryParseDate(request.WindowStart, out var start))
             q = q.Where(f => f.PlannedEnd   == null || f.PlannedEnd   >= start);
