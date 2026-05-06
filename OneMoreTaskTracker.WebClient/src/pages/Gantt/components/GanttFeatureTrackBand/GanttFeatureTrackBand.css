@@ -1,0 +1,89 @@
+.gantt-track-band {
+  border-left: 1px solid var(--border-strong);
+  margin-left: 0;
+}
+
+.gantt-track-band__header {
+  display: grid;
+  grid-template-columns: var(--gantt-gutter-width, 360px) 1fr;
+  min-height: 24px;
+  align-items: center;
+}
+
+.gantt-track-band__gutter {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-inline: var(--space-2) var(--space-3);
+  min-height: 24px;
+}
+
+.gantt-track-band__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--fg-muted);
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+}
+
+.gantt-track-band__toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .gantt-track-band__toggle {
+    transition: color var(--transition-fast);
+  }
+
+  .gantt-track-band__toggle:hover {
+    color: var(--fg-default);
+  }
+}
+
+.gantt-track-band__chevron {
+  font-size: 10px;
+  line-height: 1;
+  user-select: none;
+}
+
+.gantt-track-band__tag {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+
+.gantt-track-band__owner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.gantt-track-band__owner-name {
+  font-size: var(--text-xs);
+  color: var(--fg-default);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gantt-track-band__owner--unassigned {
+  font-size: var(--text-xs);
+  color: var(--fg-subtle);
+  font-style: italic;
+}
+
+.gantt-track-band__lane-placeholder {
+  height: 24px;
+}

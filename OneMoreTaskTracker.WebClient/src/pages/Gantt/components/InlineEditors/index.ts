@@ -19,5 +19,10 @@ export type {
   FeatureMutationCallbacks,
   UseFeatureMutationCallbacksOptions,
 } from './useFeatureMutationCallbacks';
+export { useTrackMutationCallbacks } from './useTrackMutationCallbacks';
+export type {
+  TrackMutationCallbacks,
+  UseTrackMutationCallbacksOptions,
+} from './useTrackMutationCallbacks';
 export type { InlineEditorStatus } from './InlineEditorStatus';
 export type { InlineEditorError } from './InlineEditorError';

@@ -1,4 +1,5 @@
 import type { TaskState } from './task';
+import type { FeatureTrack } from './featureTrack';
 
 export type FeatureState =
   | 'CsApproving'
@@ -69,6 +70,8 @@ export interface FeatureSummary {
    * edits. Optional on the wire; consumers treat absent as 0 and skip If-Match.
    */
   version?: number;
+  /** Per-track breakdown; absent when the feature has no tracks yet. */
+  tracks?: FeatureTrack[];
 }
 
 export interface FeatureDetail {

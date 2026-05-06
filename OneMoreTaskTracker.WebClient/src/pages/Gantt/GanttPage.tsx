@@ -13,6 +13,7 @@ import type {
   FeatureSummary,
   MiniTeamMember,
 } from '../../common/types/feature';
+import type { FeatureTrack } from '../../common/types/featureTrack';
 import type { TeamRosterMember } from '../../common/api/teamApi';
 import { AddFeatureRow } from './components/AddFeatureRow';
 import { GanttChunkStripe } from './components/GanttChunkStripe';
@@ -31,7 +32,10 @@ import {
   type ScrollChunkRequest,
 } from './useGanttTimelineScroll';
 import type { ZoomLevel } from './ganttMath';
-import { useFeatureMutationCallbacks } from './components/InlineEditors';
+import {
+  useFeatureMutationCallbacks,
+  useTrackMutationCallbacks,
+} from './components/InlineEditors';
 import './GanttPage.css';
 
 const PLACEHOLDER_ROLE: MiniTeamMember['role'] = 'FrontendDeveloper';
@@ -93,6 +97,11 @@ export interface GanttPageInternalProps {
    * Supplied by `usePlanFeatures.applyFeatureUpdate`.
    */
   onFeatureUpdated: (next: FeatureSummary) => void;
+  /**
+   * Merge an updated track back into the feature row.
+   * Supplied by `usePlanFeatures.applyTrackUpdate`.
+   */
+  onTrackUpdated: (featureId: number, next: FeatureTrack) => void;
   /** Chunk-fetch callback wired into the scrollable timeline. */
   loadChunk: (req: ScrollChunkRequest) => Promise<unknown>;
 }
@@ -139,6 +148,7 @@ export function GanttPageInternal({
   onRetry,
   state,
   onFeatureUpdated,
+  onTrackUpdated,
   loadChunk,
 }: GanttPageInternalProps) {
   const { t } = useTranslation('gantt');
@@ -147,6 +157,7 @@ export function GanttPageInternal({
   const dayPx = DAY_PX_BY_ZOOM[state.zoom];
   const isManager = role === 'Manager';
   const mutations = useFeatureMutationCallbacks({ onApplied: onFeatureUpdated });
+  const trackMutations = useTrackMutationCallbacks({ onTrackApplied: onTrackUpdated });
 
   const trailingStripeWidthPx = CHUNK_DAYS * dayPx;
 
@@ -369,7 +380,10 @@ export function GanttPageInternal({
                       resolvePerformer={resolvePerformer}
                       canEdit={isManager}
                       mutations={isManager ? mutations : undefined}
+                      trackMutations={isManager ? trackMutations : undefined}
                       roster={isManager ? rawRoster : undefined}
+                      loadedRange={loadedRange}
+                      dayPx={dayPx}
                     />
                   );
                 })}
@@ -450,6 +464,7 @@ export function GanttPage() {
       onRetry={features.refetch}
       state={state}
       onFeatureUpdated={features.applyFeatureUpdate}
+      onTrackUpdated={features.applyTrackUpdate}
       loadChunk={loadChunk}
     />
   );

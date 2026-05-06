@@ -177,6 +177,23 @@
       "endError": "Изменение планового окончания {{stage}} отклонено."
     }
   },
+  "track": {
+    "labelFrontend": "Фронт",
+    "labelBackend": "Бэк",
+    "expandAria": "Развернуть трек {{kind}}",
+    "collapseAria": "Свернуть трек {{kind}}"
+  },
+  "tracks": {
+    "stage": {
+      "sr_approving": "SR согласование",
+      "development": "Разработка",
+      "stand_testing": "Тестирование на стенде",
+      "ethalon_testing": "Тестирование на эталоне",
+      "release_to_live": "Релиз в прод",
+      "cs_approving": "CS согласование",
+      "unknown": "Неизвестный этап"
+    }
+  },
   "stagePlan": {
     "title": "План этапов",
     "subtitle": "Задайте сроки каждого этапа и назначьте ответственного.",

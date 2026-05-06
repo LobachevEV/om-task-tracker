@@ -6,17 +6,19 @@ import type {
   MiniTeamMember,
 } from '../../../../common/types/feature';
 import type { TeamRosterMember } from '../../../../common/api/teamApi';
-import { daysBetween, type BarGeometryPx } from '../../ganttMath';
+import { daysBetween, type BarGeometryPx, type DateWindow } from '../../ganttMath';
 import type { StageBarGeometry } from '../../ganttStageGeometry';
 import { featureIsOverdue, plannedStageCount } from '../../ganttStageGeometry';
 import { GanttSegmentedBar } from '../GanttSegmentedBar';
 import { GanttStageSubRow } from '../GanttStageSubRow';
+import { GanttFeatureTrackBand } from '../GanttFeatureTrackBand';
 import type { GanttLaneVariant } from '../../useGanttLayout';
 import {
   InlineLiveRegion,
   InlineOwnerPicker,
   InlineTextCell,
   type FeatureMutationCallbacks,
+  type TrackMutationCallbacks,
 } from '../InlineEditors';
 import './GanttFeatureRow.css';
 
@@ -51,8 +53,14 @@ export interface GanttFeatureRowProps {
   canEdit?: boolean;
   /** Wired by GanttPage — the five per-field PATCH callers. */
   mutations?: FeatureMutationCallbacks;
+  /** Wired by GanttPage — track-stage PATCH callers. */
+  trackMutations?: TrackMutationCallbacks;
   /** Roster used by the stage-owner picker inside expanded sub-rows. */
   roster?: readonly TeamRosterMember[];
+  /** Date window used for track bar geometry. */
+  loadedRange?: DateWindow;
+  /** Pixels per day used for track bar geometry. */
+  dayPx?: number;
 }
 
 function computeFeatureDtr(
@@ -82,7 +90,10 @@ function GanttFeatureRowInner({
   resolvePerformer,
   canEdit = false,
   mutations,
+  trackMutations,
   roster,
+  loadedRange,
+  dayPx = 24,
 }: GanttFeatureRowProps) {
   const { t } = useTranslation('gantt');
 
@@ -282,22 +293,39 @@ function GanttFeatureRowInner({
 
       {expanded ? (
         <>
-          {stageBars.map((seg, index) => (
-            <GanttStageSubRow
-              key={seg.stage}
-              feature={feature}
-              seg={seg}
-              today={today}
-              resolvePerformer={resolvePerformer}
-              removedPerformerName={null}
-              index={index}
-              onOpenStage={handleOpenStage}
-              canEdit={inlineEnabled}
-              mutations={mutations}
-              roster={roster}
-              onAnnounce={handleAnnounce}
-            />
-          ))}
+          {feature.tracks && feature.tracks.length > 0 && loadedRange != null
+            ? feature.tracks.map((track) => (
+                <GanttFeatureTrackBand
+                  key={`${track.featureId}-${track.kind}`}
+                  track={track}
+                  kind={track.kind}
+                  featureTitle={feature.title}
+                  today={today}
+                  loadedRange={loadedRange}
+                  dayPx={dayPx}
+                  resolveOwner={resolvePerformer}
+                  canEdit={inlineEnabled}
+                  mutations={trackMutations}
+                  roster={roster}
+                  onAnnounce={handleAnnounce}
+                />
+              ))
+            : stageBars.map((seg, index) => (
+                <GanttStageSubRow
+                  key={seg.stage}
+                  feature={feature}
+                  seg={seg}
+                  today={today}
+                  resolvePerformer={resolvePerformer}
+                  removedPerformerName={null}
+                  index={index}
+                  onOpenStage={handleOpenStage}
+                  canEdit={inlineEnabled}
+                  mutations={mutations}
+                  roster={roster}
+                  onAnnounce={handleAnnounce}
+                />
+              ))}
         </>
       ) : null}
       {inlineEnabled ? <InlineLiveRegion message={announcement} /> : null}

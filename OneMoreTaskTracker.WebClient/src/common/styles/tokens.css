@@ -39,12 +39,16 @@
   --text-2xl: 1.75rem;    /* 28px — route headings */
 
   /* State palette — pipeline stages */
-  --state-not-started: oklch(0.40 0.006 60);
-  --state-in-dev:      oklch(0.75 0.14 85);
-  --state-mr-release:  oklch(0.72 0.10 190);
-  --state-in-test:     oklch(0.68 0.12 250);
-  --state-mr-master:   oklch(0.70 0.10 300);
-  --state-completed:   oklch(0.65 0.10 145);
+  --state-not-started:    oklch(0.40 0.006 60);
+  --state-in-dev:         oklch(0.75 0.14 85);
+  --state-mr-release:     oklch(0.72 0.10 190);
+  --state-in-test:        oklch(0.68 0.12 250);
+  --state-mr-master:      oklch(0.70 0.10 300);
+  --state-completed:      oklch(0.65 0.10 145);
+
+  /* Track-stage tokens (feature-tracks-gantt feature) */
+  --state-development:    oklch(0.72 0.13 55);
+  --state-release-to-live: oklch(0.78 0.10 220);
 
   /* Feedback */
   --danger:  oklch(0.65 0.14 25);

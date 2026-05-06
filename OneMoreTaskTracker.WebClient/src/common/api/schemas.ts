@@ -93,6 +93,48 @@ export const detailStagePlanSchema = stagePlanSchema.extend({
   performer: miniTeamMemberSchema.nullable(),
 });
 
+export const featureTrackKindSchema = z.enum(['Frontend', 'Backend']);
+
+export const featureTrackStageKeySchema = z.enum([
+  'SrApproving',
+  'CsApproving',
+  'Development',
+  'StandTesting',
+  'EthalonTesting',
+  'ReleaseToLive',
+]);
+
+export const featureTrackStageSchema = z.object({
+  stageKey: featureTrackStageKeySchema,
+  plannedStart: isoDateOrNull,
+  plannedEnd: isoDateOrNull,
+  stageOwnerUserId: z.number().int().positive().nullable(),
+  stageVersion: z.number().int().nonnegative(),
+  stageOwner: miniTeamMemberSchema.nullable().optional(),
+});
+
+export const featureTrackSchema = z.object({
+  id: z.number().int().positive(),
+  featureId: z.number().int().positive(),
+  kind: featureTrackKindSchema,
+  trackOwnerUserId: z.number().int().positive(),
+  version: z.number().int().nonnegative(),
+  stages: z.array(featureTrackStageSchema),
+  trackOwner: miniTeamMemberSchema.nullable().optional(),
+});
+
+export const patchFeatureTrackRequestSchema = z.object({
+  trackOwnerUserId: z.number().int().positive().optional(),
+  expectedVersion: z.number().int().nonnegative().optional(),
+});
+
+export const patchFeatureTrackStageRequestSchema = z.object({
+  stageOwnerUserId: z.number().int().positive().nullable().optional(),
+  plannedStart: isoDateOrNull.optional(),
+  plannedEnd: isoDateOrNull.optional(),
+  expectedStageVersion: z.number().int().nonnegative().optional(),
+});
+
 export const featureSummarySchema = z.object({
   id: z.number().int().positive(),
   title: z.string().min(1),
@@ -114,6 +156,8 @@ export const featureSummarySchema = z.object({
    * older payloads keep parsing; absent values are treated as 0.
    */
   version: z.number().int().nonnegative().optional(),
+  /** Per-track breakdown; absent when the feature has no tracks yet. */
+  tracks: z.array(featureTrackSchema).optional(),
 });
 
 /**

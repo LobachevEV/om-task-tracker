@@ -172,6 +172,23 @@
       "endError": "{{stage}} planned end change was rejected."
     }
   },
+  "track": {
+    "labelFrontend": "Front",
+    "labelBackend": "Back",
+    "expandAria": "Expand {{kind}} track",
+    "collapseAria": "Collapse {{kind}} track"
+  },
+  "tracks": {
+    "stage": {
+      "sr_approving": "SR approving",
+      "development": "Development",
+      "stand_testing": "Stand testing",
+      "ethalon_testing": "Ethalon testing",
+      "release_to_live": "Release to live",
+      "cs_approving": "CS approving",
+      "unknown": "Unknown stage"
+    }
+  },
   "stagePlan": {
     "title": "Stage plan",
     "subtitle": "Schedule each stage and assign its owner.",

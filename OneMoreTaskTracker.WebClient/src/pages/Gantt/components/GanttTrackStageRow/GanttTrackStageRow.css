@@ -1,0 +1,99 @@
+.gantt-track-stage-row {
+  display: grid;
+  grid-template-columns: var(--gantt-gutter-width, 360px) 1fr;
+  min-height: 36px;
+  align-items: center;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.gantt-track-stage-row:nth-child(even) {
+  background-color: color-mix(in oklch, var(--surface-raised) 50%, transparent);
+}
+
+.gantt-track-stage-row__gutter {
+  display: grid;
+  grid-template-columns: 36px 1fr 1fr 1fr;
+  align-items: center;
+  gap: 0 var(--space-2);
+  padding-inline: var(--space-2) var(--space-3);
+  min-height: 36px;
+}
+
+.gantt-track-stage-row__code {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  text-align: center;
+  user-select: none;
+}
+
+.gantt-track-stage-row__name {
+  font-size: var(--text-sm);
+  color: var(--fg-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gantt-track-stage-row__owner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.gantt-track-stage-row__owner-text {
+  font-size: var(--text-sm);
+  color: var(--fg-default);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gantt-track-stage-row__unassigned {
+  font-size: var(--text-sm);
+  color: var(--fg-subtle);
+  font-style: italic;
+}
+
+.gantt-track-stage-row__avatar-placeholder {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: var(--surface-overlay);
+  flex-shrink: 0;
+}
+
+.gantt-track-stage-row__dates {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.gantt-track-stage-row__date {
+  color: var(--fg-muted);
+}
+
+.gantt-track-stage-row__sep {
+  color: var(--fg-subtle);
+}
+
+.gantt-track-stage-row__dtr {
+  color: var(--fg-muted);
+}
+
+.gantt-track-stage-row__dtr[data-overdue='true'] {
+  color: var(--danger);
+  font-weight: var(--weight-medium);
+}
+
+.gantt-track-stage-row__lane {
+  position: relative;
+  height: 36px;
+  overflow: hidden;
+}

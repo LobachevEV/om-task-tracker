@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import * as planApi from '../../common/api/planApi';
 import type { ListFeaturesParams } from '../../common/api/planApi';
 import type { FeatureScope, FeatureState, FeatureSummary } from '../../common/types/feature';
+import type { FeatureTrack } from '../../common/types/featureTrack';
 import { useRefetchOnFocus } from '../../common/hooks/useRefetchOnFocus';
 
 export interface UsePlanFeaturesParams {
@@ -45,6 +46,12 @@ export interface UsePlanFeaturesResult {
    * rows.
    */
   applyFeatureUpdate: (next: FeatureSummary) => void;
+  /**
+   * Merge an updated `FeatureTrack` into the existing feature's `tracks`
+   * array. Replaces the matching track by `kind`; no-op when the feature
+   * or track is not present.
+   */
+  applyTrackUpdate: (featureId: number, next: FeatureTrack) => void;
 }
 
 function cacheKey(params: { scope?: FeatureScope; state?: FeatureState }): string {
@@ -205,5 +212,37 @@ export function usePlanFeatures(params: UsePlanFeaturesParams): UsePlanFeaturesR
     [key],
   );
 
-  return { data, loading, error, refetch, loadChunk, applyFeatureUpdate };
+  const applyTrackUpdate = useCallback(
+    (featureId: number, next: FeatureTrack) => {
+      setData((prev) => {
+        if (!prev) return prev;
+        let changed = false;
+        const replaced = prev.map((row) => {
+          if (row.id !== featureId) return row;
+          const existingTracks = row.tracks ?? [];
+          const hasMatch = existingTracks.some((t) => t.kind === next.kind);
+          const updatedTracks = hasMatch
+            ? existingTracks.map((t) => (t.kind === next.kind ? next : t))
+            : [...existingTracks, next];
+          changed = true;
+          return { ...row, tracks: updatedTracks };
+        });
+        if (!changed) return prev;
+        const cached = featuresCache.get(key);
+        if (cached && cached.has(featureId)) {
+          const cachedRow = cached.get(featureId)!;
+          const existingTracks = cachedRow.tracks ?? [];
+          const hasMatch = existingTracks.some((t) => t.kind === next.kind);
+          const updatedTracks = hasMatch
+            ? existingTracks.map((t) => (t.kind === next.kind ? next : t))
+            : [...existingTracks, next];
+          cached.set(featureId, { ...cachedRow, tracks: updatedTracks });
+        }
+        return replaced;
+      });
+    },
+    [key],
+  );
+
+  return { data, loading, error, refetch, loadChunk, applyFeatureUpdate, applyTrackUpdate };
 }

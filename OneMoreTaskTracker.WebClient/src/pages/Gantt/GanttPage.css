@@ -13,6 +13,12 @@
   color: var(--text);
 }
 
+@media (min-width: 1440px) {
+  .gantt-page {
+    --gantt-gutter-width: 360px;
+  }
+}
+
 /* Loading and error placeholders. Asymmetric padding (taller than wide)
  * pushes the spinner / callout off the toolbar without floating dead-centre
  * — the page already has a 56px header above. */

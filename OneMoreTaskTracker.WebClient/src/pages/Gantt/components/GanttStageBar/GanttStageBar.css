@@ -1,0 +1,66 @@
+.gantt-stage-bar {
+  position: absolute;
+  height: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 2px;
+  background-color: var(--bar-color, var(--state-not-started));
+  box-shadow: 0 1px 0 oklch(1 0 0 / 0.08) inset;
+  overflow: hidden;
+  cursor: default;
+}
+
+.gantt-stage-bar--ghost {
+  opacity: 0.35;
+  border: 1px dashed var(--border-strong);
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.gantt-stage-bar__stripe {
+  position: absolute;
+  inset: 0;
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+.gantt-stage-bar--stripe-btt .gantt-stage-bar__stripe {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    currentColor 0,
+    currentColor 1px,
+    transparent 1px,
+    transparent 5px
+  );
+}
+
+.gantt-stage-bar--stripe-ttb .gantt-stage-bar__stripe {
+  background-image: repeating-linear-gradient(
+    45deg,
+    currentColor 0,
+    currentColor 1px,
+    transparent 1px,
+    transparent 5px
+  );
+}
+
+button.gantt-stage-bar {
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+
+button.gantt-stage-bar:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  button.gantt-stage-bar {
+    transition: filter var(--transition-fast);
+  }
+
+  button.gantt-stage-bar:hover {
+    filter: brightness(1.12);
+  }
+}

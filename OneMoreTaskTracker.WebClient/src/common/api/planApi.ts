@@ -3,6 +3,7 @@ import {
   featureDetailSchema,
   featureSummaryListSchema,
   featureSummarySchema,
+  featureTrackSchema,
 } from './schemas';
 import type {
   CreateFeaturePayload,
@@ -13,6 +14,11 @@ import type {
   PatchFeaturePayload,
   PatchFeatureStagePayload,
 } from '../types/feature';
+import type {
+  FeatureTrack,
+  FeatureTrackKind,
+  FeatureTrackStageKey,
+} from '../types/featureTrack';
 
 function jsonHeaders(ifMatch?: number): Record<string, string> {
   const headers: Record<string, string> = {
@@ -127,6 +133,53 @@ export async function patchFeatureStage(
   return featureSummarySchema.parse(data);
 }
 
+export interface PatchFeatureTrackPayload {
+  trackOwnerUserId?: number;
+  expectedVersion?: number;
+}
+
+export interface PatchFeatureTrackStagePayload {
+  stageOwnerUserId?: number | null;
+  plannedStart?: string | null;
+  plannedEnd?: string | null;
+  expectedStageVersion?: number;
+}
+
+export async function patchFeatureTrack(
+  featureId: number,
+  kind: FeatureTrackKind,
+  body: PatchFeatureTrackPayload,
+): Promise<FeatureTrack> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/plan/features/${featureId}/tracks/${kind}`,
+    {
+      method: 'PATCH',
+      headers: jsonHeaders(body.expectedVersion),
+      body: JSON.stringify(body),
+    },
+  );
+  const data = await handleResponse<unknown>(response);
+  return featureTrackSchema.parse(data);
+}
+
+export async function patchFeatureTrackStage(
+  featureId: number,
+  kind: FeatureTrackKind,
+  stageKey: FeatureTrackStageKey,
+  body: PatchFeatureTrackStagePayload,
+): Promise<FeatureTrack> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/plan/features/${featureId}/tracks/${kind}/stages/${stageKey}`,
+    {
+      method: 'PATCH',
+      headers: jsonHeaders(body.expectedStageVersion),
+      body: JSON.stringify(body),
+    },
+  );
+  const data = await handleResponse<unknown>(response);
+  return featureTrackSchema.parse(data);
+}
+
 export type {
   CreateFeaturePayload,
   FeatureDetail,
@@ -136,3 +189,5 @@ export type {
   PatchFeaturePayload,
   PatchFeatureStagePayload,
 } from '../types/feature';
+
+export type { FeatureTrack, FeatureTrackKind, FeatureTrackStageKey } from '../types/featureTrack';
