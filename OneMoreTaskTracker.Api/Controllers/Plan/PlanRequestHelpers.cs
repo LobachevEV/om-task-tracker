@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Text.Json;
 using Grpc.Core;
 using OneMoreTaskTracker.Proto.Users;
 
@@ -48,21 +47,14 @@ internal static class PlanRequestHelpers
         return true;
     }
 
-    // Decodes a tri-state owner field from JSON:
-    //   absent  → (hasValue: false, protoValue: 0)  — don't set the proto field
-    //   null    → (hasValue: true,  protoValue: -1) — clear (inherit); maps to proto sentinel -1
-    //   integer → (hasValue: true,  protoValue: n)  — assign to user n
-    internal static (bool HasValue, int ProtoValue) DecodeOwnerField(JsonElement? element)
+    internal static (bool HasValue, int ProtoValue) DecodeOwnerField(Tristate<int>? tristate)
     {
-        if (element is null)
+        if (tristate is null || !tristate.IsPresent)
             return (false, 0);
 
-        return element.Value.ValueKind switch
-        {
-            JsonValueKind.Null    => (true, -1),
-            JsonValueKind.Number  => (true, element.Value.GetInt32()),
-            _                     => (false, 0),
-        };
+        return tristate.Value is { } n
+            ? (true, n)
+            : (true, -1);
     }
 
     // Returns null on missing/unparseable; explicit 0 round-trips so a freshly-created
