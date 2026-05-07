@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Kbd } from '../../../../common/ds';
 import type { FeatureScope, FeatureState } from '../../../../common/types/feature';
 import { ZOOM_DAYS, type ZoomLevel } from '../../ganttMath';
 import { FEATURE_STATE_ENTRIES } from '../../stateConfig';
 import { GanttLegend } from '../GanttLegend';
+import { StateFilterPopover } from './StateFilterPopover';
 import './GanttToolbar.css';
 
 const ZOOM_ORDER: readonly ZoomLevel[] = Object.keys(ZOOM_DAYS) as ZoomLevel[];
@@ -39,6 +40,7 @@ export function GanttToolbar({
   onStateFilterChange,
 }: GanttToolbarProps) {
   const { t } = useTranslation('gantt');
+  const [isStateOpen, setIsStateOpen] = useState(false);
 
   const cycleZoom = useCallback(
     (direction: 1 | -1) => {
@@ -130,39 +132,20 @@ export function GanttToolbar({
         </div>
 
         <div
-          className="gantt-toolbar__group"
+          className="gantt-toolbar__group gantt-toolbar__group--state-tray"
           role="group"
           aria-label={t('drawer.fields.state')}
         >
           <span className="gantt-toolbar__group-label">
             {t('drawer.fields.state')} <Kbd size="sm">S</Kbd>:
           </span>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            aria-pressed={stateFilter === 'all'}
-            className={`gantt-toolbar__state-button${stateFilter === 'all' ? ' gantt-toolbar__state-button--active' : ''}`}
-            onClick={() => onStateFilterChange('all')}
-          >
-            {t('toolbar.scope.all')}
-          </Button>
-          {FEATURE_STATE_ENTRIES.map((entry) => {
-            const active = stateFilter === entry.state;
-            return (
-              <Button
-                key={entry.state}
-                type="button"
-                variant="ghost"
-                size="sm"
-                aria-pressed={active}
-                className={`gantt-toolbar__state-button${active ? ' gantt-toolbar__state-button--active' : ''}`}
-                onClick={() => onStateFilterChange(entry.state)}
-              >
-                {t(entry.i18nKey)}
-              </Button>
-            );
-          })}
+          <StateFilterPopover
+            open={isStateOpen}
+            onOpenChange={setIsStateOpen}
+            stateFilter={stateFilter}
+            onStateFilterChange={onStateFilterChange}
+          />
+          {isStateOpen && <span className="gantt-state-popover__backdrop" aria-hidden="true" />}
         </div>
 
         <div
