@@ -3,27 +3,12 @@ import { useTranslation } from 'react-i18next';
 import type { MiniTeamMember } from '../../../../common/types/feature';
 import type { FeatureTrack, FeatureTrackKind } from '../../../../common/types/featureTrack';
 import type { TeamRosterMember } from '../../../../common/api/teamApi';
-import { Avatar } from '../../../../common/ds';
+import { Avatar, roleToAvatarTone } from '../../../../common/ds';
 import type { DateWindow } from '../../ganttMath';
 import type { TrackMutationCallbacks } from '../InlineEditors/useTrackMutationCallbacks';
 import { GanttTrackStageRow } from '../GanttTrackStageRow';
 import { selectStagesForKind } from '../../selectStagesForKind';
 import './GanttFeatureTrackBand.css';
-
-function avatarTone(
-  role: MiniTeamMember['role'],
-): 'manager' | 'frontend' | 'backend' | 'qa' {
-  switch (role) {
-    case 'Manager':
-      return 'manager';
-    case 'FrontendDeveloper':
-      return 'frontend';
-    case 'BackendDeveloper':
-      return 'backend';
-    case 'Qa':
-      return 'qa';
-  }
-}
 
 export interface GanttFeatureTrackBandProps {
   track: FeatureTrack;
@@ -99,7 +84,7 @@ export function GanttFeatureTrackBand({
               <Avatar
                 name={trackOwner.displayName}
                 size="sm"
-                tone={avatarTone(trackOwner.role)}
+                tone={roleToAvatarTone(trackOwner.role)}
               />
               <span className="gantt-track-band__owner-name">{trackOwner.displayName}</span>
             </span>

@@ -30,6 +30,11 @@ import type { TeamRosterMember } from '../../../../common/api/teamApi';
  * `performer` detail payload come back null) the combobox renders a neutral
  * outline avatar + `"Name · removed"` copy + a `Reassign` link. This keeps
  * historic context visible instead of silently collapsing to "unassigned".
+ *
+ * intentionally separate from InlineOwnerPicker: this component uses a
+ * synchronous onChange form-field contract with no async save lifecycle,
+ * no error/retry flash, and no two-click confirm pattern — collapsing the
+ * two would require incompatible mode-branching across 600+ lines.
  */
 export interface StagePerformerComboboxProps {
   value: number | null;

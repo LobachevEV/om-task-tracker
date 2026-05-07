@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { FeatureState, FeatureSummary, MiniTeamMember } from '../../../../common/types/feature';
 import type { TeamRosterMember } from '../../../../common/api/teamApi';
-import { Avatar, Badge } from '../../../../common/ds';
+import { Avatar, Badge, roleToAvatarTone } from '../../../../common/ds';
 import { FEATURE_STATE_CSS } from '../../stateConfig';
 import type { StageBarGeometry } from '../../ganttStageGeometry';
 import { daysBetween, parseIsoDate } from '../../ganttMath';
@@ -50,19 +50,6 @@ export interface GanttStageSubRowProps {
   roster?: readonly TeamRosterMember[];
   /** Relay inline-edit commit outcomes into the parent aria-live region. */
   onAnnounce?: (message: string) => void;
-}
-
-function avatarTone(role: MiniTeamMember['role']): 'manager' | 'frontend' | 'backend' | 'qa' {
-  switch (role) {
-    case 'Manager':
-      return 'manager';
-    case 'FrontendDeveloper':
-      return 'frontend';
-    case 'BackendDeveloper':
-      return 'backend';
-    case 'Qa':
-      return 'qa';
-  }
 }
 
 function sideBadgeTone(side: 'Back' | 'Front' | 'Common') {
@@ -204,7 +191,7 @@ export function GanttStageSubRow({
   } else if (performer) {
     ownerNode = (
       <>
-        <Avatar name={performer.displayName} size="sm" tone={avatarTone(performer.role)} />
+        <Avatar name={performer.displayName} size="sm" tone={roleToAvatarTone(performer.role)} />
         <span className="gantt-stage-row__owner-text">{performer.displayName}</span>
       </>
     );

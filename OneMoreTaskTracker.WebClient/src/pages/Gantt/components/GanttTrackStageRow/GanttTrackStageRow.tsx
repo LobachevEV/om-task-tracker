@@ -6,7 +6,7 @@ import type {
   FeatureTrackStage,
 } from '../../../../common/types/featureTrack';
 import type { TeamRosterMember } from '../../../../common/api/teamApi';
-import { Avatar } from '../../../../common/ds';
+import { Avatar, roleToAvatarTone } from '../../../../common/ds';
 import { parseIsoDate, daysBetween, type DateWindow } from '../../ganttMath';
 import { getTrackStageMeta } from '../../trackStageMeta';
 import { computeTrackStageBars } from '../../trackStageGeometry';
@@ -28,20 +28,6 @@ function formatShortDate(iso: string, locale: string): string {
   }
 }
 
-function avatarTone(
-  role: MiniTeamMember['role'],
-): 'manager' | 'frontend' | 'backend' | 'qa' {
-  switch (role) {
-    case 'Manager':
-      return 'manager';
-    case 'FrontendDeveloper':
-      return 'frontend';
-    case 'BackendDeveloper':
-      return 'backend';
-    case 'Qa':
-      return 'qa';
-  }
-}
 
 export interface GanttTrackStageRowProps {
   track: FeatureTrack;
@@ -214,7 +200,7 @@ export function GanttTrackStageRow({
           name: inheritedOwner.displayName,
         })}
       >
-        <Avatar name={inheritedOwner.displayName} size="sm" tone={avatarTone(inheritedOwner.role)} />
+        <Avatar name={inheritedOwner.displayName} size="sm" tone={roleToAvatarTone(inheritedOwner.role)} />
         <span className="gantt-track-stage-row__owner-text gantt-track-stage-row__owner-text--inherited">
           {inheritedOwner.displayName}
           {' '}
@@ -241,7 +227,7 @@ export function GanttTrackStageRow({
   } else if (owner) {
     ownerNode = (
       <>
-        <Avatar name={owner.displayName} size="sm" tone={avatarTone(owner.role)} />
+        <Avatar name={owner.displayName} size="sm" tone={roleToAvatarTone(owner.role)} />
         <span className="gantt-track-stage-row__owner-text">{owner.displayName}</span>
       </>
     );
