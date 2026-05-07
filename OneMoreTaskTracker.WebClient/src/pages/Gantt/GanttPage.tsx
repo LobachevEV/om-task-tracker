@@ -2,10 +2,11 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
+  useReducer,
   useState,
   type CSSProperties,
 } from 'react';
+import { ZodError } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../common/auth/AuthContext';
 import { Spinner, Button, Callout } from '../../common/ds';
@@ -93,6 +94,8 @@ export interface GanttPageInternalProps {
   error: Error | null;
   /** Number of consecutive load failures so far (0 = first error). */
   failCount: number;
+  /** True when the latest error is a deterministic schema-mismatch (Zod). */
+  schemaMismatch: boolean;
   onRetry: () => void;
   state: GanttPageState;
   /**
@@ -149,6 +152,7 @@ export function GanttPageInternal({
   loading,
   error,
   failCount,
+  schemaMismatch,
   onRetry,
   state,
   onFeatureUpdated,
@@ -314,11 +318,15 @@ export function GanttPageInternal({
           <Spinner label={t('loading')} />
         </div>
       ) : error ? (
-        <div className="gantt-page__centered">
+        <div className="gantt-page__centered" role="alert" aria-live="assertive" aria-atomic="true">
           <Callout
             tone="danger"
             action={
-              failCount < 2 ? (
+              schemaMismatch ? (
+                <Button type="button" variant="secondary" onClick={() => window.location.reload()}>
+                  {t('reloadPage', { defaultValue: 'Обновить страницу' })}
+                </Button>
+              ) : failCount < 2 ? (
                 <Button type="button" variant="primary" onClick={onRetry}>
                   {t('retry')}
                 </Button>
@@ -329,7 +337,11 @@ export function GanttPageInternal({
               )
             }
           >
-            {failCount < 2 ? t('failed') : t('failedPersistent', { defaultValue: 'Не удалось загрузить план. Попробуйте обновить страницу.' })}
+            {schemaMismatch
+              ? t('schemaMismatch', { defaultValue: 'Формат данных изменился. Обновите страницу.' })
+              : failCount < 2
+                ? t('failed')
+                : t('failedPersistent', { defaultValue: 'Не удалось загрузить план. Попробуйте обновить страницу.' })}
           </Callout>
         </div>
       ) : !hasAnyFeatures ? (
@@ -428,6 +440,14 @@ export function GanttPageInternal({
   );
 }
 
+type FailCountState = { count: number; prevError: Error | null };
+type FailCountAction = { type: 'error'; error: Error } | { type: 'clear' };
+
+function failCountReducer(state: FailCountState, action: FailCountAction): FailCountState {
+  if (action.type === 'error') return { count: state.count + 1, prevError: action.error };
+  return { count: 0, prevError: null };
+}
+
 const ANONYMOUS_ROLE: UserRole = 'FrontendDeveloper';
 
 export function GanttPage() {
@@ -439,18 +459,12 @@ export function GanttPage() {
     state: state.stateFilter === 'all' ? undefined : state.stateFilter,
   });
   const roster = useTeamRoster();
-  const [failCount, setFailCount] = useState(0);
-  const prevErrorRef = useRef<Error | null>(null);
-
-  useEffect(() => {
-    if (features.error !== null && features.error !== prevErrorRef.current) {
-      prevErrorRef.current = features.error;
-      setFailCount((c) => c + 1);
-    } else if (features.error === null && prevErrorRef.current !== null) {
-      prevErrorRef.current = null;
-      setFailCount(0);
-    }
-  }, [features.error]);
+  const [failState, dispatchFail] = useReducer(failCountReducer, { count: 0, prevError: null as Error | null });
+  if (features.error !== failState.prevError) {
+    dispatchFail(features.error != null ? { type: 'error', error: features.error } : { type: 'clear' });
+  }
+  const failCount = failState.count;
+  const schemaMismatch = features.error instanceof ZodError;
 
   const rosterMembers = useMemo<MiniTeamMember[]>(
     () => (roster.data ?? []).map(toMiniMember),
@@ -484,6 +498,7 @@ export function GanttPage() {
       loading={features.loading}
       error={features.error}
       failCount={failCount}
+      schemaMismatch={schemaMismatch}
       onRetry={features.refetch}
       state={state}
       onFeatureUpdated={features.applyFeatureUpdate}

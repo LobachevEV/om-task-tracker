@@ -26,6 +26,7 @@ interface HarnessProps {
   loading?: boolean;
   error?: Error | null;
   failCount?: number;
+  schemaMismatch?: boolean;
   onRetry?: () => void;
   rosterError?: Error | null;
   rosterLoading?: boolean;
@@ -38,6 +39,7 @@ function Harness({
   loading = false,
   error = null,
   failCount = 0,
+  schemaMismatch = false,
   onRetry = () => {},
   rosterError = null,
   rosterLoading = false,
@@ -56,6 +58,7 @@ function Harness({
       loading={loading}
       error={error}
       failCount={failCount}
+      schemaMismatch={schemaMismatch}
       onRetry={onRetry}
       state={state}
       onFeatureUpdated={() => {}}
@@ -156,7 +159,8 @@ describe('GanttPageInternal', () => {
   it('renders an error state with a retry button when `error` is set', () => {
     const onRetry = vi.fn();
     renderHarness({ role: 'Manager', error: new Error('boom'), features: [], onRetry });
-    const alert = screen.getByRole('alert');
+    // The wrapper div and the inner Callout both carry role="alert"; take the outermost.
+    const alert = screen.getAllByRole('alert')[0];
     const retry = within(alert).getByRole('button');
     fireEvent.click(retry);
     expect(onRetry).toHaveBeenCalled();
@@ -169,7 +173,8 @@ describe('GanttPageInternal', () => {
     const originalLocation = window.location;
     vi.stubGlobal('location', { ...window.location, reload: reloadMock });
     renderHarness({ role: 'Manager', error: new Error('boom'), features: [], onRetry, failCount: 2 });
-    const alert = screen.getByRole('alert');
+    // The wrapper div and the inner Callout both carry role="alert"; take the outermost.
+    const alert = screen.getAllByRole('alert')[0];
     const reloadBtn = within(alert).getByRole('button');
     expect(reloadBtn.textContent).not.toBe('Retry');
     fireEvent.click(reloadBtn);

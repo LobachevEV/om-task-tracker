@@ -97,13 +97,16 @@ export function InlineOwnerPicker({
   // Total option count including the optional inherit sentinel at index 0.
   const totalOptions = allowInherit ? filtered.length + 1 : filtered.length;
   // Map list highlight index to a resolved member (null = inherit sentinel).
-  function resolveHighlighted(idx: number): TeamRosterMember | null {
-    if (allowInherit) {
-      if (idx === 0) return null;
-      return filtered[idx - 1] ?? null;
-    }
-    return filtered[idx] ?? null;
-  }
+  const resolveHighlighted = useCallback(
+    (idx: number): TeamRosterMember | null => {
+      if (allowInherit) {
+        if (idx === 0) return null;
+        return filtered[idx - 1] ?? null;
+      }
+      return filtered[idx] ?? null;
+    },
+    [allowInherit, filtered],
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -181,7 +184,7 @@ export function InlineOwnerPicker({
           break;
       }
     },
-    [commitUser, displayName, editor, filtered, highlight, open, readOnly],
+    [allowInherit, commitUser, displayName, editor, highlight, open, readOnly, resolveHighlighted, totalOptions],
   );
 
   const selectedMember = value == null ? null : (roster.find((m) => m.userId === value) ?? null);
