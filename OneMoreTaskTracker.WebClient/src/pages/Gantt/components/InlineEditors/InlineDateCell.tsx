@@ -1,9 +1,10 @@
-import { useCallback, useRef, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useInlineFieldEditor } from './useInlineFieldEditor';
 import type { InlineEditorError } from './InlineEditorError';
 import { InlineCellChevron } from './InlineCellChevron';
 import { InlineCellError } from './InlineCellError';
+import { InlineDateCalendar } from './InlineDateCalendar';
 import { ISO_DATE_RE, addDays } from '../../ganttMath';
 import './InlineEditors.css';
 
@@ -39,7 +40,8 @@ function toDraft(value: string | null): string {
  * Stage planned-start / planned-end inline editor. Accepts ISO yyyy-MM-dd
  * strings; ArrowUp/ArrowDown nudge by ±1 day when the draft parses.
  * Invalid strings roll back via the hook's `validate` slot — no keystroke
- * is rejected mid-type.
+ * is rejected mid-type. Clicking or focusing the input opens a calendar
+ * popover powered by react-day-picker.
  */
 export function InlineDateCell({
   value,
@@ -52,6 +54,10 @@ export function InlineDateCell({
 }: InlineDateCellProps) {
   const { t } = useTranslation('gantt');
   const inputRef = useRef<HTMLInputElement>(null);
+  const rootRef = useRef<HTMLSpanElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+
   const editor = useInlineFieldEditor<string>({
     committed: toDraft(value),
     onSave: (next: string) => onSave(parseDraft(next)),
@@ -65,6 +71,38 @@ export function InlineDateCell({
     onAnnounce,
   });
 
+  useEffect(() => {
+    if (!calendarOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        setCalendarOpen(false);
+      }
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [calendarOpen]);
+
+  const openCalendar = useCallback(() => {
+    if (readOnly) return;
+    editor.enterEdit();
+    setCalendarOpen(true);
+  }, [editor, readOnly]);
+
+  const closeCalendar = useCallback(() => {
+    setCalendarOpen(false);
+    triggerRef.current?.focus();
+  }, []);
+
+  const handleCalendarSelect = useCallback(
+    (iso: string) => {
+      editor.setDraft(iso);
+      setCalendarOpen(false);
+      triggerRef.current?.focus();
+      void editor.commit(iso);
+    },
+    [editor],
+  );
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
       if (readOnly) return;
@@ -73,7 +111,11 @@ export function InlineDateCell({
         void editor.commit();
       } else if (e.key === 'Escape') {
         e.preventDefault();
-        editor.cancel();
+        if (calendarOpen) {
+          setCalendarOpen(false);
+        } else {
+          editor.cancel();
+        }
       } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
         const current = editor.draft.trim();
         if (current === '' || !ISO_DATE_RE.test(current)) return;
@@ -82,7 +124,7 @@ export function InlineDateCell({
         editor.setDraft(addDays(current, direction));
       }
     },
-    [editor, readOnly],
+    [calendarOpen, editor, readOnly],
   );
 
   if (readOnly) {
@@ -95,6 +137,7 @@ export function InlineDateCell({
 
   return (
     <span
+      ref={rootRef}
       className="inline-cell inline-cell--date"
       data-status={editor.status}
       data-flash={editor.flashing ? 'true' : undefined}
@@ -116,7 +159,27 @@ export function InlineDateCell({
         onKeyDown={handleKeyDown}
         data-testid={testId ? `${testId}-input` : undefined}
       />
-      <InlineCellChevron />
+      <button
+        ref={triggerRef}
+        type="button"
+        className="inline-cell__calendar-trigger"
+        aria-label={t('inlineEdit.datePicker.openAria', { defaultValue: 'Open calendar' })}
+        aria-haspopup="dialog"
+        aria-expanded={calendarOpen}
+        tabIndex={-1}
+        onClick={openCalendar}
+        data-testid={testId ? `${testId}-calendar-btn` : undefined}
+      >
+        <InlineCellChevron />
+      </button>
+      {calendarOpen ? (
+        <InlineDateCalendar
+          selected={ISO_DATE_RE.test(editor.draft.trim()) ? editor.draft.trim() : value}
+          onSelect={handleCalendarSelect}
+          onClose={closeCalendar}
+          ariaLabel={t('inlineEdit.datePicker.calendarAria', { defaultValue: 'Pick a date' })}
+        />
+      ) : null}
       <InlineCellError
         error={editor.error}
         onRetry={() => void editor.retry()}
@@ -150,4 +213,3 @@ function resolveDateCellMessage(
   }
   return error.message;
 }
-

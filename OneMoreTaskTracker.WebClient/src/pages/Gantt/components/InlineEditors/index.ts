@@ -7,6 +7,8 @@ export { InlineTextCell } from './InlineTextCell';
 export type { InlineTextCellProps } from './InlineTextCell';
 export { InlineDateCell } from './InlineDateCell';
 export type { InlineDateCellProps } from './InlineDateCell';
+export { InlineDateCalendar } from './InlineDateCalendar';
+export type { InlineDateCalendarProps } from './InlineDateCalendar';
 export { InlineOwnerPicker } from './InlineOwnerPicker';
 export type { InlineOwnerPickerProps } from './InlineOwnerPicker';
 export { useInlineFieldEditor } from './useInlineFieldEditor';

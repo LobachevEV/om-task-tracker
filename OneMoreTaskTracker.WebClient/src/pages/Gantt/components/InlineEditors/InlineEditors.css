@@ -107,6 +107,23 @@
   background-color: var(--accent-dim);
 }
 
+/* ------------- Calendar trigger button (date cells) ------------- */
+/* Invisible wrapper around InlineCellChevron; pointer-events let it receive
+ * click while the visual affordance is delegated to the chevron glyph. */
+.inline-cell__calendar-trigger {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.inline-cell__calendar-trigger:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
+
 /* ------------- Chevron glyph (date + owner cells) ------------- */
 .inline-cell__chevron {
   display: inline-flex;

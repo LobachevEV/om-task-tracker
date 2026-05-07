@@ -1,0 +1,172 @@
+/*
+ * InlineDateCalendar — custom calendar popover for InlineDateCell.
+ * Uses only var(--*) tokens from src/common/styles/tokens.css.
+ * No oklch() literals, no hex, no rgb.
+ */
+
+.inline-date-calendar {
+  position: absolute;
+  inset-block-start: calc(100% + 4px);
+  inset-inline-start: 0;
+  z-index: var(--z-popover);
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-3);
+  min-inline-size: 240px;
+}
+
+/* ---- Layout ---- */
+.rdp-root {
+  display: block;
+}
+
+.rdp-months {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.rdp-month {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.rdp-month-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block-end: var(--space-1);
+}
+
+.rdp-caption-label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.rdp-nav {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.rdp-nav-btn {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 24px;
+  block-size: 24px;
+  border-radius: 2px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.rdp-nav-btn:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.rdp-nav-btn:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.rdp-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ---- Grid ---- */
+.rdp-month-grid {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.rdp-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.rdp-weekday {
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  padding-block: var(--space-1);
+}
+
+.rdp-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.rdp-day {
+  text-align: center;
+}
+
+.rdp-day-btn {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 30px;
+  block-size: 30px;
+  border-radius: 3px;
+  font-size: var(--text-sm);
+  color: var(--text);
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.rdp-day-btn:hover {
+  background: var(--surface-2);
+}
+
+.rdp-day-btn:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.rdp-day--selected .rdp-day-btn {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.rdp-day--today .rdp-day-btn {
+  border: 1px solid var(--border-strong);
+  font-weight: 600;
+}
+
+.rdp-day--outside .rdp-day-btn {
+  color: var(--text-dim);
+}
+
+.rdp-day--disabled .rdp-day-btn {
+  color: var(--text-dim);
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.rdp-day--hidden {
+  visibility: hidden;
+}
+
+/* ---- Motion ---- */
+@media (prefers-reduced-motion: no-preference) {
+  .inline-date-calendar {
+    animation: calendar-in 100ms ease-out both;
+  }
+}
+
+@keyframes calendar-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
