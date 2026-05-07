@@ -507,7 +507,7 @@
         "type": "object",
         "description": "All fields optional — send only the fields you want to change. Sparse fields: `trackOwnerUserId`, `expectedVersion`.",
         "properties": {
-          "trackOwnerUserId": { "type": "integer", "format": "int32", "nullable": true, "minimum": 1, "description": "Must be a positive integer from the manager's roster." },
+          "trackOwnerUserId": { "type": "integer", "format": "int32", "nullable": true, "minimum": 1, "description": "Positive integer = assign from roster. JSON null = clear (revert to unassigned). Omitted = unchanged." },
           "expectedVersion":  { "type": "integer", "format": "int32", "nullable": true, "description": "Track-level optimistic-concurrency token. Body wins over `If-Match` header when both are supplied." }
         }
       },
@@ -515,7 +515,7 @@
         "type": "object",
         "description": "All fields optional — send only the fields you want to change. Sparse fields: `stageOwnerUserId`, `plannedStart`, `plannedEnd`, `expectedStageVersion`.",
         "properties": {
-          "stageOwnerUserId":     { "type": "integer", "format": "int32", "nullable": true, "description": "Positive integer = assign from roster. -1 = clear (revert to track owner inheritance). Omitted = unchanged." },
+          "stageOwnerUserId":     { "type": "integer", "format": "int32", "nullable": true, "description": "Positive integer = assign from roster. JSON null = clear (revert to track owner inheritance). Omitted = unchanged." },
           "plannedStart":         { "type": "string",  "format": "date",  "nullable": true },
           "plannedEnd":           { "type": "string",  "format": "date",  "nullable": true },
           "expectedStageVersion": { "type": "integer", "format": "int32", "nullable": true, "description": "Stage-scoped optimistic-concurrency token. Body wins over `If-Match` header when both are supplied." }

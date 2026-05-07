@@ -83,10 +83,13 @@ public class GrpcExceptionMiddleware(RequestDelegate next, ILogger<GrpcException
 
         var resolvedMessage = string.IsNullOrWhiteSpace(publicPart) ? fallbackMessage : publicPart;
 
-        // Only AlreadyExists (version conflict) and FailedPrecondition (stage
-        // overlap/order/rangeInvalid) carry a contract-declared conflict
-        // envelope. For other status codes a marker is a misuse — ignore it.
-        if (code != StatusCode.AlreadyExists && code != StatusCode.FailedPrecondition)
+        // Only AlreadyExists (version conflict), FailedPrecondition (stage
+        // overlap/order), and InvalidArgument (cross-kind admittedKeys) carry
+        // a contract-declared conflict envelope. For other status codes a
+        // marker is a misuse — ignore it.
+        if (code != StatusCode.AlreadyExists
+            && code != StatusCode.FailedPrecondition
+            && code != StatusCode.InvalidArgument)
             return (fallbackMessage, null);
 
         try

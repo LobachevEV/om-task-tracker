@@ -22,4 +22,11 @@ internal static class ConflictDetail
             kind = "overlap",
             neighbour = neighbourStage
         })}";
+
+    public static string CrossKindAdmittedKeys(IReadOnlyList<string> admittedKeys) =>
+        $"Invalid stage key for kind{Marker}{JsonSerializer.Serialize(new
+        {
+            kind = "admittedKeys",
+            admittedKeys
+        })}";
 }

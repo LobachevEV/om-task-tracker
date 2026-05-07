@@ -67,7 +67,7 @@
 }
 
 /* 1100px: hide the stage-code chip (internal-id); dates stay stacked. */
-@media (max-width: 1099px) {
+@media (max-width: 1100px) {
   .gantt-track-stage-row__gutter {
     grid-template-columns:
       [label] 100px

@@ -21,7 +21,8 @@ public sealed class PatchFeatureTrackStageRequestValidator : AbstractValidator<P
 
         RuleFor(r => r.StageKey)
             .Must((r, stageKey) => FeatureTrackStageScope.IsAdmittedFor(r.Kind, stageKey))
-            .WithMessage(r => $"stage_key {r.StageKey} is not valid for kind {r.Kind}");
+            .WithMessage(r => ConflictDetail.CrossKindAdmittedKeys(
+                FeatureTrackStageScope.AdmittedWireNames(r.Kind)));
 
         When(r => r.HasPlannedStart && !string.IsNullOrWhiteSpace(r.PlannedStart), () =>
         {

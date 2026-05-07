@@ -319,7 +319,9 @@ public sealed class PatchFeatureTrackStageHandlerTests
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
-        ex.Which.Status.Detail.Should().Contain("SrApproving");
+        ex.Which.Status.Detail.Should().Contain("|conflict=");
+        ex.Which.Status.Detail.Should().Contain("admittedKeys");
+        ex.Which.Status.Detail.Should().Contain("CsApproving");
     }
 
     [Fact]
@@ -338,7 +340,9 @@ public sealed class PatchFeatureTrackStageHandlerTests
 
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
-        ex.Which.Status.Detail.Should().Contain("CsApproving");
+        ex.Which.Status.Detail.Should().Contain("|conflict=");
+        ex.Which.Status.Detail.Should().Contain("admittedKeys");
+        ex.Which.Status.Detail.Should().Contain("SrApproving");
     }
 
     [Fact]

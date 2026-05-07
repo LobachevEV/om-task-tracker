@@ -95,7 +95,7 @@ export interface GanttPageInternalProps {
   /** Number of consecutive load failures so far (0 = first error). */
   failCount: number;
   /** True when the latest error is a deterministic schema-mismatch (Zod). */
-  schemaMismatch: boolean;
+  schemaMismatch?: boolean;
   onRetry: () => void;
   state: GanttPageState;
   /**
@@ -152,7 +152,7 @@ export function GanttPageInternal({
   loading,
   error,
   failCount,
-  schemaMismatch,
+  schemaMismatch = false,
   onRetry,
   state,
   onFeatureUpdated,
