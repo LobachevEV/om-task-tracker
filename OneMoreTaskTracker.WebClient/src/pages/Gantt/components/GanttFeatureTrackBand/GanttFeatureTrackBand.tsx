@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MiniTeamMember } from '../../../../common/types/feature';
 import type { FeatureTrack, FeatureTrackKind } from '../../../../common/types/featureTrack';
@@ -6,6 +6,7 @@ import type { TeamRosterMember } from '../../../../common/api/teamApi';
 import { Avatar, roleToAvatarTone } from '../../../../common/ds';
 import type { DateWindow } from '../../ganttMath';
 import type { TrackMutationCallbacks } from '../InlineEditors/useTrackMutationCallbacks';
+import { InlineOwnerPicker } from '../InlineEditors';
 import { GanttTrackStageRow } from '../GanttTrackStageRow';
 import { selectStagesForKind } from '../../selectStagesForKind';
 import './GanttFeatureTrackBand.css';
@@ -55,6 +56,16 @@ export function GanttFeatureTrackBand({
     ? t('tracks.collapseAria', { defaultValue: 'Collapse {{kind}} track', kind: trackLabel })
     : t('tracks.expandAria', { defaultValue: 'Expand {{kind}} track', kind: trackLabel });
 
+  const inlineEnabled = canEdit && mutations != null && roster != null;
+
+  const buildOwnerAnnouncement = useCallback(
+    (outcome: 'saved' | 'error') =>
+      outcome === 'saved'
+        ? t('inlineEdit.announce.leadSaved', { defaultValue: 'Feature lead saved.' })
+        : t('inlineEdit.announce.leadError', { defaultValue: 'Feature lead change was rejected.' }),
+    [t],
+  );
+
   return (
     <div
       className="gantt-track-band"
@@ -79,7 +90,26 @@ export function GanttFeatureTrackBand({
             </span>
           </button>
           <span className="gantt-track-band__tag">{trackLabel}</span>
-          {trackOwner ? (
+          {inlineEnabled && mutations != null && roster != null ? (
+            <InlineOwnerPicker
+              value={track.trackOwnerUserId}
+              displayName={trackOwner?.displayName ?? null}
+              roster={roster}
+              clearable={false}
+              ariaLabel={t('tracks.ownerAria', {
+                defaultValue: 'Owner for {{kind}} track of "{{title}}"',
+                kind: trackLabel,
+                title: featureTitle,
+              })}
+              testId={`track-owner-editor-${track.featureId}-${kind}`}
+              onSave={async (next) => {
+                if (next == null) return;
+                await mutations.saveTrackOwner(track.featureId, kind, next, track.version);
+              }}
+              onAnnounce={onAnnounce}
+              buildAnnouncement={buildOwnerAnnouncement}
+            />
+          ) : trackOwner ? (
             <span className="gantt-track-band__owner">
               <Avatar
                 name={trackOwner.displayName}

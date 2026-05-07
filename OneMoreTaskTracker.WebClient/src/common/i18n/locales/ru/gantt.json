@@ -204,7 +204,8 @@
       "release_to_live": "Релиз в прод",
       "cs_approving": "CS согласование",
       "unknown": "Неизвестный этап"
-    }
+    },
+    "ownerAria": "Владелец трека {{kind}} для \"{{title}}\""
   },
   "stagePlan": {
     "title": "План этапов",

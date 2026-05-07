@@ -199,7 +199,8 @@
       "release_to_live": "Release to live",
       "cs_approving": "CS approving",
       "unknown": "Unknown stage"
-    }
+    },
+    "ownerAria": "Owner for {{kind}} track of \"{{title}}\""
   },
   "stagePlan": {
     "title": "Stage plan",

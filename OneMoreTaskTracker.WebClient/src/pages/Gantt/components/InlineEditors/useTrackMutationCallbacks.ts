@@ -4,6 +4,12 @@ import type { FeatureTrack } from '../../../../common/types/featureTrack';
 import type { FeatureTrackKind, FeatureTrackStageKey } from '../../../../common/types/featureTrack';
 
 export interface TrackMutationCallbacks {
+  saveTrackOwner: (
+    featureId: number,
+    kind: FeatureTrackKind,
+    next: number,
+    version: number,
+  ) => Promise<void>;
   saveTrackStageOwner: (
     featureId: number,
     kind: FeatureTrackKind,
@@ -35,6 +41,17 @@ export function useTrackMutationCallbacks(
   options: UseTrackMutationCallbacksOptions,
 ): TrackMutationCallbacks {
   const { onTrackApplied } = options;
+
+  const saveTrackOwner = useCallback<TrackMutationCallbacks['saveTrackOwner']>(
+    async (featureId, kind, next, version) => {
+      const updated = await planApi.patchFeatureTrack(featureId, kind, {
+        trackOwnerUserId: next,
+        expectedVersion: version,
+      });
+      onTrackApplied(featureId, updated);
+    },
+    [onTrackApplied],
+  );
 
   const saveTrackStageOwner = useCallback<TrackMutationCallbacks['saveTrackStageOwner']>(
     async (featureId, kind, stageKey, next, stageVersion) => {
@@ -75,10 +92,11 @@ export function useTrackMutationCallbacks(
 
   return useMemo(
     () => ({
+      saveTrackOwner,
       saveTrackStageOwner,
       saveTrackStagePlannedStart,
       saveTrackStagePlannedEnd,
     }),
-    [saveTrackStageOwner, saveTrackStagePlannedStart, saveTrackStagePlannedEnd],
+    [saveTrackOwner, saveTrackStageOwner, saveTrackStagePlannedStart, saveTrackStagePlannedEnd],
   );
 }
