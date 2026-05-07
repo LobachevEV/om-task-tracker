@@ -32,14 +32,17 @@
   color: inherit;
   font: inherit;
   border-radius: 2px;
-  /* Transparent resting underline so the dotted hover hairline doesn't
-   * shift layout on first reveal. */
-  border-block-end: 1px solid transparent;
   cursor: text;
 }
 
-/* Resting affordance — dotted accent underline on hover tells the manager
- * this cell is editable (Nielsen: recognition > recall). */
+/* Resting affordance — faint dotted underline at 30 % opacity signals editability
+ * without hover; strengthens to full opacity on hover (Nielsen: recognition over recall). */
+.inline-cell__input,
+.inline-cell[data-status='idle'] .inline-cell__input {
+  border-block-end: 1px dotted color-mix(in oklch, var(--accent) 30%, transparent);
+}
+
+/* Hover: strengthen the affordance to full-opacity dotted accent. */
 .inline-cell__input:hover,
 .inline-cell[data-status='idle'] .inline-cell__input:hover {
   border-block-end: 1px dotted var(--accent);
@@ -172,7 +175,7 @@
   background: var(--surface);
   padding: 2px 4px;
   border-radius: 3px;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 30%);
+  box-shadow: 0 1px 2px color-mix(in oklch, var(--text) 30%, transparent);
   max-inline-size: 100%;
   min-inline-size: 0;
 }
