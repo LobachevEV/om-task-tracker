@@ -140,6 +140,20 @@
 .inline-cell__clear:hover {
   color: var(--text);
 }
+.inline-cell__clear--pending {
+  inline-size: auto;
+  padding-inline: 6px;
+  background: var(--danger);
+  color: #fff;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.inline-cell__clear--pending:hover {
+  background: color-mix(in srgb, var(--danger) 85%, #000 15%);
+  color: #fff;
+}
 
 /* ------------- Inline micro-error text ------------- */
 .inline-cell__error {

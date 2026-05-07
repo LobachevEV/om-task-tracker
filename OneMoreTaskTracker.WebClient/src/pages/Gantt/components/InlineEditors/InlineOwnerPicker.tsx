@@ -74,6 +74,8 @@ export function InlineOwnerPicker({
   const [query, setQuery] = useState<string>(displayName ?? '');
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
+  const [clearPhase, setClearPhase] = useState<'idle' | 'pending'>('idle');
+  const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [trackedValue, setTrackedValue] = useState<number | null>(value);
   const [trackedDisplayName, setTrackedDisplayName] = useState<string | null>(displayName);
@@ -138,6 +140,40 @@ export function InlineOwnerPicker({
       }
     },
     [editor, roster],
+  );
+
+  // Clean up the auto-revert timer on unmount to prevent setState-after-unmount.
+  useEffect(() => () => { if (clearTimerRef.current != null) clearTimeout(clearTimerRef.current); }, []);
+
+  const revertClear = useCallback(() => {
+    if (clearTimerRef.current != null) {
+      clearTimeout(clearTimerRef.current);
+      clearTimerRef.current = null;
+    }
+    setClearPhase('idle');
+  }, []);
+
+  const handleClearClick = useCallback(() => {
+    if (clearPhase === 'idle') {
+      setClearPhase('pending');
+      clearTimerRef.current = setTimeout(revertClear, 2000);
+    } else {
+      revertClear();
+      void commitUser(null);
+    }
+  }, [clearPhase, commitUser, revertClear]);
+
+  const handleClearKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLButtonElement>) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleClearClick();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        revertClear();
+      }
+    },
+    [handleClearClick, revertClear],
   );
 
   const handleKeyDown = useCallback(
@@ -206,6 +242,11 @@ export function InlineOwnerPicker({
     );
   }
 
+  const clearAriaLabel =
+    clearPhase === 'pending'
+      ? t('inlineEdit.clearOwner.confirmAria', { defaultValue: 'Click again to confirm clear' })
+      : t('inlineEdit.clearOwner.idleAria', { defaultValue: 'Clear owner' });
+
   return (
     <div
       ref={rootRef}
@@ -260,16 +301,16 @@ export function InlineOwnerPicker({
       {value != null && clearable ? (
         <button
           type="button"
-          className="inline-cell__clear"
-          aria-label={t('stagePlan.clearPerformer', { defaultValue: 'Clear performer' })}
-          onMouseDown={(e) => {
-            // Keep focus in the input.
-            e.preventDefault();
-            void commitUser(null);
-          }}
-          tabIndex={-1}
+          className={`inline-cell__clear${clearPhase === 'pending' ? ' inline-cell__clear--pending' : ''}`}
+          aria-label={clearAriaLabel}
+          aria-pressed={clearPhase === 'pending'}
+          tabIndex={0}
+          onClick={handleClearClick}
+          onKeyDown={handleClearKeyDown}
         >
-          ×
+          {clearPhase === 'pending'
+            ? t('inlineEdit.clearOwner.confirmLabel', { defaultValue: 'Confirm clear' })
+            : '×'}
         </button>
       ) : null}
       {open ? (
