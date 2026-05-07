@@ -47,7 +47,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .gantt-track-band__toggle {
-    transition: color 120ms;
+    transition: color var(--transition-fast);
   }
 
   .gantt-track-band__toggle:hover {

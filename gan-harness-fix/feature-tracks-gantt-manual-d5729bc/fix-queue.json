@@ -43,7 +43,8 @@
       "reproduction_interpreter": "bash",
       "source_iteration": 1,
       "source_track": "frontend",
-      "status": "open",
+      "status": "closed",
+      "targeted_iter": 2,
       "depends_on": [],
       "must_not_touch_intersection_checked": true
     },
