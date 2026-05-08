@@ -19,4 +19,13 @@ public record MiniTeamMemberResponse(int UserId, string Email, string DisplayNam
 
         return new MiniTeamMemberResponse(userId, string.Empty, string.Empty, string.Empty);
     }
+
+    internal static MiniTeamMemberResponse? TryFrom(int? userId, IReadOnlyDictionary<int, TeamRosterMember>? roster)
+    {
+        if (userId is not int uid || uid <= 0 || roster is null)
+            return null;
+        return roster.TryGetValue(uid, out var member)
+            ? new MiniTeamMemberResponse(member.UserId, member.Email, DisplayNameHelper.ExtractDisplayName(member.Email), member.Role)
+            : null;
+    }
 }

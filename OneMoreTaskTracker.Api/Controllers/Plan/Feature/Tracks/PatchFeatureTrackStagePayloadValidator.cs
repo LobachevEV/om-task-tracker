@@ -14,10 +14,6 @@ public sealed class PatchFeatureTrackStagePayloadValidator : AbstractValidator<P
         {
             RuleFor(p => p.StageOwnerUserId!.Value)
                 .GreaterThan(0).WithMessage(PlanRequestHelpers.InvalidRequest);
-        });
-
-        When(p => p.TeamMemberId.HasValue, () =>
-        {
             RuleFor(p => p.TeamMemberId)
                 .MustBeOnCallerRoster(rosterProvider);
         });

@@ -17,9 +17,7 @@ public record FeatureTrackSummaryResponse(
         FeatureTrackDto track,
         IReadOnlyDictionary<int, TeamRosterMember>? roster = null)
     {
-        var trackOwner = track.TrackOwnerUserId > 0 && roster is not null && roster.ContainsKey(track.TrackOwnerUserId)
-            ? MiniTeamMemberResponse.From(track.TrackOwnerUserId, roster)
-            : null;
+        var trackOwner = MiniTeamMemberResponse.TryFrom(track.TrackOwnerUserId, roster);
 
         return new(
             track.Id,
@@ -35,9 +33,7 @@ public record FeatureTrackSummaryResponse(
         FeatureTrackDto track,
         IReadOnlyDictionary<int, TeamRosterMember> roster)
     {
-        var trackOwner = track.TrackOwnerUserId > 0 && roster.ContainsKey(track.TrackOwnerUserId)
-            ? MiniTeamMemberResponse.From(track.TrackOwnerUserId, roster)
-            : null;
+        var trackOwner = MiniTeamMemberResponse.TryFrom(track.TrackOwnerUserId, roster);
 
         return new FeatureTrackDetailResponse(
             track.Id,

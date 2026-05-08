@@ -1,6 +1,4 @@
 using System.Globalization;
-using Grpc.Core;
-using OneMoreTaskTracker.Proto.Users;
 
 namespace OneMoreTaskTracker.Api.Controllers.Plan;
 
@@ -72,26 +70,4 @@ internal static class PlanRequestHelpers
         return null;
     }
 
-    internal static async Task<IReadOnlyDictionary<int, TeamRosterMember>> LoadRosterForManagerAsync(
-        this UserService.UserServiceClient userService,
-        int managerId,
-        ILogger logger,
-        CancellationToken ct)
-    {
-        if (managerId <= 0)
-            return new Dictionary<int, TeamRosterMember>();
-
-        try
-        {
-            var roster = await userService.GetTeamRosterAsync(
-                new GetTeamRosterRequest { ManagerId = managerId },
-                cancellationToken: ct);
-            return (roster.Members ?? []).ToDictionary(m => m.UserId);
-        }
-        catch (RpcException ex)
-        {
-            logger.LogWarning(ex, "Failed to load roster for manager {ManagerId}", managerId);
-            return new Dictionary<int, TeamRosterMember>();
-        }
-    }
 }
