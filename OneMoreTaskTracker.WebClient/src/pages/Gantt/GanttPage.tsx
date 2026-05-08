@@ -56,7 +56,7 @@ const CHUNK_DAYS = 14;
  * Date columns and segment bars start at scroller-x = GUTTER_WIDTH_PX so they
  * share the same coordinate space; must match `--gantt-gutter-width` in CSS.
  */
-const GUTTER_WIDTH_PX = 320;
+const GUTTER_WIDTH_PX = 280;
 
 function toMiniMember(row: TeamRosterMember): MiniTeamMember {
   return {

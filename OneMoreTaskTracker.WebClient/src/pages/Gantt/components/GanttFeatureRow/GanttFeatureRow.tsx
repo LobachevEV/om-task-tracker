@@ -6,7 +6,7 @@ import type {
   MiniTeamMember,
 } from '../../../../common/types/feature';
 import type { TeamRosterMember } from '../../../../common/api/teamApi';
-import { daysBetween, formatShortDate, type BarGeometryPx, type DateWindow } from '../../ganttMath';
+import { daysBetween, type BarGeometryPx, type DateWindow } from '../../ganttMath';
 import type { StageBarGeometry } from '../../ganttStageGeometry';
 import { featureIsOverdue, plannedStageCount } from '../../ganttStageGeometry';
 import { GanttSegmentedBar } from '../GanttSegmentedBar';
@@ -95,8 +95,7 @@ function GanttFeatureRowInner({
   loadedRange,
   dayPx = 24,
 }: GanttFeatureRowProps) {
-  const { t, i18n } = useTranslation('gantt');
-  const locale = i18n.language || 'en';
+  const { t } = useTranslation('gantt');
 
   const isOverdue = useMemo(() => featureIsOverdue(feature, today), [feature, today]);
   const planned = useMemo(() => plannedStageCount(feature), [feature]);
@@ -255,9 +254,9 @@ function GanttFeatureRowInner({
               <span className="gantt-row__no-plan-label">{t('row.notPlannedYet')}</span>
             ) : (
               <span className="gantt-row__dates">
-                {formatShortDate(feature.plannedStart, locale)}
-                <span className="gantt-row__meta-sep">{' – '}</span>
-                {formatShortDate(feature.plannedEnd, locale)}
+                {feature.plannedStart ?? '—'}
+                <span className="gantt-row__meta-sep">{' · '}</span>
+                {feature.plannedEnd ?? '—'}
               </span>
             )}
             <span className="gantt-row__meta-sep">{'·'}</span>

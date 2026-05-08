@@ -7,13 +7,26 @@ import type {
 } from '../../../../common/types/featureTrack';
 import type { TeamRosterMember } from '../../../../common/api/teamApi';
 import { Avatar, roleToAvatarTone } from '../../../../common/ds';
-import { daysBetween, formatShortDate, type DateWindow } from '../../ganttMath';
+import { parseIsoDate, daysBetween, type DateWindow } from '../../ganttMath';
 import { getTrackStageMeta } from '../../trackStageMeta';
 import { computeTrackStageBars } from '../../trackStageGeometry';
 import { GanttStageBar } from '../GanttStageBar';
 import { InlineDateCell, InlineOwnerPicker } from '../InlineEditors';
 import type { TrackMutationCallbacks } from '../InlineEditors/useTrackMutationCallbacks';
 import './GanttTrackStageRow.css';
+
+function formatShortDate(iso: string, locale: string): string {
+  try {
+    const date = parseIsoDate(iso);
+    return new Intl.DateTimeFormat(locale, {
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'UTC',
+    }).format(date);
+  } catch {
+    return iso;
+  }
+}
 
 
 export interface GanttTrackStageRowProps {
@@ -61,8 +74,12 @@ export function GanttTrackStageRow({
   const bars = computeTrackStageBars(loadedRange, track, today, dayPx);
   const barEntry = bars[index] ?? null;
 
-  const shortStart = formatShortDate(stage.plannedStart, locale);
-  const shortEnd = formatShortDate(stage.plannedEnd, locale);
+  const shortStart = stage.plannedStart
+    ? formatShortDate(stage.plannedStart, locale)
+    : '—';
+  const shortEnd = stage.plannedEnd
+    ? formatShortDate(stage.plannedEnd, locale)
+    : '—';
 
   const dtr = (() => {
     if (!stage.plannedEnd) return '—';
@@ -124,24 +141,25 @@ export function GanttTrackStageRow({
     const pickerDisplayName = isInherited
       ? inheritedOwner!.displayName
       : (owner?.displayName ?? null);
-    const inheritedAriaLabel = isInherited
-      ? t('tracks.row.ariaInheritedOwner', {
-          defaultValue: 'Owner inherited from track: {{name}}',
-          name: inheritedOwner!.displayName,
-        })
-      : undefined;
     ownerNode = (
       <span
-        className="gantt-track-stage-row__owner-inline"
+        className={
+          isInherited
+            ? 'gantt-track-stage-row__owner-inline gantt-track-stage-row__owner-inline--inherited'
+            : 'gantt-track-stage-row__owner-inline'
+        }
         data-inherited={isInherited ? 'true' : undefined}
-        aria-label={inheritedAriaLabel}
+        aria-label={
+          isInherited
+            ? t('tracks.row.ariaInheritedOwner', {
+                defaultValue: 'Owner inherited from track: {{name}}',
+                name: inheritedOwner!.displayName,
+              })
+            : undefined
+        }
       >
         {isInherited ? (
-          <span
-            className="gantt-track-stage-row__inherit-glyph"
-            aria-hidden="true"
-            title={inheritedAriaLabel}
-          >&#x2198;</span>
+          <span className="gantt-track-stage-row__inherit-glyph" aria-hidden="true">&#x2198;</span>
         ) : null}
         <InlineOwnerPicker
           value={stage.stageOwnerUserId}
@@ -167,35 +185,30 @@ export function GanttTrackStageRow({
           allowInherit={isInherited || hasOwnerId}
         />
         {isInherited ? (
-          <span style={{ display: 'none' }} aria-hidden="true">
+          <span className="gantt-track-stage-row__inherit-suffix" aria-hidden="true">
             {t('tracks.row.inheritedOwnerSuffix', { defaultValue: '· по треку' })}
           </span>
         ) : null}
       </span>
     );
   } else if (isInherited) {
-    const inheritedAriaLabel = t('tracks.row.ariaInheritedOwner', {
-      defaultValue: 'Owner inherited from track: {{name}}',
-      name: inheritedOwner.displayName,
-    });
     ownerNode = (
       <span
         className="gantt-track-stage-row__inherited"
-        aria-label={inheritedAriaLabel}
+        aria-label={t('tracks.row.ariaInheritedOwner', {
+          defaultValue: 'Owner inherited from track: {{name}}',
+          name: inheritedOwner.displayName,
+        })}
       >
         <Avatar name={inheritedOwner.displayName} size="sm" tone={roleToAvatarTone(inheritedOwner.role)} />
-        <span className="gantt-track-stage-row__owner-text">
+        <span className="gantt-track-stage-row__owner-text gantt-track-stage-row__owner-text--inherited">
           {inheritedOwner.displayName}
           {' '}
-          <span style={{ display: 'none' }} aria-hidden="true">
+          <span className="gantt-track-stage-row__inherit-suffix" aria-hidden="true">
             {t('tracks.row.inheritedOwnerSuffix', { defaultValue: '· по треку' })}
           </span>
         </span>
-        <span
-          className="gantt-track-stage-row__inherit-glyph"
-          aria-hidden="true"
-          title={inheritedAriaLabel}
-        >&#x2198;</span>
+        <span className="gantt-track-stage-row__inherit-glyph" aria-hidden="true">&#x2198;</span>
       </span>
     );
   } else if (!hasOwnerId) {
@@ -238,6 +251,13 @@ export function GanttTrackStageRow({
       data-kind={kind.toLowerCase()}
     >
       <div className="gantt-track-stage-row__gutter">
+        <span
+          className="gantt-track-stage-row__code"
+          aria-hidden="true"
+          style={{ color: `var(${meta.tokenVar})` }}
+        >
+          {meta.code3}
+        </span>
         <span className="gantt-track-stage-row__name">{stageName}</span>
         <span className="gantt-track-stage-row__owner" data-testid="track-stage-owner">
           {ownerNode}

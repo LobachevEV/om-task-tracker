@@ -1,11 +1,12 @@
 .gantt-track-band {
+  border-left: 1px solid var(--border-strong);
   margin-left: 0;
 }
 
 .gantt-track-band__header {
   display: grid;
   grid-template-columns: var(--gantt-gutter-width, 280px) 1fr;
-  min-height: 28px;
+  min-height: 24px;
   align-items: center;
 }
 
@@ -14,7 +15,7 @@
   align-items: center;
   gap: var(--space-2);
   padding-inline: var(--space-2) var(--space-3);
-  min-height: 28px;
+  min-height: 24px;
   position: sticky;
   inset-inline-start: 0;
   background: var(--surface);
@@ -28,13 +29,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   padding: 0;
   border: none;
   background: transparent;
   cursor: pointer;
-  color: var(--text-dim);
+  color: var(--text-muted);
   flex-shrink: 0;
   border-radius: var(--radius-micro);
 }
@@ -55,7 +56,7 @@
 }
 
 .gantt-track-band__chevron {
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1;
   user-select: none;
 }
@@ -91,5 +92,5 @@
 }
 
 .gantt-track-band__lane-placeholder {
-  height: 28px;
+  height: 24px;
 }
