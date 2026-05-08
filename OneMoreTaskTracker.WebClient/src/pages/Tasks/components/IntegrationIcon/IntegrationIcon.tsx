@@ -1,4 +1,5 @@
-import type { IntegrationKind, IntegrationSignal } from '../../integrationStatus';
+import type { IntegrationKind } from '../../../../common/ds';
+import type { IntegrationSignal } from '../../integrationStatus';
 import { SVG_PATHS } from './svgPaths';
 import './IntegrationIcon.css';
 

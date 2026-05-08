@@ -15,25 +15,25 @@ describe('deriveIntegrations', () => {
     });
   });
 
-  it('returns git waiting indicator for InDev state', () => {
+  it('returns gitlab waiting indicator for InDev state', () => {
     const task: Task = { id: 1, jiraId: 'PROJ-1', state: 'InDev', userId: 1 };
     const indicators = deriveIntegrations(task);
 
     expect(indicators).toHaveLength(1);
     expect(indicators[0]).toEqual({
-      kind: 'git',
+      kind: 'gitlab',
       signal: 'waiting',
       tooltip: expect.stringContaining('Разработка'),
     });
   });
 
-  it('returns git and confluence waiting indicators for MrToRelease state', () => {
+  it('returns gitlab and confluence waiting indicators for MrToRelease state', () => {
     const task: Task = { id: 1, jiraId: 'PROJ-1', state: 'MrToRelease', userId: 1 };
     const indicators = deriveIntegrations(task);
 
     expect(indicators).toHaveLength(2);
     expect(indicators[0]).toEqual({
-      kind: 'git',
+      kind: 'gitlab',
       signal: 'waiting',
       tooltip: expect.stringContaining('MR'),
     });
@@ -56,25 +56,25 @@ describe('deriveIntegrations', () => {
     });
   });
 
-  it('returns git waiting indicator for MrToMaster state', () => {
+  it('returns gitlab waiting indicator for MrToMaster state', () => {
     const task: Task = { id: 1, jiraId: 'PROJ-1', state: 'MrToMaster', userId: 1 };
     const indicators = deriveIntegrations(task);
 
     expect(indicators).toHaveLength(1);
     expect(indicators[0]).toEqual({
-      kind: 'git',
+      kind: 'gitlab',
       signal: 'waiting',
       tooltip: expect.stringContaining('MR в master'),
     });
   });
 
-  it('returns git passed indicator for Completed state', () => {
+  it('returns gitlab passed indicator for Completed state', () => {
     const task: Task = { id: 1, jiraId: 'PROJ-1', state: 'Completed', userId: 1 };
     const indicators = deriveIntegrations(task);
 
     expect(indicators).toHaveLength(1);
     expect(indicators[0]).toEqual({
-      kind: 'git',
+      kind: 'gitlab',
       signal: 'passed',
       tooltip: expect.stringContaining('Слито'),
     });

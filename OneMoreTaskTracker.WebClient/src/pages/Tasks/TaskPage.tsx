@@ -9,7 +9,8 @@ import {STATE_CLASS} from '../../common/constants/taskConstants';
 import {useKeyboardShortcut} from '../../common/hooks/useKeyboardShortcut';
 import {useAuth} from '../../common/auth/AuthContext';
 import type {Task, TaskState} from '../../common/types/task';
-import {IntegrationIcon, SVG_PATHS} from './components/IntegrationIcon';
+import {IntegrationIcon, signalToTone} from '../../common/ds';
+import {SVG_PATHS} from './components/IntegrationIcon';
 import {deriveIntegrations} from './integrationStatus';
 import './TaskPage.css';
 
@@ -196,7 +197,7 @@ export function TaskPage() {
                         </span>
                         <span className="task-list__integrations">
                           {deriveIntegrations(task).map((ind) => (
-                            <IntegrationIcon key={ind.kind} {...ind} />
+                            <IntegrationIcon key={ind.kind} kind={ind.kind} tone={signalToTone(ind.signal)} title={ind.tooltip} />
                           ))}
                         </span>
                         {isManager && task.userId !== user!.userId && (
