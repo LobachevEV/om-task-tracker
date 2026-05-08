@@ -38,7 +38,7 @@
   inset-inline-start: 0;
   background: var(--surface);
   border-inline-end: 1px solid var(--border);
-  z-index: 2;
+  z-index: var(--z-sticky);
   max-inline-size: var(--gantt-gutter-width, 280px);
   overflow: hidden;
 }

@@ -72,7 +72,7 @@
 .gantt-page__header-row {
   position: sticky;
   inset-block-start: 0;
-  z-index: 4;
+  z-index: var(--z-overlay);
   display: flex;
   flex-direction: row;
   background: var(--surface);
@@ -90,7 +90,7 @@
 .gantt-page__header-flank--leading {
   position: sticky;
   inset-inline-start: 0;
-  z-index: 1;
+  z-index: var(--z-base);
   border-inline-end: 1px solid var(--border);
   inline-size: var(--gantt-gutter-width);
 }
@@ -115,7 +115,7 @@
   inset-inline-start: var(--gantt-today-px, 0px);
   background: var(--accent);
   pointer-events: none;
-  z-index: 2;
+  z-index: var(--z-sticky);
 }
 
 /* Lanes row sits below the sticky date header. Cushions / chunk stripes flank

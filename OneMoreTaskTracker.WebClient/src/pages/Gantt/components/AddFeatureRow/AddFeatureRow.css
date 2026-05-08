@@ -27,7 +27,7 @@
 .add-feature-row--row .add-feature-row__form {
   position: sticky;
   inset-inline-start: 0;
-  z-index: 2;
+  z-index: var(--z-sticky);
   box-sizing: border-box;
   inline-size: var(--gantt-gutter-width, 280px);
   background: var(--surface);
@@ -55,8 +55,8 @@
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
+  gap: var(--space-2-5);
+  padding: var(--space-2-5) var(--space-3-5);
   color: var(--text-muted);
   block-size: 100%;
   transition:
@@ -121,7 +121,7 @@
   flex-direction: column;
   justify-content: center;
   gap: 4px;
-  padding: 8px 14px;
+  padding: var(--space-2) var(--space-3-5);
   block-size: 100%;
 }
 

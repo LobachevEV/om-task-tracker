@@ -14,7 +14,7 @@
   inset-inline-start: 0;
   padding: 8px 12px;
   background: var(--surface);
-  z-index: 2;
+  z-index: var(--z-sticky);
   border-inline-end: 1px solid var(--border);
   display: grid;
   gap: 4px;

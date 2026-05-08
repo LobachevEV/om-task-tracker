@@ -29,7 +29,7 @@
   background: var(--surface);
   padding: 6px 12px;
   border-inline-end: 1px solid var(--border);
-  z-index: 2;
+  z-index: var(--z-sticky);
   /* Constrain strictly to the feature gutter so no child (owner / side /
      dates / DTR) can overflow into the date-grid lane. */
   max-inline-size: var(--gantt-gutter-width, 280px);
