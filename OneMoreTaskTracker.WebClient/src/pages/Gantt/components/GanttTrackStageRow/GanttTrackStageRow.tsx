@@ -141,25 +141,24 @@ export function GanttTrackStageRow({
     const pickerDisplayName = isInherited
       ? inheritedOwner!.displayName
       : (owner?.displayName ?? null);
+    const inheritedAriaLabel = isInherited
+      ? t('tracks.row.ariaInheritedOwner', {
+          defaultValue: 'Owner inherited from track: {{name}}',
+          name: inheritedOwner!.displayName,
+        })
+      : undefined;
     ownerNode = (
       <span
-        className={
-          isInherited
-            ? 'gantt-track-stage-row__owner-inline gantt-track-stage-row__owner-inline--inherited'
-            : 'gantt-track-stage-row__owner-inline'
-        }
+        className="gantt-track-stage-row__owner-inline"
         data-inherited={isInherited ? 'true' : undefined}
-        aria-label={
-          isInherited
-            ? t('tracks.row.ariaInheritedOwner', {
-                defaultValue: 'Owner inherited from track: {{name}}',
-                name: inheritedOwner!.displayName,
-              })
-            : undefined
-        }
+        aria-label={inheritedAriaLabel}
       >
         {isInherited ? (
-          <span className="gantt-track-stage-row__inherit-glyph" aria-hidden="true">&#x2198;</span>
+          <span
+            className="gantt-track-stage-row__inherit-glyph"
+            aria-hidden="true"
+            title={inheritedAriaLabel}
+          >&#x2198;</span>
         ) : null}
         <InlineOwnerPicker
           value={stage.stageOwnerUserId}
@@ -185,30 +184,35 @@ export function GanttTrackStageRow({
           allowInherit={isInherited || hasOwnerId}
         />
         {isInherited ? (
-          <span className="gantt-track-stage-row__inherit-suffix" aria-hidden="true">
+          <span style={{ display: 'none' }} aria-hidden="true">
             {t('tracks.row.inheritedOwnerSuffix', { defaultValue: '· по треку' })}
           </span>
         ) : null}
       </span>
     );
   } else if (isInherited) {
+    const inheritedAriaLabel = t('tracks.row.ariaInheritedOwner', {
+      defaultValue: 'Owner inherited from track: {{name}}',
+      name: inheritedOwner.displayName,
+    });
     ownerNode = (
       <span
         className="gantt-track-stage-row__inherited"
-        aria-label={t('tracks.row.ariaInheritedOwner', {
-          defaultValue: 'Owner inherited from track: {{name}}',
-          name: inheritedOwner.displayName,
-        })}
+        aria-label={inheritedAriaLabel}
       >
         <Avatar name={inheritedOwner.displayName} size="sm" tone={roleToAvatarTone(inheritedOwner.role)} />
-        <span className="gantt-track-stage-row__owner-text gantt-track-stage-row__owner-text--inherited">
+        <span className="gantt-track-stage-row__owner-text">
           {inheritedOwner.displayName}
           {' '}
-          <span className="gantt-track-stage-row__inherit-suffix" aria-hidden="true">
+          <span style={{ display: 'none' }} aria-hidden="true">
             {t('tracks.row.inheritedOwnerSuffix', { defaultValue: '· по треку' })}
           </span>
         </span>
-        <span className="gantt-track-stage-row__inherit-glyph" aria-hidden="true">&#x2198;</span>
+        <span
+          className="gantt-track-stage-row__inherit-glyph"
+          aria-hidden="true"
+          title={inheritedAriaLabel}
+        >&#x2198;</span>
       </span>
     );
   } else if (!hasOwnerId) {

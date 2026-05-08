@@ -88,23 +88,8 @@
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  opacity: 0.65;
   min-width: 0;
   overflow: hidden;
-}
-
-.gantt-track-stage-row__owner-text--inherited {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  min-width: 0;
-  overflow: hidden;
-}
-
-.gantt-track-stage-row__inherit-suffix {
-  font-size: var(--text-xs);
-  color: var(--text-dim);
-  flex-shrink: 0;
 }
 
 .gantt-track-stage-row__inherit-glyph {
@@ -121,13 +106,6 @@
   gap: var(--space-1);
   min-width: 0;
   overflow: hidden;
-}
-
-/* Inherited state: dim everything to 0.65 opacity so the three-signal
-   affordance reads "set by track, not this stage". */
-.gantt-track-stage-row__owner-inline--inherited {
-  opacity: 0.65;
-  color: var(--text-muted);
 }
 
 .gantt-track-stage-row__avatar-placeholder {
