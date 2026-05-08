@@ -10,7 +10,7 @@ import {useKeyboardShortcut} from '../../common/hooks/useKeyboardShortcut';
 import {useAuth} from '../../common/auth/AuthContext';
 import type {Task, TaskState} from '../../common/types/task';
 import {IntegrationIcon, signalToTone} from '../../common/ds';
-import {SVG_PATHS} from './components/IntegrationIcon';
+import {SLACK_JUMP_PATH} from './slackJumpPaths';
 import {deriveIntegrations} from './integrationStatus';
 import './TaskPage.css';
 
@@ -219,7 +219,7 @@ export function TaskPage() {
                         fill="currentColor"
                         aria-hidden="true"
                       >
-                        <path d={SVG_PATHS.slack} />
+                        <path d={SLACK_JUMP_PATH} />
                       </svg>
                     </a>
                   </li>
