@@ -41,6 +41,20 @@ export function toIsoDate(d: Date): string {
   return `${y}-${mo}-${day}`;
 }
 
+export function formatShortDate(iso: string | null | undefined, locale: string): string {
+  if (!iso) return '—';
+  try {
+    const date = parseIsoDate(iso);
+    return new Intl.DateTimeFormat(locale, {
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'UTC',
+    }).format(date);
+  } catch {
+    return iso;
+  }
+}
+
 const MS_PER_DAY = 86_400_000;
 
 export function addDays(iso: string, n: number): string {

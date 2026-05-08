@@ -7,26 +7,13 @@ import type {
 } from '../../../../common/types/featureTrack';
 import type { TeamRosterMember } from '../../../../common/api/teamApi';
 import { Avatar, roleToAvatarTone } from '../../../../common/ds';
-import { parseIsoDate, daysBetween, type DateWindow } from '../../ganttMath';
+import { daysBetween, formatShortDate, type DateWindow } from '../../ganttMath';
 import { getTrackStageMeta } from '../../trackStageMeta';
 import { computeTrackStageBars } from '../../trackStageGeometry';
 import { GanttStageBar } from '../GanttStageBar';
 import { InlineDateCell, InlineOwnerPicker } from '../InlineEditors';
 import type { TrackMutationCallbacks } from '../InlineEditors/useTrackMutationCallbacks';
 import './GanttTrackStageRow.css';
-
-function formatShortDate(iso: string, locale: string): string {
-  try {
-    const date = parseIsoDate(iso);
-    return new Intl.DateTimeFormat(locale, {
-      month: 'short',
-      day: 'numeric',
-      timeZone: 'UTC',
-    }).format(date);
-  } catch {
-    return iso;
-  }
-}
 
 
 export interface GanttTrackStageRowProps {
@@ -74,12 +61,8 @@ export function GanttTrackStageRow({
   const bars = computeTrackStageBars(loadedRange, track, today, dayPx);
   const barEntry = bars[index] ?? null;
 
-  const shortStart = stage.plannedStart
-    ? formatShortDate(stage.plannedStart, locale)
-    : '—';
-  const shortEnd = stage.plannedEnd
-    ? formatShortDate(stage.plannedEnd, locale)
-    : '—';
+  const shortStart = formatShortDate(stage.plannedStart, locale);
+  const shortEnd = formatShortDate(stage.plannedEnd, locale);
 
   const dtr = (() => {
     if (!stage.plannedEnd) return '—';
