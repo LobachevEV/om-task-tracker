@@ -145,22 +145,22 @@
 
 .roster-table .avatar--mgr {
   background: color-mix(in oklch, var(--state-mr-master) 80%, var(--bg));
-  color: oklch(0.14 0.02 300);
+  color: var(--ink-role-mgr);
 }
 
 .roster-table .avatar--frontend {
   background: color-mix(in oklch, var(--state-in-test) 80%, var(--bg));
-  color: oklch(0.14 0.02 250);
+  color: var(--ink-role-fe);
 }
 
 .roster-table .avatar--backend {
   background: color-mix(in oklch, var(--state-mr-release) 80%, var(--bg));
-  color: oklch(0.14 0.02 190);
+  color: var(--ink-role-be);
 }
 
 .roster-table .avatar--qa {
   background: color-mix(in oklch, var(--state-completed) 80%, var(--bg));
-  color: oklch(0.14 0.02 145);
+  color: var(--ink-role-qa);
 }
 
 /* "YOU" chip */
