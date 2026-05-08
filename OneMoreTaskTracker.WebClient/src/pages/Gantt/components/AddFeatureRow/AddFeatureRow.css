@@ -27,7 +27,7 @@
 .add-feature-row--row .add-feature-row__form {
   position: sticky;
   inset-inline-start: 0;
-  z-index: 2;
+  z-index: var(--z-sticky);
   box-sizing: border-box;
   inline-size: var(--gantt-gutter-width, 280px);
   background: var(--surface);
@@ -44,7 +44,7 @@
 .add-feature-row--standalone .add-feature-row__ghost,
 .add-feature-row--standalone .add-feature-row__form {
   background: var(--surface);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   inline-size: 100%;
 }
 
@@ -55,8 +55,8 @@
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
+  gap: var(--space-2-5);
+  padding: var(--space-2-5) var(--space-3-5);
   color: var(--text-muted);
   block-size: 100%;
   transition:
@@ -71,7 +71,7 @@
   position: absolute;
   inset: 6px;
   border: 1px dashed var(--border-strong);
-  border-radius: 6px;
+  border-radius: var(--radius-base);
   pointer-events: none;
   transition: border-color 160ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -121,7 +121,7 @@
   flex-direction: column;
   justify-content: center;
   gap: 4px;
-  padding: 8px 14px;
+  padding: var(--space-2) var(--space-3-5);
   block-size: 100%;
 }
 
@@ -166,7 +166,7 @@
   flex: 0 0 auto;
   inline-size: 12px;
   block-size: 12px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   border: 2px solid color-mix(in oklch, var(--accent) 40%, transparent);
   border-block-start-color: var(--accent);
   animation: add-feature-row-spin 720ms linear infinite;

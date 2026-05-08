@@ -12,7 +12,7 @@
   height: 2rem;
   border: 3px solid color-mix(in oklch, var(--border) 50%, transparent);
   border-top-color: var(--accent);
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   animation: spin 0.7s linear infinite;
 }
 

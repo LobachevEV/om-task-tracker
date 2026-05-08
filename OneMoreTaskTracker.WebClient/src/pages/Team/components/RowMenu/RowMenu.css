@@ -30,10 +30,10 @@
   right: 0;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   min-width: 200px;
-  z-index: 1000;
+  z-index: var(--z-toast);
   margin-top: 0.5rem;
 }
 

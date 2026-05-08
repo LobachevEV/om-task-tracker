@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 import { IntegrationIcon } from '../../../../src/common/ds/IntegrationIcon/IntegrationIcon';
+import { signalToTone } from '../../../../src/common/ds/IntegrationIcon/signal';
 
 const meta: Meta<typeof IntegrationIcon> = {
   title: 'Primitives/IntegrationIcon',
@@ -13,7 +14,7 @@ const meta: Meta<typeof IntegrationIcon> = {
   },
   argTypes: {
     kind: { control: 'inline-radio', options: ['gitlab', 'github', 'jira', 'confluence', 'slack'] },
-    tone: { control: 'inline-radio', options: ['blocked', 'passed', 'failed', 'neutral'] },
+    tone: { control: 'inline-radio', options: ['blocked', 'passed', 'failed', 'neutral', null] },
   },
 };
 export default meta;
@@ -29,7 +30,7 @@ export const AllIntegrations: Story = {
       <IntegrationIcon kind="gitlab" tone="passed" title="GitLab: MR merged" />
       <IntegrationIcon kind="github" tone="passed" title="GitHub: checks green" />
       <IntegrationIcon kind="confluence" tone="blocked" title="Confluence: approval pending" />
-      <IntegrationIcon kind="slack" tone="neutral" title="Slack: open thread" />
+      <IntegrationIcon kind="slack" tone={null} title="Slack: no active thread" />
     </div>
   ),
 };
@@ -66,8 +67,8 @@ export const OnTaskRow: Story = {
       <span style={{ flex: 1, color: 'var(--text)', fontSize: 13 }}>
         Автоматизация pipeline релизов
       </span>
-      <IntegrationIcon kind="jira" tone="passed" title="Jira: in progress" />
-      <IntegrationIcon kind="gitlab" tone="blocked" title="GitLab: MR open, 2 reviewers" />
+      <IntegrationIcon kind="jira" tone={signalToTone('waiting')} title="Jira: in progress" />
+      <IntegrationIcon kind="gitlab" tone={signalToTone('failed')} title="GitLab: MR failed CI" />
       <IntegrationIcon kind="confluence" tone="failed" title="Confluence: review rejected" />
       <IntegrationIcon
         kind="slack"

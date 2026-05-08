@@ -1,6 +1,6 @@
 import type { Task } from '../../common/types/task';
+import type { IntegrationKind } from '../../common/ds';
 
-export type IntegrationKind = 'git' | 'jira' | 'confluence' | 'slack';
 export type IntegrationSignal = 'waiting' | 'passed' | 'failed' | 'none';
 
 export interface IntegrationIndicator {
@@ -19,20 +19,20 @@ export function deriveIntegrations(task: Task): IntegrationIndicator[] {
       out.push({ kind: 'jira', signal: 'waiting', tooltip: 'Ожидает назначения в Jira' });
       break;
     case 'InDev':
-      out.push({ kind: 'git', signal: 'waiting', tooltip: 'Разработка в ветке' });
+      out.push({ kind: 'gitlab', signal: 'waiting', tooltip: 'Разработка в ветке' });
       break;
     case 'MrToRelease':
-      out.push({ kind: 'git', signal: 'waiting', tooltip: 'MR в release — ожидает review' });
+      out.push({ kind: 'gitlab', signal: 'waiting', tooltip: 'MR в release — ожидает review' });
       out.push({ kind: 'confluence', signal: 'waiting', tooltip: 'Ожидает подтверждения CS' });
       break;
     case 'InTest':
       out.push({ kind: 'jira', signal: 'waiting', tooltip: 'QA в работе' });
       break;
     case 'MrToMaster':
-      out.push({ kind: 'git', signal: 'waiting', tooltip: 'MR в master — финальный гейт' });
+      out.push({ kind: 'gitlab', signal: 'waiting', tooltip: 'MR в master — финальный гейт' });
       break;
     case 'Completed':
-      out.push({ kind: 'git', signal: 'passed', tooltip: 'Слито в master' });
+      out.push({ kind: 'gitlab', signal: 'passed', tooltip: 'Слито в master' });
       break;
   }
 

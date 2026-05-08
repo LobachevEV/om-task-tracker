@@ -15,7 +15,7 @@
 }
 
 .field__input {
-  border-radius: 0.75rem;
+  border-radius: var(--radius-field);
   border: 1px solid var(--border);
   background-color: var(--bg);
   color: var(--text);

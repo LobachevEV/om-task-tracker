@@ -32,7 +32,7 @@
   position: absolute;
   inset-block-start: 4px;
   inset-inline-end: 8px;
-  z-index: 3;
+  z-index: var(--z-overlay);
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -46,7 +46,7 @@
   background: var(--surface);
   color: var(--accent);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-base);
   font-family: var(--font-mono, var(--font-sans));
   font-size: 11px;
   letter-spacing: 0.04em;

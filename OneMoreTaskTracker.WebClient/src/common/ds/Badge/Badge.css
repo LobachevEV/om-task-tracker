@@ -5,7 +5,7 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0.15rem 0.55rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.03em;
@@ -17,7 +17,7 @@
 .ds-badge__dot {
   width: 6px;
   height: 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: currentColor;
   flex-shrink: 0;
 }

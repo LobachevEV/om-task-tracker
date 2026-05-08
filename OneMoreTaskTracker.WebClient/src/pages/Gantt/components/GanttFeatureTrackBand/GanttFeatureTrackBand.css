@@ -20,7 +20,7 @@
   inset-inline-start: 0;
   background: var(--surface);
   border-inline-end: 1px solid var(--border);
-  z-index: 2;
+  z-index: var(--z-sticky);
   max-inline-size: var(--gantt-gutter-width, 280px);
   overflow: hidden;
 }
@@ -37,7 +37,7 @@
   cursor: pointer;
   color: var(--text-muted);
   flex-shrink: 0;
-  border-radius: 3px;
+  border-radius: var(--radius-micro);
 }
 
 .gantt-track-band__toggle:focus-visible {
