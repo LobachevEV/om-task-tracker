@@ -1,0 +1,50 @@
+# GitNexus reads only the root .gitignore + .gitnexusignore.
+# Nested .gitignore files (e.g. OneMoreTaskTracker.WebClient/.gitignore)
+# are NOT walked, so build artefacts inside subdirs must be re-listed here.
+#
+# DEFAULT_IGNORE_LIST already covers: node_modules, dist, build, coverage,
+# .git, .idea, .vscode, .vs, .github, .circleci, __tests__, __mocks__, ...
+# Root .gitignore already covers: bin/, obj/, publish/, .serena/, .specs/,
+# .design/, .worktrees/, .playwright-mcp/, .claude/ (mostly), .junie/memory/.
+# Entries below are the gaps.
+
+# --- WebClient build / generated output ---
+OneMoreTaskTracker.WebClient/storybook-static/
+OneMoreTaskTracker.WebClient/.vite/
+OneMoreTaskTracker.WebClient/dist-ssr/
+
+# --- WebClient test-runner artefacts ---
+OneMoreTaskTracker.WebClient/playwright-report/
+OneMoreTaskTracker.WebClient/test-results/
+OneMoreTaskTracker.WebClient/playwright/.cache/
+
+# --- One-off scratch / diff artefacts ---
+OneMoreTaskTracker.WebClient/iter3-diff.txt
+_contract-shards/
+**/_contract-shards/
+
+# --- GAN harness state (LLM-generated planning, not source) ---
+gan-harness/
+gan-harness-feature/
+gan-harness-fix/
+gan-harness-refactor/
+
+# --- Local index / graph caches ---
+graphify-out/
+.gitnexus/
+.graphifyignore
+
+# --- Editor / agent state not in DEFAULT_IGNORE_LIST or root .gitignore ---
+.history/
+.cursor/
+.codex/
+.junie/
+
+# --- Misc generated bundles anywhere in tree ---
+**/*.min.js
+**/*.min.css
+**/*.map
+
+# --- macOS / OS noise ---
+.DS_Store
+**/.DS_Store

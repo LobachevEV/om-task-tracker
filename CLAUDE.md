@@ -108,31 +108,6 @@ Request flow: Browser → `OneMoreTaskTracker.Api` (REST, JWT) → gRPC → (`Us
 - Exposed ports: 8080 (HTTP/2), 8081 (HTTPS)
 - `compose.yaml` maps host ports 5176 (proxy) and 5102 (tasks)
 
-## Knowledge Graph (graphify)
-
-An agent-crawlable knowledge graph of this project lives at `./graphify-out/`, produced by the `graphify` tool. **Use it before reading raw files when answering architecture or cross-cutting questions.**
-
-- **`graphify-out/wiki/index.md`** — start here. Index of 75 communities (clusters of related code/docs) with `[[WikiLink]]` navigation to each community article. Each article lists the nodes in that community, god nodes, and cross-community edges with confidence tags (EXTRACTED / INFERRED / AMBIGUOUS).
-- **`graphify-out/GRAPH_REPORT.md`** — audit report with god nodes (most-connected symbols, your core abstractions), surprising cross-file connections, and suggested questions the graph is uniquely positioned to answer.
-- **`graphify-out/graph.json`** — raw graph (617 nodes, 911 edges). Query via `/graphify query "<question>"`, `/graphify path "A" "B"`, `/graphify explain "<node>"`.
-- **`graphify-out/graph.html`** — interactive visual graph.
-
-**`graphify-out/` is gitignored — the knowledge graph is generated locally, not committed.** On a fresh clone, run `graphify update .` once to materialize the graph; afterwards the `post-commit` and `post-checkout` git hooks in `.git/hooks/` keep `graph.json` and `GRAPH_REPORT.md` current via AST-only `_rebuild_code` (no LLM cost). The `graphify-out/wiki/` directory and semantic (INFERRED / AMBIGUOUS) edges are only refreshed by the LLM-powered `/graphify --update`, which is run manually. Treat wiki content as a snapshot that may lag current code.
-
-Rules:
-1. Before answering "how does X work" or "where is Y" — read `graphify-out/wiki/index.md` first, then the relevant community article(s). If `graphify-out/` is missing, run `graphify update .` to generate it.
-2. When tracing a behavior across modules, prefer the wiki's community view over grepping individual files, but verify load-bearing claims against the current source before acting on them (the wiki can be stale).
-3. `graph.json` and `GRAPH_REPORT.md` are auto-refreshed locally on every commit and branch switch via git hooks (AST-only). The wiki and semantic edges are NOT — run `/graphify --update` after docs/image changes or when you notice wiki drift from current code.
-4. If a wiki claim contradicts what you see in the source, trust the source and flag the drift to the user.
-
-## Planning Workflow
-
-Before implementing any task:
-
-1. **Check the knowledge graph** — `graphify-out/wiki/index.md` for a map of the system; drill into relevant community articles for involved components and their edges (remember the wiki may be stale — verify before acting)
-2. **Identify components** — services, handlers, entities, proto messages, and tests to touch
-3. **Then read code** — only after understanding the design, navigate to source files; source is always authoritative over the wiki
-
 ## Code Conventions
 
 - Nullable reference types enabled across all C# projects
@@ -143,3 +118,47 @@ Before implementing any task:
 - Test projects mirror service structure under `tests/`, using xUnit + FluentAssertions + NSubstitute
 - Integration tests use `WebApplicationFactory<Program>` with `IClassFixture<ApiWebApplicationFactory>`
 - Frontend: functional components, Zod schemas at API boundaries, React Context for auth state, `ErrorBoundary` at app root
+
+<!-- gitnexus:start -->
+# GitNexus — Code Intelligence
+
+This project is indexed by GitNexus as **om-task-tracker** (5985 symbols, 12391 relationships, 233 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+
+> If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
+
+## Always Do
+
+- **MUST run impact analysis before editing any symbol.** Before modifying a function, class, or method, run `gitnexus_impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
+- **MUST run `gitnexus_detect_changes()` before committing** to verify your changes only affect expected symbols and execution flows.
+- **MUST warn the user** if impact analysis returns HIGH or CRITICAL risk before proceeding with edits.
+- When exploring unfamiliar code, use `gitnexus_query({query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
+- When you need full context on a specific symbol — callers, callees, which execution flows it participates in — use `gitnexus_context({name: "symbolName"})`.
+
+## Never Do
+
+- NEVER edit a function, class, or method without first running `gitnexus_impact` on it.
+- NEVER ignore HIGH or CRITICAL risk warnings from impact analysis.
+- NEVER rename symbols with find-and-replace — use `gitnexus_rename` which understands the call graph.
+- NEVER commit changes without running `gitnexus_detect_changes()` to check affected scope.
+
+## Resources
+
+| Resource | Use for |
+|----------|---------|
+| `gitnexus://repo/om-task-tracker/context` | Codebase overview, check index freshness |
+| `gitnexus://repo/om-task-tracker/clusters` | All functional areas |
+| `gitnexus://repo/om-task-tracker/processes` | All execution flows |
+| `gitnexus://repo/om-task-tracker/process/{name}` | Step-by-step execution trace |
+
+## CLI
+
+| Task | Read this skill file |
+|------|---------------------|
+| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md` |
+| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
+| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
+| Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
+| Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
+| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
+
+<!-- gitnexus:end -->
