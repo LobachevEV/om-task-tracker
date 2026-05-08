@@ -46,7 +46,7 @@
 /* 1280px: fold planned-start + planned-end into stacked short dates.
    Done via class toggled by media query on the dates container — the
    container itself stays in the grid, only the internal layout changes. */
-@media (max-width: 1279px) {
+@media (max-width: 1280px) {
   .gantt-track-stage-row__gutter {
     grid-template-columns:
       [code]  28px
