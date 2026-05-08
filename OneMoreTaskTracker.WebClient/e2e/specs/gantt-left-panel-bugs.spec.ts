@@ -81,9 +81,18 @@ test.describe('@integration gantt left-panel bugs (visual acceptance, RED at bas
           ),
         );
         const featureMeta = Array.from(document.querySelectorAll<HTMLElement>('.gantt-row__dates'));
-        return [...triggers, ...featureMeta]
-          .map((el) => (el.textContent ?? '').trim())
-          .filter((t) => t.length > 0 && /\d/.test(t));
+        // For the inline-cell wrappers the visible date text lives on a child
+        // `<input value=...>` element when editable (Manager view) and on a
+        // direct text node when read-only. textContent does NOT include input
+        // values, so collect input values explicitly.
+        const triggerTexts = triggers.flatMap((el) => {
+          const inputs = Array.from(el.querySelectorAll<HTMLInputElement>('input'));
+          const inputVals = inputs.map((i) => i.value.trim());
+          const childText = (el.textContent ?? '').trim();
+          return [...inputVals, childText];
+        });
+        const metaTexts = featureMeta.map((el) => (el.textContent ?? '').trim());
+        return [...triggerTexts, ...metaTexts].filter((t) => t.length > 0 && /\d/.test(t));
       });
 
       expect(rawTexts.length, `at least one date string rendered at locale ${locale}`).toBeGreaterThan(0);

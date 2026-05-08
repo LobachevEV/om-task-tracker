@@ -152,7 +152,7 @@ export function InlineDateCell({
         className="inline-cell__input inline-cell__input--date"
         aria-label={ariaLabel}
         aria-invalid={editor.status === 'error' || undefined}
-        value={editor.draft}
+        value={editor.status === 'idle' ? formatShortDate(value, locale) : editor.draft}
         placeholder="—"
         onFocus={editor.enterEdit}
         onChange={(e) => editor.setDraft(e.currentTarget.value)}
