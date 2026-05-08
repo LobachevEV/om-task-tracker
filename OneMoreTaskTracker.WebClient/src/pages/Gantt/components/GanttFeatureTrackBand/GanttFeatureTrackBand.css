@@ -6,7 +6,7 @@
 .gantt-track-band__header {
   display: grid;
   grid-template-columns: var(--gantt-gutter-width, 280px) 1fr;
-  min-height: 24px;
+  min-height: 28px;
   align-items: center;
 }
 
@@ -15,7 +15,7 @@
   align-items: center;
   gap: var(--space-2);
   padding-inline: var(--space-2) var(--space-3);
-  min-height: 24px;
+  min-height: 28px;
   position: sticky;
   inset-inline-start: 0;
   background: var(--surface);
@@ -29,13 +29,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   padding: 0;
   border: none;
   background: transparent;
   cursor: pointer;
-  color: var(--text-muted);
+  color: var(--text-dim);
   flex-shrink: 0;
   border-radius: var(--radius-micro);
 }
@@ -56,7 +56,7 @@
 }
 
 .gantt-track-band__chevron {
-  font-size: 10px;
+  font-size: 9px;
   line-height: 1;
   user-select: none;
 }
@@ -92,5 +92,5 @@
 }
 
 .gantt-track-band__lane-placeholder {
-  height: 24px;
+  height: 28px;
 }

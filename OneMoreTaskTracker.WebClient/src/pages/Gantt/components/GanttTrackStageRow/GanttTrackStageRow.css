@@ -1,7 +1,7 @@
 .gantt-track-stage-row {
   display: grid;
   grid-template-columns: var(--gantt-gutter-width, 280px) 1fr;
-  min-height: 36px;
+  min-height: 28px;
   align-items: center;
   border-bottom: 1px solid var(--border-soft);
 }
@@ -33,7 +33,7 @@
   align-items: center;
   gap: 0 var(--space-2);
   padding-inline: var(--space-2) var(--space-3);
-  min-height: 36px;
+  min-height: 28px;
   position: sticky;
   inset-inline-start: 0;
   background: var(--surface);
@@ -226,6 +226,6 @@
 
 .gantt-track-stage-row__lane {
   position: relative;
-  height: 36px;
+  height: 28px;
   overflow: hidden;
 }

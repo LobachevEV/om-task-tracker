@@ -5,7 +5,7 @@
   display: grid;
   grid-template-columns: var(--gantt-gutter-width) 1fr;
   align-items: stretch;
-  min-height: 48px;
+  min-height: 56px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -107,7 +107,6 @@
   gap: 4px;
   font-size: 11px;
   color: var(--text-muted);
-  min-block-size: 20px;
 }
 
 .gantt-row__lead-label {
