@@ -29,42 +29,26 @@
   border-radius: var(--radius-sm);
 }
 
-.ds-integration-icon__glyph {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  border-radius: var(--radius-micro);
-  font-family: var(--font-display);
-  font-variation-settings: 'wdth' 90, 'wght' 600;
-  font-size: 9px;
-  line-height: 1;
-  color: var(--text);
-  background: var(--elevated);
-  border: 1px solid var(--border);
+.ds-integration-icon__svg {
+  display: block;
 }
 
 /* Integration-specific tints — grounded in the neutral surface, subtle so the
  * status dot remains the dominant signal. */
-.ds-integration-icon__glyph--gitlab {
+.ds-integration-icon__svg--gitlab {
   color: oklch(0.80 0.12 40);
-  border-color: color-mix(in oklch, oklch(0.80 0.12 40) 30%, var(--border));
 }
-.ds-integration-icon__glyph--github {
+.ds-integration-icon__svg--github {
   color: var(--text);
 }
-.ds-integration-icon__glyph--jira {
+.ds-integration-icon__svg--jira {
   color: oklch(0.75 0.12 250);
-  border-color: color-mix(in oklch, oklch(0.75 0.12 250) 30%, var(--border));
 }
-.ds-integration-icon__glyph--confluence {
+.ds-integration-icon__svg--confluence {
   color: oklch(0.78 0.10 240);
-  border-color: color-mix(in oklch, oklch(0.78 0.10 240) 30%, var(--border));
 }
-.ds-integration-icon__glyph--slack {
+.ds-integration-icon__svg--slack {
   color: oklch(0.78 0.10 340);
-  border-color: color-mix(in oklch, oklch(0.78 0.10 340) 30%, var(--border));
 }
 
 .ds-integration-icon__dot {

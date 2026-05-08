@@ -1,13 +1,14 @@
 import { StatusDot, type StatusTone } from '../StatusDot/StatusDot';
 import { cx } from '../cx';
+import { SVG_PATHS } from './svgPaths';
 import './IntegrationIcon.css';
 
 export type IntegrationKind = 'gitlab' | 'github' | 'jira' | 'confluence' | 'slack';
 
 export interface IntegrationIconProps {
   kind: IntegrationKind;
-  /** Status of the integration signal this icon represents. */
-  tone: StatusTone;
+  /** Status tone for the indicator dot. Pass `null` to suppress the dot. */
+  tone?: StatusTone | null;
   /** Required tooltip explaining the specific blocker/state. */
   title: string;
   /** Optional link that triggers on click (e.g. jump to Slack channel). */
@@ -22,17 +23,6 @@ const labels: Record<IntegrationKind, string> = {
   jira: 'Jira',
   confluence: 'Confluence',
   slack: 'Slack',
-};
-
-// Brand letter on a warm graphite chip — readable at 16px, replaceable with
-// real SVG marks later. GitLab and GitHub both start with G; disambiguated by
-// chip colour via `--${kind}`.
-const glyphLetter: Record<IntegrationKind, string> = {
-  gitlab: 'G',
-  github: 'G',
-  jira: 'J',
-  confluence: 'C',
-  slack: 'S',
 };
 
 export function IntegrationIcon({
@@ -61,10 +51,20 @@ export function IntegrationIcon({
       style={{ width: size, height: size }}
       {...tagProps}
     >
-      <span className={cx('ds-integration-icon__glyph', `ds-integration-icon__glyph--${kind}`)}>
-        {glyphLetter[kind]}
-      </span>
-      <StatusDot tone={tone} size={Math.round(size * 0.4)} className="ds-integration-icon__dot" />
+      <svg
+        viewBox="0 0 14 14"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="currentColor"
+        aria-hidden="true"
+        className={cx('ds-integration-icon__svg', `ds-integration-icon__svg--${kind}`)}
+        width={size}
+        height={size}
+      >
+        <path d={SVG_PATHS[kind]} />
+      </svg>
+      {tone != null && (
+        <StatusDot tone={tone} size={Math.round(size * 0.4)} className="ds-integration-icon__dot" />
+      )}
     </Tag>
   );
 }

@@ -36,5 +36,8 @@ export type { StatusDotProps, StatusTone } from './StatusDot/StatusDot';
 export { IntegrationIcon } from './IntegrationIcon/IntegrationIcon';
 export type { IntegrationIconProps, IntegrationKind } from './IntegrationIcon/IntegrationIcon';
 
+export { signalToTone } from './IntegrationIcon/signal';
+export type { IntegrationSignal } from './IntegrationIcon/signal';
+
 export { Dialog } from './Dialog/Dialog';
 export type { DialogProps } from './Dialog/Dialog';
