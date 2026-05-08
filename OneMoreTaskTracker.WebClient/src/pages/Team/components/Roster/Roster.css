@@ -2,7 +2,7 @@
 
 .roster-card {
   background: var(--surface);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
   overflow-x: auto;
@@ -171,7 +171,7 @@
   letter-spacing: 0.05em;
   color: var(--accent);
   border: 1px solid var(--accent);
-  border-radius: 3px;
+  border-radius: var(--radius-micro);
   padding: 0.15rem 0.4rem;
   text-transform: uppercase;
   flex-shrink: 0;

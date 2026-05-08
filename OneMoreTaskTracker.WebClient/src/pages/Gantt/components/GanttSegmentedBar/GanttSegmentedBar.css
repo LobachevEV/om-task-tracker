@@ -28,7 +28,7 @@
   width: var(--summary-width, 0px);
   height: 24px;
   min-width: 6px;
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   background: transparent;
   border: 1px dashed var(--border-strong);
   opacity: 0.85;
@@ -45,7 +45,7 @@
   min-width: 6px;
   padding: 0;
   border: none;
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   background: var(--seg-color, var(--state-in-dev));
   cursor: pointer;
   font: inherit;
@@ -111,7 +111,7 @@
   left: 50%;
   width: 9px;
   height: 9px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   background: var(--accent);
   transform: translate(-50%, -50%);
   box-shadow: 0 0 0 4px var(--accent-dim);

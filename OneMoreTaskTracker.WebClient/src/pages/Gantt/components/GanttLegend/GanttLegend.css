@@ -14,7 +14,7 @@
   padding: var(--space-3, 12px) var(--space-4, 16px);
   background: var(--surface);
   border: 1px solid var(--border-strong);
-  border-radius: 6px;
+  border-radius: var(--radius-base);
   box-shadow: 0 8px 24px -12px color-mix(in oklch, var(--text) 32%, transparent);
   min-width: 320px;
 }
@@ -57,7 +57,7 @@
   flex: none;
   width: 22px;
   height: 12px;
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   background: var(--state-in-dev);
 }
 

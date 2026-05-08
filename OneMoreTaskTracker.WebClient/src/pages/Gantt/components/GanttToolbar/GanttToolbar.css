@@ -74,7 +74,7 @@
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--accent);
   color: var(--accent-ink);
   font-size: 10px;
@@ -94,7 +94,7 @@
   padding: var(--space-3, 12px);
   background: var(--surface);
   border: 1px solid var(--border-strong);
-  border-radius: 6px;
+  border-radius: var(--radius-base);
   box-shadow: 0 8px 24px -12px color-mix(in oklch, var(--text) 32%, transparent);
   min-width: 180px;
 }

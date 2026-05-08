@@ -14,7 +14,7 @@
 .dialog {
   background: var(--elevated);
   border: 1px solid var(--border-strong);
-  border-radius: 10px;
+  border-radius: var(--radius-dialog);
   padding: 1.5rem;
   max-width: 420px;
   width: 100%;

@@ -37,7 +37,7 @@
   cursor: pointer;
   color: var(--text-muted);
   flex-shrink: 0;
-  border-radius: 3px;
+  border-radius: var(--radius-micro);
 }
 
 .gantt-track-band__toggle:focus-visible {

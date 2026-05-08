@@ -78,12 +78,16 @@
   --z-toast: 1000;
 
   /* Border-radius scale */
-  --radius-pill: 999px;
-  --radius-card: 1rem;
-  --radius-field: 0.75rem;
-  --radius-dialog: 10px;
-  --radius-base: 6px;
-  --radius-sm: 4px;
+  --radius-pill:   999px;   /* pill chips, badges — fully rounded */
+  --radius-circle: 50%;     /* circular avatars, dots, spinners */
+  --radius-card:   1rem;    /* card containers */
+  --radius-field:  0.75rem; /* form field inputs */
+  --radius-md:     0.5rem;  /* medium containers (search, toast, roster) */
+  --radius-dialog: 10px;    /* dialog/modal surfaces */
+  --radius-base:   6px;     /* general interactive elements */
+  --radius-sm:     4px;     /* small chips, tags, badges */
+  --radius-xs:     2px;     /* thin bar/segment micro-rounding (Gantt) */
+  --radius-micro:  3px;     /* icon inner rounding, combobox clear buttons */
 
   /* Half-step spacing */
   --space-2-5: 10px;

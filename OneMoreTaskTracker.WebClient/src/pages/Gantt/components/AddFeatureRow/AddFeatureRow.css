@@ -44,7 +44,7 @@
 .add-feature-row--standalone .add-feature-row__ghost,
 .add-feature-row--standalone .add-feature-row__form {
   background: var(--surface);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   inline-size: 100%;
 }
 
@@ -71,7 +71,7 @@
   position: absolute;
   inset: 6px;
   border: 1px dashed var(--border-strong);
-  border-radius: 6px;
+  border-radius: var(--radius-base);
   pointer-events: none;
   transition: border-color 160ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -166,7 +166,7 @@
   flex: 0 0 auto;
   inline-size: 12px;
   block-size: 12px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   border: 2px solid color-mix(in oklch, var(--accent) 40%, transparent);
   border-block-start-color: var(--accent);
   animation: add-feature-row-spin 720ms linear infinite;
