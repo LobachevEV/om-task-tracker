@@ -6,10 +6,6 @@
   border-bottom: 1px solid var(--border-soft);
 }
 
-.gantt-track-stage-row:nth-child(even) {
-  background-color: color-mix(in oklch, var(--elevated) 50%, transparent);
-}
-
 /*
  * Gutter inner grid — 3 named columns hosting label · owner · inline dates.
  * Sums to 220 fixed + 16 gap + 20 padding = 256, leaving 64 for the [owner]
