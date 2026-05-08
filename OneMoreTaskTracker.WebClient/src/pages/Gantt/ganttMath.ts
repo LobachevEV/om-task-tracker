@@ -48,6 +48,20 @@ export function addDays(iso: string, n: number): string {
   return toIsoDate(new Date(base.getTime() + n * MS_PER_DAY));
 }
 
+export function formatShortDate(iso: string | null | undefined, locale: string): string {
+  if (!iso) return '—';
+  try {
+    const date = parseIsoDate(iso);
+    return new Intl.DateTimeFormat(locale, {
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'UTC',
+    }).format(date);
+  } catch {
+    return iso;
+  }
+}
+
 /** Floor of (b - a) in days, treating inputs as UTC midnights. */
 export function daysBetween(a: string, b: string): number {
   const da = parseIsoDate(a).getTime();

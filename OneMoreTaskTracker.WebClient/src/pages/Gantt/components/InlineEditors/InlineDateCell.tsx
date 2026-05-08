@@ -5,7 +5,7 @@ import type { InlineEditorError } from './InlineEditorError';
 import { InlineCellChevron } from './InlineCellChevron';
 import { InlineCellError } from './InlineCellError';
 import { InlineDateCalendar } from './InlineDateCalendar';
-import { ISO_DATE_RE, addDays } from '../../ganttMath';
+import { ISO_DATE_RE, addDays, formatShortDate } from '../../ganttMath';
 import './InlineEditors.css';
 
 export interface InlineDateCellProps {
@@ -52,7 +52,8 @@ export function InlineDateCell({
   onAnnounce,
   buildAnnouncement,
 }: InlineDateCellProps) {
-  const { t } = useTranslation('gantt');
+  const { t, i18n } = useTranslation('gantt');
+  const locale = i18n.language || 'en';
   const inputRef = useRef<HTMLInputElement>(null);
   const rootRef = useRef<HTMLSpanElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -130,7 +131,7 @@ export function InlineDateCell({
   if (readOnly) {
     return (
       <span className="inline-cell inline-cell--read" data-testid={testId}>
-        {value ?? '—'}
+        {formatShortDate(value, locale)}
       </span>
     );
   }

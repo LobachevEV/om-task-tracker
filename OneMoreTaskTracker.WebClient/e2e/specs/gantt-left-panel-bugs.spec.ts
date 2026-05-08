@@ -89,11 +89,14 @@ test.describe('@integration gantt left-panel bugs (visual acceptance, RED at bas
       expect(rawTexts.length, `at least one date string rendered at locale ${locale}`).toBeGreaterThan(0);
       const expected = locale === 'en' ? EN_DATE_RE : RU_DATE_RE;
       for (const raw of rawTexts) {
-        // Strip everything that's not a letter, digit, space, or range/period mark
-        const cleaned = raw.replace(/[^\p{L}\p{N}\s.\-–—]/gu, '').trim();
+        // Keep letters, digits, whitespace, `.` (Russian short month abbreviations
+        // end in a period), `-` / `–` / `—` (range dashes), and `·` (the meta-row
+        // field separator the app uses).
+        const cleaned = raw.replace(/[^\p{L}\p{N}\s.\-–—·]/gu, '').trim();
         expect(cleaned, `cleaned date "${cleaned}" (raw "${raw}") must not be raw ISO`).not.toMatch(ISO_RE);
-        // Range form "Sep 13 – Sep 30" or "13 сент. – 30 сент.": split and validate each side
-        const parts = cleaned.split(/\s+[–—-]\s+/);
+        // Split on either a dash range ("Sep 13 – Sep 30") or the `·` field
+        // separator ("Jan 1 · Dec 31" — paired dates in the feature meta row).
+        const parts = cleaned.split(/\s*[·–—-]+\s*/);
         for (const part of parts) {
           const p = part.trim();
           if (!p || p === '—' || /^\d+d$/.test(p) || /^\d+\/\d+\s+/.test(p)) continue;
