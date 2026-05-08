@@ -1,8 +1,10 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OneMoreTaskTracker.Api.Auth;
 using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
 using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Tracks;
+using OneMoreTaskTracker.Api.Roster;
 using OneMoreTaskTracker.Proto.Features;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
@@ -21,7 +23,8 @@ public class FeaturesController(
     FeaturePatcher.FeaturePatcherClient featurePatcher,
     FeaturesLister.FeaturesListerClient featuresLister,
     FeatureGetter.FeatureGetterClient featureGetter,
-    UserService.UserServiceClient userService,
+    ITeamRosterProvider rosterProvider,
+    IValidator<UpdateFeaturePayload> updateValidator,
     ILogger<FeaturesController> logger) : ControllerBase
 {
 
@@ -52,7 +55,7 @@ public class FeaturesController(
 
         // Load roster once for the caller — used to resolve track/stage owners.
         // All features in the list share the same manager (userId = caller).
-        var roster = await userService.LoadRosterForManagerAsync(userId, logger, ct);
+        var roster = await rosterProvider.LoadRosterAsync(userId, ct);
 
         var summaries = listResponse.Features
             .Select(f => FeatureSummaryResponse.From(f, PlanRequestHelpers.EmptyTasks, roster))
@@ -70,7 +73,7 @@ public class FeaturesController(
             new GetFeatureRequest { Id = id },
             cancellationToken: ct);
 
-        var roster = await userService.LoadRosterForManagerAsync(feature.ManagerUserId, logger, ct);
+        var roster = await rosterProvider.LoadRosterAsync(feature.ManagerUserId, ct);
 
         var lead = MiniTeamMemberResponse.From(feature.LeadUserId, roster);
         var detailStagePlans = feature.StagePlans
@@ -122,16 +125,11 @@ public class FeaturesController(
             return BadRequest(ModelState);
 
         var callerUserId = User.GetUserId();
-
-        if (body.LeadUserId is { } leadUserId)
-        {
-            if (leadUserId < 1)
-                return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
-
-            var roster = await userService.LoadRosterForManagerAsync(callerUserId, logger, ct);
-            if (!roster.ContainsKey(leadUserId))
-                return BadRequest(new { error = "Pick a teammate from the list" });
-        }
+        var validationContext = new ValidationContext<UpdateFeaturePayload>(body);
+        validationContext.SetCallerUserId(callerUserId);
+        var validation = await updateValidator.ValidateAsync(validationContext, ct);
+        if (!validation.IsValid)
+            return BadRequest(new { error = validation.Errors[0].ErrorMessage });
 
         var headerVersion = PlanRequestHelpers.ParseIfMatch(ifMatch, logger);
         var expectedVersion = body.ExpectedVersion ?? headerVersion;

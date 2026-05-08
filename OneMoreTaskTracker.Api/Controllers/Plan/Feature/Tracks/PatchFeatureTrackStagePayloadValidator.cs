@@ -1,19 +1,24 @@
 using FluentValidation;
 using OneMoreTaskTracker.Api.Roster;
 
-namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
+namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.Tracks;
 
-public sealed class PatchFeatureStagePayloadValidator : AbstractValidator<PatchFeatureStagePayload>
+public sealed class PatchFeatureTrackStagePayloadValidator : AbstractValidator<PatchFeatureTrackStagePayload>
 {
     private const int MinReleaseYear = 2000;
     private const int MaxReleaseYear = 2100;
 
-    public PatchFeatureStagePayloadValidator(ITeamRosterProvider rosterProvider)
+    public PatchFeatureTrackStagePayloadValidator(ITeamRosterProvider rosterProvider)
     {
-        When(p => p.StageOwnerUserId.HasValue, () =>
+        When(p => p.StageOwnerUserId is { IsPresent: true, Value: not null }, () =>
         {
-            RuleFor(p => p.StageOwnerUserId)
-                .GreaterThan(0).WithMessage(PlanRequestHelpers.InvalidRequest)
+            RuleFor(p => p.StageOwnerUserId!.Value)
+                .GreaterThan(0).WithMessage(PlanRequestHelpers.InvalidRequest);
+        });
+
+        When(p => p.TeamMemberId.HasValue, () =>
+        {
+            RuleFor(p => p.TeamMemberId)
                 .MustBeOnCallerRoster(rosterProvider);
         });
 

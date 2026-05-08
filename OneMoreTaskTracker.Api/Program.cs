@@ -1,7 +1,10 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using OneMoreTaskTracker.Api.Auth;
+using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
 using OneMoreTaskTracker.Api.Middleware;
+using OneMoreTaskTracker.Api.Roster;
 using OneMoreTaskTracker.Api.Time;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
@@ -120,6 +123,9 @@ builder.Services
 
 builder.Services
     .AddGrpcClient<FeatureTrackStagePatcher.FeatureTrackStagePatcherClient>(o => o.Address = new Uri(featuresServiceAddress));
+
+builder.Services.AddScoped<ITeamRosterProvider, TeamRosterProvider>();
+builder.Services.AddValidatorsFromAssemblyContaining<PatchFeatureStagePayloadValidator>();
 
 var app = builder.Build();
 

@@ -65,6 +65,18 @@ public sealed class PatchFeatureSparseEndpointTests(TasksControllerWebApplicatio
             .GetTeamRosterAsync(Arg.Any<GetTeamRosterRequest>(),
                 Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
             .Returns(GrpcTestHelpers.UnaryCall(response));
+
+        var members = new HashSet<int>(teammateUserIds) { managerUserId };
+        _factory.MockUserService
+            .IsTeamMemberAsync(
+                Arg.Is<IsTeamMemberRequest>(r => members.Contains(r.MemberUserId)),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new IsTeamMemberResponse { IsMember = true }));
+        _factory.MockUserService
+            .IsTeamMemberAsync(
+                Arg.Is<IsTeamMemberRequest>(r => !members.Contains(r.MemberUserId)),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new IsTeamMemberResponse { IsMember = false }));
     }
 
     private static FeatureStagePlan ProtoPlan(FeatureState stage) =>

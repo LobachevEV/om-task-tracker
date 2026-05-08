@@ -136,7 +136,6 @@ public class UserServiceHandler(UsersDbContext dbContext) : UserService.UserServ
         if (user is null)
             throw new RpcException(new Status(StatusCode.NotFound, "User not found"));
 
-        // Verify user belongs to the requesting manager's team
         if (user.ManagerId != request.ManagerId)
             throw new RpcException(new Status(StatusCode.PermissionDenied, "User is not on your team"));
 
@@ -144,5 +143,16 @@ public class UserServiceHandler(UsersDbContext dbContext) : UserService.UserServ
         await dbContext.SaveChangesAsync(context.CancellationToken);
 
         return new DeleteUserResponse();
+    }
+
+    public override async Task<IsTeamMemberResponse> IsTeamMember(
+        IsTeamMemberRequest request, ServerCallContext context)
+    {
+        var isMember = await dbContext.Users.AnyAsync(
+            u => u.Id == request.MemberUserId &&
+                 (u.ManagerId == request.ManagerUserId || u.Id == request.ManagerUserId),
+            context.CancellationToken);
+
+        return new IsTeamMemberResponse { IsMember = isMember };
     }
 }

@@ -67,6 +67,18 @@ public sealed class PatchFeatureTrackControllerTests(TasksControllerWebApplicati
             .GetTeamRosterAsync(Arg.Any<GetTeamRosterRequest>(),
                 Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
             .Returns(GrpcTestHelpers.UnaryCall(response));
+
+        var members = new HashSet<int>(teammateUserIds) { managerUserId };
+        _factory.MockUserService
+            .IsTeamMemberAsync(
+                Arg.Is<IsTeamMemberRequest>(r => members.Contains(r.MemberUserId)),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new IsTeamMemberResponse { IsMember = true }));
+        _factory.MockUserService
+            .IsTeamMemberAsync(
+                Arg.Is<IsTeamMemberRequest>(r => !members.Contains(r.MemberUserId)),
+                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
+            .Returns(GrpcTestHelpers.UnaryCall(new IsTeamMemberResponse { IsMember = false }));
     }
 
     private static GetFeatureDto MinimalFeatureDto(int id = 1, int managerUserId = 1) =>

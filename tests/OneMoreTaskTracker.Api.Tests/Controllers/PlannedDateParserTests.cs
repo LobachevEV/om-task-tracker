@@ -1,6 +1,8 @@
 using FluentAssertions;
+using NSubstitute;
 using OneMoreTaskTracker.Api.Controllers.Plan;
 using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
+using OneMoreTaskTracker.Api.Roster;
 using Xunit;
 
 namespace OneMoreTaskTracker.Api.Tests.Controllers;
@@ -42,7 +44,7 @@ public sealed class PlannedDateParserTests
     {
         var payload = new PatchFeatureStagePayload(StageOwnerUserId: null, PlannedStart: raw, PlannedEnd: null, ExpectedStageVersion: null);
 
-        var result = new PatchFeatureStagePayloadValidator().Validate(payload);
+        var result = new PatchFeatureStagePayloadValidator(Substitute.For<ITeamRosterProvider>()).Validate(payload);
 
         result.IsValid.Should().BeTrue();
     }
@@ -52,7 +54,7 @@ public sealed class PlannedDateParserTests
     {
         var payload = new PatchFeatureStagePayload(StageOwnerUserId: null, PlannedStart: "31/01/2026", PlannedEnd: null, ExpectedStageVersion: null);
 
-        var result = new PatchFeatureStagePayloadValidator().Validate(payload);
+        var result = new PatchFeatureStagePayloadValidator(Substitute.For<ITeamRosterProvider>()).Validate(payload);
 
         result.IsValid.Should().BeFalse();
         result.Errors[0].ErrorMessage.Should().Be("Date must be YYYY-MM-DD");
@@ -65,7 +67,7 @@ public sealed class PlannedDateParserTests
     {
         var payload = new PatchFeatureStagePayload(StageOwnerUserId: null, PlannedStart: raw, PlannedEnd: null, ExpectedStageVersion: null);
 
-        var result = new PatchFeatureStagePayloadValidator().Validate(payload);
+        var result = new PatchFeatureStagePayloadValidator(Substitute.For<ITeamRosterProvider>()).Validate(payload);
 
         result.IsValid.Should().BeFalse();
         result.Errors[0].ErrorMessage.Should().Be("Use a real release date");
@@ -76,7 +78,7 @@ public sealed class PlannedDateParserTests
     {
         var payload = new PatchFeatureStagePayload(StageOwnerUserId: null, PlannedStart: null, PlannedEnd: "31/01/2026", ExpectedStageVersion: null);
 
-        var result = new PatchFeatureStagePayloadValidator().Validate(payload);
+        var result = new PatchFeatureStagePayloadValidator(Substitute.For<ITeamRosterProvider>()).Validate(payload);
 
         result.IsValid.Should().BeFalse();
         result.Errors[0].ErrorMessage.Should().Be("Date must be YYYY-MM-DD");

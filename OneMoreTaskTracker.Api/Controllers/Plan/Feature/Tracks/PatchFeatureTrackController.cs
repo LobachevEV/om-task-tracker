@@ -1,10 +1,11 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OneMoreTaskTracker.Api.Auth;
 using OneMoreTaskTracker.Api.Controllers.Plan.Feature;
+using OneMoreTaskTracker.Api.Roster;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureTrackCommand;
-using OneMoreTaskTracker.Proto.Users;
 
 namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.Tracks;
 
@@ -14,7 +15,7 @@ namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.Tracks;
 public class PatchFeatureTrackController(
     FeatureTrackPatcher.FeatureTrackPatcherClient featureTrackPatcher,
     FeatureGetter.FeatureGetterClient featureGetter,
-    UserService.UserServiceClient userService,
+    IValidator<PatchFeatureTrackPayload> validator,
     ILogger<PatchFeatureTrackController> logger) : ControllerBase
 {
     [HttpPatch("")]
@@ -29,18 +30,13 @@ public class PatchFeatureTrackController(
             return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
 
         var callerUserId = User.GetUserId();
+        var validationContext = new ValidationContext<PatchFeatureTrackPayload>(body);
+        validationContext.SetCallerUserId(callerUserId);
+        var validation = await validator.ValidateAsync(validationContext, ct);
+        if (!validation.IsValid)
+            return BadRequest(new { error = validation.Errors[0].ErrorMessage });
+
         var (ownerHasValue, ownerProtoValue) = PlanRequestHelpers.DecodeOwnerField(body.TrackOwnerUserId);
-
-        if (ownerHasValue && ownerProtoValue == 0)
-            return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
-
-        if (ownerHasValue && ownerProtoValue > 0)
-        {
-            var roster = await userService.LoadRosterForManagerAsync(callerUserId, logger, ct);
-            if (!roster.ContainsKey(ownerProtoValue))
-                return BadRequest(new { error = "Pick a teammate from the list" });
-        }
-
         var headerVersion = PlanRequestHelpers.ParseIfMatch(ifMatch, logger);
         var expectedVersion = body.ExpectedVersion ?? headerVersion;
 

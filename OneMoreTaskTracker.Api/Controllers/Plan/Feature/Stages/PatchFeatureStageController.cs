@@ -1,9 +1,10 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OneMoreTaskTracker.Api.Auth;
 using OneMoreTaskTracker.Api.Controllers.Plan.Feature;
+using OneMoreTaskTracker.Api.Roster;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand;
-using OneMoreTaskTracker.Proto.Users;
 
 namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
 
@@ -12,7 +13,7 @@ namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
 [Route("api/plan/features/{id:int}/stages/{stage}")]
 public class PatchFeatureStageController(
     FeatureStagePatcher.FeatureStagePatcherClient featureStagePatcher,
-    UserService.UserServiceClient userService,
+    IValidator<PatchFeatureStagePayload> validator,
     ILogger<PatchFeatureStageController> logger) : ControllerBase
 {
     [HttpPatch("")]
@@ -26,21 +27,12 @@ public class PatchFeatureStageController(
         if (!FeatureStateMapper.TryParseStage(stage, out var parsedStage))
             return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
 
-        var validation = await new PatchFeatureStagePayloadValidator().ValidateAsync(body, ct);
+        var callerUserId = User.GetUserId();
+        var validationContext = new ValidationContext<PatchFeatureStagePayload>(body);
+        validationContext.SetCallerUserId(callerUserId);
+        var validation = await validator.ValidateAsync(validationContext, ct);
         if (!validation.IsValid)
             return BadRequest(new { error = validation.Errors[0].ErrorMessage });
-
-        var callerUserId = User.GetUserId();
-
-        if (body.StageOwnerUserId is { } ownerId)
-        {
-            if (ownerId < 1)
-                return BadRequest(new { error = PlanRequestHelpers.InvalidRequest });
-
-            var roster = await userService.LoadRosterForManagerAsync(callerUserId, logger, ct);
-            if (!roster.ContainsKey(ownerId))
-                return BadRequest(new { error = "Pick a teammate from the list" });
-        }
 
         var headerVersion = PlanRequestHelpers.ParseIfMatch(ifMatch, logger);
         var expectedStageVersion = body.ExpectedStageVersion ?? headerVersion;
