@@ -33,7 +33,7 @@ describe('GanttTrackStageRow — read-only', () => {
     await i18n.changeLanguage('en');
   });
 
-  it('renders the stage 3-letter code', () => {
+  it('renders the localized stage name', () => {
     const stage: FeatureTrackStage = {
       stageKey: 'Development',
       plannedStart: '2026-04-15',
@@ -43,7 +43,7 @@ describe('GanttTrackStageRow — read-only', () => {
     };
     const track = makeTrack([stage]);
 
-    render(
+    const { container } = render(
       <GanttTrackStageRow
         track={track}
         stage={stage}
@@ -57,7 +57,9 @@ describe('GanttTrackStageRow — read-only', () => {
       />,
     );
 
-    expect(screen.getByText('DEV')).toBeInTheDocument();
+    const nameEl = container.querySelector('.gantt-track-stage-row__name');
+    expect(nameEl).not.toBeNull();
+    expect(nameEl?.textContent ?? '').not.toBe('');
   });
 
   it('renders stage start and end dates', () => {

@@ -251,13 +251,6 @@ export function GanttTrackStageRow({
       data-kind={kind.toLowerCase()}
     >
       <div className="gantt-track-stage-row__gutter">
-        <span
-          className="gantt-track-stage-row__code"
-          aria-hidden="true"
-          style={{ color: `var(${meta.tokenVar})` }}
-        >
-          {meta.code3}
-        </span>
         <span className="gantt-track-stage-row__name">{stageName}</span>
         <span className="gantt-track-stage-row__owner" data-testid="track-stage-owner">
           {ownerNode}

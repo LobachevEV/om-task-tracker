@@ -1,7 +1,7 @@
 /* Single Gantt row: sticky gutter + absolutely-positioned bar. */
 
 .gantt-row {
-  --gantt-gutter-width: 280px;
+  --gantt-gutter-width: 320px;
   display: grid;
   grid-template-columns: var(--gantt-gutter-width) 1fr;
   align-items: stretch;
