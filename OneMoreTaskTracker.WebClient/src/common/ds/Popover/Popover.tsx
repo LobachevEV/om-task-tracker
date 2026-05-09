@@ -65,39 +65,44 @@ export function Popover({
   const [coords, setCoords] = useState<Coords | null>(null);
 
   useLayoutEffect(() => {
-    if (!open || !anchorRef.current) return;
+    if (!open) return;
 
     const place = () => {
       const anchor = anchorRef.current;
       if (!anchor) return;
       const r = anchor.getBoundingClientRect();
       const popoverHeight = popoverRef.current?.getBoundingClientRect().height ?? 0;
+      const popoverWidth = popoverRef.current?.getBoundingClientRect().width ?? 0;
 
-      let top: number;
       const effectivePlacement =
-        placement === 'bottom-start' && r.bottom + popoverHeight + offset > window.innerHeight
+        placement === 'bottom-start' && popoverHeight > 0 && r.bottom + popoverHeight + offset > window.innerHeight
           ? 'top-start'
           : placement;
 
-      if (effectivePlacement === 'top-start') {
-        top = r.top - popoverHeight - offset;
-      } else {
-        top = r.bottom + offset;
-      }
+      const top =
+        effectivePlacement === 'top-start'
+          ? r.top - popoverHeight - offset
+          : r.bottom + offset;
 
-      const popoverWidth = popoverRef.current?.getBoundingClientRect().width ?? 0;
       const left =
-        r.left + popoverWidth > window.innerWidth
+        popoverWidth > 0 && r.left + popoverWidth > window.innerWidth
           ? window.innerWidth - popoverWidth - 4
           : r.left;
 
       setCoords({ left, top });
     };
 
+    // First call: sets coords from anchor position immediately (popoverHeight=0, no flip yet).
+    // This ensures the portal is not rendered at a sentinel position — it appears at the correct
+    // anchor coordinates on the first paint.
     place();
+    // Second call after first paint: popoverRef is now populated, so auto-flip and horizontal
+    // clamping can use the real popover dimensions.
+    const raf = requestAnimationFrame(place);
     window.addEventListener('resize', place);
     window.addEventListener('scroll', place, true);
     return () => {
+      cancelAnimationFrame(raf);
       window.removeEventListener('resize', place);
       window.removeEventListener('scroll', place, true);
     };
@@ -130,7 +135,7 @@ export function Popover({
     };
   }, [open, anchorRef, onClose]);
 
-  if (!open) return null;
+  if (!open || coords === null) return null;
 
   return createPortal(
     <div
@@ -141,8 +146,8 @@ export function Popover({
       data-testid={testId}
       style={{
         position: 'fixed',
-        left: coords?.left ?? -9999,
-        top: coords?.top ?? -9999,
+        left: coords.left,
+        top: coords.top,
         zIndex: 'var(--z-popover)',
         minWidth,
       }}
