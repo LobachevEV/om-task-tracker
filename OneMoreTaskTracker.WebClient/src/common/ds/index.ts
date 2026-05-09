@@ -41,3 +41,6 @@ export type { IntegrationSignal } from './IntegrationIcon/signal';
 
 export { Dialog } from './Dialog/Dialog';
 export type { DialogProps } from './Dialog/Dialog';
+
+export { Popover } from './Popover/Popover';
+export type { PopoverProps, Placement } from './Popover/Popover';
