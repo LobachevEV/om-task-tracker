@@ -32,6 +32,15 @@ the evaluator runs each iteration.
 
 The rubric weighs these axes — see `refactor-eval-rubric.md`.
 
+### Final values (verified at $GEN_COMMIT=ba5a8e0, evaluated 2026-05-09)
+
+| # | Axis | Final | Verdict |
+|---|------|-------|---------|
+| 1 | Named-line `grid-template-columns:\s*\[` in row CSS | **0** (across all three row CSS files) | **MET** |
+| 2 | `min-(height\|block-size): Npx` in row CSS, excl. `__lead` | **2 surviving** (`GanttFeatureRow.css:102 __lead 20px` exception; `GanttTrackStageRow.css:4 .gantt-track-stage-row outer 36px` — pre-existing, non-gutter-root). All gutter-root selectors in `Gutter.css` resolve through `var(--row-h-{compact,default,feature})`. | **PARTIAL** (gutter roots clean; non-gutter-root literals tracked under RF-003-02) |
+| 3 | `@media (max-width:` lines without `/* --bp-* */` marker | **0** (`Gutter.css` 3/3 marked: `--bp-xl`, `--bp-lg-narrow`, `--bp-md`; surviving `GanttTrackStageRow.css` `@media` rules also marked) | **MET** |
+| 4 | Type-checking exemplar uses `<Gutter>` for a 4th variant without modifying `Gutter.{tsx,css}` | **1** at `evidence/iter-003/axis-4-exemplar.tsx`, 16 LOC, imports from `.../GanttGutter`, typechecks under project tsconfig flags | **MET** |
+
 ### Optional 5th axis (decision: NOT included this run)
 
 The brief flags container queries as encouraged but not mandatory. The
