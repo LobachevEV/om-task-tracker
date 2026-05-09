@@ -7,12 +7,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
   border-radius: 8px; /* literal: hand-tuned button rounding, no token equiv */
   border: 1px solid transparent;
   font-family: inherit;
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: var(--text-base);
   letter-spacing: 0.02em;
   cursor: pointer;
   transition: background-color var(--transition-fast), border-color var(--transition-fast),
@@ -26,9 +26,9 @@
 }
 
 .ds-button--sm {
-  padding: 0.35rem 0.75rem;
+  padding: 0.35rem var(--space-3);
   font-size: 0.8rem;
-  min-height: 32px;
+  min-height: var(--space-8);
 }
 
 /* --md is the baseline; primitives/button.css supplies default padding. */

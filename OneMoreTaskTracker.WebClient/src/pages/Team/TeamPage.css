@@ -1,27 +1,27 @@
 /* Team page layout and containers. */
 
 .team-main {
-  max-width: 1120px;
+  max-width: 1120px; /* TODO: no exact --bp-* token; accept literal */
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 var(--space-4);
 }
 
 .team-page {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  margin: 1rem auto 1.5rem;
+  gap: var(--space-6);
+  margin: var(--space-4) auto var(--space-6);
 }
 
 /* Team toolbar */
 .team-toolbar {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-4);
   align-items: stretch;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 768px) /* TODO: no --bp-* token for this breakpoint; accept literal */ {
   .team-toolbar {
     flex-direction: row;
     justify-content: space-between;
@@ -32,18 +32,18 @@
 .team-toolbar__info {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--space-1);
 }
 
 .team-toolbar__title {
-  font-size: 1.5rem;
+  font-size: var(--space-6);
   font-weight: 700;
   margin: 0;
   color: var(--text);
 }
 
 .team-toolbar__summary {
-  font-size: 0.9rem;
+  font-size: 0.9rem; /* TODO: no exact --text-* token; accept literal */
   color: var(--text-muted);
   margin: 0;
 }
@@ -54,12 +54,12 @@
 
 .team-search-input {
   width: 100%;
-  max-width: 320px;
-  padding: 0.95rem 1rem;
-  min-height: 2.75rem;
+  max-width: 320px; /* TODO: no --bp-* token for this width; accept literal */
+  padding: 0.95rem var(--space-4); /* TODO: 0.95rem has no --space-* token; accept literal */
+  min-height: 2.75rem; /* TODO: nearest --row-h-* is --row-h-nav; accept literal */
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  font-size: 0.9rem;
+  font-size: 0.9rem; /* TODO: no exact --text-* token; accept literal */
   background-color: var(--surface);
   color: var(--text);
   transition: border-color var(--transition-base);
@@ -68,7 +68,7 @@
 .team-search-input:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--accent) 15%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--accent) 15%, transparent); /* 3px: focus-ring spread; accept literal */
 }
 
 .team-search-input::placeholder {
@@ -80,8 +80,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem;
+  gap: var(--space-4);
+  padding: var(--space-4);
   background-color: color-mix(in oklch, var(--accent) 15%, var(--surface));
   border: 1px solid color-mix(in oklch, var(--accent) 40%, transparent);
   border-radius: var(--radius-md);
@@ -91,7 +91,7 @@
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-10px); /* -10px: animation offset; accept literal */
   }
   to {
     opacity: 1;
@@ -101,7 +101,7 @@
 
 .team-toast__content {
   flex: 1;
-  font-size: 0.9rem;
+  font-size: 0.9rem; /* TODO: no exact --text-* token; accept literal */
   color: var(--text);
 }
 
@@ -111,28 +111,28 @@
 
 .team-toast__password {
   display: inline-block;
-  margin: 0 0.25rem;
-  padding: 0.25rem 0.5rem;
+  margin: 0 var(--space-1);
+  padding: var(--space-1) var(--space-2);
   background-color: var(--bg);
-  border-radius: 0.25rem; /* literal: non-standard rem step, no token equiv */
+  border-radius: var(--radius-sm);
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: 0.85rem; /* TODO: no exact --text-* token; accept literal */
   color: var(--accent);
 }
 
 .team-toast__actions {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-2);
   flex-shrink: 0;
 }
 
 .team-toast__copy-btn {
-  padding: 0.75rem 1.25rem;
+  padding: var(--space-3) 1.25rem; /* TODO: 1.25rem has no --space-* token; accept literal */
   background-color: var(--accent);
   color: var(--accent-ink);
   border: none;
-  border-radius: 0.375rem; /* literal: non-standard rem step, no token equiv */
-  font-size: 0.8rem;
+  border-radius: var(--radius-base);
+  font-size: 0.8rem; /* TODO: no exact --text-* token; accept literal */
   font-weight: 500;
   cursor: pointer;
   transition: background-color var(--transition-fast);
@@ -146,13 +146,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2.75rem;
-  min-height: 2.75rem;
-  padding: 0.5rem 0.75rem;
+  min-width: 2.75rem; /* TODO: touch-target; no --space-* token; accept literal */
+  min-height: 2.75rem; /* TODO: touch-target; no --space-* token; accept literal */
+  padding: var(--space-2) var(--space-3);
   background: none;
   border: none;
   color: var(--text-muted);
-  font-size: 1.5rem;
+  font-size: var(--space-6); /* icon size: matches --space-6 */
   cursor: pointer;
   line-height: 1;
   transition: color var(--transition-fast);
@@ -164,26 +164,26 @@
 
 /* Empty state */
 .team-empty-state {
-  padding: 3rem 2rem;
+  padding: var(--row-h-nav) var(--space-8);
   text-align: center;
   color: var(--text-muted);
   background-color: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  font-size: 0.95rem;
+  font-size: 0.95rem; /* TODO: no exact --text-* token; accept literal */
 }
 
 /* Loading spinner */
 .team-page__spinner {
   display: flex;
   justify-content: center;
-  padding: 3rem 2rem;
+  padding: var(--row-h-nav) var(--space-8);
 }
 
 .spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--border);
+  width: var(--space-8);
+  height: var(--space-8);
+  border: 3px solid var(--border); /* 3px: structural border width; accept literal */
   border-top-color: var(--accent);
   border-radius: var(--radius-circle);
   animation: spin 0.8s linear infinite;
@@ -194,4 +194,3 @@
     transform: rotate(360deg);
   }
 }
-

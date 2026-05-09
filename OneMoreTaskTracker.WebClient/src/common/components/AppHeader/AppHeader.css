@@ -83,7 +83,7 @@
 
 @media (min-width: 768px) {
   .app-header {
-    padding: 1.25rem 1.75rem;
+    padding: 1.25rem var(--text-2xl);
   }
 
   /* 768px: switch inner row to horizontal two-column layout. */
@@ -101,7 +101,7 @@
   }
 
   .app-header__title h1 {
-    font-size: 1.5rem;
+    font-size: var(--space-6);
   }
 
   .app-header__title p {

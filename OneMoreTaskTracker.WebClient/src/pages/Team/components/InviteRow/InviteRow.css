@@ -2,9 +2,9 @@
 
 .invite-row {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--space-3);
   align-items: center;
-  padding: 1rem;
+  padding: var(--space-4);
   border: 1px dashed var(--border);
   border-radius: var(--radius-base);
   background: transparent;
@@ -22,7 +22,7 @@
   flex: 1 1 auto;
   min-width: 200px;
   min-height: 44px;
-  padding: 0.5rem 1rem;
+  padding: var(--space-2) var(--space-4);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   font-size: 0.9rem;
@@ -51,13 +51,13 @@
 
 .invite-row__role {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-2);
   flex-shrink: 0;
 }
 
 .invite-role-chip {
   min-height: 44px;
-  padding: 0.5rem 0.8rem;
+  padding: var(--space-2) 0.8rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: transparent;

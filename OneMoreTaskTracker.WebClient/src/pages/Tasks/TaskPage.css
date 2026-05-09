@@ -12,10 +12,10 @@
 
 @media (min-width: 768px) {
   .app-main {
-    margin: 1.75rem auto 2.5rem;
-    padding: 0 1.75rem;
+    margin: var(--text-2xl) auto 2.5rem;
+    padding: 0 var(--text-2xl);
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.25fr);
-    gap: 1.75rem;
+    gap: var(--text-2xl);
   }
 }
 
