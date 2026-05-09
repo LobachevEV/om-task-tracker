@@ -28,6 +28,24 @@
   --space-6: 24px;
   --space-8: 32px;
 
+  /* Row densities — owner: /gan-refactor row-grid-primitive.
+   * Single source of truth for vertical rhythm across the gantt and similar
+   * row-based surfaces. Each component picks one. */
+  --row-h-compact: 28px;
+  --row-h-default: 36px;
+  --row-h-feature: 56px;
+  --row-h-nav:     48px;
+
+  /* Breakpoint tokens — owner: /gan-refactor row-grid-primitive.
+   * @custom-media is non-standard CSS, so consumers' @media queries keep
+   * literal pixel values BUT carry a comment marker tying each query to one
+   * of these tokens. Grep target: every @media (max-width: <px>) line in
+   * row CSS has a /* --bp-* * / marker. */
+  --bp-md:        1024px;
+  --bp-lg-narrow: 1100px;
+  --bp-lg:        1280px;
+  --bp-xl:        1440px;
+
   /* Type scale — owner: /typeset. Ratio ≥ 1.25 between adjacent steps.
    * Pair scale with weight contrast for hierarchy (see DESIGN.md). */
   --text-xs: 0.75rem;     /* 12px — meta strings, eyebrows, status chips */
