@@ -3,13 +3,13 @@
 .team-main {
   max-width: 1120px; /* no exact --bp-* token; accept literal */
   margin: 0 auto;
-  padding: 0 var(--space-4);
+  padding: 0 var(--space-3);
 }
 
 .team-page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-4);
   margin: var(--space-4) auto var(--space-6);
 }
 
@@ -17,7 +17,7 @@
 .team-toolbar {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-3);
   align-items: stretch;
 }
 
@@ -36,7 +36,7 @@
 }
 
 .team-toolbar__title {
-  font-size: var(--space-6);
+  font-size: var(--space-4);
   font-weight: 700;
   margin: 0;
   color: var(--text);
@@ -55,7 +55,7 @@
 .team-search-input {
   width: 100%;
   max-width: 320px; /* no --bp-* token for this width; accept literal */
-  padding: 0.95rem var(--space-4); /* 0.95rem has no --space-* token; accept literal */
+  padding: 0.95rem var(--space-3); /* 0.95rem has no --space-* token; accept literal */
   min-height: 2.75rem; /* nearest --row-h-* is --row-h-nav; accept literal */
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -80,8 +80,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-4);
+  gap: var(--space-3);
+  padding: var(--space-3);
   background-color: color-mix(in oklch, var(--accent) 15%, var(--surface));
   border: 1px solid color-mix(in oklch, var(--accent) 40%, transparent);
   border-radius: var(--radius-md);
@@ -127,7 +127,7 @@
 }
 
 .team-toast__copy-btn {
-  padding: var(--space-3) 1.25rem; /* 1.25rem has no --space-* token; accept literal */
+  padding: var(--space-2) 1.25rem; /* 1.25rem has no --space-* token; accept literal */
   background-color: var(--accent);
   color: var(--accent-ink);
   border: none;
@@ -148,11 +148,11 @@
   justify-content: center;
   min-width: 2.75rem; /* touch-target; no --space-* token; accept literal */
   min-height: 2.75rem; /* touch-target; no --space-* token; accept literal */
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-2);
   background: none;
   border: none;
   color: var(--text-muted);
-  font-size: var(--space-6); /* icon size: matches --space-6 */
+  font-size: var(--space-4); /* icon size: snapped down from --space-6 */
   cursor: pointer;
   line-height: 1;
   transition: color var(--transition-fast);
@@ -164,7 +164,7 @@
 
 /* Empty state */
 .team-empty-state {
-  padding: var(--row-h-nav) var(--space-8);
+  padding: var(--row-h-nav) var(--space-5);
   text-align: center;
   color: var(--text-muted);
   background-color: var(--surface);
@@ -177,12 +177,12 @@
 .team-page__spinner {
   display: flex;
   justify-content: center;
-  padding: var(--row-h-nav) var(--space-8);
+  padding: var(--row-h-nav) var(--space-5);
 }
 
 .spinner {
-  width: var(--space-8);
-  height: var(--space-8);
+  width: var(--space-4);
+  height: var(--space-4);
   border: 3px solid var(--border); /* 3px: structural border width; accept literal */
   border-top-color: var(--accent);
   border-radius: var(--radius-circle);

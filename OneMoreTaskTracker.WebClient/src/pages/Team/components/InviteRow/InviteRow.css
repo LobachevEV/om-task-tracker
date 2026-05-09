@@ -2,9 +2,9 @@
 
 .invite-row {
   display: flex;
-  gap: var(--space-3);
+  gap: var(--space-2);
   align-items: center;
-  padding: var(--space-4);
+  padding: var(--space-3);
   border: 1px dashed var(--border);
   border-radius: var(--radius-base);
   background: transparent;
@@ -22,7 +22,7 @@
   flex: 1 1 auto;
   min-width: 200px;
   min-height: 44px;
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-1) var(--space-3);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   font-size: 0.9rem;

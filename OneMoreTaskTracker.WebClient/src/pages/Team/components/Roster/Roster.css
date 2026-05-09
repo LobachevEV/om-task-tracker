@@ -22,7 +22,7 @@
 }
 
 .roster-table th {
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-2) var(--space-3);
   text-align: left;
   font-weight: 600;
   font-size: 0.8rem;
@@ -32,7 +32,7 @@
 }
 
 .roster-table td {
-  padding: 0.85rem var(--space-4);
+  padding: 0.85rem var(--space-3);
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
 }
@@ -79,7 +79,7 @@
 .roster-table__name-stack {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 .roster-table__name-info {
@@ -106,7 +106,7 @@
 
 /* Role column */
 .roster-table__role-cell {
-  padding: 0.85rem var(--space-4);
+  padding: 0.85rem var(--space-3);
 }
 
 /* Active count column */
@@ -120,7 +120,7 @@
 /* Mix column */
 .roster-table__mix-cell {
   width: 210px;
-  padding: 0.85rem var(--space-4);
+  padding: 0.85rem var(--space-3);
 }
 
 /* Last active column */
@@ -184,10 +184,10 @@
   }
 
   .roster-table th {
-    padding: 0.6rem var(--space-3);
+    padding: 0.6rem var(--space-2);
   }
 
   .roster-table td {
-    padding: 0.65rem var(--space-3);
+    padding: 0.65rem var(--space-2);
   }
 }

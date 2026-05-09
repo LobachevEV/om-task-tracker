@@ -11,7 +11,7 @@
   border: 1px solid var(--border);
   border-radius: 4px;
   box-shadow: var(--shadow-lg);
-  padding: var(--space-3);
+  padding: var(--space-2);
   min-inline-size: 240px;
 }
 
@@ -22,7 +22,7 @@
 
 .rdp-months {
   display: flex;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 .rdp-month {
