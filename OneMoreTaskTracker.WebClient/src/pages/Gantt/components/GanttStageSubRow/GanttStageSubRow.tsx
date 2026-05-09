@@ -3,7 +3,7 @@ import type { FeatureState, FeatureSummary, MiniTeamMember } from '../../../../c
 import type { TeamRosterMember } from '../../../../common/api/teamApi';
 import { Avatar, Badge, roleToAvatarTone } from '../../../../common/ds';
 import { FEATURE_STATE_CSS } from '../../stateConfig';
-import { getStagePlan } from '../../ganttStageGeometry';
+import { getStageWindow } from '../../ganttStageGeometry';
 import type { StageBarGeometry } from '../../ganttStageGeometry';
 import { daysBetween, parseIsoDate } from '../../ganttMath';
 import { roleToSide } from '../../roleToSide';
@@ -97,7 +97,7 @@ export function GanttStageSubRow({
   onAnnounce,
 }: GanttStageSubRowProps) {
   const { t, i18n } = useTranslation('gantt');
-  const plan = getStagePlan(feature, seg.stage);
+  const plan = getStageWindow(feature, seg.stage);
   const performer = resolvePerformer(plan.ownerUserId);
   const hasPerformerId = plan.ownerUserId != null;
   const stale = hasPerformerId && performer == null;

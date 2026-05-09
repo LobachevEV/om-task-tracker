@@ -401,11 +401,87 @@ public sealed class PatchFeatureHandlerTests
             },
             TestServerCallContext.Create());
 
-        // Stage dates are now flat fields on the DTO — verify the response carries them
         dto.Id.Should().Be(created.Id);
         dto.Title.Should().Be("Renamed");
-        // Flat fields exist (even if empty strings) — proto default is ""
         dto.CsApprovingPlannedStart.Should().NotBeNull();
         dto.DevelopmentPlannedStart.Should().NotBeNull();
+    }
+
+    [Theory]
+    [InlineData("2025-01-10", "2025-01-05", "Development")]  // CsApproving end overlaps Development start
+    [InlineData("2025-02-10", "2025-02-05", "Testing")]       // Development end overlaps Testing start
+    [InlineData("2025-03-10", "2025-03-05", "EthalonTesting")] // Testing end overlaps EthalonTesting start
+    [InlineData("2025-04-10", "2025-04-05", "LiveRelease")]   // EthalonTesting end overlaps LiveRelease start
+    public async Task Patch_StageDatesOutOfOrder_ThrowsFailedPreconditionWithNeighbourName(
+        string earlierEnd, string laterStart, string expectedNeighbour)
+    {
+        var db = NewDb();
+        var created = await CreateFeatureAsync(db);
+
+        PatchFeatureRequest BuildRequest()
+        {
+            var req = new PatchFeatureRequest { Id = created.Id, CallerUserId = 1 };
+            if (expectedNeighbour == "Development")
+            {
+                req.CsApprovingPlannedStart = "2025-01-01";
+                req.CsApprovingPlannedEnd = earlierEnd;
+                req.DevelopmentPlannedStart = laterStart;
+                req.DevelopmentPlannedEnd = "2025-02-01";
+            }
+            else if (expectedNeighbour == "Testing")
+            {
+                req.DevelopmentPlannedStart = "2025-02-01";
+                req.DevelopmentPlannedEnd = earlierEnd;
+                req.TestingPlannedStart = laterStart;
+                req.TestingPlannedEnd = "2025-03-01";
+            }
+            else if (expectedNeighbour == "EthalonTesting")
+            {
+                req.TestingPlannedStart = "2025-03-01";
+                req.TestingPlannedEnd = earlierEnd;
+                req.EthalonTestingPlannedStart = laterStart;
+                req.EthalonTestingPlannedEnd = "2025-04-01";
+            }
+            else
+            {
+                req.EthalonTestingPlannedStart = "2025-04-01";
+                req.EthalonTestingPlannedEnd = earlierEnd;
+                req.LiveReleasePlannedStart = laterStart;
+                req.LiveReleasePlannedEnd = "2025-05-01";
+            }
+            return req;
+        }
+
+        var act = () => Handler(db).Patch(BuildRequest(), TestServerCallContext.Create());
+
+        var ex = await act.Should().ThrowAsync<RpcException>();
+        ex.Which.StatusCode.Should().Be(StatusCode.FailedPrecondition);
+        ex.Which.Status.Detail.Should().Contain(expectedNeighbour);
+        ex.Which.Status.Detail.Should().Contain("neighbour");
+    }
+
+    [Fact]
+    public async Task Patch_StageDatesInOrder_Succeeds()
+    {
+        var db = NewDb();
+        var created = await CreateFeatureAsync(db);
+
+        var dto = await Handler(db).Patch(
+            new PatchFeatureRequest
+            {
+                Id = created.Id,
+                CallerUserId = 1,
+                CsApprovingPlannedStart = "2025-01-01",
+                CsApprovingPlannedEnd = "2025-01-15",
+                DevelopmentPlannedStart = "2025-01-15",
+                DevelopmentPlannedEnd = "2025-02-15",
+                TestingPlannedStart = "2025-02-15",
+                TestingPlannedEnd = "2025-03-01",
+            },
+            TestServerCallContext.Create());
+
+        dto.CsApprovingPlannedEnd.Should().Be("2025-01-15");
+        dto.DevelopmentPlannedStart.Should().Be("2025-01-15");
+        dto.TestingPlannedEnd.Should().Be("2025-03-01");
     }
 }

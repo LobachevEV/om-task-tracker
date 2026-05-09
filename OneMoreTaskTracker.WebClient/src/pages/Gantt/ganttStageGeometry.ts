@@ -31,7 +31,7 @@ export interface StageBarGeometry {
 /** Fallback width for an unplanned (ghost) segment. */
 const GHOST_DEFAULT_SPAN_DAYS = 3;
 
-interface StagePlanFlat {
+interface StageWindow {
   stage: FeatureState;
   plannedStart: string | null;
   plannedEnd: string | null;
@@ -42,7 +42,7 @@ interface StagePlanFlat {
  * Extract per-stage flat fields from FeatureSummary into a uniform shape.
  * Replaces the old `feature.stagePlans.find(p => p.stage === stage)` pattern.
  */
-function getStagePlan(feature: FeatureSummary, stage: FeatureState): StagePlanFlat {
+function getStageWindow(feature: FeatureSummary, stage: FeatureState): StageWindow {
   switch (stage) {
     case 'CsApproving':
       return {
@@ -83,7 +83,7 @@ function getStagePlan(feature: FeatureSummary, stage: FeatureState): StagePlanFl
 }
 
 function stageIsOverdue(
-  plan: StagePlanFlat,
+  plan: StageWindow,
   feature: FeatureSummary,
   today: string,
 ): boolean {
@@ -95,7 +95,7 @@ function stageIsOverdue(
   return daysBetween(plan.plannedEnd, today) > 0;
 }
 
-function stageIsCompleted(plan: StagePlanFlat, feature: FeatureSummary): boolean {
+function stageIsCompleted(plan: StageWindow, feature: FeatureSummary): boolean {
   const stageOrder = FEATURE_STATE_ORDER[plan.stage];
   const currentOrder = FEATURE_STATE_ORDER[feature.state];
   if (stageOrder < currentOrder) return true;
@@ -130,7 +130,7 @@ export function computeStageBars(
   let ghostAnchor: string = loadedRange.start;
   const out: StageBarGeometry[] = [];
   for (const stage of FEATURE_STATES) {
-    const plan = getStagePlan(feature, stage);
+    const plan = getStageWindow(feature, stage);
     const hasAnyDate = plan.plannedStart != null || plan.plannedEnd != null;
     const bar = barGeometryPx(
       loadedRange,
@@ -186,7 +186,7 @@ export function activeStageIndex(feature: FeatureSummary): number {
  */
 export function plannedStageCount(feature: FeatureSummary): number {
   return FEATURE_STATES.filter((stage) => {
-    const plan = getStagePlan(feature, stage);
+    const plan = getStageWindow(feature, stage);
     return plan.plannedStart != null || plan.plannedEnd != null;
   }).length;
 }
@@ -197,10 +197,10 @@ export function plannedStageCount(feature: FeatureSummary): number {
  */
 export function featureIsOverdue(feature: FeatureSummary, today: string): boolean {
   if (feature.state === 'LiveRelease') return false;
-  const active = getStagePlan(feature, feature.state);
+  const active = getStageWindow(feature, feature.state);
   if (active.plannedEnd == null) return false;
   return daysBetween(active.plannedEnd, today) > 0;
 }
 
-export { getStagePlan };
-export type { StagePlanFlat };
+export { getStageWindow };
+export type { StageWindow };

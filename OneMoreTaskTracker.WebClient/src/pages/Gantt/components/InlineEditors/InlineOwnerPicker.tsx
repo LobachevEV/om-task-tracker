@@ -176,9 +176,6 @@ export function InlineOwnerPicker({
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
-          // First ArrowDown when closed opens the listbox with highlight 0;
-          // subsequent ArrowDowns advance the highlight, capped at the list
-          // tail. Parity with `StagePerformerCombobox`.
           if (!open) {
             setOpen(true);
             setHighlight(0);

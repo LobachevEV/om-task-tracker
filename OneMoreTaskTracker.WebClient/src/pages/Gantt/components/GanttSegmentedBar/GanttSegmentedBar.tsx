@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { FeatureState, FeatureSummary, MiniTeamMember } from '../../../../common/types/feature';
 import { FEATURE_STATE_CSS } from '../../stateConfig';
 import type { BarGeometryPx } from '../../ganttMath';
-import { getStagePlan } from '../../ganttStageGeometry';
+import { getStageWindow } from '../../ganttStageGeometry';
 import type { StageBarGeometry } from '../../ganttStageGeometry';
 import './GanttSegmentedBar.css';
 
@@ -92,7 +92,7 @@ export function GanttSegmentedBar({
         </span>
       ) : null}
       {stageBars.map((seg, index) => {
-        const plan = getStagePlan(feature, seg.stage);
+        const plan = getStageWindow(feature, seg.stage);
         const performer = resolvePerformer(plan.ownerUserId);
         const geometry = seg.bar ?? seg.ghost;
         const cssVar = FEATURE_STATE_CSS[seg.stage];

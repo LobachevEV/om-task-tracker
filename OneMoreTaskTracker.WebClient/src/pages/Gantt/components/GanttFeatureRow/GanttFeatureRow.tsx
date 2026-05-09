@@ -8,7 +8,7 @@ import type {
 import type { TeamRosterMember } from '../../../../common/api/teamApi';
 import { daysBetween, formatShortDate, type BarGeometryPx, type DateWindow } from '../../ganttMath';
 import type { StageBarGeometry } from '../../ganttStageGeometry';
-import { featureIsOverdue, getStagePlan, plannedStageCount } from '../../ganttStageGeometry';
+import { featureIsOverdue, getStageWindow, plannedStageCount } from '../../ganttStageGeometry';
 import { GanttSegmentedBar } from '../GanttSegmentedBar';
 import { GanttStageSubRow } from '../GanttStageSubRow';
 import { GanttFeatureTrackBand } from '../GanttFeatureTrackBand';
@@ -70,7 +70,7 @@ function computeFeatureDtr(
   doneLabel: string,
 ): string {
   if (feature.state === 'LiveRelease') return doneLabel;
-  const active = getStagePlan(feature, feature.state);
+  const active = getStageWindow(feature, feature.state);
   const plannedEnd = active.plannedEnd ?? feature.plannedEnd;
   if (plannedEnd == null) return '—';
   const delta = daysBetween(today, plannedEnd);
