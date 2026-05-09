@@ -4,20 +4,13 @@
   display: grid;
   grid-template-columns: var(--gantt-gutter-width, 280px) 1fr;
   align-items: stretch;
-  min-height: 48px;
   border-bottom: 1px solid var(--border);
 }
 
+/* Override Gutter base defaults for the feature row's vertical-stack layout. */
 .gantt-row__gutter {
-  position: sticky;
-  inset-inline-start: 0;
   padding: 8px 12px;
-  background: var(--surface);
-  z-index: var(--z-sticky);
-  border-inline-end: 1px solid var(--border);
-  display: grid;
   gap: 4px;
-  align-content: center;
 }
 
 .gantt-row__gutter:has(.inline-cell[data-open='true']),

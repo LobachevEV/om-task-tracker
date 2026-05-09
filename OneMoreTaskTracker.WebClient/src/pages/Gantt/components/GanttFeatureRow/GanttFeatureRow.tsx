@@ -20,6 +20,7 @@ import {
   type FeatureMutationCallbacks,
   type TrackMutationCallbacks,
 } from '../InlineEditors';
+import { Gutter } from '../GanttGutter';
 import './GanttFeatureRow.css';
 
 export interface GanttFeatureRowProps {
@@ -169,7 +170,7 @@ function GanttFeatureRowInner({
         data-testid={`feature-row-${feature.id}`}
         data-variant={variant}
       >
-        <div className="gantt-row__gutter" data-testid="feature-info-panel">
+        <Gutter density="feature" columns={[]} className="gantt-row__gutter" data-testid="feature-info-panel">
           <div className="gantt-row__title-line">
             <button
               type="button"
@@ -277,7 +278,7 @@ function GanttFeatureRowInner({
               {t('row.plannedCounter', { planned, total: totalStages })}
             </span>
           </div>
-        </div>
+        </Gutter>
 
         <div className="gantt-row__lane" data-variant={variant}>
           <GanttSegmentedBar

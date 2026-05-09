@@ -6,23 +6,7 @@
 .gantt-track-band__header {
   display: grid;
   grid-template-columns: var(--gantt-gutter-width, 280px) 1fr;
-  min-height: 24px;
   align-items: center;
-}
-
-.gantt-track-band__gutter {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding-inline: var(--space-2) var(--space-3);
-  min-height: 24px;
-  position: sticky;
-  inset-inline-start: 0;
-  background: var(--surface);
-  border-inline-end: 1px solid var(--border);
-  z-index: var(--z-sticky);
-  max-inline-size: var(--gantt-gutter-width, 280px);
-  overflow: hidden;
 }
 
 .gantt-track-band__toggle {
@@ -38,6 +22,7 @@
   color: var(--text-muted);
   flex-shrink: 0;
   border-radius: var(--radius-micro);
+  grid-column: code;
 }
 
 .gantt-track-band__toggle:focus-visible {
@@ -68,6 +53,7 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   flex-shrink: 0;
+  grid-column: label;
 }
 
 .gantt-track-band__owner {
@@ -75,6 +61,7 @@
   align-items: center;
   gap: var(--space-1);
   min-width: 0;
+  grid-column: owner;
 }
 
 .gantt-track-band__owner-name {
@@ -89,6 +76,13 @@
   font-size: var(--text-xs);
   color: var(--text-dim);
   font-style: italic;
+  grid-column: owner;
+}
+
+/* When inline editing is enabled, the owner picker renders directly in the
+   gutter grid and must occupy the [owner] column. */
+.gantt-track-band__gutter .inline-cell--owner {
+  grid-column: owner;
 }
 
 .gantt-track-band__lane-placeholder {
