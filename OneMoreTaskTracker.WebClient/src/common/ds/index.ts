@@ -44,3 +44,6 @@ export type { DialogProps } from './Dialog/Dialog';
 
 export { Popover } from './Popover/Popover';
 export type { PopoverProps, Placement } from './Popover/Popover';
+
+export { Gutter } from './spatial/Gutter';
+export type { GutterProps, GutterColumn, GutterDensity } from './spatial/Gutter';

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../common/auth/AuthContext';
 import { ROLE_BADGE_CLASS } from '../../auth/roles';
 import { LanguageSwitcher } from '../LanguageSwitcher';
+import { Gutter } from '../../ds';
 import './AppHeader.css';
 
 export function AppHeader() {
@@ -30,7 +31,7 @@ export function AppHeader() {
 
   return (
     <header className="app-header">
-      <div className="app-header__inner">
+      <Gutter density="nav" columns={['label', 'owner']} className="app-header__inner">
         <div className="app-header__left">
           <div className="app-header__title">
             <h1>One More Task Tracker</h1>
@@ -69,7 +70,7 @@ export function AppHeader() {
             {t('logout')}
           </button>
         </div>
-      </div>
+      </Gutter>
     </header>
   );
 }
