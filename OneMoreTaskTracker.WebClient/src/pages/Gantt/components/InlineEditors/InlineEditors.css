@@ -260,7 +260,6 @@
 
 /* ------------- Owner picker listbox ------------- */
 .inline-cell__listbox {
-  position: fixed;
   list-style: none;
   margin: 0;
   padding: 4px 0;

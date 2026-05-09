@@ -150,6 +150,8 @@ export function Popover({
         top: coords.top,
         zIndex: 'var(--z-popover)',
         minWidth,
+        width: 'fit-content',
+        maxWidth: 'min(420px, calc(100vw - 16px))',
       }}
     >
       {children}
