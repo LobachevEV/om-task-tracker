@@ -79,15 +79,6 @@ public sealed class PatchFeatureSparseEndpointTests(TasksControllerWebApplicatio
             .Returns(GrpcTestHelpers.UnaryCall(new IsTeamMemberResponse { IsMember = false }));
     }
 
-    private static FeatureStagePlan ProtoPlan(FeatureState stage) =>
-        new()
-        {
-            Stage = stage,
-            PlannedStart = string.Empty,
-            PlannedEnd = string.Empty,
-            PerformerUserId = 0,
-        };
-
     private static PatchFeatureDto FiveRowDto(int id = 1, int managerUserId = 1, int leadUserId = 1) =>
         new()
         {
@@ -102,14 +93,6 @@ public sealed class PatchFeatureSparseEndpointTests(TasksControllerWebApplicatio
             CreatedAt = DateTime.UtcNow.ToString("O"),
             UpdatedAt = DateTime.UtcNow.ToString("O"),
             Version = 4,
-            StagePlans =
-            {
-                ProtoPlan(FeatureState.CsApproving),
-                ProtoPlan(FeatureState.Development),
-                ProtoPlan(FeatureState.Testing),
-                ProtoPlan(FeatureState.EthalonTesting),
-                ProtoPlan(FeatureState.LiveRelease),
-            }
         };
 
     [Fact]

@@ -10,6 +10,7 @@ public record StagePlanDetailResponse(
     string? PlannedEnd,
     int? PerformerUserId,
     MiniTeamMemberResponse? Performer,
-    // Per-stage optimistic-concurrency token exposed on the detail surface so
-    // the inline editor's If-Match header can target stage rows independently.
-    int StageVersion);
+    // Feature-level optimistic-concurrency token. The per-stage PATCH endpoint
+    // has been consolidated onto PATCH /api/plan/features/{id}; clients use the
+    // feature version for If-Match.
+    int Version);

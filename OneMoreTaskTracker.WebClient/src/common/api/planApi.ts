@@ -11,7 +11,6 @@ import type {
   FeatureState,
   FeatureSummary,
   PatchFeaturePayload,
-  PatchFeatureStagePayload,
 } from '../types/feature';
 import type {
   FeatureTrack,
@@ -35,11 +34,8 @@ function jsonHeaders(ifMatch?: number): Record<string, string> {
 export interface ListFeaturesParams {
   scope?: FeatureScope;
   state?: FeatureState;
-  /** Inclusive ISO yyyy-MM-dd; pairs with `windowEnd`. */
   windowStart?: string;
-  /** Inclusive ISO yyyy-MM-dd; pairs with `windowStart`. */
   windowEnd?: string;
-  /** Optional AbortSignal — caller cancels stale chunk fetches on fast pan. */
   signal?: AbortSignal;
 }
 
@@ -129,23 +125,6 @@ export async function patchFeature(
   return featureSummarySchema.parse(data);
 }
 
-export async function patchFeatureStage(
-  featureId: number,
-  stage: FeatureState,
-  body: PatchFeatureStagePayload,
-): Promise<FeatureSummary> {
-  const response = await fetch(
-    `${API_BASE_URL}/api/plan/features/${featureId}/stages/${stage}`,
-    {
-      method: 'PATCH',
-      headers: jsonHeaders(body.expectedStageVersion),
-      body: JSON.stringify(body),
-    },
-  );
-  const data = await handleResponse<unknown>(response);
-  return featureSummarySchema.parse(data);
-}
-
 export async function patchFeatureTrack(
   featureId: number,
   kind: FeatureTrackKind,
@@ -188,7 +167,6 @@ export type {
   FeatureState,
   FeatureSummary,
   PatchFeaturePayload,
-  PatchFeatureStagePayload,
 } from '../types/feature';
 
 export type { FeatureTrack, FeatureTrackKind, FeatureTrackStageKey } from '../types/featureTrack';

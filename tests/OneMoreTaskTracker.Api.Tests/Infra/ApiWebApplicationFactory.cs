@@ -8,7 +8,6 @@ using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureCommand;
-using OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand;
 using OneMoreTaskTracker.Proto.Tasks;
 using OneMoreTaskTracker.Proto.Tasks.AttachTaskCommand;
 using OneMoreTaskTracker.Proto.Tasks.CreateTaskCommand;
@@ -52,8 +51,7 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
                 d.ServiceType == typeof(FeatureCreator.FeatureCreatorClient) ||
                 d.ServiceType == typeof(FeaturesLister.FeaturesListerClient) ||
                 d.ServiceType == typeof(FeatureGetter.FeatureGetterClient) ||
-                d.ServiceType == typeof(FeaturePatcher.FeaturePatcherClient) ||
-                d.ServiceType == typeof(FeatureStagePatcher.FeatureStagePatcherClient)
+                d.ServiceType == typeof(FeaturePatcher.FeaturePatcherClient)
             ).ToList();
 
             foreach (var descriptor in descriptors)
@@ -69,7 +67,6 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
             services.AddSingleton(Substitute.For<FeaturesLister.FeaturesListerClient>());
             services.AddSingleton(Substitute.For<FeatureGetter.FeatureGetterClient>());
             services.AddSingleton(Substitute.For<FeaturePatcher.FeaturePatcherClient>());
-            services.AddSingleton(Substitute.For<FeatureStagePatcher.FeatureStagePatcherClient>());
         });
     }
 }

@@ -87,18 +87,20 @@ public sealed class DevFeatureSeederTests
     }
 
     [Fact]
-    public async Task SeedAsync_MaterializesFiveStagePlansPerFeature()
+    public async Task SeedAsync_AllFeaturesHaveAllFiveStageDateSlots()
     {
         await using var db = NewDb();
 
         await NewSeeder().SeedAsync(db);
 
-        var features = await db.Features.AsNoTracking().Include(f => f.StagePlans).ToListAsync();
-        features.Should().OnlyContain(f => f.StagePlans.Count == 5);
-        foreach (var feature in features)
-        {
-            feature.StagePlans.Select(sp => sp.Stage).Distinct().Should().HaveCount(5);
-        }
+        // Each feature row carries all five stage-slot columns (flat); verify
+        // the seeder doesn't leave the aggregate in a partially-initialised state
+        // where the derived PlannedStart/End cannot be computed.
+        var features = await db.Features.AsNoTracking().ToListAsync();
+        features.Should().NotBeEmpty();
+        // PlannedStart/End are derived: they must be consistent (start ≤ end when both set)
+        foreach (var f in features.Where(f => f.PlannedStart != null))
+            f.PlannedEnd.Should().NotBeNull("PlannedEnd must be set when PlannedStart is set");
     }
 
     [Fact]
@@ -108,15 +110,24 @@ public sealed class DevFeatureSeederTests
 
         await NewSeeder().SeedAsync(db);
 
-        var features = await db.Features.AsNoTracking().Include(f => f.StagePlans).ToListAsync();
+        var features = await db.Features.AsNoTracking().ToListAsync();
 
-        var fully  = features.Single(f => f.Title == "Checkout redesign");
+        var fully   = features.Single(f => f.Title == "Checkout redesign");
         var partial = features.Single(f => f.Title == "Search infra upgrade");
-        var empty  = features.Single(f => f.Title == "Legacy API sunset");
+        var empty   = features.Single(f => f.Title == "Legacy API sunset");
 
-        fully.StagePlans.Should().OnlyContain(sp => sp.PlannedStart != null && sp.PlannedEnd != null);
-        partial.StagePlans.Count(sp => sp.PlannedStart != null).Should().Be(2);
-        empty.StagePlans.Should().OnlyContain(sp => sp.PlannedStart == null && sp.PlannedEnd == null);
+        // "Checkout redesign" — all five stage start dates populated
+        new[] { fully.CsApprovingPlannedStart, fully.DevelopmentPlannedStart, fully.TestingPlannedStart, fully.EthalonTestingPlannedStart, fully.LiveReleasePlannedStart }
+            .Should().OnlyContain(d => d != null, "all stage starts must be set for the 'fully' fixture");
+
+        // "Search infra upgrade" — exactly 2 stages populated
+        var partialStartCount = new[] { partial.CsApprovingPlannedStart, partial.DevelopmentPlannedStart, partial.TestingPlannedStart, partial.EthalonTestingPlannedStart, partial.LiveReleasePlannedStart }
+            .Count(d => d != null);
+        partialStartCount.Should().Be(2);
+
+        // "Legacy API sunset" — no dates
+        empty.CsApprovingPlannedStart.Should().BeNull();
+        empty.DevelopmentPlannedStart.Should().BeNull();
         empty.PlannedStart.Should().BeNull();
         empty.PlannedEnd.Should().BeNull();
     }

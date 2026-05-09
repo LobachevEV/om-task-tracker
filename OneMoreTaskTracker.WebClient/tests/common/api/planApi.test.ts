@@ -13,14 +13,6 @@ import { makeResponse } from '../../testUtils';
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
-const emptyStagePlans = [
-  { stage: 'CsApproving' as const,    plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
-  { stage: 'Development' as const,    plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
-  { stage: 'Testing' as const,        plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
-  { stage: 'EthalonTesting' as const, plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
-  { stage: 'LiveRelease' as const,    plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
-];
-
 const sampleSummary = {
   id: 1,
   title: 'Feature A',
@@ -32,7 +24,21 @@ const sampleSummary = {
   managerUserId: 2,
   taskCount: 0,
   taskIds: [] as number[],
-  stagePlans: emptyStagePlans,
+  csApprovingPlannedStart: null,
+  csApprovingPlannedEnd: null,
+  csApprovingOwnerUserId: null,
+  developmentPlannedStart: null,
+  developmentPlannedEnd: null,
+  developmentOwnerUserId: null,
+  testingPlannedStart: null,
+  testingPlannedEnd: null,
+  testingOwnerUserId: null,
+  ethalonTestingPlannedStart: null,
+  ethalonTestingPlannedEnd: null,
+  ethalonTestingOwnerUserId: null,
+  liveReleasePlannedStart: null,
+  liveReleasePlannedEnd: null,
+  liveReleaseOwnerUserId: null,
   version: 0,
 };
 
@@ -41,7 +47,6 @@ const sampleDetail = {
   tasks: [],
   lead: { userId: 1, email: 'lead@example.com', displayName: 'Lead', role: 'Manager' as const },
   miniTeam: [],
-  stagePlans: emptyStagePlans.map((p) => ({ ...p, performer: null })),
 };
 
 beforeEach(() => {

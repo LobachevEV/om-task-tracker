@@ -11,7 +11,6 @@ public class ListFeaturesHandler(FeaturesDbContext db) : FeaturesLister.Features
     public override async Task<ListFeaturesResponse> List(ListFeaturesRequest request, ServerCallContext context)
     {
         IQueryable<Feature> q = db.Features.AsNoTracking()
-            .Include(f => f.StagePlans)
             .Include(f => f.Tracks)
             .ThenInclude(t => t.Stages);
 
@@ -50,7 +49,6 @@ public class ListFeaturesHandler(FeaturesDbContext db) : FeaturesLister.Features
         foreach (var row in rows)
         {
             var dto = row.Adapt<FeatureDto>();
-            dto.StagePlans.Add(FeatureMappingConfig.BuildProtoStagePlans(row));
             dto.Tracks.AddRange(FeatureMappingConfig.BuildProtoTracks(row));
             response.Features.Add(dto);
         }

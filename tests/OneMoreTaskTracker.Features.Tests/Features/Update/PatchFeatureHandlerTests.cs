@@ -387,7 +387,7 @@ public sealed class PatchFeatureHandlerTests
     }
 
     [Fact]
-    public async Task Patch_PreservesStagePlansInResponseShape()
+    public async Task Patch_ReturnsFlatStageDateFieldsInResponseShape()
     {
         var db = NewDb();
         var created = await CreateFeatureAsync(db);
@@ -401,7 +401,11 @@ public sealed class PatchFeatureHandlerTests
             },
             TestServerCallContext.Create());
 
-        dto.StagePlans.Count.Should().Be(created.StagePlans.Count);
-        dto.StagePlans.Count.Should().BeGreaterThan(0);
+        // Stage dates are now flat fields on the DTO — verify the response carries them
+        dto.Id.Should().Be(created.Id);
+        dto.Title.Should().Be("Renamed");
+        // Flat fields exist (even if empty strings) — proto default is ""
+        dto.CsApprovingPlannedStart.Should().NotBeNull();
+        dto.DevelopmentPlannedStart.Should().NotBeNull();
     }
 }

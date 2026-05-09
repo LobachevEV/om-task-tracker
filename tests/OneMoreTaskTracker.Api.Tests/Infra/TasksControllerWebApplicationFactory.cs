@@ -13,7 +13,6 @@ using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
 using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureCommand;
-using OneMoreTaskTracker.Proto.Features.PatchFeatureStageCommand;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureTrackCommand;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureTrackStageCommand;
 using OneMoreTaskTracker.Proto.Tasks;
@@ -60,9 +59,6 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
 
     public FeaturePatcher.FeaturePatcherClient MockFeaturePatcher { get; } =
         Substitute.For<FeaturePatcher.FeaturePatcherClient>();
-
-    public FeatureStagePatcher.FeatureStagePatcherClient MockFeatureStagePatcher { get; } =
-        Substitute.For<FeatureStagePatcher.FeatureStagePatcherClient>();
 
     public FeatureTrackPatcher.FeatureTrackPatcherClient MockFeatureTrackPatcher { get; } =
         Substitute.For<FeatureTrackPatcher.FeatureTrackPatcherClient>();
@@ -116,7 +112,6 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
                 d.ServiceType == typeof(FeaturesLister.FeaturesListerClient) ||
                 d.ServiceType == typeof(FeatureGetter.FeatureGetterClient) ||
                 d.ServiceType == typeof(FeaturePatcher.FeaturePatcherClient) ||
-                d.ServiceType == typeof(FeatureStagePatcher.FeatureStagePatcherClient) ||
                 d.ServiceType == typeof(FeatureTrackPatcher.FeatureTrackPatcherClient) ||
                 d.ServiceType == typeof(FeatureTrackStagePatcher.FeatureTrackStagePatcherClient)
             ).ToList();
@@ -135,7 +130,6 @@ public sealed class TasksControllerWebApplicationFactory : WebApplicationFactory
             services.AddSingleton(MockFeaturesLister);
             services.AddSingleton(MockFeatureGetter);
             services.AddSingleton(MockFeaturePatcher);
-            services.AddSingleton(MockFeatureStagePatcher);
             services.AddSingleton(MockFeatureTrackPatcher);
             services.AddSingleton(MockFeatureTrackStagePatcher);
 

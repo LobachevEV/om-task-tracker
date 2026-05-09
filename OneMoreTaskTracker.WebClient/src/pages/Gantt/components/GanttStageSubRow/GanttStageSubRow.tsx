@@ -3,6 +3,7 @@ import type { FeatureState, FeatureSummary, MiniTeamMember } from '../../../../c
 import type { TeamRosterMember } from '../../../../common/api/teamApi';
 import { Avatar, Badge, roleToAvatarTone } from '../../../../common/ds';
 import { FEATURE_STATE_CSS } from '../../stateConfig';
+import { getStagePlan } from '../../ganttStageGeometry';
 import type { StageBarGeometry } from '../../ganttStageGeometry';
 import { daysBetween, parseIsoDate } from '../../ganttMath';
 import { roleToSide } from '../../roleToSide';
@@ -96,14 +97,14 @@ export function GanttStageSubRow({
   onAnnounce,
 }: GanttStageSubRowProps) {
   const { t, i18n } = useTranslation('gantt');
-  const plan = feature.stagePlans.find((p) => p.stage === seg.stage) ?? null;
-  const performer = resolvePerformer(plan?.performerUserId ?? null);
-  const hasPerformerId = plan?.performerUserId != null;
+  const plan = getStagePlan(feature, seg.stage);
+  const performer = resolvePerformer(plan.ownerUserId);
+  const hasPerformerId = plan.ownerUserId != null;
   const stale = hasPerformerId && performer == null;
 
   const side = performer ? roleToSide(performer.role) : null;
   const dtr = computeDtr({
-    plannedEnd: plan?.plannedEnd ?? null,
+    plannedEnd: plan.plannedEnd,
     today,
     isOverdue: seg.isOverdue,
     isCompleted: seg.isCompleted,
@@ -113,11 +114,10 @@ export function GanttStageSubRow({
   const numeral = String(index + 1).padStart(2, '0');
   const stageName = t(`state.${seg.stage}`);
   const locale = i18n.language || 'en';
-  const shortStart = plan?.plannedStart ? formatShortDate(plan.plannedStart, locale) : '—';
-  const shortEnd = plan?.plannedEnd ? formatShortDate(plan.plannedEnd, locale) : '—';
+  const shortStart = plan.plannedStart ? formatShortDate(plan.plannedStart, locale) : '—';
+  const shortEnd = plan.plannedEnd ? formatShortDate(plan.plannedEnd, locale) : '—';
 
   const inlineEnabled = canEdit && mutations != null;
-  const stageVersion = plan?.stageVersion ?? 0;
 
   const announceOwner = (outcome: 'saved' | 'error') =>
     outcome === 'saved'
@@ -157,7 +157,7 @@ export function GanttStageSubRow({
   if (inlineEnabled && mutations != null && roster && !stale) {
     ownerNode = (
       <InlineOwnerPicker
-        value={plan?.performerUserId ?? null}
+        value={plan.ownerUserId}
         displayName={performer?.displayName ?? null}
         roster={roster}
         ariaLabel={t('inlineEdit.ownerAria', {
@@ -167,7 +167,7 @@ export function GanttStageSubRow({
         })}
         testId={`stage-owner-editor-${feature.id}-${seg.stage}`}
         onSave={async (next) => {
-          await mutations.saveStageOwner(feature.id, seg.stage, next, stageVersion);
+          await mutations.saveStageOwner(feature.id, seg.stage, next, feature.version ?? 0);
         }}
         onAnnounce={onAnnounce}
         buildAnnouncement={announceOwner}
@@ -262,7 +262,7 @@ export function GanttStageSubRow({
                       feature.id,
                       seg.stage,
                       next,
-                      stageVersion,
+                      feature.version ?? 0,
                     );
                   }}
                   onAnnounce={onAnnounce}
@@ -284,7 +284,7 @@ export function GanttStageSubRow({
                       feature.id,
                       seg.stage,
                       next,
-                      stageVersion,
+                      feature.version ?? 0,
                     );
                   }}
                   onAnnounce={onAnnounce}

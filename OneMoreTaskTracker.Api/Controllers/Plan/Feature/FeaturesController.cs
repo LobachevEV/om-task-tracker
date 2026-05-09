@@ -7,11 +7,10 @@ using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Tracks;
 using OneMoreTaskTracker.Api.Roster;
 using OneMoreTaskTracker.Proto.Features;
 using OneMoreTaskTracker.Proto.Features.CreateFeatureCommand;
-using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
+using GetFeatureQuery = OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.ListFeaturesQuery;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureCommand;
 using OneMoreTaskTracker.Proto.Users;
-using ProtoFeatureStagePlan = OneMoreTaskTracker.Proto.Features.FeatureStagePlan;
 
 namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature;
 
@@ -22,7 +21,7 @@ public class FeaturesController(
     FeatureCreator.FeatureCreatorClient featureCreator,
     FeaturePatcher.FeaturePatcherClient featurePatcher,
     FeaturesLister.FeaturesListerClient featuresLister,
-    FeatureGetter.FeatureGetterClient featureGetter,
+    GetFeatureQuery.FeatureGetter.FeatureGetterClient featureGetter,
     ITeamRosterProvider rosterProvider,
     IValidator<UpdateFeaturePayload> updateValidator,
     ILogger<FeaturesController> logger) : ControllerBase
@@ -70,20 +69,18 @@ public class FeaturesController(
         CancellationToken ct)
     {
         var feature = await featureGetter.GetAsync(
-            new GetFeatureRequest { Id = id },
+            new GetFeatureQuery.GetFeatureRequest { Id = id },
             cancellationToken: ct);
 
         var roster = await rosterProvider.LoadRosterAsync(feature.ManagerUserId, ct);
 
         var lead = MiniTeamMemberResponse.From(feature.LeadUserId, roster);
-        var detailStagePlans = feature.StagePlans
-            .Select(sp => BuildDetailStagePlan(sp, roster, feature.Id, feature.ManagerUserId))
-            .ToList();
+        var detailStagePlans = BuildDetailStagePlans(feature, roster);
 
         var miniTeamIds = new HashSet<int>();
         if (feature.LeadUserId > 0) miniTeamIds.Add(feature.LeadUserId);
-        foreach (var sp in feature.StagePlans)
-            if (sp.PerformerUserId > 0) miniTeamIds.Add(sp.PerformerUserId);
+        foreach (var sp in detailStagePlans)
+            if (sp.PerformerUserId is > 0 and int pid) miniTeamIds.Add(pid);
 
         var miniTeam = miniTeamIds
             .Select(uid => MiniTeamMemberResponse.From(uid, roster))
@@ -149,6 +146,41 @@ public class FeaturesController(
         if (body.LeadUserId is { } lead)
             request.LeadUserId = lead;
 
+        if (body.CsApprovingPlannedStart is not null)
+            request.CsApprovingPlannedStart = body.CsApprovingPlannedStart;
+        if (body.CsApprovingPlannedEnd is not null)
+            request.CsApprovingPlannedEnd = body.CsApprovingPlannedEnd;
+        if (body.CsApprovingOwnerUserId is { } csOwner)
+            request.CsApprovingOwnerUserId = csOwner;
+
+        if (body.DevelopmentPlannedStart is not null)
+            request.DevelopmentPlannedStart = body.DevelopmentPlannedStart;
+        if (body.DevelopmentPlannedEnd is not null)
+            request.DevelopmentPlannedEnd = body.DevelopmentPlannedEnd;
+        if (body.DevelopmentOwnerUserId is { } devOwner)
+            request.DevelopmentOwnerUserId = devOwner;
+
+        if (body.TestingPlannedStart is not null)
+            request.TestingPlannedStart = body.TestingPlannedStart;
+        if (body.TestingPlannedEnd is not null)
+            request.TestingPlannedEnd = body.TestingPlannedEnd;
+        if (body.TestingOwnerUserId is { } testOwner)
+            request.TestingOwnerUserId = testOwner;
+
+        if (body.EthalonTestingPlannedStart is not null)
+            request.EthalonTestingPlannedStart = body.EthalonTestingPlannedStart;
+        if (body.EthalonTestingPlannedEnd is not null)
+            request.EthalonTestingPlannedEnd = body.EthalonTestingPlannedEnd;
+        if (body.EthalonTestingOwnerUserId is { } etOwner)
+            request.EthalonTestingOwnerUserId = etOwner;
+
+        if (body.LiveReleasePlannedStart is not null)
+            request.LiveReleasePlannedStart = body.LiveReleasePlannedStart;
+        if (body.LiveReleasePlannedEnd is not null)
+            request.LiveReleasePlannedEnd = body.LiveReleasePlannedEnd;
+        if (body.LiveReleaseOwnerUserId is { } lrOwner)
+            request.LiveReleaseOwnerUserId = lrOwner;
+
         if (expectedVersion.HasValue)
             request.ExpectedVersion = expectedVersion.Value;
 
@@ -156,22 +188,32 @@ public class FeaturesController(
         return Ok(FeatureSummaryResponse.From(dto, PlanRequestHelpers.EmptyTasks));
     }
 
-    private StagePlanDetailResponse BuildDetailStagePlan(
-        ProtoFeatureStagePlan sp,
-        IReadOnlyDictionary<int, TeamRosterMember> roster,
-        int featureId,
-        int managerUserId)
+    private IReadOnlyList<StagePlanDetailResponse> BuildDetailStagePlans(
+        GetFeatureQuery.FeatureDto feature,
+        IReadOnlyDictionary<int, TeamRosterMember> roster)
     {
-        var performerUserId = sp.PerformerUserId > 0 ? (int?)sp.PerformerUserId : null;
-        var performer = ResolvePerformer(performerUserId, roster, featureId, managerUserId, sp.Stage);
+        var stages = new[]
+        {
+            (FeatureState.CsApproving,    feature.CsApprovingPlannedStart,    feature.CsApprovingPlannedEnd,    feature.CsApprovingOwnerUserId),
+            (FeatureState.Development,    feature.DevelopmentPlannedStart,    feature.DevelopmentPlannedEnd,    feature.DevelopmentOwnerUserId),
+            (FeatureState.Testing,        feature.TestingPlannedStart,        feature.TestingPlannedEnd,        feature.TestingOwnerUserId),
+            (FeatureState.EthalonTesting, feature.EthalonTestingPlannedStart, feature.EthalonTestingPlannedEnd, feature.EthalonTestingOwnerUserId),
+            (FeatureState.LiveRelease,    feature.LiveReleasePlannedStart,    feature.LiveReleasePlannedEnd,    feature.LiveReleaseOwnerUserId),
+        };
 
-        return new StagePlanDetailResponse(
-            sp.Stage.ToWireString(),
-            string.IsNullOrEmpty(sp.PlannedStart) ? null : sp.PlannedStart,
-            string.IsNullOrEmpty(sp.PlannedEnd) ? null : sp.PlannedEnd,
-            performerUserId,
-            performer,
-            sp.Version);
+        return stages.Select(s =>
+        {
+            var (stageState, plannedStart, plannedEnd, ownerUserId) = s;
+            var performerUserId = ownerUserId > 0 ? (int?)ownerUserId : null;
+            var performer = ResolvePerformer(performerUserId, roster, feature.Id, feature.ManagerUserId, stageState);
+            return new StagePlanDetailResponse(
+                stageState.ToWireString(),
+                string.IsNullOrEmpty(plannedStart) ? null : plannedStart,
+                string.IsNullOrEmpty(plannedEnd) ? null : plannedEnd,
+                performerUserId,
+                performer,
+                feature.Version);
+        }).ToList();
     }
 
     private MiniTeamMemberResponse? ResolvePerformer(

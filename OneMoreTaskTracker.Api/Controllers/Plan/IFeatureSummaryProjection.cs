@@ -12,7 +12,27 @@ internal interface IFeatureSummaryProjection
     string PlannedEnd { get; }
     int LeadUserId { get; }
     int ManagerUserId { get; }
-    IEnumerable<FeatureStagePlan> StagePlans { get; }
     IEnumerable<FeatureTrackDto> Tracks { get; }
     int Version { get; }
+
+    // Per-stage flat fields
+    string CsApprovingPlannedStart { get; }
+    string CsApprovingPlannedEnd { get; }
+    int CsApprovingOwnerUserId { get; }
+
+    string DevelopmentPlannedStart { get; }
+    string DevelopmentPlannedEnd { get; }
+    int DevelopmentOwnerUserId { get; }
+
+    string TestingPlannedStart { get; }
+    string TestingPlannedEnd { get; }
+    int TestingOwnerUserId { get; }
+
+    string EthalonTestingPlannedStart { get; }
+    string EthalonTestingPlannedEnd { get; }
+    int EthalonTestingOwnerUserId { get; }
+
+    string LiveReleasePlannedStart { get; }
+    string LiveReleasePlannedEnd { get; }
+    int LiveReleaseOwnerUserId { get; }
 }

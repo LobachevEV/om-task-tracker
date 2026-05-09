@@ -1,7 +1,7 @@
 using FluentAssertions;
 using NSubstitute;
 using OneMoreTaskTracker.Api.Controllers.Plan;
-using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
+using OneMoreTaskTracker.Api.Controllers.Plan.Feature;
 using OneMoreTaskTracker.Api.Roster;
 using Xunit;
 
@@ -42,9 +42,9 @@ public sealed class PlannedDateParserTests
     [InlineData("2026-04-29")]
     public void Validator_Passes_OnMissingOrValidPlannedStart(string? raw)
     {
-        var payload = new PatchFeatureStagePayload(StageOwnerUserId: null, PlannedStart: raw, PlannedEnd: null, ExpectedStageVersion: null);
+        var payload = new UpdateFeaturePayload(CsApprovingPlannedStart: raw);
 
-        var result = new PatchFeatureStagePayloadValidator(Substitute.For<ITeamRosterProvider>()).Validate(payload);
+        var result = new UpdateFeaturePayloadValidator(Substitute.For<ITeamRosterProvider>()).Validate(payload);
 
         result.IsValid.Should().BeTrue();
     }
@@ -52,9 +52,9 @@ public sealed class PlannedDateParserTests
     [Fact]
     public void Validator_ReportsFormatError_OnUnparseablePlannedStart()
     {
-        var payload = new PatchFeatureStagePayload(StageOwnerUserId: null, PlannedStart: "31/01/2026", PlannedEnd: null, ExpectedStageVersion: null);
+        var payload = new UpdateFeaturePayload(CsApprovingPlannedStart: "31/01/2026");
 
-        var result = new PatchFeatureStagePayloadValidator(Substitute.For<ITeamRosterProvider>()).Validate(payload);
+        var result = new UpdateFeaturePayloadValidator(Substitute.For<ITeamRosterProvider>()).Validate(payload);
 
         result.IsValid.Should().BeFalse();
         result.Errors[0].ErrorMessage.Should().Be("Date must be YYYY-MM-DD");
@@ -65,9 +65,9 @@ public sealed class PlannedDateParserTests
     [InlineData("2101-01-01")]
     public void Validator_ReportsRangeError_OnOutOfWindowYear(string raw)
     {
-        var payload = new PatchFeatureStagePayload(StageOwnerUserId: null, PlannedStart: raw, PlannedEnd: null, ExpectedStageVersion: null);
+        var payload = new UpdateFeaturePayload(CsApprovingPlannedStart: raw);
 
-        var result = new PatchFeatureStagePayloadValidator(Substitute.For<ITeamRosterProvider>()).Validate(payload);
+        var result = new UpdateFeaturePayloadValidator(Substitute.For<ITeamRosterProvider>()).Validate(payload);
 
         result.IsValid.Should().BeFalse();
         result.Errors[0].ErrorMessage.Should().Be("Use a real release date");
@@ -76,9 +76,9 @@ public sealed class PlannedDateParserTests
     [Fact]
     public void Validator_AlsoChecksPlannedEnd()
     {
-        var payload = new PatchFeatureStagePayload(StageOwnerUserId: null, PlannedStart: null, PlannedEnd: "31/01/2026", ExpectedStageVersion: null);
+        var payload = new UpdateFeaturePayload(CsApprovingPlannedEnd: "31/01/2026");
 
-        var result = new PatchFeatureStagePayloadValidator(Substitute.For<ITeamRosterProvider>()).Validate(payload);
+        var result = new UpdateFeaturePayloadValidator(Substitute.For<ITeamRosterProvider>()).Validate(payload);
 
         result.IsValid.Should().BeFalse();
         result.Errors[0].ErrorMessage.Should().Be("Date must be YYYY-MM-DD");

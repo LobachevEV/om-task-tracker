@@ -45,19 +45,6 @@ public sealed class PlanControllerStagePlansTests(TasksControllerWebApplicationF
             .ListTasksAsync(Arg.Any<ListTasksRequest>(), Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
             .Returns(GrpcTestHelpers.UnaryCall(new ListTasksResponse()));
 
-    private static FeatureStagePlan ProtoPlan(
-        FeatureState stage,
-        string? start = null,
-        string? end = null,
-        int performer = 0) =>
-        new()
-        {
-            Stage           = stage,
-            PlannedStart    = start ?? string.Empty,
-            PlannedEnd      = end   ?? string.Empty,
-            PerformerUserId = performer,
-        };
-
     private static PatchFeatureDto FiveRowPatchDto(int id = 1, int managerUserId = 1, int leadUserId = 1) =>
         new()
         {
@@ -71,14 +58,18 @@ public sealed class PlanControllerStagePlansTests(TasksControllerWebApplicationF
             ManagerUserId = managerUserId,
             CreatedAt = DateTime.UtcNow.ToString("O"),
             UpdatedAt = DateTime.UtcNow.ToString("O"),
-            StagePlans =
-            {
-                ProtoPlan(FeatureState.CsApproving,    "2026-05-01", "2026-05-10", 4),
-                ProtoPlan(FeatureState.Development,    "2026-05-11", "2026-06-01", 2),
-                ProtoPlan(FeatureState.Testing),
-                ProtoPlan(FeatureState.EthalonTesting, "2026-06-05", "2026-06-10", 6),
-                ProtoPlan(FeatureState.LiveRelease,    "2026-06-12", "2026-06-15", 1),
-            }
+            CsApprovingPlannedStart    = "2026-05-01",
+            CsApprovingPlannedEnd      = "2026-05-10",
+            CsApprovingOwnerUserId     = 4,
+            DevelopmentPlannedStart    = "2026-05-11",
+            DevelopmentPlannedEnd      = "2026-06-01",
+            DevelopmentOwnerUserId     = 2,
+            EthalonTestingPlannedStart = "2026-06-05",
+            EthalonTestingPlannedEnd   = "2026-06-10",
+            EthalonTestingOwnerUserId  = 6,
+            LiveReleasePlannedStart    = "2026-06-12",
+            LiveReleasePlannedEnd      = "2026-06-15",
+            LiveReleaseOwnerUserId     = 1,
         };
 
     [Fact]
@@ -124,14 +115,7 @@ public sealed class PlanControllerStagePlansTests(TasksControllerWebApplicationF
                 ManagerUserId = 1,
                 CreatedAt = DateTime.UtcNow.ToString("O"),
                 UpdatedAt = DateTime.UtcNow.ToString("O"),
-                StagePlans =
-                {
-                    ProtoPlan(FeatureState.CsApproving, performer: 2),
-                    ProtoPlan(FeatureState.Development),
-                    ProtoPlan(FeatureState.Testing),
-                    ProtoPlan(FeatureState.EthalonTesting),
-                    ProtoPlan(FeatureState.LiveRelease),
-                }
+                CsApprovingOwnerUserId = 2,
             }));
 
         _factory.MockUserService
@@ -179,14 +163,7 @@ public sealed class PlanControllerStagePlansTests(TasksControllerWebApplicationF
                 ManagerUserId = 1,
                 CreatedAt = DateTime.UtcNow.ToString("O"),
                 UpdatedAt = DateTime.UtcNow.ToString("O"),
-                StagePlans =
-                {
-                    ProtoPlan(FeatureState.CsApproving, performer: 999),
-                    ProtoPlan(FeatureState.Development),
-                    ProtoPlan(FeatureState.Testing),
-                    ProtoPlan(FeatureState.EthalonTesting),
-                    ProtoPlan(FeatureState.LiveRelease),
-                }
+                CsApprovingOwnerUserId = 999,
             }));
 
         _factory.MockUserService
@@ -259,7 +236,7 @@ public sealed class PlanControllerStagePlansTests(TasksControllerWebApplicationF
     }
 
     [Fact]
-    public async Task ListFeatures_IncludesStagePlansInEachSummary()
+    public async Task ListFeatures_ReturnsSummariesWithPlanningDates()
     {
         var client = ClientWithToken(ManagerToken(userId: 1));
         StubEmptyTasks();
@@ -286,14 +263,6 @@ public sealed class PlanControllerStagePlansTests(TasksControllerWebApplicationF
                         PlannedEnd = string.Empty,
                         LeadUserId = 1,
                         ManagerUserId = 1,
-                        StagePlans =
-                        {
-                            ProtoPlan(FeatureState.CsApproving),
-                            ProtoPlan(FeatureState.Development),
-                            ProtoPlan(FeatureState.Testing),
-                            ProtoPlan(FeatureState.EthalonTesting),
-                            ProtoPlan(FeatureState.LiveRelease),
-                        }
                     }
                 }
             }));
@@ -302,7 +271,8 @@ public sealed class PlanControllerStagePlansTests(TasksControllerWebApplicationF
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var body = await response.Content.ReadAsStringAsync();
-        body.Should().Contain("\"stagePlans\":");
+        body.Should().Contain("\"plannedStart\":\"2026-01-01\"");
+        body.Should().Contain("\"title\":\"F1\"");
     }
 
     [Fact]
@@ -326,14 +296,6 @@ public sealed class PlanControllerStagePlansTests(TasksControllerWebApplicationF
                 ManagerUserId = 1,
                 CreatedAt = DateTime.UtcNow.ToString("O"),
                 UpdatedAt = DateTime.UtcNow.ToString("O"),
-                StagePlans =
-                {
-                    ProtoPlan(FeatureState.CsApproving),
-                    ProtoPlan(FeatureState.Development),
-                    ProtoPlan(FeatureState.Testing),
-                    ProtoPlan(FeatureState.EthalonTesting),
-                    ProtoPlan(FeatureState.LiveRelease),
-                },
                 Tracks =
                 {
                     new TrackDto
@@ -421,14 +383,6 @@ public sealed class PlanControllerStagePlansTests(TasksControllerWebApplicationF
                 ManagerUserId = 1,
                 CreatedAt = DateTime.UtcNow.ToString("O"),
                 UpdatedAt = DateTime.UtcNow.ToString("O"),
-                StagePlans =
-                {
-                    ProtoPlan(FeatureState.CsApproving),
-                    ProtoPlan(FeatureState.Development),
-                    ProtoPlan(FeatureState.Testing),
-                    ProtoPlan(FeatureState.EthalonTesting),
-                    ProtoPlan(FeatureState.LiveRelease),
-                },
                 Tracks =
                 {
                     new TrackDto

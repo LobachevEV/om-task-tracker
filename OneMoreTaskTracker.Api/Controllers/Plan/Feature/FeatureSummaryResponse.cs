@@ -1,4 +1,3 @@
-using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Stages;
 using OneMoreTaskTracker.Api.Controllers.Plan.Feature.Tracks;
 using OneMoreTaskTracker.Proto.Users;
 
@@ -15,7 +14,6 @@ public record FeatureSummaryResponse(
     int ManagerUserId,
     int TaskCount,
     IReadOnlyList<int> TaskIds,
-    IReadOnlyList<StagePlanResponse> StagePlans,
     int Version,
     IReadOnlyList<FeatureTrackSummaryResponse>? Tracks)
 {
@@ -38,7 +36,6 @@ public record FeatureSummaryResponse(
             f.ManagerUserId,
             taskIds.Count,
             taskIds,
-            f.StagePlans.Select(StagePlanResponse.From).ToList(),
             f.Version,
             trackList);
     }
