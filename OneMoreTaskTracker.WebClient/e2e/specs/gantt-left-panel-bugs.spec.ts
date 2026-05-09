@@ -58,8 +58,8 @@ test.describe('@integration gantt left-panel bugs (visual acceptance, RED at bas
       for (const [i, w] of ownerWidths.entries()) {
         expect(
           w,
-          `stage-owner cell #${i} bounding-rect width must be >= 24px (avatar)`,
-        ).toBeGreaterThanOrEqual(24);
+          `stage-owner cell #${i} bounding-rect width must be >= 48px (avatar + name + chevron click target)`,
+        ).toBeGreaterThanOrEqual(48);
       }
     });
   }
@@ -114,6 +114,40 @@ test.describe('@integration gantt left-panel bugs (visual acceptance, RED at bas
       }
     });
   }
+
+  // ----- Bug 2 (deeper): owner picker is actually USABLE (input doesn't overflow + popover opens at the cell) -----
+  test('Bug 2 (interactive): owner picker input fits the grid cell at viewport 1200px', async ({ managerPage }) => {
+    await managerPage.setViewportSize({ width: 1200, height: 1227 });
+    await managerPage.goto('/plan');
+    await managerPage.locator('.gantt-page').waitFor({ state: 'visible' });
+    await managerPage.locator('[data-testid^="track-stage-row-"]').first().waitFor({ state: 'visible' });
+
+    const measure = await managerPage.evaluate(() => {
+      const ownerCell = document.querySelector(
+        '[data-testid^="track-stage-row-"] [data-testid="track-stage-owner"]',
+      );
+      const ownerCellRect = ownerCell?.getBoundingClientRect();
+      const input = ownerCell?.querySelector<HTMLInputElement>('input[role="combobox"]');
+      const inputRect = input?.getBoundingClientRect();
+      return {
+        cellWidth: Math.round(ownerCellRect?.width ?? 0),
+        inputWidth: Math.round(inputRect?.width ?? 0),
+        cellRight: Math.round(ownerCellRect?.right ?? 0),
+        inputRight: Math.round(inputRect?.right ?? 0),
+      };
+    });
+
+    expect(measure.cellWidth, 'owner cell must be > 0').toBeGreaterThan(0);
+    // The picker input must fit inside the cell (not overflow into adjacent columns).
+    expect(
+      measure.inputWidth,
+      `picker input width (${measure.inputWidth}) must not exceed owner cell width (${measure.cellWidth})`,
+    ).toBeLessThanOrEqual(measure.cellWidth);
+    expect(
+      measure.inputRight,
+      `picker input right edge (${measure.inputRight}) must not exceed cell right edge (${measure.cellRight})`,
+    ).toBeLessThanOrEqual(measure.cellRight + 1); // 1 px tolerance for sub-pixel rounding
+  });
 
   // ----- Smoke: page renders, no app-level console errors -----
   // Pre-existing /config.js 404 is filtered: it's an env-injection probe that

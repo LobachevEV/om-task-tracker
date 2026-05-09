@@ -66,20 +66,34 @@
 
 .inline-cell__input--date {
   font-variant-numeric: tabular-nums;
-  inline-size: 11ch;
+  /* Date input shrinks with its grid cell. The visible text wants ~6ch for
+   * 'MMM DD' or '1 апр.', so 6ch is the floor; above that we let the
+   * surrounding [dates] column take charge of the available width. */
+  inline-size: 100%;
+  min-inline-size: 6ch;
+  max-inline-size: 11ch;
 }
 
 .inline-cell__input--owner {
   cursor: default;
-  min-inline-size: 12ch;
+  /* No min-inline-size: the picker MUST respect its grid cell. The visible
+   * value is decorative; the avatar + chevron are the affordance. The full
+   * combobox text + ellipsis is preserved via overflow:hidden / text-overflow
+   * on the parent .inline-cell--owner. */
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
-/* Owner cells need to give the input enough room to render the name. The
- * inline-flex parent collapses to content width; explicitly size the cell
- * so the combobox value is visible at rest. */
+/* Owner cell respects its grid container; flexes from full width down to
+ * just-the-avatar at narrow viewports. */
 .inline-cell--owner {
-  min-inline-size: 14ch;
+  min-inline-size: 0;
+  max-inline-size: 100%;
   gap: 6px;
+  overflow: hidden;
 }
 
 .inline-cell--owner .inline-cell__avatar {

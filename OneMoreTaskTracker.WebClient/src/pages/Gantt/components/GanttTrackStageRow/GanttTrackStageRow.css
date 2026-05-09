@@ -43,16 +43,21 @@
   overflow: hidden;
 }
 
-/* 1280px: fold planned-start + planned-end into stacked short dates.
-   Done via class toggled by media query on the dates container — the
-   container itself stays in the grid, only the internal layout changes. */
-@media (max-width: 1280px) {
+/* viewport 1024–1439: gutter is 320 px (the @1440 480-px override hasn't
+   kicked in yet), so the inner grid must squeeze. Fixed columns sum to
+   180 px (28 + 64 + 88 + 24 gaps + 20 padding-inline ≈ 224), leaving the
+   1fr [owner] track ~96 px — enough for the avatar + a truncated name and
+   a clickable picker affordance. Dates fold to two stacked short-form
+   lines so the dates column can shrink to 88 px without ellipsising the
+   localised "Apr 1" / "1 апр." values. Below 1100 the @1100 rule narrows
+   further and drops the code chip; below 1024 the @1023 rule hides dates. */
+@media (max-width: 1439px) {
   .gantt-track-stage-row__gutter {
     grid-template-columns:
       [code]  28px
-      [label] 100px
+      [label] 64px
       [owner] 1fr
-      [dates] 120px;
+      [dates] 88px;
   }
 
   .gantt-track-stage-row__dates {
@@ -62,6 +67,13 @@
   }
 
   .gantt-track-stage-row__sep--range {
+    display: none;
+  }
+
+  /* Inheritance suffix "· по треку" is redundant at narrow viewports —
+   * the ↘ glyph + opacity-dimmed picker still signal "inherited from
+   * track". Reclaim the ~60 px so the picker input has clickable width. */
+  .gantt-track-stage-row__inherit-suffix {
     display: none;
   }
 }
