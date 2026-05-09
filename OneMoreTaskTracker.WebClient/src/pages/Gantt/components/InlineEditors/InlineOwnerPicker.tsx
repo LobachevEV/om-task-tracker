@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import type { TeamRosterMember } from '../../../../common/api/teamApi';
 import { Avatar, roleToAvatarTone } from '../../../../common/ds';
@@ -62,6 +63,8 @@ export function InlineOwnerPicker({
   const { t } = useTranslation('gantt');
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listboxPortalRef = useRef<HTMLUListElement>(null);
+  const [listboxCoords, setListboxCoords] = useState<{ left: number; top: number; minWidth: number } | null>(null);
 
   const editor = useInlineFieldEditor<number | null>({
     committed: value,
@@ -113,7 +116,10 @@ export function InlineOwnerPicker({
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const insideTrigger = rootRef.current?.contains(target) ?? false;
+      const insideListbox = listboxPortalRef.current?.contains(target) ?? false;
+      if (!insideTrigger && !insideListbox) {
         setOpen(false);
         setQuery(displayName ?? '');
       }
@@ -121,6 +127,27 @@ export function InlineOwnerPicker({
     document.addEventListener('mousedown', onDown);
     return () => document.removeEventListener('mousedown', onDown);
   }, [displayName, open]);
+
+  useLayoutEffect(() => {
+    if (!open || !inputRef.current) {
+      setListboxCoords(null);
+      return;
+    }
+    const place = () => {
+      if (!inputRef.current) return;
+      const r = inputRef.current.getBoundingClientRect();
+      setListboxCoords({ left: r.left, top: r.bottom + 2, minWidth: r.width });
+    };
+    place();
+    window.addEventListener('resize', place);
+    window.addEventListener('scroll', place, true);
+    return () => {
+      window.removeEventListener('resize', place);
+      window.removeEventListener('scroll', place, true);
+    };
+  }, [open]);
+
+  const inheritLabel = t('tracks.combobox.inheritFromTrack', { defaultValue: 'Унаследовать от трека' });
 
   const commitUser = useCallback(
     async (userId: number | null) => {
@@ -132,14 +159,14 @@ export function InlineOwnerPicker({
       } finally {
         // Mirror the committed value in the filter input.
         if (userId == null) {
-          setQuery('');
+          setQuery(allowInherit ? inheritLabel : '');
         } else {
           const match = roster.find((m) => m.userId === userId);
           setQuery(match?.displayName ?? '');
         }
       }
     },
-    [editor, roster],
+    [allowInherit, editor, inheritLabel, roster],
   );
 
   // Clean up the auto-revert timer on unmount to prevent setState-after-unmount.
@@ -313,68 +340,77 @@ export function InlineOwnerPicker({
             : '×'}
         </button>
       ) : null}
-      {open ? (
-        <ul className="inline-cell__listbox" role="listbox">
-          {allowInherit ? (
-            <li
-              key="__inherit__"
-              role="option"
-              aria-selected={value === null}
-              className="inline-cell__listbox-option inline-cell__listbox-option--inherit"
-              data-active={highlight === 0 ? 'true' : 'false'}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                void commitUser(null);
-              }}
-              onMouseEnter={() => setHighlight(0)}
+      {open && listboxCoords
+        ? createPortal(
+            <ul
+              ref={listboxPortalRef}
+              className="inline-cell__listbox"
+              role="listbox"
+              data-testid="inline-cell-listbox"
+              style={{ left: listboxCoords.left, top: listboxCoords.top, minWidth: listboxCoords.minWidth }}
             >
-              <span className="inline-cell__inherit-glyph" aria-hidden="true">↘</span>
-              <span className="inline-cell__listbox-name">
-                {t('tracks.combobox.inheritFromTrack', { defaultValue: 'Унаследовать от трека' })}
-              </span>
-            </li>
-          ) : null}
-          {filtered.length === 0 && !allowInherit ? (
-            <li className="inline-cell__listbox-empty" role="option" aria-selected="false">
-              {t('stagePlan.performerEmpty', {
-                defaultValue: 'No teammate matches "{{query}}".',
-                query,
-              })}
-            </li>
-          ) : (
-            filtered.map((m, idx) => {
-              const listIdx = allowInherit ? idx + 1 : idx;
-              const active = listIdx === highlight;
-              const isSelected = m.userId === value;
-              return (
+              {allowInherit ? (
                 <li
-                  key={m.userId}
+                  key="__inherit__"
                   role="option"
-                  aria-selected={isSelected}
-                  className="inline-cell__listbox-option"
-                  data-active={active ? 'true' : 'false'}
+                  aria-selected={value === null}
+                  className="inline-cell__listbox-option inline-cell__listbox-option--inherit"
+                  data-active={highlight === 0 ? 'true' : 'false'}
                   onMouseDown={(e) => {
                     e.preventDefault();
-                    void commitUser(m.userId);
+                    void commitUser(null);
                   }}
-                  onMouseEnter={() => setHighlight(listIdx)}
+                  onMouseEnter={() => setHighlight(0)}
                 >
-                  <Avatar
-                    className="inline-cell__avatar"
-                    name={m.displayName}
-                    size="sm"
-                    tone={roleToAvatarTone(m.role)}
-                    aria-hidden="true"
-                  />
-                  <span className="inline-cell__listbox-name">{m.displayName}</span>
-                  <span className="inline-cell__listbox-sep">·</span>
-                  <span className="inline-cell__listbox-role">{m.role}</span>
+                  <span className="inline-cell__inherit-glyph" aria-hidden="true">↘</span>
+                  <span className="inline-cell__listbox-name">
+                    {t('tracks.combobox.inheritFromTrack', { defaultValue: 'Унаследовать от трека' })}
+                  </span>
                 </li>
-              );
-            })
-          )}
-        </ul>
-      ) : null}
+              ) : null}
+              {filtered.length === 0 && !allowInherit ? (
+                <li className="inline-cell__listbox-empty" role="option" aria-selected="false">
+                  {t('stagePlan.performerEmpty', {
+                    defaultValue: 'No teammate matches "{{query}}".',
+                    query,
+                  })}
+                </li>
+              ) : (
+                filtered.map((m, idx) => {
+                  const listIdx = allowInherit ? idx + 1 : idx;
+                  const active = listIdx === highlight;
+                  const isSelected = m.userId === value;
+                  return (
+                    <li
+                      key={m.userId}
+                      role="option"
+                      aria-selected={isSelected}
+                      className="inline-cell__listbox-option"
+                      data-active={active ? 'true' : 'false'}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        void commitUser(m.userId);
+                      }}
+                      onMouseEnter={() => setHighlight(listIdx)}
+                    >
+                      <Avatar
+                        className="inline-cell__avatar"
+                        name={m.displayName}
+                        size="sm"
+                        tone={roleToAvatarTone(m.role)}
+                        aria-hidden="true"
+                      />
+                      <span className="inline-cell__listbox-name">{m.displayName}</span>
+                      <span className="inline-cell__listbox-sep">·</span>
+                      <span className="inline-cell__listbox-role">{m.role}</span>
+                    </li>
+                  );
+                })
+              )}
+            </ul>,
+            document.body,
+          )
+        : null}
       <InlineCellError
         error={editor.error}
         onRetry={() => void editor.retry()}

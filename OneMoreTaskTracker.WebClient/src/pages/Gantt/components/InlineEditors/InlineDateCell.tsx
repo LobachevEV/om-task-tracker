@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useInlineFieldEditor } from './useInlineFieldEditor';
 import type { InlineEditorError } from './InlineEditorError';
@@ -57,7 +58,9 @@ export function InlineDateCell({
   const inputRef = useRef<HTMLInputElement>(null);
   const rootRef = useRef<HTMLSpanElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const calendarPortalRef = useRef<HTMLDivElement>(null);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [calendarCoords, setCalendarCoords] = useState<{ left: number; top: number } | null>(null);
 
   const editor = useInlineFieldEditor<string>({
     committed: toDraft(value),
@@ -75,12 +78,37 @@ export function InlineDateCell({
   useEffect(() => {
     if (!calendarOpen) return;
     const onPointerDown = (e: PointerEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const insideRoot = rootRef.current?.contains(target) ?? false;
+      const insideCalendar = calendarPortalRef.current?.contains(target) ?? false;
+      if (!insideRoot && !insideCalendar) {
         setCalendarOpen(false);
       }
     };
     document.addEventListener('pointerdown', onPointerDown);
     return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [calendarOpen]);
+
+  useLayoutEffect(() => {
+    if (!calendarOpen || !triggerRef.current) {
+      return;
+    }
+    const CAL_HEIGHT = 240;
+    const CAL_WIDTH = 304;
+    const place = () => {
+      if (!triggerRef.current) return;
+      const r = triggerRef.current.getBoundingClientRect();
+      const top = r.bottom + CAL_HEIGHT > window.innerHeight ? r.top - CAL_HEIGHT - 2 : r.bottom + 2;
+      const left = r.left + CAL_WIDTH > window.innerWidth ? window.innerWidth - CAL_WIDTH - 4 : r.left;
+      setCalendarCoords({ left, top });
+    };
+    place();
+    window.addEventListener('resize', place);
+    window.addEventListener('scroll', place, true);
+    return () => {
+      window.removeEventListener('resize', place);
+      window.removeEventListener('scroll', place, true);
+    };
   }, [calendarOpen]);
 
   const openCalendar = useCallback(() => {
@@ -173,14 +201,23 @@ export function InlineDateCell({
       >
         <InlineCellChevron />
       </button>
-      {calendarOpen ? (
-        <InlineDateCalendar
-          selected={ISO_DATE_RE.test(editor.draft.trim()) ? editor.draft.trim() : value}
-          onSelect={handleCalendarSelect}
-          onClose={closeCalendar}
-          ariaLabel={t('inlineEdit.datePicker.calendarAria', { defaultValue: 'Pick a date' })}
-        />
-      ) : null}
+      {calendarOpen && calendarCoords
+        ? createPortal(
+            <div
+              ref={calendarPortalRef}
+              data-testid="inline-date-calendar"
+              style={{ position: 'fixed', left: calendarCoords.left, top: calendarCoords.top }}
+            >
+              <InlineDateCalendar
+                selected={ISO_DATE_RE.test(editor.draft.trim()) ? editor.draft.trim() : value}
+                onSelect={handleCalendarSelect}
+                onClose={closeCalendar}
+                ariaLabel={t('inlineEdit.datePicker.calendarAria', { defaultValue: 'Pick a date' })}
+              />
+            </div>,
+            document.body,
+          )
+        : null}
       <InlineCellError
         error={editor.error}
         onRetry={() => void editor.retry()}

@@ -5,9 +5,7 @@
  */
 
 .inline-date-calendar {
-  position: absolute;
-  inset-block-start: calc(100% + 4px);
-  inset-inline-start: 0;
+  position: fixed;
   z-index: var(--z-popover);
   background: var(--elevated);
   border: 1px solid var(--border);
