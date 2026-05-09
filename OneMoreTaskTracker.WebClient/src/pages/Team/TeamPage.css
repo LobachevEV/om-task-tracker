@@ -1,7 +1,7 @@
 /* Team page layout and containers. */
 
 .team-main {
-  max-width: 1120px; /* TODO: no exact --bp-* token; accept literal */
+  max-width: 1120px; /* no exact --bp-* token; accept literal */
   margin: 0 auto;
   padding: 0 var(--space-4);
 }
@@ -21,7 +21,7 @@
   align-items: stretch;
 }
 
-@media (min-width: 768px) /* TODO: no --bp-* token for this breakpoint; accept literal */ {
+@media (min-width: 768px) /* no --bp-* token for this breakpoint; accept literal */ {
   .team-toolbar {
     flex-direction: row;
     justify-content: space-between;
@@ -43,7 +43,7 @@
 }
 
 .team-toolbar__summary {
-  font-size: 0.9rem; /* TODO: no exact --text-* token; accept literal */
+  font-size: 0.9rem; /* no exact --text-* token; accept literal */
   color: var(--text-muted);
   margin: 0;
 }
@@ -54,12 +54,12 @@
 
 .team-search-input {
   width: 100%;
-  max-width: 320px; /* TODO: no --bp-* token for this width; accept literal */
-  padding: 0.95rem var(--space-4); /* TODO: 0.95rem has no --space-* token; accept literal */
-  min-height: 2.75rem; /* TODO: nearest --row-h-* is --row-h-nav; accept literal */
+  max-width: 320px; /* no --bp-* token for this width; accept literal */
+  padding: 0.95rem var(--space-4); /* 0.95rem has no --space-* token; accept literal */
+  min-height: 2.75rem; /* nearest --row-h-* is --row-h-nav; accept literal */
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  font-size: 0.9rem; /* TODO: no exact --text-* token; accept literal */
+  font-size: 0.9rem; /* no exact --text-* token; accept literal */
   background-color: var(--surface);
   color: var(--text);
   transition: border-color var(--transition-base);
@@ -101,7 +101,7 @@
 
 .team-toast__content {
   flex: 1;
-  font-size: 0.9rem; /* TODO: no exact --text-* token; accept literal */
+  font-size: 0.9rem; /* no exact --text-* token; accept literal */
   color: var(--text);
 }
 
@@ -116,7 +116,7 @@
   background-color: var(--bg);
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
-  font-size: 0.85rem; /* TODO: no exact --text-* token; accept literal */
+  font-size: var(--text-mm); /* mono password chip */
   color: var(--accent);
 }
 
@@ -127,12 +127,12 @@
 }
 
 .team-toast__copy-btn {
-  padding: var(--space-3) 1.25rem; /* TODO: 1.25rem has no --space-* token; accept literal */
+  padding: var(--space-3) 1.25rem; /* 1.25rem has no --space-* token; accept literal */
   background-color: var(--accent);
   color: var(--accent-ink);
   border: none;
   border-radius: var(--radius-base);
-  font-size: 0.8rem; /* TODO: no exact --text-* token; accept literal */
+  font-size: 0.8rem; /* no exact --text-* token; accept literal */
   font-weight: 500;
   cursor: pointer;
   transition: background-color var(--transition-fast);
@@ -146,8 +146,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2.75rem; /* TODO: touch-target; no --space-* token; accept literal */
-  min-height: 2.75rem; /* TODO: touch-target; no --space-* token; accept literal */
+  min-width: 2.75rem; /* touch-target; no --space-* token; accept literal */
+  min-height: 2.75rem; /* touch-target; no --space-* token; accept literal */
   padding: var(--space-2) var(--space-3);
   background: none;
   border: none;
@@ -170,7 +170,7 @@
   background-color: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  font-size: 0.95rem; /* TODO: no exact --text-* token; accept literal */
+  font-size: 0.95rem; /* no exact --text-* token; accept literal */
 }
 
 /* Loading spinner */

@@ -171,7 +171,121 @@ Do NOT use `<Gutter>` for:
 
 ---
 
-## 6. Migration Checklist
+## 6. Token consumers
+
+The following CSS files currently consume spatial or type tokens.
+
+### Design-system primitives
+
+| File | Tokens used |
+|------|-------------|
+| `src/common/ds/spatial/Gutter/Gutter.css` | `--space-*`, `--row-h-*` |
+| `src/common/ds/Badge/Badge.css` | `--space-*`, `--radius-*`, `--text-*` |
+| `src/common/ds/Button/Button.css` | `--space-*`, `--radius-*`, `--text-*` |
+| `src/common/ds/Callout/Callout.css` | `--space-*`, `--radius-*`, `--text-*` |
+| `src/common/ds/IntegrationIcon/IntegrationIcon.css` | `--space-*`, `--radius-*` |
+| `src/common/ds/Kbd/Kbd.css` | `--space-*`, `--radius-*`, `--text-*` |
+| `src/common/ds/StatusDot/StatusDot.css` | `--space-*` |
+
+### Common components
+
+| File | Tokens used |
+|------|-------------|
+| `src/common/components/AppHeader/AppHeader.css` | `--space-*`, `--text-*` |
+| `src/common/components/ErrorBoundary/ErrorBoundary.css` | `--space-*`, `--text-*` |
+| `src/common/components/LanguageSwitcher/LanguageSwitcher.css` | `--space-*`, `--text-*`, `--radius-*` |
+| `src/common/components/ShortcutLegend/ShortcutLegend.css` | `--space-*`, `--text-*` |
+| `src/common/components/Spinner/Spinner.css` | `--space-*`, `--text-*` |
+
+### Page CSS
+
+| File | Tokens used |
+|------|-------------|
+| `src/pages/Tasks/TaskPage.css` | `--space-*`, `--text-*`, `--radius-*` |
+| `src/pages/Tasks/TaskDetailPage.css` | `--space-*`, `--text-*` |
+| `src/pages/Team/TeamPage.css` | `--space-*`, `--text-*`, `--radius-*` |
+| `src/pages/Team/components/InviteRow/InviteRow.css` | `--space-*`, `--text-*`, `--radius-*` |
+| `src/pages/Team/components/Roster/Roster.css` | `--space-*`, `--text-*` |
+| `src/pages/Team/components/RowMenu/RowMenu.css` | `--space-*`, `--text-*`, `--radius-*` |
+| `src/pages/Team/components/StateBar/StateBar.css` | `--space-*` |
+| `src/pages/Team/components/StateBarLegend/StateBarLegend.css` | `--space-*`, `--text-*` |
+
+---
+
+## 7. Known token-scale gaps
+
+Some CSS call sites retain bare numeric literals because no exact token equivalent exists
+at the current scale. These values are accepted and documented here rather than annotated
+per call site.
+
+### Typography — values without an exact `--text-*` match
+
+| Literal | Context | Resolution |
+|---------|---------|------------|
+| `0.9rem` | Secondary body text, TablePage row labels | Between `--text-sm` (0.8125rem) and `--text-base` (0.875rem) |
+| `0.8rem` | Footer labels, caption text | Below `--text-sm` in some contexts |
+| `0.95rem` | Slightly-larger body (TeamPage hero) | Between `--text-base` and `--text-md` |
+| `0.65rem`, `0.72rem` | Micro-labels, small chips | Below `--text-xs` (0.75rem) |
+
+`--text-mm: 0.85rem` was added as a token for mono snippets and table-row secondary text
+where 13.6px is the most common freeform value (AppHeader email, Spinner label, ShortcutLegend,
+StateBarLegend, InviteRow chip, Roster last-active, ErrorBoundary detail, TaskDetailPage back-link).
+
+### Spacing — fractions without a `--space-*` match
+
+The `--space-*` scale covers 4/8/12/16/24/32/40/48/64/96px. Values outside this set
+(letter-spacing nudges, fine-grained border adjustments) are intentional micro-offsets:
+`0.05rem`, `0.1rem`, `0.15rem`, `0.2rem`, `0.3rem`, `0.35rem`, `0.4rem`, `0.45rem`.
+None of these are candidates for tokenisation at this scale; they are sub-grid adjustments.
+
+### Layout widths and breakpoints without a `--bp-*` match
+
+The `--bp-*` set covers 640 / 768 / 1024 / 1280 px. Component-local max-widths and
+element-specific column widths fall outside the breakpoint token set and remain as literals:
+`200px`, `210px`, `320px`, `400px`, `420px`, `599px`, `640px`, `70px`, `960px`, `1120px`, `1200px`.
+
+### Visual constants
+
+`1px` (borders), `2px` (focus rings, nudges), `3px` (small radius), `6px`, `8px` (Button
+hand-tuned radius) have no corresponding structural token. They are stable visual constants,
+not layout decisions.
+
+---
+
+## 8. Worked example — AppHeader with `<Gutter>`
+
+`AppHeader` is the first non-Gantt consumer of `<Gutter>`. It wraps the top navigation bar
+in a nav-density Gutter to achieve the same row-height discipline as the Gantt left panel.
+
+```tsx
+// src/common/components/AppHeader/AppHeader.tsx
+import { Gutter } from '../../ds';
+
+export function AppHeader() {
+  return (
+    <header className="app-header">
+      <Gutter density="nav" columns={['label', 'owner']} className="app-header__inner">
+        {/* [label] slot — project logo and page title */}
+        <div className="app-header__brand">...</div>
+
+        {/* [owner] slot — user menu and language switcher */}
+        <div className="app-header__user">...</div>
+      </Gutter>
+    </header>
+  );
+}
+```
+
+The `density="nav"` maps to `--row-h-nav` (48px); the two named columns (`label`, `owner`) let
+the header logo and user controls align with any future left-panel row at the same density.
+
+Note: AppHeader's outer `<header>` overrides `max-inline-size` and `min-inline-size` from
+Gutter's default gantt-panel sizing via its own CSS cascade, making the navigation bar
+full-width while still participating in the row-height token system.
+
+---
+
+## 9. Migration Checklist
 
 When touching any component CSS file, apply these checks before committing:
 

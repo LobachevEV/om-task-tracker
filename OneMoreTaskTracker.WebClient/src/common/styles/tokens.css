@@ -49,6 +49,7 @@
   /* Type scale — owner: /typeset. Ratio ≥ 1.25 between adjacent steps.
    * Pair scale with weight contrast for hierarchy (see DESIGN.md). */
   --text-xs: 0.75rem;     /* 12px — meta strings, eyebrows, status chips */
+  --text-mm: 0.85rem;     /* 13.6px — mono snippets, table-row secondary */
   --text-sm: 0.8125rem;   /* 13px — secondary body, table cells */
   --text-base: 0.875rem;  /* 14px — primary body, form inputs */
   --text-md: 1rem;        /* 16px — section subtitles */

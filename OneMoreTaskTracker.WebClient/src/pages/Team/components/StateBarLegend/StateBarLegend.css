@@ -5,7 +5,7 @@
   gap: var(--space-6);
   margin: 0.9rem 0 var(--space-4) 0;
   padding: 0;
-  font-size: 0.85rem;
+  font-size: var(--text-mm);
   color: var(--text-muted);
   flex-wrap: wrap;
 }

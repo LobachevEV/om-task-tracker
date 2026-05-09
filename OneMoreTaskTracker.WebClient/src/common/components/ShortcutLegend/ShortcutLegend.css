@@ -9,7 +9,7 @@
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-field);
   box-shadow: var(--shadow-lg);
-  font-size: 0.85rem;
+  font-size: var(--text-mm);
 }
 
 .shortcut-legend__title {

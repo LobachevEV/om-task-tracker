@@ -70,14 +70,14 @@
 
 .app-header__email {
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: var(--text-mm);
 }
 
 .app-header__user {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  font-size: 0.85rem;
+  font-size: var(--text-mm);
   color: var(--text-muted);
 }
 
