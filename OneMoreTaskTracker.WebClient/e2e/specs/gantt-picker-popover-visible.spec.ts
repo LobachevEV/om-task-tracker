@@ -236,6 +236,91 @@ test.describe('@integration gantt picker popover visibility (visual acceptance, 
       .not.toEqual(before);
   });
 
+  // ----- Bug 3: Popover width must not bloat -----
+  // Catches the failure mode where `position: fixed` + `left: X` + `width: auto`
+  // resolves to "fill from left to viewport's right edge" — making a popover
+  // anchored to a small trigger render across most of the page. The popover
+  // wrapper's bounding rect must stay tight: width ≤ POPOVER_MAX_WIDTH.
+  // 500 px gives the calendar (~304 px) and listbox (capped at ~420 px by
+  // its content) headroom; anything larger is a sign of a `width: auto`
+  // / shrink-to-fit regression.
+  const POPOVER_MAX_WIDTH = 500;
+
+  for (const vw of VIEWPORTS) {
+    test(`Bug 3a: owner listbox width is bounded at viewport ${vw}px`, async ({ managerPage }) => {
+      await managerPage.setViewportSize({ width: vw, height: 1000 });
+      await managerPage.goto('/plan');
+      await managerPage.locator('.gantt-page').waitFor({ state: 'visible' });
+      await managerPage.locator('[data-testid^="track-stage-row-"]').first().waitFor({ state: 'visible' });
+
+      const ownerInput = managerPage
+        .locator('[data-testid^="track-stage-row-"] [data-testid="track-stage-owner"] input[role="combobox"]')
+        .first();
+      await ownerInput.scrollIntoViewIfNeeded();
+      await ownerInput.click();
+
+      await managerPage.locator('.inline-cell__listbox').first().waitFor({ state: 'attached' });
+
+      // Measure the painted popover surface. The listbox can either paint
+      // at its own width (when the wrapper is fit-content) or stretch to
+      // the wrapper's box when the wrapper is fill-available — take the
+      // max of the two, since whichever is larger is what the user sees.
+      const widths = await managerPage.evaluate(() => {
+        const lb = document.querySelector<HTMLElement>('.inline-cell__listbox');
+        const wrapper = lb?.parentElement ?? null;
+        return {
+          wrapperWidth: wrapper ? Math.round(wrapper.getBoundingClientRect().width) : 0,
+          listboxWidth: lb ? Math.round(lb.getBoundingClientRect().width) : 0,
+        };
+      });
+      const paintedWidth = Math.max(widths.wrapperWidth, widths.listboxWidth);
+
+      expect(paintedWidth, `painted owner-popover width must be > 0 at vw=${vw}`).toBeGreaterThan(0);
+      expect(
+        paintedWidth,
+        `painted owner-popover width (max of wrapper=${widths.wrapperWidth}, listbox=${widths.listboxWidth}) must not bloat past ${POPOVER_MAX_WIDTH}px at vw=${vw}`,
+      ).toBeLessThanOrEqual(POPOVER_MAX_WIDTH);
+    });
+  }
+
+  for (const vw of VIEWPORTS) {
+    test(`Bug 3b: date calendar width is bounded at viewport ${vw}px`, async ({ managerPage }) => {
+      await managerPage.setViewportSize({ width: vw, height: 1000 });
+      await managerPage.goto('/plan');
+      await managerPage.locator('.gantt-page').waitFor({ state: 'visible' });
+      await managerPage.locator('[data-testid^="track-stage-row-"]').first().waitFor({ state: 'visible' });
+
+      const calendarBtn = managerPage
+        .locator('[data-testid^="track-stage-start-"] [data-testid$="-calendar-btn"]')
+        .first();
+      await calendarBtn.scrollIntoViewIfNeeded();
+      await calendarBtn.click();
+
+      await managerPage.locator('.inline-date-calendar').first().waitFor({ state: 'attached' });
+
+      // Calendar is a `display: contents`-style wrapper around react-day-picker;
+      // its parentElement (the Popover wrapper) may be `fit-content: 0` when the
+      // calendar paints itself. Measure both and assert the visible max.
+      const widths = await managerPage.evaluate(() => {
+        const cal = document.querySelector<HTMLElement>('.inline-date-calendar');
+        const wrapper = cal?.parentElement ?? null;
+        const rdp = cal?.querySelector<HTMLElement>('.rdp-root');
+        return {
+          wrapperWidth: wrapper ? Math.round(wrapper.getBoundingClientRect().width) : 0,
+          calendarWidth: cal ? Math.round(cal.getBoundingClientRect().width) : 0,
+          rdpWidth: rdp ? Math.round(rdp.getBoundingClientRect().width) : 0,
+        };
+      });
+      const paintedWidth = Math.max(widths.wrapperWidth, widths.calendarWidth, widths.rdpWidth);
+
+      expect(paintedWidth, `painted calendar width must be > 0 at vw=${vw}`).toBeGreaterThan(0);
+      expect(
+        paintedWidth,
+        `painted calendar width (max of wrapper=${widths.wrapperWidth}, calendar=${widths.calendarWidth}, rdp=${widths.rdpWidth}) must not bloat past ${POPOVER_MAX_WIDTH}px at vw=${vw}`,
+      ).toBeLessThanOrEqual(POPOVER_MAX_WIDTH);
+    });
+  }
+
   // ----- Smoke: page renders, picker open/close emits no app console errors -----
   test('Smoke: Manager opens /plan + each picker, no app console errors', async ({ managerPage }) => {
     const errors: string[] = [];
