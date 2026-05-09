@@ -10,56 +10,10 @@
   background-color: color-mix(in oklch, var(--elevated) 50%, transparent);
 }
 
-/*
- * Gutter inner grid — 4 named columns:
- *   [code]   28px   — 3-letter stage chip
- *   [label]  120px  — stage name (Russian, truncated)
- *   [owner]  1fr    — avatar + name (takes remaining space)
- *   [dates]  180px  — planned-start · sep · planned-end · dtr
- *
- * The outer gutter width is controlled by --gantt-gutter-width on .gantt-page.
- * At ≥1440px that variable is 480px (see GanttPage.css @media 1440).
- * At 1280px the dates column folds to a stacked short-date cell (see below).
- * At 1100px the dates column is hidden (hover popover carries the info).
- * At 1024px the label column is also hidden (compact: code + owner only).
- */
-.gantt-track-stage-row__gutter {
-  display: grid;
-  grid-template-columns:
-    [code]  28px
-    [label] 120px
-    [owner] 1fr
-    [dates] 180px;
-  align-items: center;
-  gap: 0 var(--space-2);
-  padding-inline: var(--space-2) var(--space-3);
-  min-height: 36px;
-  position: sticky;
-  inset-inline-start: 0;
-  background: var(--surface);
-  border-inline-end: 1px solid var(--border);
-  z-index: var(--z-sticky);
-  max-inline-size: var(--gantt-gutter-width, 280px);
-  overflow: hidden;
-}
-
-/* viewport 1024–1439: gutter is 320 px (the @1440 480-px override hasn't
-   kicked in yet), so the inner grid must squeeze. Fixed columns sum to
-   180 px (28 + 64 + 88 + 24 gaps + 20 padding-inline ≈ 224), leaving the
-   1fr [owner] track ~96 px — enough for the avatar + a truncated name and
-   a clickable picker affordance. Dates fold to two stacked short-form
-   lines so the dates column can shrink to 88 px without ellipsising the
-   localised "Apr 1" / "1 апр." values. Below 1100 the @1100 rule narrows
-   further and drops the code chip; below 1024 the @1023 rule hides dates. */
-@media (max-width: 1439px) {
-  .gantt-track-stage-row__gutter {
-    grid-template-columns:
-      [code]  28px
-      [label] 64px
-      [owner] 1fr
-      [dates] 88px;
-  }
-
+/* Breakpoint cascade for the [dates] column children.
+ * The inner grid-template-columns are now in Gutter.css keyed by
+ * [data-density="default"]. Child visibility rules stay here. */
+@media (max-width: 1439px) /* --bp-xl */ {
   .gantt-track-stage-row__dates {
     flex-direction: column;
     gap: 0;
@@ -70,36 +24,20 @@
     display: none;
   }
 
-  /* Inheritance suffix "· по треку" is redundant at narrow viewports —
-   * the ↘ glyph + opacity-dimmed picker still signal "inherited from
-   * track". Reclaim the ~60 px so the picker input has clickable width. */
   .gantt-track-stage-row__inherit-suffix {
     display: none;
   }
 }
 
 /* 1100px: hide the stage-code chip (internal-id); dates stay stacked. */
-@media (max-width: 1100px) {
-  .gantt-track-stage-row__gutter {
-    grid-template-columns:
-      [label] 100px
-      [owner] 1fr
-      [dates] 120px;
-  }
-
+@media (max-width: 1100px) /* --bp-lg-narrow */ {
   .gantt-track-stage-row__code {
     display: none;
   }
 }
 
 /* 1024px: compact — hide dates too; keep label + owner only. */
-@media (max-width: 1023px) {
-  .gantt-track-stage-row__gutter {
-    grid-template-columns:
-      [label] 100px
-      [owner] 1fr;
-  }
-
+@media (max-width: 1023px) /* --bp-md */ {
   .gantt-track-stage-row__dates {
     display: none;
   }
