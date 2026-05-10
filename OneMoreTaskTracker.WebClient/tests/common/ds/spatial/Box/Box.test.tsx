@@ -1,4 +1,7 @@
 import { createRef } from 'react';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { Box } from '../../../../../src/common/ds/spatial/Box/Box';
@@ -71,5 +74,25 @@ describe('Box', () => {
     const { container } = render(<Box />);
     expect(container.firstElementChild?.tagName).toBe('DIV');
     expect(container.firstElementChild?.childNodes.length).toBe(0);
+  });
+});
+
+describe('Box CSS contract', () => {
+  const cssPath = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '../../../../../src/common/ds/spatial/Box/Box.css',
+  );
+  const css = readFileSync(cssPath, 'utf-8');
+
+  it('defines CSS rule for data-pad token key 2', () => {
+    expect(css).toContain("[data-pad='2']");
+  });
+
+  it('defines CSS rule for data-pad-inline token key 4', () => {
+    expect(css).toContain("[data-pad-inline='4']");
+  });
+
+  it('defines CSS rule for data-pad-block token key 1', () => {
+    expect(css).toContain("[data-pad-block='1']");
   });
 });

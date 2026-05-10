@@ -1,4 +1,7 @@
 import { createRef } from 'react';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { Inline } from '../../../../../src/common/ds/spatial/Inline/Inline';
@@ -71,5 +74,29 @@ describe('Inline', () => {
   it('forwards arbitrary data attributes', () => {
     const { container } = render(<Inline data-testid="my-inline">content</Inline>);
     expect(container.firstElementChild?.getAttribute('data-testid')).toBe('my-inline');
+  });
+});
+
+describe('Inline CSS contract', () => {
+  const cssPath = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '../../../../../src/common/ds/spatial/Inline/Inline.css',
+  );
+  const css = readFileSync(cssPath, 'utf-8');
+
+  it('defines CSS rule for data-gap token key 2', () => {
+    expect(css).toContain("[data-gap='2']");
+  });
+
+  it('defines CSS rule for data-pad token key 3', () => {
+    expect(css).toContain("[data-pad='3']");
+  });
+
+  it('defines CSS rule for data-align value baseline', () => {
+    expect(css).toContain("[data-align='baseline']");
+  });
+
+  it('defines CSS rule for data-justify value between', () => {
+    expect(css).toContain("[data-justify='between']");
   });
 });

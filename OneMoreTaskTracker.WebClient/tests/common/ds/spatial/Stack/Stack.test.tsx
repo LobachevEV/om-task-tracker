@@ -1,4 +1,7 @@
 import { createRef } from 'react';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { Stack } from '../../../../../src/common/ds/spatial/Stack/Stack';
@@ -71,5 +74,25 @@ describe('Stack', () => {
   it('omits data-gap when gap prop is not provided', () => {
     const { container } = render(<Stack>content</Stack>);
     expect(container.firstElementChild?.hasAttribute('data-gap')).toBe(false);
+  });
+});
+
+describe('Stack CSS contract', () => {
+  const cssPath = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '../../../../../src/common/ds/spatial/Stack/Stack.css',
+  );
+  const css = readFileSync(cssPath, 'utf-8');
+
+  it('defines CSS rule for data-gap token key 3', () => {
+    expect(css).toContain("[data-gap='3']");
+  });
+
+  it('defines CSS rule for data-pad token key 2', () => {
+    expect(css).toContain("[data-pad='2']");
+  });
+
+  it('defines CSS rule for data-align value center', () => {
+    expect(css).toContain("[data-align='center']");
   });
 });

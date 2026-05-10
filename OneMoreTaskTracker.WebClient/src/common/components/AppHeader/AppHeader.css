@@ -7,22 +7,17 @@
   z-index: var(--z-header);
 }
 
-/* Reset Gantt-specific Gutter geometry for page-chrome context.
- * Specificity: (0,2,0) overrides .gantt-gutter (0,1,0).
- * The density (min-block-size: var(--row-h-nav)) is intentionally kept. */
-.app-header .gantt-gutter {
-  position: static;
-  inset-inline-start: unset;
-  border-inline-end: none;
-  min-inline-size: unset;
+.app-header__inner {
+  min-block-size: var(--row-h-nav);
   max-inline-size: 1200px;
-  overflow: visible;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.app-header__grid {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding-inline: 0;
-  margin: 0 auto;
-  width: 100%;
 }
 
 .app-header__left {
@@ -87,7 +82,7 @@
   }
 
   /* 768px: switch inner row to horizontal two-column layout. */
-  .app-header .gantt-gutter {
+  .app-header__grid {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;

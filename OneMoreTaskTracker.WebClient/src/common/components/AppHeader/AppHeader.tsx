@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../common/auth/AuthContext';
 import { ROLE_BADGE_CLASS } from '../../auth/roles';
 import { LanguageSwitcher } from '../LanguageSwitcher';
-import { Gutter } from '../../ds';
+import { Box, Grid } from '../../ds/spatial';
 import './AppHeader.css';
 
 export function AppHeader() {
@@ -31,46 +31,48 @@ export function AppHeader() {
 
   return (
     <header className="app-header">
-      <Gutter density="nav" columns={['label', 'owner']} className="app-header__inner">
-        <div className="app-header__left">
-          <div className="app-header__title">
-            <h1>One More Task Tracker</h1>
-            <p>{t('subtitle')}</p>
-          </div>
-          <nav className="app-header__nav">
-            <a
-              href="/plan"
-              className={`app-header__nav-item ${isPlanActive ? 'app-header__nav-item--active' : ''}`}
-            >
-              {t('nav.plan')}
-            </a>
-            {!isManager ? (
+      <Box className="app-header__inner">
+        <Grid className="app-header__grid" columns="1fr">
+          <div className="app-header__left">
+            <div className="app-header__title">
+              <h1>One More Task Tracker</h1>
+              <p>{t('subtitle')}</p>
+            </div>
+            <nav className="app-header__nav">
               <a
-                href="/tasks"
-                className={`app-header__nav-item ${isTasksActive ? 'app-header__nav-item--active' : ''}`}
+                href="/plan"
+                className={`app-header__nav-item ${isPlanActive ? 'app-header__nav-item--active' : ''}`}
               >
-                {t('nav.tasks')}
+                {t('nav.plan')}
               </a>
-            ) : null}
-            <a
-              href="/team"
-              className={`app-header__nav-item ${isTeamActive ? 'app-header__nav-item--active' : ''}`}
-            >
-              {t('nav.team')}
-            </a>
-          </nav>
-        </div>
-        <div className="app-header__user">
-          <LanguageSwitcher />
-          <span className="app-header__email">{user.email}</span>
-          <span className={`role-badge ${ROLE_BADGE_CLASS[user.role]}`}>
-            {user.role}
-          </span>
-          <button className="primary-button" type="button" onClick={handleLogout}>
-            {t('logout')}
-          </button>
-        </div>
-      </Gutter>
+              {!isManager ? (
+                <a
+                  href="/tasks"
+                  className={`app-header__nav-item ${isTasksActive ? 'app-header__nav-item--active' : ''}`}
+                >
+                  {t('nav.tasks')}
+                </a>
+              ) : null}
+              <a
+                href="/team"
+                className={`app-header__nav-item ${isTeamActive ? 'app-header__nav-item--active' : ''}`}
+              >
+                {t('nav.team')}
+              </a>
+            </nav>
+          </div>
+          <div className="app-header__user">
+            <LanguageSwitcher />
+            <span className="app-header__email">{user.email}</span>
+            <span className={`role-badge ${ROLE_BADGE_CLASS[user.role]}`}>
+              {user.role}
+            </span>
+            <button className="primary-button" type="button" onClick={handleLogout}>
+              {t('logout')}
+            </button>
+          </div>
+        </Grid>
+      </Box>
     </header>
   );
 }
