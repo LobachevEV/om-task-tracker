@@ -23,37 +23,11 @@ public static class FeatureDbContextExtensions
             }
         }
         
-        public async Task SaveStageAsync(
-            FeatureStagePlan plan,
-            CancellationToken cancellationToken)
-        {
-            try
-            {
-                await db.SaveChangesAsync(cancellationToken);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                await db.Entry(plan).ReloadAsync(cancellationToken);
-                throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(plan.Version)));
-            }
-        }
-        
-        public async Task<Feature> LoadFeatureWithStagePlansAsync(
-            int featureId,
-            CancellationToken cancellationToken)
-        {
-            return await db.Features
-                       .Include(f => f.StagePlans)
-                       .FirstOrDefaultAsync(f => f.Id == featureId, cancellationToken)
-                   ?? throw new RpcException(new Status(StatusCode.NotFound, $"feature {featureId} not found"));
-        }
-
         public async Task<Feature> LoadFeatureWithTracksAsync(
             int featureId,
             CancellationToken cancellationToken)
         {
             return await db.Features
-                       .Include(f => f.StagePlans)
                        .Include(f => f.Tracks)
                        .ThenInclude(t => t.Stages)
                        .FirstOrDefaultAsync(f => f.Id == featureId, cancellationToken)

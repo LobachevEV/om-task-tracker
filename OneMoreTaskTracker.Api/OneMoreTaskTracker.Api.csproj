@@ -83,14 +83,6 @@
       <CompileOutputs>True</CompileOutputs>
       <Generator>MSBuild:Compile</Generator>
     </Protobuf>
-    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\feature_stage_plan.proto">
-      <GrpcServices>None</GrpcServices>
-      <Access>Public</Access>
-      <ProtoCompile>True</ProtoCompile>
-      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
-      <CompileOutputs>True</CompileOutputs>
-      <Generator>MSBuild:Compile</Generator>
-    </Protobuf>
     <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\CreateFeatureCommand\create_feature_command_handler.proto">
       <GrpcServices>Client</GrpcServices>
       <Access>Public</Access>
@@ -116,14 +108,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Protobuf>
     <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\PatchFeatureCommand\patch_feature_command_handler.proto">
-      <GrpcServices>Client</GrpcServices>
-      <Access>Public</Access>
-      <ProtoCompile>True</ProtoCompile>
-      <ProtoRoot>..\OneMoreTaskTracker.Features\Protos</ProtoRoot>
-      <CompileOutputs>True</CompileOutputs>
-      <Generator>MSBuild:Compile</Generator>
-    </Protobuf>
-    <Protobuf Include="..\OneMoreTaskTracker.Features\Protos\PatchFeatureStageCommand\patch_feature_stage_command_handler.proto">
       <GrpcServices>Client</GrpcServices>
       <Access>Public</Access>
       <ProtoCompile>True</ProtoCompile>

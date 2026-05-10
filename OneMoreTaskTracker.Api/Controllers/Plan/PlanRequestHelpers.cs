@@ -4,7 +4,15 @@ namespace OneMoreTaskTracker.Api.Controllers.Plan;
 
 internal static class PlanRequestHelpers
 {
-    internal const string InvalidRequest = "Invalid request data";
+    internal const string InvalidRequest   = "Invalid request data";
+    internal const string DateFormatError  = "Date must be YYYY-MM-DD";
+    internal const string DateRangeError   = "Use a real release date";
+
+    internal static bool IsValidOptionalDate(string? raw) =>
+        string.IsNullOrEmpty(raw) || TryParseIsoDate(raw, out _);
+
+    internal static bool IsInDateWindow(string? raw) =>
+        TryParseIsoDate(raw, out var d) && d.Year is >= 2000 and <= 2100;
 
     internal static readonly IReadOnlyDictionary<int, List<int>> EmptyTasks =
         new Dictionary<int, List<int>>();

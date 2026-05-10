@@ -1,11 +1,9 @@
 import type {
   AttachedTask,
   FeatureDetail,
-  FeatureStagePlan,
   FeatureSummary,
   MiniTeamMember,
 } from '../../../common/types/feature';
-import { FEATURE_STATES } from '../../../common/types/feature';
 
 export const FIXTURE_TODAY = '2026-04-21';
 
@@ -15,53 +13,6 @@ const be: MiniTeamMember = { userId: 12, email: 'be@example.com', displayName: '
 const mg: MiniTeamMember = { userId:  1, email: 'pm@example.com', displayName: 'Mel PM',    role: 'Manager' };
 
 export const MINI_TEAM_MEMBERS = { qa, fe, be, mg } as const;
-
-/** Produce a 5-row empty stage plan in canonical order. */
-export function emptyStagePlans(): FeatureStagePlan[] {
-  return FEATURE_STATES.map((stage) => ({
-    stage,
-    plannedStart: null,
-    plannedEnd: null,
-    performerUserId: null,
-    stageVersion: 0,
-  }));
-}
-
-/**
- * Produce a fully-planned 5-row stage plan with contiguous dates and the
- * given performers. Missing entries fall back to unassigned / null dates.
- */
-export function buildStagePlans(
-  entries: Partial<Record<string, Partial<FeatureStagePlan>>>,
-): FeatureStagePlan[] {
-  return FEATURE_STATES.map<FeatureStagePlan>((stage) => {
-    const override = entries[stage] ?? {};
-    return {
-      stage,
-      plannedStart: override.plannedStart ?? null,
-      plannedEnd: override.plannedEnd ?? null,
-      performerUserId: override.performerUserId ?? null,
-      performer: override.performer ?? null,
-      stageVersion: override.stageVersion ?? 0,
-    };
-  });
-}
-
-const soloStagePlans = buildStagePlans({
-  CsApproving:    { plannedStart: '2026-04-15', plannedEnd: '2026-04-17', performerUserId: mg.userId },
-  Development:    { plannedStart: '2026-04-17', plannedEnd: '2026-04-24', performerUserId: fe.userId },
-  Testing:        { plannedStart: '2026-04-24', plannedEnd: '2026-04-26', performerUserId: qa.userId },
-  EthalonTesting: { plannedStart: '2026-04-26', plannedEnd: '2026-04-27', performerUserId: qa.userId },
-  LiveRelease:    { plannedStart: '2026-04-28', plannedEnd: '2026-04-28', performerUserId: mg.userId },
-});
-
-const miniTeamStagePlans = buildStagePlans({
-  CsApproving:    { plannedStart: '2026-04-10', plannedEnd: '2026-04-12', performerUserId: mg.userId },
-  Development:    { plannedStart: '2026-04-12', plannedEnd: '2026-04-25', performerUserId: be.userId },
-  Testing:        { plannedStart: '2026-04-25', plannedEnd: '2026-05-01', performerUserId: qa.userId },
-  EthalonTesting: { plannedStart: '2026-05-01', plannedEnd: '2026-05-04', performerUserId: qa.userId },
-  LiveRelease:    { plannedStart: '2026-05-05', plannedEnd: '2026-05-05', performerUserId: mg.userId },
-});
 
 export const SOLO_FEATURE: FeatureSummary = {
   id: 101,
@@ -74,7 +25,21 @@ export const SOLO_FEATURE: FeatureSummary = {
   managerUserId: mg.userId,
   taskCount: 2,
   taskIds: [501, 502],
-  stagePlans: soloStagePlans,
+  csApprovingPlannedStart:    '2026-04-15',
+  csApprovingPlannedEnd:      '2026-04-17',
+  csApprovingOwnerUserId:     mg.userId,
+  developmentPlannedStart:    '2026-04-17',
+  developmentPlannedEnd:      '2026-04-24',
+  developmentOwnerUserId:     fe.userId,
+  testingPlannedStart:        '2026-04-24',
+  testingPlannedEnd:          '2026-04-26',
+  testingOwnerUserId:         qa.userId,
+  ethalonTestingPlannedStart: '2026-04-26',
+  ethalonTestingPlannedEnd:   '2026-04-27',
+  ethalonTestingOwnerUserId:  qa.userId,
+  liveReleasePlannedStart:    '2026-04-28',
+  liveReleasePlannedEnd:      '2026-04-28',
+  liveReleaseOwnerUserId:     mg.userId,
   version: 0,
 };
 
@@ -89,7 +54,21 @@ export const MINI_TEAM_FEATURE: FeatureSummary = {
   managerUserId: mg.userId,
   taskCount: 5,
   taskIds: [503, 504, 505, 506, 507],
-  stagePlans: miniTeamStagePlans,
+  csApprovingPlannedStart:    '2026-04-10',
+  csApprovingPlannedEnd:      '2026-04-12',
+  csApprovingOwnerUserId:     mg.userId,
+  developmentPlannedStart:    '2026-04-12',
+  developmentPlannedEnd:      '2026-04-25',
+  developmentOwnerUserId:     be.userId,
+  testingPlannedStart:        '2026-04-25',
+  testingPlannedEnd:          '2026-05-01',
+  testingOwnerUserId:         qa.userId,
+  ethalonTestingPlannedStart: '2026-05-01',
+  ethalonTestingPlannedEnd:   '2026-05-04',
+  ethalonTestingOwnerUserId:  qa.userId,
+  liveReleasePlannedStart:    '2026-05-05',
+  liveReleasePlannedEnd:      '2026-05-05',
+  liveReleaseOwnerUserId:     mg.userId,
   version: 0,
 };
 
@@ -104,7 +83,21 @@ export const UNSCHEDULED_FEATURE: FeatureSummary = {
   managerUserId: mg.userId,
   taskCount: 0,
   taskIds: [],
-  stagePlans: emptyStagePlans(),
+  csApprovingPlannedStart:    null,
+  csApprovingPlannedEnd:      null,
+  csApprovingOwnerUserId:     null,
+  developmentPlannedStart:    null,
+  developmentPlannedEnd:      null,
+  developmentOwnerUserId:     null,
+  testingPlannedStart:        null,
+  testingPlannedEnd:          null,
+  testingOwnerUserId:         null,
+  ethalonTestingPlannedStart: null,
+  ethalonTestingPlannedEnd:   null,
+  ethalonTestingOwnerUserId:  null,
+  liveReleasePlannedStart:    null,
+  liveReleasePlannedEnd:      null,
+  liveReleaseOwnerUserId:     null,
   version: 0,
 };
 
@@ -119,10 +112,21 @@ export const OVERDUE_FEATURE: FeatureSummary = {
   managerUserId: mg.userId,
   taskCount: 3,
   taskIds: [508, 509, 510],
-  stagePlans: buildStagePlans({
-    CsApproving: { plannedStart: '2026-03-01', plannedEnd: '2026-03-05', performerUserId: mg.userId },
-    Development: { plannedStart: '2026-03-05', plannedEnd: '2026-04-10', performerUserId: be.userId },
-  }),
+  csApprovingPlannedStart:    '2026-03-01',
+  csApprovingPlannedEnd:      '2026-03-05',
+  csApprovingOwnerUserId:     mg.userId,
+  developmentPlannedStart:    '2026-03-05',
+  developmentPlannedEnd:      '2026-04-10',
+  developmentOwnerUserId:     be.userId,
+  testingPlannedStart:        null,
+  testingPlannedEnd:          null,
+  testingOwnerUserId:         null,
+  ethalonTestingPlannedStart: null,
+  ethalonTestingPlannedEnd:   null,
+  ethalonTestingOwnerUserId:  null,
+  liveReleasePlannedStart:    null,
+  liveReleasePlannedEnd:      null,
+  liveReleaseOwnerUserId:     null,
   version: 0,
 };
 
@@ -137,13 +141,21 @@ export const SHIPPED_FEATURE: FeatureSummary = {
   managerUserId: mg.userId,
   taskCount: 4,
   taskIds: [511, 512, 513, 514],
-  stagePlans: buildStagePlans({
-    CsApproving:    { plannedStart: '2026-04-02', plannedEnd: '2026-04-04', performerUserId: mg.userId },
-    Development:    { plannedStart: '2026-04-04', plannedEnd: '2026-04-12', performerUserId: fe.userId },
-    Testing:        { plannedStart: '2026-04-12', plannedEnd: '2026-04-15', performerUserId: qa.userId },
-    EthalonTesting: { plannedStart: '2026-04-15', plannedEnd: '2026-04-17', performerUserId: qa.userId },
-    LiveRelease:    { plannedStart: '2026-04-18', plannedEnd: '2026-04-18', performerUserId: mg.userId },
-  }),
+  csApprovingPlannedStart:    '2026-04-02',
+  csApprovingPlannedEnd:      '2026-04-04',
+  csApprovingOwnerUserId:     mg.userId,
+  developmentPlannedStart:    '2026-04-04',
+  developmentPlannedEnd:      '2026-04-12',
+  developmentOwnerUserId:     fe.userId,
+  testingPlannedStart:        '2026-04-12',
+  testingPlannedEnd:          '2026-04-15',
+  testingOwnerUserId:         qa.userId,
+  ethalonTestingPlannedStart: '2026-04-15',
+  ethalonTestingPlannedEnd:   '2026-04-17',
+  ethalonTestingOwnerUserId:  qa.userId,
+  liveReleasePlannedStart:    '2026-04-18',
+  liveReleasePlannedEnd:      '2026-04-18',
+  liveReleaseOwnerUserId:     mg.userId,
   version: 0,
 };
 
@@ -163,23 +175,11 @@ const tasksForMiniTeam: AttachedTask[] = [
   { id: 507, jiraId: 'REAL-105', state: 'NotStarted', userId: fe.userId },
 ];
 
-// Resolved stage plans (with performer mini-members) for detail view.
-const miniTeamDetailStagePlans: FeatureStagePlan[] = miniTeamStagePlans.map((plan) => ({
-  ...plan,
-  performer:
-    plan.performerUserId === mg.userId ? mg :
-    plan.performerUserId === be.userId ? be :
-    plan.performerUserId === fe.userId ? fe :
-    plan.performerUserId === qa.userId ? qa :
-    null,
-}));
-
 export const MINI_TEAM_FEATURE_DETAIL: FeatureDetail = {
-  feature: { ...MINI_TEAM_FEATURE, stagePlans: miniTeamDetailStagePlans },
+  feature: MINI_TEAM_FEATURE,
   tasks: tasksForMiniTeam,
   lead: be,
   miniTeam: [be, fe, qa, mg],
-  stagePlans: miniTeamDetailStagePlans,
 };
 
 export const EMPTY_FEATURE_DETAIL: FeatureDetail = {
@@ -187,7 +187,6 @@ export const EMPTY_FEATURE_DETAIL: FeatureDetail = {
   tasks: [],
   lead: fe,
   miniTeam: [fe],
-  stagePlans: UNSCHEDULED_FEATURE.stagePlans.map((p) => ({ ...p, performer: null })),
 };
 
 export const SHIPPED_FEATURE_DETAIL: FeatureDetail = {
@@ -195,37 +194,14 @@ export const SHIPPED_FEATURE_DETAIL: FeatureDetail = {
   tasks: [],
   lead: fe,
   miniTeam: [fe, mg, qa],
-  stagePlans: SHIPPED_FEATURE.stagePlans.map<FeatureStagePlan>((plan) => ({
-    ...plan,
-    performer:
-      plan.performerUserId === mg.userId ? mg :
-      plan.performerUserId === fe.userId ? fe :
-      plan.performerUserId === qa.userId ? qa :
-      null,
-  })),
 };
 
-/** Stale performer: userId referenced by the plan is NOT on the mini-team. */
-const stalePerformerPlans = buildStagePlans({
-  CsApproving:    { plannedStart: '2026-04-10', plannedEnd: '2026-04-12', performerUserId: mg.userId },
-  Development:    { plannedStart: '2026-04-12', plannedEnd: '2026-04-25', performerUserId: 9999 },
-  Testing:        { plannedStart: '2026-04-25', plannedEnd: '2026-05-01', performerUserId: qa.userId },
-  EthalonTesting: { plannedStart: '2026-05-01', plannedEnd: '2026-05-04', performerUserId: qa.userId },
-  LiveRelease:    { plannedStart: '2026-05-05', plannedEnd: '2026-05-05', performerUserId: mg.userId },
-});
-
 export const STALE_PERFORMER_DETAIL: FeatureDetail = {
-  feature: { ...MINI_TEAM_FEATURE, stagePlans: stalePerformerPlans },
+  feature: {
+    ...MINI_TEAM_FEATURE,
+    developmentOwnerUserId: 9999,
+  },
   tasks: [],
   lead: be,
   miniTeam: [be, qa, mg],
-  stagePlans: stalePerformerPlans.map<FeatureStagePlan>((plan) => ({
-    ...plan,
-    // Unknown ids come back with performer=null; the FE covers the "stale" copy.
-    performer:
-      plan.performerUserId === mg.userId ? mg :
-      plan.performerUserId === qa.userId ? qa :
-      plan.performerUserId === be.userId ? be :
-      null,
-  })),
 };

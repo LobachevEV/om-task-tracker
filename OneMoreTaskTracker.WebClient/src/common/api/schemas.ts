@@ -71,28 +71,6 @@ const miniTeamMemberSchema = z.object({
   role: userRoleSchema,
 });
 
-/**
- * `stageVersion` is optional on the wire; absent values are treated as 0
- * so older payloads that predate optimistic concurrency keep parsing.
- */
-export const stagePlanSchema = z.object({
-  stage: featureStateSchema,
-  plannedStart: isoDateOrNull,
-  plannedEnd: isoDateOrNull,
-  performerUserId: z.number().int().positive().nullable(),
-  stageVersion: z.number().int().nonnegative().optional(),
-});
-
-/**
- * Detail stage plan. Same as `stagePlanSchema` but carries a resolved
- * `performer` mini-member. The field is required on the wire but may be
- * null either because `performerUserId` is null OR because the referenced
- * user is no longer on the manager's roster ("stale performer").
- */
-export const detailStagePlanSchema = stagePlanSchema.extend({
-  performer: miniTeamMemberSchema.nullable(),
-});
-
 export const featureTrackKindSchema = z.enum(['Frontend', 'Backend']);
 
 export const featureTrackStageKeySchema = z.enum([
@@ -135,6 +113,8 @@ export const patchFeatureTrackStageRequestSchema = z.object({
   expectedStageVersion: z.number().int().nonnegative().optional(),
 });
 
+const ownerUserIdOrNull = z.number().int().positive().nullable();
+
 export const featureSummarySchema = z.object({
   id: z.number().int().positive(),
   title: z.string().min(1),
@@ -149,35 +129,45 @@ export const featureSummarySchema = z.object({
   managerUserId: z.number().int().positive(),
   taskCount: z.number().int().nonnegative(),
   taskIds: z.array(z.number().int().positive()),
-  /** Always length 5 — see api-contract.md. */
-  stagePlans: z.array(stagePlanSchema).length(5),
-  /**
-   * Feature-level optimistic-concurrency token. Optional on the wire so
-   * older payloads keep parsing; absent values are treated as 0.
-   */
+  csApprovingPlannedStart: isoDateOrNull,
+  csApprovingPlannedEnd: isoDateOrNull,
+  csApprovingOwnerUserId: ownerUserIdOrNull,
+  developmentPlannedStart: isoDateOrNull,
+  developmentPlannedEnd: isoDateOrNull,
+  developmentOwnerUserId: ownerUserIdOrNull,
+  testingPlannedStart: isoDateOrNull,
+  testingPlannedEnd: isoDateOrNull,
+  testingOwnerUserId: ownerUserIdOrNull,
+  ethalonTestingPlannedStart: isoDateOrNull,
+  ethalonTestingPlannedEnd: isoDateOrNull,
+  ethalonTestingOwnerUserId: ownerUserIdOrNull,
+  liveReleasePlannedStart: isoDateOrNull,
+  liveReleasePlannedEnd: isoDateOrNull,
+  liveReleaseOwnerUserId: ownerUserIdOrNull,
   version: z.number().int().nonnegative().optional(),
-  /** Per-track breakdown; absent when the feature has no tracks yet. */
   tracks: z.array(featureTrackSchema).optional(),
 });
 
-/**
- * Sparse PATCH request schemas for the consolidated endpoints. Every field is
- * optional; callers send only the fields the user actually changed plus the
- * version token. The gateway returns a refreshed `FeatureSummary` validated
- * via `featureSummarySchema`.
- */
 export const patchFeatureRequestSchema = z.object({
   title: z.string().min(1).max(200).optional(),
   description: z.string().max(4000).nullable().optional(),
   leadUserId: z.number().int().positive().optional(),
   expectedVersion: z.number().int().nonnegative().optional(),
-});
-
-export const patchFeatureStageRequestSchema = z.object({
-  stageOwnerUserId: z.number().int().positive().nullable().optional(),
-  plannedStart: isoDateOrNull.optional(),
-  plannedEnd: isoDateOrNull.optional(),
-  expectedStageVersion: z.number().int().nonnegative().optional(),
+  csApprovingPlannedStart: isoDateOrNull.optional(),
+  csApprovingPlannedEnd: isoDateOrNull.optional(),
+  csApprovingOwnerUserId: ownerUserIdOrNull.optional(),
+  developmentPlannedStart: isoDateOrNull.optional(),
+  developmentPlannedEnd: isoDateOrNull.optional(),
+  developmentOwnerUserId: ownerUserIdOrNull.optional(),
+  testingPlannedStart: isoDateOrNull.optional(),
+  testingPlannedEnd: isoDateOrNull.optional(),
+  testingOwnerUserId: ownerUserIdOrNull.optional(),
+  ethalonTestingPlannedStart: isoDateOrNull.optional(),
+  ethalonTestingPlannedEnd: isoDateOrNull.optional(),
+  ethalonTestingOwnerUserId: ownerUserIdOrNull.optional(),
+  liveReleasePlannedStart: isoDateOrNull.optional(),
+  liveReleasePlannedEnd: isoDateOrNull.optional(),
+  liveReleaseOwnerUserId: ownerUserIdOrNull.optional(),
 });
 
 export const featureSummaryListSchema = z.array(featureSummarySchema);
@@ -194,7 +184,5 @@ export const featureDetailSchema = z.object({
   tasks: z.array(attachedTaskSchema),
   lead: miniTeamMemberSchema,
   miniTeam: z.array(miniTeamMemberSchema),
-  /** Always length 5 — see api-contract.md. */
-  stagePlans: z.array(detailStagePlanSchema).length(5),
   tracks: z.array(featureTrackSchema).optional(),
 });

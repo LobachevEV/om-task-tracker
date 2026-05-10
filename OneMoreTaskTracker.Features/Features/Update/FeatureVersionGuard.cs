@@ -11,12 +11,6 @@ public static class FeatureVersionGuard
             throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(feature.Version)));
     }
 
-    public static void EnsureStageVersion(FeatureStagePlan plan, bool hasExpected, int expectedStageVersion)
-    {
-        if (hasExpected && expectedStageVersion != plan.Version)
-            throw new RpcException(new Status(StatusCode.AlreadyExists, ConflictDetail.VersionMismatch(plan.Version)));
-    }
-
     public static void EnsureTrackVersion(FeatureTrack track, bool hasExpected, int expectedVersion)
     {
         if (hasExpected && expectedVersion != track.Version)

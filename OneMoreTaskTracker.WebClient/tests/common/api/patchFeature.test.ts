@@ -10,14 +10,6 @@ import { makeResponse } from '../../testUtils';
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
-const emptyStagePlans = [
-  { stage: 'CsApproving' as const,    plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
-  { stage: 'Development' as const,    plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
-  { stage: 'Testing' as const,        plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
-  { stage: 'EthalonTesting' as const, plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
-  { stage: 'LiveRelease' as const,    plannedStart: null, plannedEnd: null, performerUserId: null, stageVersion: 0 },
-];
-
 const sampleSummary = {
   id: 7,
   title: 'Feature P',
@@ -29,7 +21,21 @@ const sampleSummary = {
   managerUserId: 1,
   taskCount: 0,
   taskIds: [] as number[],
-  stagePlans: emptyStagePlans,
+  csApprovingPlannedStart: null,
+  csApprovingPlannedEnd: null,
+  csApprovingOwnerUserId: null,
+  developmentPlannedStart: null,
+  developmentPlannedEnd: null,
+  developmentOwnerUserId: null,
+  testingPlannedStart: null,
+  testingPlannedEnd: null,
+  testingOwnerUserId: null,
+  ethalonTestingPlannedStart: null,
+  ethalonTestingPlannedEnd: null,
+  ethalonTestingOwnerUserId: null,
+  liveReleasePlannedStart: null,
+  liveReleasePlannedEnd: null,
+  liveReleaseOwnerUserId: null,
   version: 3,
 };
 

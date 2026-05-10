@@ -245,9 +245,7 @@ describe('GanttFeatureRow', () => {
     const fakeId = 9999;
     const feature = {
       ...MINI_TEAM_FEATURE,
-      stagePlans: MINI_TEAM_FEATURE.stagePlans.map((p) =>
-        p.stage === 'Development' ? { ...p, performerUserId: fakeId } : p,
-      ),
+      developmentOwnerUserId: fakeId,
     };
     render(
       <GanttFeatureRow
