@@ -45,5 +45,17 @@ export type { DialogProps } from './Dialog/Dialog';
 export { Popover } from './Popover/Popover';
 export type { PopoverProps, Placement } from './Popover/Popover';
 
-export { Gutter } from './spatial/Gutter';
-export type { GutterProps, GutterColumn, GutterDensity } from './spatial/Gutter';
+export { Stack } from './spatial/Stack/Stack';
+export type { StackProps } from './spatial/Stack/Stack';
+
+export { Inline } from './spatial/Inline/Inline';
+export type { InlineProps } from './spatial/Inline/Inline';
+
+export { Cluster } from './spatial/Cluster/Cluster';
+export type { ClusterProps } from './spatial/Cluster/Cluster';
+
+export { Grid } from './spatial/Grid/Grid';
+export type { GridProps } from './spatial/Grid/Grid';
+
+export { Box } from './spatial/Box/Box';
+export type { BoxProps } from './spatial/Box/Box';

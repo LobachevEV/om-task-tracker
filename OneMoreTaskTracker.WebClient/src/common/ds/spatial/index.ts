@@ -14,6 +14,3 @@ export { Box } from './Box/Box';
 export type { BoxProps } from './Box/Box';
 
 export type { SpaceTokenKey } from './spaceToken';
-
-export { Gutter } from './Gutter/Gutter';
-export type { GutterProps, GutterColumn, GutterDensity } from './Gutter/Gutter';
