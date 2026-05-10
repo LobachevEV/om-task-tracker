@@ -11,7 +11,7 @@ import { daysBetween, formatShortDate, type DateWindow } from '../../ganttMath';
 import { getTrackStageMeta } from '../../trackStageMeta';
 import { computeTrackStageBars } from '../../trackStageGeometry';
 import { GanttStageBar } from '../GanttStageBar';
-import { Gutter } from '../GanttGutter';
+import { Box, Grid } from '../../../../common/ds/spatial';
 import { InlineDateCell, InlineOwnerPicker } from '../InlineEditors';
 import type { TrackMutationCallbacks } from '../InlineEditors/useTrackMutationCallbacks';
 import './GanttTrackStageRow.css';
@@ -237,7 +237,8 @@ export function GanttTrackStageRow({
       data-testid={`track-stage-row-${track.featureId}-${kind}-${stage.stageKey}`}
       data-kind={kind.toLowerCase()}
     >
-      <Gutter density="default" columns={['code', 'label', 'owner', 'dates']} className="gantt-track-stage-row__gutter">
+      <Box className="gantt-track-stage-row__gutter">
+        <Grid columns="var(--gantt-row-columns)" className="gantt-row__grid">
         <span
           className="gantt-track-stage-row__code"
           aria-hidden="true"
@@ -330,7 +331,8 @@ export function GanttTrackStageRow({
             </span>
           </span>
         ) : null}
-      </Gutter>
+        </Grid>
+      </Box>
       <div className="gantt-track-stage-row__lane" aria-hidden="true">
         {barNode}
       </div>

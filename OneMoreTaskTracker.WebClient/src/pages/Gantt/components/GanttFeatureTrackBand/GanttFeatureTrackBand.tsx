@@ -9,7 +9,7 @@ import type { TrackMutationCallbacks } from '../InlineEditors/useTrackMutationCa
 import { InlineOwnerPicker } from '../InlineEditors';
 import { GanttTrackStageRow } from '../GanttTrackStageRow';
 import { selectStagesForKind } from '../../selectStagesForKind';
-import { Gutter } from '../GanttGutter';
+import { Box, Grid } from '../../../../common/ds/spatial';
 import './GanttFeatureTrackBand.css';
 
 export interface GanttFeatureTrackBandProps {
@@ -74,7 +74,8 @@ export function GanttFeatureTrackBand({
       data-testid={`track-band-${track.featureId}-${kind}`}
     >
       <div className="gantt-track-band__header">
-        <Gutter density="compact" columns={['code', 'label', 'owner']} className="gantt-track-band__gutter">
+        <Box className="gantt-track-band__gutter">
+          <Grid columns="28px 120px 1fr" className="gantt-track-band__grid">
           <button
             type="button"
             className="gantt-track-band__toggle"
@@ -124,7 +125,8 @@ export function GanttFeatureTrackBand({
               {t('row.unassigned')}
             </span>
           )}
-        </Gutter>
+          </Grid>
+        </Box>
         <div className="gantt-track-band__lane-placeholder" aria-hidden="true" />
       </div>
 
