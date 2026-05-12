@@ -216,8 +216,6 @@
     "unassigned": "Unassigned",
     "clearPerformer": "Clear performer",
     "performerEmpty": "No teammate matches \"{{query}}\".",
-    "performerRemoved": "{{name}} · removed",
-    "performerRemovedUnknown": "removed",
     "reassign": "Reassign",
     "rangeSummary_one": "{{start}} — {{end}} · {{count}} day",
     "rangeSummary_other": "{{start}} — {{end}} · {{count}} days",

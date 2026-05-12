@@ -2,6 +2,7 @@ import type { FeatureState, FeatureSummary } from '../../common/types/feature';
 import { FEATURE_STATES } from '../../common/types/feature';
 import type { FeatureTrackStageKey } from '../../common/types/featureTrack';
 import { FEATURE_STATE_ORDER } from './stateConfig';
+import { selectStagesForKind } from './selectStagesForKind';
 import {
   addDays,
   barGeometryPx,
@@ -70,7 +71,7 @@ export function computeLifecycleStageWindow(
   const ends: string[] = [];
 
   for (const track of tracks) {
-    for (const ts of track.stages) {
+    for (const ts of selectStagesForKind(track.stages, track.kind)) {
       if (!trackStageKeys.includes(ts.stageKey)) continue;
       if (ts.plannedStart != null) starts.push(ts.plannedStart);
       if (ts.plannedEnd != null) ends.push(ts.plannedEnd);
