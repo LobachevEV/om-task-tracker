@@ -113,8 +113,6 @@ export const patchFeatureTrackStageRequestSchema = z.object({
   expectedStageVersion: z.number().int().nonnegative().optional(),
 });
 
-const ownerUserIdOrNull = z.number().int().positive().nullable();
-
 export const featureSummarySchema = z.object({
   id: z.number().int().positive(),
   title: z.string().min(1),
@@ -129,21 +127,6 @@ export const featureSummarySchema = z.object({
   managerUserId: z.number().int().positive(),
   taskCount: z.number().int().nonnegative(),
   taskIds: z.array(z.number().int().positive()),
-  csApprovingPlannedStart: isoDateOrNull,
-  csApprovingPlannedEnd: isoDateOrNull,
-  csApprovingOwnerUserId: ownerUserIdOrNull,
-  developmentPlannedStart: isoDateOrNull,
-  developmentPlannedEnd: isoDateOrNull,
-  developmentOwnerUserId: ownerUserIdOrNull,
-  testingPlannedStart: isoDateOrNull,
-  testingPlannedEnd: isoDateOrNull,
-  testingOwnerUserId: ownerUserIdOrNull,
-  ethalonTestingPlannedStart: isoDateOrNull,
-  ethalonTestingPlannedEnd: isoDateOrNull,
-  ethalonTestingOwnerUserId: ownerUserIdOrNull,
-  liveReleasePlannedStart: isoDateOrNull,
-  liveReleasePlannedEnd: isoDateOrNull,
-  liveReleaseOwnerUserId: ownerUserIdOrNull,
   version: z.number().int().nonnegative().optional(),
   tracks: z.array(featureTrackSchema).optional(),
 });
@@ -153,21 +136,6 @@ export const patchFeatureRequestSchema = z.object({
   description: z.string().max(4000).nullable().optional(),
   leadUserId: z.number().int().positive().optional(),
   expectedVersion: z.number().int().nonnegative().optional(),
-  csApprovingPlannedStart: isoDateOrNull.optional(),
-  csApprovingPlannedEnd: isoDateOrNull.optional(),
-  csApprovingOwnerUserId: ownerUserIdOrNull.optional(),
-  developmentPlannedStart: isoDateOrNull.optional(),
-  developmentPlannedEnd: isoDateOrNull.optional(),
-  developmentOwnerUserId: ownerUserIdOrNull.optional(),
-  testingPlannedStart: isoDateOrNull.optional(),
-  testingPlannedEnd: isoDateOrNull.optional(),
-  testingOwnerUserId: ownerUserIdOrNull.optional(),
-  ethalonTestingPlannedStart: isoDateOrNull.optional(),
-  ethalonTestingPlannedEnd: isoDateOrNull.optional(),
-  ethalonTestingOwnerUserId: ownerUserIdOrNull.optional(),
-  liveReleasePlannedStart: isoDateOrNull.optional(),
-  liveReleasePlannedEnd: isoDateOrNull.optional(),
-  liveReleaseOwnerUserId: ownerUserIdOrNull.optional(),
 });
 
 export const featureSummaryListSchema = z.array(featureSummarySchema);

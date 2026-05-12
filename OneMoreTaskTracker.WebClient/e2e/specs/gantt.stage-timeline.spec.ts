@@ -16,6 +16,23 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const FIXTURE_PATH = path.resolve(__dirname, '../fixtures/stage-timeline.json');
 
+interface FixtureTrackStage {
+  stageKey: string;
+  plannedStart: string | null;
+  plannedEnd: string | null;
+  stageOwnerUserId: number | null;
+  stageVersion: number;
+}
+
+interface FixtureTrack {
+  id: number;
+  featureId: number;
+  kind: 'Frontend' | 'Backend';
+  trackOwnerUserId: number;
+  version: number;
+  stages: FixtureTrackStage[];
+}
+
 interface FixtureFeature {
   id: number;
   title: string;
@@ -27,12 +44,8 @@ interface FixtureFeature {
   managerUserId: number;
   taskCount: number;
   taskIds: number[];
-  stagePlans: Array<{
-    stage: 'CsApproving' | 'Development' | 'Testing' | 'EthalonTesting' | 'LiveRelease';
-    plannedStart: string | null;
-    plannedEnd: string | null;
-    performerUserId: number | null;
-  }>;
+  version: number;
+  tracks: FixtureTrack[];
 }
 
 interface FixtureRoot {
@@ -123,13 +136,6 @@ async function stubApi(page: import('@playwright/test').Page, fixture: FixtureRo
           tasks: [],
           lead,
           miniTeam: fixture.roster,
-          stagePlans: feature.stagePlans.map((p) => ({
-            ...p,
-            performer:
-              p.performerUserId == null
-                ? null
-                : fixture.roster.find((m) => m.userId === p.performerUserId) ?? null,
-          })),
         }),
       });
       return;
@@ -169,7 +175,8 @@ test.describe('gantt stage timeline (FE-only stubbed)', () => {
     const current = row.locator('[aria-current="step"]');
     await expect(current).toHaveCount(1);
     await expect(current).toHaveAttribute('data-testid', 'segment-Development');
-    await expect(row.locator('[data-testid="feature-overdue-badge"]')).toHaveCount(0);
+    // No segment in an overdue state on F1
+    await expect(row.locator('[data-overdue="true"]')).toHaveCount(0);
 
     // UX-002-01: on Development-active (amber-on-amber) rows the active-stage
     // marker must survive as three stacked signals:
@@ -209,14 +216,15 @@ test.describe('gantt stage timeline (FE-only stubbed)', () => {
     expect(Number(upcomingOpacity)).toBeLessThan(Number(activeStyles.opacity));
   });
 
-  test('Flow 1 edge — overdue badge on F2 (Testing overdue)', async ({ page }) => {
+  test('Flow 1 edge — overdue segment on F2 (Testing overdue)', async ({ page }) => {
     await page.goto('/plan');
     await expect(page.locator('[data-testid="gantt-page"]')).toBeVisible();
     const row = page.locator('[data-testid="feature-row-102"]');
-    await expect(row.locator('[data-testid="feature-overdue-badge"]')).toBeVisible();
+    // The Testing lifecycle stage is overdue — its segment carries data-overdue="true"
+    await expect(row.locator('[data-testid="segment-Testing"][data-overdue="true"]')).toBeVisible();
   });
 
-  test('Flow 1 edge — partial plan shows 2/5 planned (F3)', async ({ page }) => {
+  test('Flow 1 edge — partial plan shows 3/5 planned (F3)', async ({ page }) => {
     await page.goto('/plan');
     await expect(page.locator('[data-testid="gantt-page"]')).toBeVisible();
     const row = page.locator('[data-testid="feature-row-103"]');
@@ -232,57 +240,70 @@ test.describe('gantt stage timeline (FE-only stubbed)', () => {
     await expect(dtr).toHaveText('✓');
   });
 
-  test('Flow 2 — expand reveals 5 stage sub-rows in canonical order', async ({ page }) => {
+  test('Flow 2 — track bands render with per-stage rows for F1', async ({ page }) => {
     await page.goto('/plan');
     await expect(page.locator('[data-testid="gantt-page"]')).toBeVisible();
-    const row = page.locator('[data-testid="feature-row-101"]');
-    const caret = row.locator('[data-testid="expand-caret"]');
-    await expect(caret).toHaveAttribute('aria-expanded', 'false');
-    await caret.click();
-    await expect(caret).toHaveAttribute('aria-expanded', 'true');
 
-    const subRows = page.locator('[data-testid^="stage-subrow-101-"]');
-    await expect(subRows).toHaveCount(5);
-    // owner + DTR non-empty on every sub-row.
-    for (const stage of [
-      'CsApproving',
-      'Development',
-      'Testing',
-      'EthalonTesting',
-      'LiveRelease',
-    ]) {
-      const sub = page.locator(`[data-testid="stage-subrow-101-${stage}"]`);
-      await expect(sub.locator('[data-testid="stage-owner"]')).not.toHaveText('');
-      await expect(sub.locator('[data-testid="stage-dtr"]')).not.toHaveText('');
+    // Both tracks are visible by default (GanttFeatureTrackBand starts expanded)
+    const feBand = page.locator('[data-testid="track-band-101-Frontend"]');
+    const beBand = page.locator('[data-testid="track-band-101-Backend"]');
+    await expect(feBand).toBeVisible();
+    await expect(beBand).toBeVisible();
+
+    // Frontend track: 5 stage rows (SrApproving, Development, StandTesting, EthalonTesting, ReleaseToLive)
+    const feStageKeys = ['SrApproving', 'Development', 'StandTesting', 'EthalonTesting', 'ReleaseToLive'];
+    for (const key of feStageKeys) {
+      const stageRow = page.locator(`[data-testid="track-stage-row-101-Frontend-${key}"]`);
+      await expect(stageRow).toBeVisible();
+      // Owner must not be empty (all F1 Frontend stages have stageOwnerUserId set)
+      await expect(stageRow.locator('[data-testid="track-stage-owner"]')).not.toHaveText('');
     }
 
-    await caret.click();
-    await expect(caret).toHaveAttribute('aria-expanded', 'false');
-    await expect(subRows).toHaveCount(0);
+    // Backend track: 5 stage rows (CsApproving, Development, StandTesting, EthalonTesting, ReleaseToLive)
+    const beStageKeys = ['CsApproving', 'Development', 'StandTesting', 'EthalonTesting', 'ReleaseToLive'];
+    for (const key of beStageKeys) {
+      const stageRow = page.locator(`[data-testid="track-stage-row-101-Backend-${key}"]`);
+      await expect(stageRow).toBeVisible();
+      await expect(stageRow.locator('[data-testid="track-stage-owner"]')).not.toHaveText('');
+    }
   });
 
   test('Flow 2 edge — F6 stale performer renders "removed" without throwing', async ({ page }) => {
     await page.goto('/plan');
     await expect(page.locator('[data-testid="gantt-page"]')).toBeVisible();
-    const row = page.locator('[data-testid="feature-row-106"]');
-    await row.locator('[data-testid="expand-caret"]').click();
-    const devSub = page.locator('[data-testid="stage-subrow-106-Development"]');
-    await expect(devSub.locator('[data-testid="stage-owner"]')).toContainText('removed');
+    // F6 Frontend Development stage has stageOwnerUserId=9999 which is not in roster
+    const feDevRow = page.locator('[data-testid="track-stage-row-106-Frontend-Development"]');
+    await expect(feDevRow).toBeVisible();
+    await expect(feDevRow.locator('[data-testid="track-stage-owner"]')).toContainText('removed');
+    // Same for Backend
+    const beDevRow = page.locator('[data-testid="track-stage-row-106-Backend-Development"]');
+    await expect(beDevRow).toBeVisible();
+    await expect(beDevRow.locator('[data-testid="track-stage-owner"]')).toContainText('removed');
   });
 
-  test('Flow 5 — F4 no-plan feature shows unassigned + em-dash DTR', async ({ page }) => {
+  test('Flow 5 — F4 no-plan feature shows em-dash DTR and unassigned per-stage rows', async ({ page }) => {
     await page.goto('/plan');
     await expect(page.locator('[data-testid="gantt-page"]')).toBeVisible();
     const row = page.locator('[data-testid="feature-row-104"]');
     await expect(row.locator('[data-testid="feature-dtr"]')).toHaveText('—');
-    await row.locator('[data-testid="expand-caret"]').click();
-    const subRows = page.locator('[data-testid^="stage-subrow-104-"]');
-    await expect(subRows).toHaveCount(5);
-    for (let i = 0; i < 5; i++) {
-      await expect(subRows.nth(i).locator('[data-testid="stage-dtr"]')).toHaveText('—');
-      await expect(subRows.nth(i).locator('[data-testid="stage-owner"]')).toContainText(
-        /unassigned/i,
-      );
+
+    // Track bands are present
+    const feBand = page.locator('[data-testid="track-band-104-Frontend"]');
+    const beBand = page.locator('[data-testid="track-band-104-Backend"]');
+    await expect(feBand).toBeVisible();
+    await expect(beBand).toBeVisible();
+
+    // All 5 Frontend stage rows: no-signal rows render a "—" placeholder (noSignal branch)
+    // and owner is not displayed (empty signal glyph)
+    const feStageKeys = ['SrApproving', 'Development', 'StandTesting', 'EthalonTesting', 'ReleaseToLive'];
+    for (const key of feStageKeys) {
+      const stageRow = page.locator(`[data-testid="track-stage-row-104-Frontend-${key}"]`);
+      await expect(stageRow).toBeVisible();
+    }
+    const beStageKeys = ['CsApproving', 'Development', 'StandTesting', 'EthalonTesting', 'ReleaseToLive'];
+    for (const key of beStageKeys) {
+      const stageRow = page.locator(`[data-testid="track-stage-row-104-Backend-${key}"]`);
+      await expect(stageRow).toBeVisible();
     }
   });
 });

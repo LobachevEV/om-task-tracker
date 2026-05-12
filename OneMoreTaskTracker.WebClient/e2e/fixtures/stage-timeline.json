@@ -18,12 +18,36 @@
       "managerUserId": 1,
       "taskCount": 0,
       "taskIds": [],
-      "stagePlans": [
-        { "stage": "CsApproving",    "plannedStart": "2026-04-15", "plannedEnd": "2026-04-17", "performerUserId": 1 },
-        { "stage": "Development",    "plannedStart": "2026-04-17", "plannedEnd": "2026-04-25", "performerUserId": 11 },
-        { "stage": "Testing",        "plannedStart": "2026-04-25", "plannedEnd": "2026-04-29", "performerUserId": 10 },
-        { "stage": "EthalonTesting", "plannedStart": "2026-04-29", "plannedEnd": "2026-05-02", "performerUserId": 10 },
-        { "stage": "LiveRelease",    "plannedStart": "2026-05-03", "plannedEnd": "2026-05-05", "performerUserId": 1 }
+      "version": 1,
+      "tracks": [
+        {
+          "id": 1001,
+          "featureId": 101,
+          "kind": "Frontend",
+          "trackOwnerUserId": 11,
+          "version": 1,
+          "stages": [
+            { "stageKey": "SrApproving",    "plannedStart": "2026-04-15", "plannedEnd": "2026-04-17", "stageOwnerUserId": 1,  "stageVersion": 1 },
+            { "stageKey": "Development",    "plannedStart": "2026-04-17", "plannedEnd": "2026-04-25", "stageOwnerUserId": 11, "stageVersion": 1 },
+            { "stageKey": "StandTesting",   "plannedStart": "2026-04-25", "plannedEnd": "2026-04-29", "stageOwnerUserId": 10, "stageVersion": 1 },
+            { "stageKey": "EthalonTesting", "plannedStart": "2026-04-29", "plannedEnd": "2026-05-02", "stageOwnerUserId": 10, "stageVersion": 1 },
+            { "stageKey": "ReleaseToLive",  "plannedStart": "2026-05-03", "plannedEnd": "2026-05-05", "stageOwnerUserId": 1,  "stageVersion": 1 }
+          ]
+        },
+        {
+          "id": 1002,
+          "featureId": 101,
+          "kind": "Backend",
+          "trackOwnerUserId": 12,
+          "version": 1,
+          "stages": [
+            { "stageKey": "CsApproving",    "plannedStart": "2026-04-15", "plannedEnd": "2026-04-17", "stageOwnerUserId": 1,  "stageVersion": 1 },
+            { "stageKey": "Development",    "plannedStart": "2026-04-17", "plannedEnd": "2026-04-25", "stageOwnerUserId": 12, "stageVersion": 1 },
+            { "stageKey": "StandTesting",   "plannedStart": "2026-04-25", "plannedEnd": "2026-04-29", "stageOwnerUserId": 10, "stageVersion": 1 },
+            { "stageKey": "EthalonTesting", "plannedStart": "2026-04-29", "plannedEnd": "2026-05-02", "stageOwnerUserId": 10, "stageVersion": 1 },
+            { "stageKey": "ReleaseToLive",  "plannedStart": "2026-05-03", "plannedEnd": "2026-05-05", "stageOwnerUserId": 1,  "stageVersion": 1 }
+          ]
+        }
       ]
     },
     {
@@ -37,12 +61,36 @@
       "managerUserId": 1,
       "taskCount": 0,
       "taskIds": [],
-      "stagePlans": [
-        { "stage": "CsApproving",    "plannedStart": "2026-04-01", "plannedEnd": "2026-04-03", "performerUserId": 1 },
-        { "stage": "Development",    "plannedStart": "2026-04-03", "plannedEnd": "2026-04-10", "performerUserId": 12 },
-        { "stage": "Testing",        "plannedStart": "2026-04-10", "plannedEnd": "2026-04-15", "performerUserId": 10 },
-        { "stage": "EthalonTesting", "plannedStart": "2026-04-15", "plannedEnd": "2026-04-17", "performerUserId": 10 },
-        { "stage": "LiveRelease",    "plannedStart": "2026-04-17", "plannedEnd": "2026-04-18", "performerUserId": 1 }
+      "version": 1,
+      "tracks": [
+        {
+          "id": 1003,
+          "featureId": 102,
+          "kind": "Frontend",
+          "trackOwnerUserId": 11,
+          "version": 1,
+          "stages": [
+            { "stageKey": "SrApproving",    "plannedStart": "2026-04-01", "plannedEnd": "2026-04-03", "stageOwnerUserId": 1,  "stageVersion": 1 },
+            { "stageKey": "Development",    "plannedStart": "2026-04-03", "plannedEnd": "2026-04-10", "stageOwnerUserId": 11, "stageVersion": 1 },
+            { "stageKey": "StandTesting",   "plannedStart": "2026-04-10", "plannedEnd": "2026-04-15", "stageOwnerUserId": 10, "stageVersion": 1 },
+            { "stageKey": "EthalonTesting", "plannedStart": "2026-04-15", "plannedEnd": "2026-04-17", "stageOwnerUserId": 10, "stageVersion": 1 },
+            { "stageKey": "ReleaseToLive",  "plannedStart": "2026-04-17", "plannedEnd": "2026-04-18", "stageOwnerUserId": 1,  "stageVersion": 1 }
+          ]
+        },
+        {
+          "id": 1004,
+          "featureId": 102,
+          "kind": "Backend",
+          "trackOwnerUserId": 12,
+          "version": 1,
+          "stages": [
+            { "stageKey": "CsApproving",    "plannedStart": "2026-04-01", "plannedEnd": "2026-04-03", "stageOwnerUserId": 1,  "stageVersion": 1 },
+            { "stageKey": "Development",    "plannedStart": "2026-04-03", "plannedEnd": "2026-04-10", "stageOwnerUserId": 12, "stageVersion": 1 },
+            { "stageKey": "StandTesting",   "plannedStart": "2026-04-10", "plannedEnd": "2026-04-15", "stageOwnerUserId": 10, "stageVersion": 1 },
+            { "stageKey": "EthalonTesting", "plannedStart": "2026-04-15", "plannedEnd": "2026-04-17", "stageOwnerUserId": 10, "stageVersion": 1 },
+            { "stageKey": "ReleaseToLive",  "plannedStart": "2026-04-17", "plannedEnd": "2026-04-18", "stageOwnerUserId": 1,  "stageVersion": 1 }
+          ]
+        }
       ]
     },
     {
@@ -56,12 +104,36 @@
       "managerUserId": 1,
       "taskCount": 0,
       "taskIds": [],
-      "stagePlans": [
-        { "stage": "CsApproving",    "plannedStart": "2026-04-18", "plannedEnd": "2026-04-20", "performerUserId": 1 },
-        { "stage": "Development",    "plannedStart": "2026-04-20", "plannedEnd": "2026-04-24", "performerUserId": 12 },
-        { "stage": "Testing",        "plannedStart": null,          "plannedEnd": null,          "performerUserId": null },
-        { "stage": "EthalonTesting", "plannedStart": null,          "plannedEnd": null,          "performerUserId": null },
-        { "stage": "LiveRelease",    "plannedStart": "2026-04-28", "plannedEnd": "2026-04-28", "performerUserId": 1 }
+      "version": 1,
+      "tracks": [
+        {
+          "id": 1005,
+          "featureId": 103,
+          "kind": "Frontend",
+          "trackOwnerUserId": 11,
+          "version": 1,
+          "stages": [
+            { "stageKey": "SrApproving",    "plannedStart": "2026-04-18", "plannedEnd": "2026-04-20", "stageOwnerUserId": 1,  "stageVersion": 1 },
+            { "stageKey": "Development",    "plannedStart": "2026-04-20", "plannedEnd": "2026-04-24", "stageOwnerUserId": 11, "stageVersion": 1 },
+            { "stageKey": "StandTesting",   "plannedStart": null,          "plannedEnd": null,          "stageOwnerUserId": null, "stageVersion": 1 },
+            { "stageKey": "EthalonTesting", "plannedStart": null,          "plannedEnd": null,          "stageOwnerUserId": null, "stageVersion": 1 },
+            { "stageKey": "ReleaseToLive",  "plannedStart": "2026-04-28", "plannedEnd": "2026-04-28", "stageOwnerUserId": 1,  "stageVersion": 1 }
+          ]
+        },
+        {
+          "id": 1006,
+          "featureId": 103,
+          "kind": "Backend",
+          "trackOwnerUserId": 12,
+          "version": 1,
+          "stages": [
+            { "stageKey": "CsApproving",    "plannedStart": "2026-04-18", "plannedEnd": "2026-04-20", "stageOwnerUserId": 1,  "stageVersion": 1 },
+            { "stageKey": "Development",    "plannedStart": "2026-04-20", "plannedEnd": "2026-04-24", "stageOwnerUserId": 12, "stageVersion": 1 },
+            { "stageKey": "StandTesting",   "plannedStart": null,          "plannedEnd": null,          "stageOwnerUserId": null, "stageVersion": 1 },
+            { "stageKey": "EthalonTesting", "plannedStart": null,          "plannedEnd": null,          "stageOwnerUserId": null, "stageVersion": 1 },
+            { "stageKey": "ReleaseToLive",  "plannedStart": "2026-04-28", "plannedEnd": "2026-04-28", "stageOwnerUserId": 1,  "stageVersion": 1 }
+          ]
+        }
       ]
     },
     {
@@ -75,12 +147,36 @@
       "managerUserId": 1,
       "taskCount": 0,
       "taskIds": [],
-      "stagePlans": [
-        { "stage": "CsApproving",    "plannedStart": null, "plannedEnd": null, "performerUserId": null },
-        { "stage": "Development",    "plannedStart": null, "plannedEnd": null, "performerUserId": null },
-        { "stage": "Testing",        "plannedStart": null, "plannedEnd": null, "performerUserId": null },
-        { "stage": "EthalonTesting", "plannedStart": null, "plannedEnd": null, "performerUserId": null },
-        { "stage": "LiveRelease",    "plannedStart": null, "plannedEnd": null, "performerUserId": null }
+      "version": 1,
+      "tracks": [
+        {
+          "id": 1007,
+          "featureId": 104,
+          "kind": "Frontend",
+          "trackOwnerUserId": 11,
+          "version": 1,
+          "stages": [
+            { "stageKey": "SrApproving",    "plannedStart": null, "plannedEnd": null, "stageOwnerUserId": null, "stageVersion": 1 },
+            { "stageKey": "Development",    "plannedStart": null, "plannedEnd": null, "stageOwnerUserId": null, "stageVersion": 1 },
+            { "stageKey": "StandTesting",   "plannedStart": null, "plannedEnd": null, "stageOwnerUserId": null, "stageVersion": 1 },
+            { "stageKey": "EthalonTesting", "plannedStart": null, "plannedEnd": null, "stageOwnerUserId": null, "stageVersion": 1 },
+            { "stageKey": "ReleaseToLive",  "plannedStart": null, "plannedEnd": null, "stageOwnerUserId": null, "stageVersion": 1 }
+          ]
+        },
+        {
+          "id": 1008,
+          "featureId": 104,
+          "kind": "Backend",
+          "trackOwnerUserId": 12,
+          "version": 1,
+          "stages": [
+            { "stageKey": "CsApproving",    "plannedStart": null, "plannedEnd": null, "stageOwnerUserId": null, "stageVersion": 1 },
+            { "stageKey": "Development",    "plannedStart": null, "plannedEnd": null, "stageOwnerUserId": null, "stageVersion": 1 },
+            { "stageKey": "StandTesting",   "plannedStart": null, "plannedEnd": null, "stageOwnerUserId": null, "stageVersion": 1 },
+            { "stageKey": "EthalonTesting", "plannedStart": null, "plannedEnd": null, "stageOwnerUserId": null, "stageVersion": 1 },
+            { "stageKey": "ReleaseToLive",  "plannedStart": null, "plannedEnd": null, "stageOwnerUserId": null, "stageVersion": 1 }
+          ]
+        }
       ]
     },
     {
@@ -94,12 +190,36 @@
       "managerUserId": 1,
       "taskCount": 0,
       "taskIds": [],
-      "stagePlans": [
-        { "stage": "CsApproving",    "plannedStart": "2026-04-02", "plannedEnd": "2026-04-04", "performerUserId": 1 },
-        { "stage": "Development",    "plannedStart": "2026-04-04", "plannedEnd": "2026-04-12", "performerUserId": 11 },
-        { "stage": "Testing",        "plannedStart": "2026-04-12", "plannedEnd": "2026-04-15", "performerUserId": 10 },
-        { "stage": "EthalonTesting", "plannedStart": "2026-04-15", "plannedEnd": "2026-04-18", "performerUserId": 10 },
-        { "stage": "LiveRelease",    "plannedStart": "2026-04-18", "plannedEnd": "2026-04-20", "performerUserId": 1 }
+      "version": 1,
+      "tracks": [
+        {
+          "id": 1009,
+          "featureId": 105,
+          "kind": "Frontend",
+          "trackOwnerUserId": 11,
+          "version": 1,
+          "stages": [
+            { "stageKey": "SrApproving",    "plannedStart": "2026-04-02", "plannedEnd": "2026-04-04", "stageOwnerUserId": 1,  "stageVersion": 1 },
+            { "stageKey": "Development",    "plannedStart": "2026-04-04", "plannedEnd": "2026-04-12", "stageOwnerUserId": 11, "stageVersion": 1 },
+            { "stageKey": "StandTesting",   "plannedStart": "2026-04-12", "plannedEnd": "2026-04-15", "stageOwnerUserId": 10, "stageVersion": 1 },
+            { "stageKey": "EthalonTesting", "plannedStart": "2026-04-15", "plannedEnd": "2026-04-18", "stageOwnerUserId": 10, "stageVersion": 1 },
+            { "stageKey": "ReleaseToLive",  "plannedStart": "2026-04-18", "plannedEnd": "2026-04-20", "stageOwnerUserId": 1,  "stageVersion": 1 }
+          ]
+        },
+        {
+          "id": 1010,
+          "featureId": 105,
+          "kind": "Backend",
+          "trackOwnerUserId": 12,
+          "version": 1,
+          "stages": [
+            { "stageKey": "CsApproving",    "plannedStart": "2026-04-02", "plannedEnd": "2026-04-04", "stageOwnerUserId": 1,  "stageVersion": 1 },
+            { "stageKey": "Development",    "plannedStart": "2026-04-04", "plannedEnd": "2026-04-12", "stageOwnerUserId": 12, "stageVersion": 1 },
+            { "stageKey": "StandTesting",   "plannedStart": "2026-04-12", "plannedEnd": "2026-04-15", "stageOwnerUserId": 10, "stageVersion": 1 },
+            { "stageKey": "EthalonTesting", "plannedStart": "2026-04-15", "plannedEnd": "2026-04-18", "stageOwnerUserId": 10, "stageVersion": 1 },
+            { "stageKey": "ReleaseToLive",  "plannedStart": "2026-04-18", "plannedEnd": "2026-04-20", "stageOwnerUserId": 1,  "stageVersion": 1 }
+          ]
+        }
       ]
     },
     {
@@ -113,12 +233,36 @@
       "managerUserId": 1,
       "taskCount": 0,
       "taskIds": [],
-      "stagePlans": [
-        { "stage": "CsApproving",    "plannedStart": "2026-04-14", "plannedEnd": "2026-04-16", "performerUserId": 1 },
-        { "stage": "Development",    "plannedStart": "2026-04-16", "plannedEnd": "2026-04-28", "performerUserId": 9999 },
-        { "stage": "Testing",        "plannedStart": "2026-04-28", "plannedEnd": "2026-05-02", "performerUserId": 10 },
-        { "stage": "EthalonTesting", "plannedStart": "2026-05-02", "plannedEnd": "2026-05-04", "performerUserId": 10 },
-        { "stage": "LiveRelease",    "plannedStart": "2026-05-04", "plannedEnd": "2026-05-06", "performerUserId": 1 }
+      "version": 1,
+      "tracks": [
+        {
+          "id": 1011,
+          "featureId": 106,
+          "kind": "Frontend",
+          "trackOwnerUserId": 9999,
+          "version": 1,
+          "stages": [
+            { "stageKey": "SrApproving",    "plannedStart": "2026-04-14", "plannedEnd": "2026-04-16", "stageOwnerUserId": 1,    "stageVersion": 1 },
+            { "stageKey": "Development",    "plannedStart": "2026-04-16", "plannedEnd": "2026-04-28", "stageOwnerUserId": 9999, "stageVersion": 1 },
+            { "stageKey": "StandTesting",   "plannedStart": "2026-04-28", "plannedEnd": "2026-05-02", "stageOwnerUserId": 10,   "stageVersion": 1 },
+            { "stageKey": "EthalonTesting", "plannedStart": "2026-05-02", "plannedEnd": "2026-05-04", "stageOwnerUserId": 10,   "stageVersion": 1 },
+            { "stageKey": "ReleaseToLive",  "plannedStart": "2026-05-04", "plannedEnd": "2026-05-06", "stageOwnerUserId": 1,    "stageVersion": 1 }
+          ]
+        },
+        {
+          "id": 1012,
+          "featureId": 106,
+          "kind": "Backend",
+          "trackOwnerUserId": 12,
+          "version": 1,
+          "stages": [
+            { "stageKey": "CsApproving",    "plannedStart": "2026-04-14", "plannedEnd": "2026-04-16", "stageOwnerUserId": 1,    "stageVersion": 1 },
+            { "stageKey": "Development",    "plannedStart": "2026-04-16", "plannedEnd": "2026-04-28", "stageOwnerUserId": 9999, "stageVersion": 1 },
+            { "stageKey": "StandTesting",   "plannedStart": "2026-04-28", "plannedEnd": "2026-05-02", "stageOwnerUserId": 10,   "stageVersion": 1 },
+            { "stageKey": "EthalonTesting", "plannedStart": "2026-05-02", "plannedEnd": "2026-05-04", "stageOwnerUserId": 10,   "stageVersion": 1 },
+            { "stageKey": "ReleaseToLive",  "plannedStart": "2026-05-04", "plannedEnd": "2026-05-06", "stageOwnerUserId": 1,    "stageVersion": 1 }
+          ]
+        }
       ]
     }
   ]

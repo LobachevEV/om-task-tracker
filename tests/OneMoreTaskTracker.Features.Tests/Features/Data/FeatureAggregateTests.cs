@@ -79,25 +79,6 @@ public sealed class FeatureAggregateTests
     }
 
     [Fact]
-    public void SetStagePlannedStart_AssignsStart_BumpsVersionByOne_AndStampsUpdatedAt()
-    {
-        var feature = NewFeature();
-        var versionBefore = feature.Version;
-        var titleBefore = feature.Title;
-        var leadBefore = feature.LeadUserId;
-        var now = new DateTime(2026, 4, 28, 14, 0, 0, DateTimeKind.Utc);
-        var date = new DateOnly(2026, 5, 1);
-
-        feature.SetStagePlannedStart(FeatureState.Development, date, now);
-
-        feature.DevelopmentPlannedStart.Should().Be(date);
-        feature.Version.Should().Be(versionBefore + 1);
-        feature.UpdatedAt.Should().Be(now);
-        feature.Title.Should().Be(titleBefore);
-        feature.LeadUserId.Should().Be(leadBefore);
-    }
-
-    [Fact]
     public void Touch_StampsUpdatedAt_WithoutBumpingVersion()
     {
         var feature = NewFeature();

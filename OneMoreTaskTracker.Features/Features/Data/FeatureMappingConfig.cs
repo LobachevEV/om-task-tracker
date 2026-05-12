@@ -69,20 +69,5 @@ public static class FeatureMappingConfig
             .Map(d => d.PlannedStart, s => s.PlannedStart == null ? string.Empty : s.PlannedStart.Value.ToString("yyyy-MM-dd"))
             .Map(d => d.PlannedEnd,   s => s.PlannedEnd   == null ? string.Empty : s.PlannedEnd.Value.ToString("yyyy-MM-dd"))
             .Map(d => d.CreatedAt,    s => s.CreatedAt.ToString("O"))
-            .Map(d => d.UpdatedAt,    s => s.UpdatedAt.ToString("O"))
-            .Map(d => d.CsApprovingPlannedStart,    s => s.CsApprovingPlannedStart    == null ? string.Empty : s.CsApprovingPlannedStart.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.CsApprovingPlannedEnd,      s => s.CsApprovingPlannedEnd      == null ? string.Empty : s.CsApprovingPlannedEnd.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.CsApprovingOwnerUserId,     s => s.CsApprovingOwnerUserId     ?? 0)
-            .Map(d => d.DevelopmentPlannedStart,    s => s.DevelopmentPlannedStart    == null ? string.Empty : s.DevelopmentPlannedStart.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.DevelopmentPlannedEnd,      s => s.DevelopmentPlannedEnd      == null ? string.Empty : s.DevelopmentPlannedEnd.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.DevelopmentOwnerUserId,     s => s.DevelopmentOwnerUserId     ?? 0)
-            .Map(d => d.TestingPlannedStart,        s => s.TestingPlannedStart        == null ? string.Empty : s.TestingPlannedStart.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.TestingPlannedEnd,          s => s.TestingPlannedEnd          == null ? string.Empty : s.TestingPlannedEnd.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.TestingOwnerUserId,         s => s.TestingOwnerUserId         ?? 0)
-            .Map(d => d.EthalonTestingPlannedStart, s => s.EthalonTestingPlannedStart == null ? string.Empty : s.EthalonTestingPlannedStart.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.EthalonTestingPlannedEnd,   s => s.EthalonTestingPlannedEnd   == null ? string.Empty : s.EthalonTestingPlannedEnd.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.EthalonTestingOwnerUserId,  s => s.EthalonTestingOwnerUserId  ?? 0)
-            .Map(d => d.LiveReleasePlannedStart,    s => s.LiveReleasePlannedStart    == null ? string.Empty : s.LiveReleasePlannedStart.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.LiveReleasePlannedEnd,      s => s.LiveReleasePlannedEnd      == null ? string.Empty : s.LiveReleasePlannedEnd.Value.ToString("yyyy-MM-dd"))
-            .Map(d => d.LiveReleaseOwnerUserId,     s => s.LiveReleaseOwnerUserId     ?? 0);
+            .Map(d => d.UpdatedAt,    s => s.UpdatedAt.ToString("O"));
 }

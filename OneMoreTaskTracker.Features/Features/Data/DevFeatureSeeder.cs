@@ -12,7 +12,6 @@ public sealed class DevFeatureSeeder(IRequestClock clock)
     private const int AliceFrontendUserId  = 2;
     private const int CharlieBackendUserId = 4;
     private const int DaveBackendUserId    = 5;
-    private const int EveQaUserId          = 6;
 
     public async Task SeedAsync(FeaturesDbContext dbContext, CancellationToken cancellationToken = default)
     {
@@ -38,22 +37,6 @@ public sealed class DevFeatureSeeder(IRequestClock clock)
             CreatedAt     = now,
         };
         checkout.Touch(now);
-        checkout.SetStagePlannedStart(FeatureState.CsApproving,    new DateOnly(2026, 04, 01), now);
-        checkout.SetStagePlannedEnd(  FeatureState.CsApproving,    new DateOnly(2026, 04, 07), now);
-        checkout.AssignStageOwner(    FeatureState.CsApproving,    SeededManagerUserId,        now);
-        checkout.SetStagePlannedStart(FeatureState.Development,    new DateOnly(2026, 04, 08), now);
-        checkout.SetStagePlannedEnd(  FeatureState.Development,    new DateOnly(2026, 05, 15), now);
-        checkout.AssignStageOwner(    FeatureState.Development,    AliceFrontendUserId,        now);
-        checkout.SetStagePlannedStart(FeatureState.Testing,        new DateOnly(2026, 05, 16), now);
-        checkout.SetStagePlannedEnd(  FeatureState.Testing,        new DateOnly(2026, 05, 25), now);
-        checkout.AssignStageOwner(    FeatureState.Testing,        EveQaUserId,                now);
-        checkout.SetStagePlannedStart(FeatureState.EthalonTesting, new DateOnly(2026, 05, 26), now);
-        checkout.SetStagePlannedEnd(  FeatureState.EthalonTesting, new DateOnly(2026, 06, 05), now);
-        checkout.AssignStageOwner(    FeatureState.EthalonTesting, EveQaUserId,                now);
-        checkout.SetStagePlannedStart(FeatureState.LiveRelease,    new DateOnly(2026, 06, 10), now);
-        checkout.SetStagePlannedEnd(  FeatureState.LiveRelease,    new DateOnly(2026, 06, 15), now);
-        checkout.AssignStageOwner(    FeatureState.LiveRelease,    AliceFrontendUserId,        now);
-        checkout.RecomputePlannedDates();
         dbContext.Features.Add(checkout);
 
         // B — partially planned (first 2 stages populated)
@@ -67,13 +50,6 @@ public sealed class DevFeatureSeeder(IRequestClock clock)
             CreatedAt     = now,
         };
         search.Touch(now);
-        search.SetStagePlannedStart(FeatureState.CsApproving, new DateOnly(2026, 05, 01), now);
-        search.SetStagePlannedEnd(  FeatureState.CsApproving, new DateOnly(2026, 05, 10), now);
-        search.AssignStageOwner(    FeatureState.CsApproving, SeededManagerUserId,        now);
-        search.SetStagePlannedStart(FeatureState.Development,  new DateOnly(2026, 05, 11), now);
-        search.SetStagePlannedEnd(  FeatureState.Development,  new DateOnly(2026, 07, 15), now);
-        search.AssignStageOwner(    FeatureState.Development,  CharlieBackendUserId,       now);
-        search.RecomputePlannedDates();
         dbContext.Features.Add(search);
 
         // C — empty (no stage dates, no performers)
@@ -139,25 +115,58 @@ public sealed class DevFeatureSeeder(IRequestClock clock)
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
+        // Checkout redesign — fully planned: every admitted stage gets start + end dates.
+        // Dates are contiguous two-week windows per stage so PlannedEnd >= PlannedStart always holds.
+        var checkoutStageStart = new DateOnly(2026, 5, 1);
         foreach (var stageKey in FeatureTrackStageScope.AdmittedKeys(FeatureTrackKind.Frontend))
         {
-            dbContext.FeatureTrackStages.Add(FeatureTrackStage.Create(frontendTrack.Id, (int)stageKey, now));
+            var stage = FeatureTrackStage.Create(frontendTrack.Id, (int)stageKey, now);
+            stage.SetPlannedStart(checkoutStageStart, now);
+            stage.SetPlannedEnd(checkoutStageStart.AddDays(13), now);
+            checkoutStageStart = checkoutStageStart.AddDays(14);
+            dbContext.FeatureTrackStages.Add(stage);
         }
 
         foreach (var stageKey in FeatureTrackStageScope.AdmittedKeys(FeatureTrackKind.Backend))
         {
-            dbContext.FeatureTrackStages.Add(FeatureTrackStage.Create(backendTrack.Id, (int)stageKey, now));
+            var stage = FeatureTrackStage.Create(backendTrack.Id, (int)stageKey, now);
+            stage.SetPlannedStart(checkoutStageStart, now);
+            stage.SetPlannedEnd(checkoutStageStart.AddDays(13), now);
+            checkoutStageStart = checkoutStageStart.AddDays(14);
+            dbContext.FeatureTrackStages.Add(stage);
         }
 
-        // features[1]: BACKEND (owner=Dave)
+        // Recompute Feature.PlannedStart/End from the stage rollup (min start, max end).
+        var allCheckoutStages = dbContext.FeatureTrackStages.Local
+            .Where(s => s.PlannedStart != null)
+            .ToList();
+        if (allCheckoutStages.Count > 0)
+        {
+            checkoutFeature.PlannedStart = allCheckoutStages.Min(s => s.PlannedStart);
+            checkoutFeature.PlannedEnd   = allCheckoutStages.Max(s => s.PlannedEnd);
+        }
+
+        // features[1]: BACKEND (owner=Dave) — partially planned: only the first backend stage has dates.
         var searchFeature = seededFeatures[1];
         var searchBackendTrack = FeatureTrack.Create(searchFeature.Id, (int)FeatureTrackKind.Backend, DaveBackendUserId, now);
         dbContext.FeatureTracks.Add(searchBackendTrack);
 
+        var searchStageStart = new DateOnly(2026, 6, 1);
+        bool firstSearchStage = true;
         foreach (var stageKey in FeatureTrackStageScope.AdmittedKeys(FeatureTrackKind.Backend))
         {
-            dbContext.FeatureTrackStages.Add(FeatureTrackStage.Create(searchBackendTrack.Id, (int)stageKey, now));
+            var stage = FeatureTrackStage.Create(searchBackendTrack.Id, (int)stageKey, now);
+            if (firstSearchStage)
+            {
+                stage.SetPlannedStart(searchStageStart, now);
+                stage.SetPlannedEnd(searchStageStart.AddDays(13), now);
+                firstSearchStage = false;
+            }
+            dbContext.FeatureTrackStages.Add(stage);
         }
+
+        searchFeature.PlannedStart = searchStageStart;
+        searchFeature.PlannedEnd   = searchStageStart.AddDays(13);
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }

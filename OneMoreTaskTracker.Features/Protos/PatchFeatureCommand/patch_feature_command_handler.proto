@@ -16,21 +16,7 @@ message PatchFeatureRequest {
   optional string title = 4;
   optional string description = 5;
   optional int32 lead_user_id = 6;
-  optional string cs_approving_planned_start  = 7;
-  optional string cs_approving_planned_end    = 8;
-  optional int32  cs_approving_owner_user_id  = 9;
-  optional string development_planned_start   = 10;
-  optional string development_planned_end     = 11;
-  optional int32  development_owner_user_id   = 12;
-  optional string testing_planned_start       = 13;
-  optional string testing_planned_end         = 14;
-  optional int32  testing_owner_user_id       = 15;
-  optional string ethalon_testing_planned_start = 16;
-  optional string ethalon_testing_planned_end   = 17;
-  optional int32  ethalon_testing_owner_user_id = 18;
-  optional string live_release_planned_start  = 19;
-  optional string live_release_planned_end    = 20;
-  optional int32  live_release_owner_user_id  = 21;
+  reserved 7 to 21;
 }
 
 message FeatureDto {
@@ -47,19 +33,5 @@ message FeatureDto {
   reserved 11;
   int32        version            = 12;
   repeated     FeatureTrackDto   tracks     = 13;
-  string       cs_approving_planned_start    = 14;
-  string       cs_approving_planned_end      = 15;
-  int32        cs_approving_owner_user_id    = 16;
-  string       development_planned_start     = 17;
-  string       development_planned_end       = 18;
-  int32        development_owner_user_id     = 19;
-  string       testing_planned_start         = 20;
-  string       testing_planned_end           = 21;
-  int32        testing_owner_user_id         = 22;
-  string       ethalon_testing_planned_start = 23;
-  string       ethalon_testing_planned_end   = 24;
-  int32        ethalon_testing_owner_user_id = 25;
-  string       live_release_planned_start    = 26;
-  string       live_release_planned_end      = 27;
-  int32        live_release_owner_user_id    = 28;
+  reserved 14 to 28;
 }

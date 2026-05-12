@@ -4,6 +4,7 @@ import type {
   FeatureSummary,
   MiniTeamMember,
 } from '../../../common/types/feature';
+import type { FeatureTrack } from '../../../common/types/featureTrack';
 
 export const FIXTURE_TODAY = '2026-04-21';
 
@@ -13,6 +14,26 @@ const be: MiniTeamMember = { userId: 12, email: 'be@example.com', displayName: '
 const mg: MiniTeamMember = { userId:  1, email: 'pm@example.com', displayName: 'Mel PM',    role: 'Manager' };
 
 export const MINI_TEAM_MEMBERS = { qa, fe, be, mg } as const;
+
+/**
+ * Frontend track covering all 5 lifecycle stages for SOLO_FEATURE.
+ * Stage windows: CsApproving 04-15..04-17, Development 04-17..04-24,
+ * Testing 04-24..04-26, EthalonTesting 04-26..04-27, LiveRelease 04-28..04-28.
+ */
+const SOLO_FEATURE_FRONTEND_TRACK: FeatureTrack = {
+  id: 201,
+  featureId: 101,
+  kind: 'Frontend',
+  trackOwnerUserId: fe.userId,
+  version: 0,
+  stages: [
+    { stageKey: 'SrApproving',    plannedStart: '2026-04-15', plannedEnd: '2026-04-17', stageOwnerUserId: mg.userId, stageVersion: 0 },
+    { stageKey: 'Development',    plannedStart: '2026-04-17', plannedEnd: '2026-04-24', stageOwnerUserId: fe.userId, stageVersion: 0 },
+    { stageKey: 'StandTesting',   plannedStart: '2026-04-24', plannedEnd: '2026-04-26', stageOwnerUserId: qa.userId, stageVersion: 0 },
+    { stageKey: 'EthalonTesting', plannedStart: '2026-04-26', plannedEnd: '2026-04-27', stageOwnerUserId: qa.userId, stageVersion: 0 },
+    { stageKey: 'ReleaseToLive',  plannedStart: '2026-04-28', plannedEnd: '2026-04-28', stageOwnerUserId: mg.userId, stageVersion: 0 },
+  ],
+};
 
 export const SOLO_FEATURE: FeatureSummary = {
   id: 101,
@@ -25,22 +46,23 @@ export const SOLO_FEATURE: FeatureSummary = {
   managerUserId: mg.userId,
   taskCount: 2,
   taskIds: [501, 502],
-  csApprovingPlannedStart:    '2026-04-15',
-  csApprovingPlannedEnd:      '2026-04-17',
-  csApprovingOwnerUserId:     mg.userId,
-  developmentPlannedStart:    '2026-04-17',
-  developmentPlannedEnd:      '2026-04-24',
-  developmentOwnerUserId:     fe.userId,
-  testingPlannedStart:        '2026-04-24',
-  testingPlannedEnd:          '2026-04-26',
-  testingOwnerUserId:         qa.userId,
-  ethalonTestingPlannedStart: '2026-04-26',
-  ethalonTestingPlannedEnd:   '2026-04-27',
-  ethalonTestingOwnerUserId:  qa.userId,
-  liveReleasePlannedStart:    '2026-04-28',
-  liveReleasePlannedEnd:      '2026-04-28',
-  liveReleaseOwnerUserId:     mg.userId,
   version: 0,
+  tracks: [SOLO_FEATURE_FRONTEND_TRACK],
+};
+
+const MINI_TEAM_FEATURE_BACKEND_TRACK: FeatureTrack = {
+  id: 202,
+  featureId: 102,
+  kind: 'Backend',
+  trackOwnerUserId: be.userId,
+  version: 0,
+  stages: [
+    { stageKey: 'CsApproving',    plannedStart: '2026-04-10', plannedEnd: '2026-04-12', stageOwnerUserId: mg.userId, stageVersion: 0 },
+    { stageKey: 'Development',    plannedStart: '2026-04-12', plannedEnd: '2026-04-25', stageOwnerUserId: be.userId, stageVersion: 0 },
+    { stageKey: 'StandTesting',   plannedStart: '2026-04-25', plannedEnd: '2026-05-01', stageOwnerUserId: qa.userId, stageVersion: 0 },
+    { stageKey: 'EthalonTesting', plannedStart: '2026-05-01', plannedEnd: '2026-05-04', stageOwnerUserId: qa.userId, stageVersion: 0 },
+    { stageKey: 'ReleaseToLive',  plannedStart: '2026-05-05', plannedEnd: '2026-05-05', stageOwnerUserId: mg.userId, stageVersion: 0 },
+  ],
 };
 
 export const MINI_TEAM_FEATURE: FeatureSummary = {
@@ -54,22 +76,8 @@ export const MINI_TEAM_FEATURE: FeatureSummary = {
   managerUserId: mg.userId,
   taskCount: 5,
   taskIds: [503, 504, 505, 506, 507],
-  csApprovingPlannedStart:    '2026-04-10',
-  csApprovingPlannedEnd:      '2026-04-12',
-  csApprovingOwnerUserId:     mg.userId,
-  developmentPlannedStart:    '2026-04-12',
-  developmentPlannedEnd:      '2026-04-25',
-  developmentOwnerUserId:     be.userId,
-  testingPlannedStart:        '2026-04-25',
-  testingPlannedEnd:          '2026-05-01',
-  testingOwnerUserId:         qa.userId,
-  ethalonTestingPlannedStart: '2026-05-01',
-  ethalonTestingPlannedEnd:   '2026-05-04',
-  ethalonTestingOwnerUserId:  qa.userId,
-  liveReleasePlannedStart:    '2026-05-05',
-  liveReleasePlannedEnd:      '2026-05-05',
-  liveReleaseOwnerUserId:     mg.userId,
   version: 0,
+  tracks: [MINI_TEAM_FEATURE_BACKEND_TRACK],
 };
 
 export const UNSCHEDULED_FEATURE: FeatureSummary = {
@@ -83,22 +91,22 @@ export const UNSCHEDULED_FEATURE: FeatureSummary = {
   managerUserId: mg.userId,
   taskCount: 0,
   taskIds: [],
-  csApprovingPlannedStart:    null,
-  csApprovingPlannedEnd:      null,
-  csApprovingOwnerUserId:     null,
-  developmentPlannedStart:    null,
-  developmentPlannedEnd:      null,
-  developmentOwnerUserId:     null,
-  testingPlannedStart:        null,
-  testingPlannedEnd:          null,
-  testingOwnerUserId:         null,
-  ethalonTestingPlannedStart: null,
-  ethalonTestingPlannedEnd:   null,
-  ethalonTestingOwnerUserId:  null,
-  liveReleasePlannedStart:    null,
-  liveReleasePlannedEnd:      null,
-  liveReleaseOwnerUserId:     null,
   version: 0,
+};
+
+const OVERDUE_FEATURE_BACKEND_TRACK: FeatureTrack = {
+  id: 203,
+  featureId: 104,
+  kind: 'Backend',
+  trackOwnerUserId: be.userId,
+  version: 0,
+  stages: [
+    { stageKey: 'CsApproving',    plannedStart: '2026-03-01', plannedEnd: '2026-03-05', stageOwnerUserId: mg.userId, stageVersion: 0 },
+    { stageKey: 'Development',    plannedStart: '2026-03-05', plannedEnd: '2026-04-10', stageOwnerUserId: be.userId, stageVersion: 0 },
+    { stageKey: 'StandTesting',   plannedStart: null,         plannedEnd: null,         stageOwnerUserId: null,      stageVersion: 0 },
+    { stageKey: 'EthalonTesting', plannedStart: null,         plannedEnd: null,         stageOwnerUserId: null,      stageVersion: 0 },
+    { stageKey: 'ReleaseToLive',  plannedStart: null,         plannedEnd: null,         stageOwnerUserId: null,      stageVersion: 0 },
+  ],
 };
 
 export const OVERDUE_FEATURE: FeatureSummary = {
@@ -112,22 +120,23 @@ export const OVERDUE_FEATURE: FeatureSummary = {
   managerUserId: mg.userId,
   taskCount: 3,
   taskIds: [508, 509, 510],
-  csApprovingPlannedStart:    '2026-03-01',
-  csApprovingPlannedEnd:      '2026-03-05',
-  csApprovingOwnerUserId:     mg.userId,
-  developmentPlannedStart:    '2026-03-05',
-  developmentPlannedEnd:      '2026-04-10',
-  developmentOwnerUserId:     be.userId,
-  testingPlannedStart:        null,
-  testingPlannedEnd:          null,
-  testingOwnerUserId:         null,
-  ethalonTestingPlannedStart: null,
-  ethalonTestingPlannedEnd:   null,
-  ethalonTestingOwnerUserId:  null,
-  liveReleasePlannedStart:    null,
-  liveReleasePlannedEnd:      null,
-  liveReleaseOwnerUserId:     null,
   version: 0,
+  tracks: [OVERDUE_FEATURE_BACKEND_TRACK],
+};
+
+const SHIPPED_FEATURE_FRONTEND_TRACK: FeatureTrack = {
+  id: 204,
+  featureId: 105,
+  kind: 'Frontend',
+  trackOwnerUserId: fe.userId,
+  version: 0,
+  stages: [
+    { stageKey: 'SrApproving',    plannedStart: '2026-04-02', plannedEnd: '2026-04-04', stageOwnerUserId: mg.userId, stageVersion: 0 },
+    { stageKey: 'Development',    plannedStart: '2026-04-04', plannedEnd: '2026-04-12', stageOwnerUserId: fe.userId, stageVersion: 0 },
+    { stageKey: 'StandTesting',   plannedStart: '2026-04-12', plannedEnd: '2026-04-15', stageOwnerUserId: qa.userId, stageVersion: 0 },
+    { stageKey: 'EthalonTesting', plannedStart: '2026-04-15', plannedEnd: '2026-04-17', stageOwnerUserId: qa.userId, stageVersion: 0 },
+    { stageKey: 'ReleaseToLive',  plannedStart: '2026-04-18', plannedEnd: '2026-04-18', stageOwnerUserId: mg.userId, stageVersion: 0 },
+  ],
 };
 
 export const SHIPPED_FEATURE: FeatureSummary = {
@@ -141,22 +150,8 @@ export const SHIPPED_FEATURE: FeatureSummary = {
   managerUserId: mg.userId,
   taskCount: 4,
   taskIds: [511, 512, 513, 514],
-  csApprovingPlannedStart:    '2026-04-02',
-  csApprovingPlannedEnd:      '2026-04-04',
-  csApprovingOwnerUserId:     mg.userId,
-  developmentPlannedStart:    '2026-04-04',
-  developmentPlannedEnd:      '2026-04-12',
-  developmentOwnerUserId:     fe.userId,
-  testingPlannedStart:        '2026-04-12',
-  testingPlannedEnd:          '2026-04-15',
-  testingOwnerUserId:         qa.userId,
-  ethalonTestingPlannedStart: '2026-04-15',
-  ethalonTestingPlannedEnd:   '2026-04-17',
-  ethalonTestingOwnerUserId:  qa.userId,
-  liveReleasePlannedStart:    '2026-04-18',
-  liveReleasePlannedEnd:      '2026-04-18',
-  liveReleaseOwnerUserId:     mg.userId,
   version: 0,
+  tracks: [SHIPPED_FEATURE_FRONTEND_TRACK],
 };
 
 export const ALL_FEATURES: FeatureSummary[] = [
@@ -197,10 +192,7 @@ export const SHIPPED_FEATURE_DETAIL: FeatureDetail = {
 };
 
 export const STALE_PERFORMER_DETAIL: FeatureDetail = {
-  feature: {
-    ...MINI_TEAM_FEATURE,
-    developmentOwnerUserId: 9999,
-  },
+  feature: MINI_TEAM_FEATURE,
   tasks: [],
   lead: be,
   miniTeam: [be, qa, mg],

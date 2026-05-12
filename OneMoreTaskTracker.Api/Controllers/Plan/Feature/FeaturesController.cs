@@ -77,16 +77,9 @@ public class FeaturesController(
 
         var miniTeamIds = new HashSet<int>();
         if (feature.LeadUserId > 0) miniTeamIds.Add(feature.LeadUserId);
-        foreach (var ownerId in new[]
+        foreach (var track in feature.Tracks)
         {
-            feature.CsApprovingOwnerUserId,
-            feature.DevelopmentOwnerUserId,
-            feature.TestingOwnerUserId,
-            feature.EthalonTestingOwnerUserId,
-            feature.LiveReleaseOwnerUserId,
-        })
-        {
-            if (ownerId > 0) miniTeamIds.Add(ownerId);
+            if (track.TrackOwnerUserId > 0) miniTeamIds.Add(track.TrackOwnerUserId);
         }
 
         var miniTeam = miniTeamIds
@@ -152,41 +145,6 @@ public class FeaturesController(
 
         if (body.LeadUserId is { } lead)
             request.LeadUserId = lead;
-
-        if (body.CsApprovingPlannedStart is not null)
-            request.CsApprovingPlannedStart = body.CsApprovingPlannedStart;
-        if (body.CsApprovingPlannedEnd is not null)
-            request.CsApprovingPlannedEnd = body.CsApprovingPlannedEnd;
-        if (body.CsApprovingOwnerUserId is { } csOwner)
-            request.CsApprovingOwnerUserId = csOwner;
-
-        if (body.DevelopmentPlannedStart is not null)
-            request.DevelopmentPlannedStart = body.DevelopmentPlannedStart;
-        if (body.DevelopmentPlannedEnd is not null)
-            request.DevelopmentPlannedEnd = body.DevelopmentPlannedEnd;
-        if (body.DevelopmentOwnerUserId is { } devOwner)
-            request.DevelopmentOwnerUserId = devOwner;
-
-        if (body.TestingPlannedStart is not null)
-            request.TestingPlannedStart = body.TestingPlannedStart;
-        if (body.TestingPlannedEnd is not null)
-            request.TestingPlannedEnd = body.TestingPlannedEnd;
-        if (body.TestingOwnerUserId is { } testOwner)
-            request.TestingOwnerUserId = testOwner;
-
-        if (body.EthalonTestingPlannedStart is not null)
-            request.EthalonTestingPlannedStart = body.EthalonTestingPlannedStart;
-        if (body.EthalonTestingPlannedEnd is not null)
-            request.EthalonTestingPlannedEnd = body.EthalonTestingPlannedEnd;
-        if (body.EthalonTestingOwnerUserId is { } etOwner)
-            request.EthalonTestingOwnerUserId = etOwner;
-
-        if (body.LiveReleasePlannedStart is not null)
-            request.LiveReleasePlannedStart = body.LiveReleasePlannedStart;
-        if (body.LiveReleasePlannedEnd is not null)
-            request.LiveReleasePlannedEnd = body.LiveReleasePlannedEnd;
-        if (body.LiveReleaseOwnerUserId is { } lrOwner)
-            request.LiveReleaseOwnerUserId = lrOwner;
 
         if (expectedVersion.HasValue)
             request.ExpectedVersion = expectedVersion.Value;

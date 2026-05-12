@@ -41,26 +41,6 @@ export interface FeatureSummary {
   managerUserId: number;
   taskCount: number;
   taskIds: number[];
-  // CsApproving stage
-  csApprovingPlannedStart: string | null;
-  csApprovingPlannedEnd: string | null;
-  csApprovingOwnerUserId: number | null;
-  // Development stage
-  developmentPlannedStart: string | null;
-  developmentPlannedEnd: string | null;
-  developmentOwnerUserId: number | null;
-  // Testing stage
-  testingPlannedStart: string | null;
-  testingPlannedEnd: string | null;
-  testingOwnerUserId: number | null;
-  // EthalonTesting stage
-  ethalonTestingPlannedStart: string | null;
-  ethalonTestingPlannedEnd: string | null;
-  ethalonTestingOwnerUserId: number | null;
-  // LiveRelease stage
-  liveReleasePlannedStart: string | null;
-  liveReleasePlannedEnd: string | null;
-  liveReleaseOwnerUserId: number | null;
   version?: number;
   tracks?: FeatureTrack[];
 }
@@ -84,26 +64,6 @@ export interface PatchFeaturePayload {
   description?: string | null;
   leadUserId?: number;
   expectedVersion?: number;
-  // CsApproving stage
-  csApprovingPlannedStart?: string | null;
-  csApprovingPlannedEnd?: string | null;
-  csApprovingOwnerUserId?: number | null;
-  // Development stage
-  developmentPlannedStart?: string | null;
-  developmentPlannedEnd?: string | null;
-  developmentOwnerUserId?: number | null;
-  // Testing stage
-  testingPlannedStart?: string | null;
-  testingPlannedEnd?: string | null;
-  testingOwnerUserId?: number | null;
-  // EthalonTesting stage
-  ethalonTestingPlannedStart?: string | null;
-  ethalonTestingPlannedEnd?: string | null;
-  ethalonTestingOwnerUserId?: number | null;
-  // LiveRelease stage
-  liveReleasePlannedStart?: string | null;
-  liveReleasePlannedEnd?: string | null;
-  liveReleaseOwnerUserId?: number | null;
 }
 
 export type FeatureScope = 'all' | 'mine';
