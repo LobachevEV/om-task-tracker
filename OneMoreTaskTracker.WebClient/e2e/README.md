@@ -100,6 +100,7 @@ Notes:
 - Use `127.0.0.1` (not `localhost`) — alumnium's `ALUMNIUM_OLLAMA_URL` validator rejects bare hostnames, so this suite goes through `OLLAMA_HOST` instead, which has no URL regex.
 - `oxfmt` is an extra devDependency added solely to work around a packaging gap in `alumnium@0.20.0` (it imports `oxfmt` eagerly without declaring it as a dep).
 - A single `al.check(...)` round-trip with qwen3:14b takes ~15–25s and ~10k input tokens. Keep AI assertions coarse and few; the existing Playwright POM specs remain the right tool for fine-grained checks.
+- **Attribute filtering:** `plan.ai.spec.ts` passes `EXCLUDE_ATTRIBUTES` (exported from `e2e/helpers/llm.ts`) into the `Alumni` constructor via `excludeAttributes`. This drops 14 attributes — pure styling (`class`, `style`), test-only hooks (`data-testid`, `data-feature-id`, `data-feature-row`, `data-day-cell`, `data-date`), and internal state markers (`data-variant`, `data-stage`, `data-status`, `data-active`, `data-overdue`, `data-kind`, `data-inherited`) — from the accessibility-tree XML Alumnium sends to the LLM. All `aria-*`, `role`, `id`, `name`, `value`, `placeholder`, `title`, `alt`, `href`, and `for` attributes are kept, so the LLM retains full semantic context. This reduces input tokens per `al.check(...)` from ~10017 (baseline) to ≤ 4000 (target). The filter only affects what Alumnium serialises; the real DOM is unchanged, so the default Playwright POM suite (`specs/`) remains the authoritative regression witness.
 
 ## CI
 

@@ -1,7 +1,7 @@
 import { Alumni, Model } from 'alumnium';
 import { test, expect } from '../fixtures/authed';
 import { isBackendReachable } from '../helpers/backend';
-import { ALUMNIUM_MODEL, isOllamaReachable, OLLAMA_URL } from '../helpers/llm';
+import { ALUMNIUM_MODEL, EXCLUDE_ATTRIBUTES, isOllamaReachable, OLLAMA_URL } from '../helpers/llm';
 
 test.describe('@ai plan view — Alumnium + Ollama (qwen3:14b)', () => {
   test.beforeAll(async () => {
@@ -16,7 +16,10 @@ test.describe('@ai plan view — Alumnium + Ollama (qwen3:14b)', () => {
   });
 
   test('verifies plan toolbar via natural-language assertion', async ({ managerPage }) => {
-    const al = new Alumni(managerPage, { model: Model.parse(ALUMNIUM_MODEL) });
+    const al = new Alumni(managerPage, {
+      model: Model.parse(ALUMNIUM_MODEL),
+      excludeAttributes: [...EXCLUDE_ATTRIBUTES],
+    });
 
     try {
       await managerPage.goto('/plan');

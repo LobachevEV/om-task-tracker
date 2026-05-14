@@ -4,6 +4,23 @@ export const OLLAMA_URL =
   'http://127.0.0.1:11434';
 export const ALUMNIUM_MODEL = process.env.ALUMNIUM_MODEL ?? 'ollama/qwen3:14b';
 
+export const EXCLUDE_ATTRIBUTES: readonly string[] = [
+  'class',
+  'style',
+  'data-testid',
+  'data-feature-id',
+  'data-feature-row',
+  'data-day-cell',
+  'data-date',
+  'data-variant',
+  'data-stage',
+  'data-status',
+  'data-active',
+  'data-overdue',
+  'data-kind',
+  'data-inherited',
+];
+
 function modelTag(): string {
   const [, name] = ALUMNIUM_MODEL.split('/');
   return name ?? '';
