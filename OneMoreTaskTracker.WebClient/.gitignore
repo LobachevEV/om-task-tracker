@@ -15,7 +15,9 @@ coverage
 
 # Playwright
 /playwright-report/
+/playwright-report-ai/
 /test-results/
+/test-results-ai/
 /playwright/.cache/
 
 # Editor directories and files

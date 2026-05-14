@@ -74,6 +74,32 @@ e2e/
 | `E2E_API_BASE_URL`     | `http://localhost:5000`     | Gateway base URL for `apiLogin` / `isReachable` |
 | `E2E_EXTERNAL_SERVER`  | unset                       | Set to `1` to skip Playwright's Vite autostart  |
 | `CI`                   | unset                       | Enables retries (2) and a single worker         |
+| `ALUMNIUM_MODEL`       | `ollama/qwen3:14b`          | Alumnium model spec for the AI specs           |
+| `OLLAMA_HOST`          | `http://127.0.0.1:11434`    | Ollama base URL for the AI specs               |
+
+## AI-assisted specs (`specs-ai/`)
+
+A second, opt-in suite lives under `e2e/specs-ai/` and is driven by [Alumnium](https://alumnium.ai/) plus a local LLM via Ollama. It is NOT run by `npm run e2e` (the default config has `testIgnore: ['**/specs-ai/**']`).
+
+Setup (one-time):
+
+```bash
+ollama pull qwen3:14b          # ~9 GB
+```
+
+Run:
+
+```bash
+npm run e2e:ai                 # headless, chromium only
+npm run e2e:ai:headed          # see browser
+```
+
+Specs skip cleanly when either the gateway (`:5000`) or Ollama (`:11434`) is unreachable, or when the configured model tag is not present in `ollama list`. Defaults live in `playwright.ai.config.ts` and can be overridden via `ALUMNIUM_MODEL` / `OLLAMA_HOST`.
+
+Notes:
+- Use `127.0.0.1` (not `localhost`) — alumnium's `ALUMNIUM_OLLAMA_URL` validator rejects bare hostnames, so this suite goes through `OLLAMA_HOST` instead, which has no URL regex.
+- `oxfmt` is an extra devDependency added solely to work around a packaging gap in `alumnium@0.20.0` (it imports `oxfmt` eagerly without declaring it as a dep).
+- A single `al.check(...)` round-trip with qwen3:14b takes ~15–25s and ~10k input tokens. Keep AI assertions coarse and few; the existing Playwright POM specs remain the right tool for fine-grained checks.
 
 ## CI
 

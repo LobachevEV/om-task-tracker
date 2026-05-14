@@ -10,6 +10,7 @@ const useExternalServer = process.env.E2E_EXTERNAL_SERVER === '1';
 
 export default defineConfig({
   testDir: './e2e',
+  testIgnore: ['**/specs-ai/**'],
   fullyParallel: true,
   forbidOnly: CI,
   retries: CI ? 2 : 0,
