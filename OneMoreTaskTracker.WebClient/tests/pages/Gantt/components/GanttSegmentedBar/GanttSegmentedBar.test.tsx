@@ -1,45 +1,34 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import i18n from '../../../../../src/common/i18n/config';
 import { GanttSegmentedBar } from '../../../../../src/pages/Gantt/components/GanttSegmentedBar/GanttSegmentedBar';
 import {
   FIXTURE_TODAY,
   MINI_TEAM_FEATURE,
-  MINI_TEAM_MEMBERS,
   OVERDUE_FEATURE,
   UNSCHEDULED_FEATURE,
 } from '../../../../../src/pages/Gantt/__fixtures__/FeatureFixtures';
 import { windowForZoom } from '../../../../../src/pages/Gantt/ganttMath';
 import { computeStageBars } from '../../../../../src/pages/Gantt/ganttStageGeometry';
-import type { MiniTeamMember } from '../../../../../src/common/types/feature';
 
-const { fe, be, qa, mg } = MINI_TEAM_MEMBERS;
 const window = windowForZoom(FIXTURE_TODAY, 'month');
 const DAY_PX = 32;
-
-function resolverFor(members: MiniTeamMember[]) {
-  const byId = new Map(members.map((m) => [m.userId, m]));
-  return (id: number | null | undefined) =>
-    id == null ? undefined : byId.get(id);
-}
 
 describe('GanttSegmentedBar', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en');
   });
 
-  it('renders exactly 5 segment buttons in canonical order', () => {
+  it('renders exactly 5 segment images in canonical order', () => {
     const stageBars = computeStageBars(window, MINI_TEAM_FEATURE, FIXTURE_TODAY, DAY_PX);
     render(
       <GanttSegmentedBar
         feature={MINI_TEAM_FEATURE}
         stageBars={stageBars}
         today={FIXTURE_TODAY}
-        resolvePerformer={resolverFor([fe, be, qa, mg])}
-        onOpenStage={vi.fn()}
       />,
     );
-    const segs = screen.getAllByRole('button');
+    const segs = screen.getAllByRole('img');
     expect(segs).toHaveLength(5);
     expect(segs[0]).toHaveAttribute('data-testid', 'segment-CsApproving');
     expect(segs[4]).toHaveAttribute('data-testid', 'segment-LiveRelease');
@@ -52,11 +41,9 @@ describe('GanttSegmentedBar', () => {
         feature={MINI_TEAM_FEATURE}
         stageBars={stageBars}
         today={FIXTURE_TODAY}
-        resolvePerformer={resolverFor([fe, be, qa, mg])}
-        onOpenStage={vi.fn()}
       />,
     );
-    const segs = screen.getAllByRole('button');
+    const segs = screen.getAllByRole('img');
     const currents = segs.filter((s) => s.getAttribute('aria-current') === 'step');
     expect(currents).toHaveLength(1);
     expect(currents[0]).toHaveAttribute('data-testid', `segment-${MINI_TEAM_FEATURE.state}`);
@@ -69,8 +56,6 @@ describe('GanttSegmentedBar', () => {
         feature={OVERDUE_FEATURE}
         stageBars={stageBars}
         today={FIXTURE_TODAY}
-        resolvePerformer={resolverFor([fe, be, qa, mg])}
-        onOpenStage={vi.fn()}
       />,
     );
     const dev = screen.getByTestId('segment-Development');
@@ -84,30 +69,12 @@ describe('GanttSegmentedBar', () => {
         feature={UNSCHEDULED_FEATURE}
         stageBars={stageBars}
         today={FIXTURE_TODAY}
-        resolvePerformer={resolverFor([fe, be, qa, mg])}
-        onOpenStage={vi.fn()}
       />,
     );
     const bar = screen.getByTestId('segmented-bar');
     expect(bar).toHaveAttribute('data-variant', 'ghost');
-    const allSegs = screen.getAllByRole('button');
+    const allSegs = screen.getAllByRole('img');
     expect(allSegs.every((s) => s.getAttribute('data-variant') === 'ghost')).toBe(true);
-  });
-
-  it('calls onOpenStage with the clicked segment’s stage', () => {
-    const onOpenStage = vi.fn();
-    const stageBars = computeStageBars(window, MINI_TEAM_FEATURE, FIXTURE_TODAY, DAY_PX);
-    render(
-      <GanttSegmentedBar
-        feature={MINI_TEAM_FEATURE}
-        stageBars={stageBars}
-        today={FIXTURE_TODAY}
-        resolvePerformer={resolverFor([fe, be, qa, mg])}
-        onOpenStage={onOpenStage}
-      />,
-    );
-    fireEvent.click(screen.getByTestId('segment-Testing'));
-    expect(onOpenStage).toHaveBeenCalledWith('Testing');
   });
 
   it('renders a feature-level summary bar when stages are unplanned but feature has dates', () => {
@@ -117,8 +84,6 @@ describe('GanttSegmentedBar', () => {
         feature={UNSCHEDULED_FEATURE}
         stageBars={stageBars}
         today={FIXTURE_TODAY}
-        resolvePerformer={resolverFor([fe, be, qa, mg])}
-        onOpenStage={vi.fn()}
         summaryBar={{ leftPx: 120, widthPx: 480, clampedLeft: false, clampedRight: false }}
       />,
     );
@@ -135,8 +100,6 @@ describe('GanttSegmentedBar', () => {
         feature={UNSCHEDULED_FEATURE}
         stageBars={stageBars}
         today={FIXTURE_TODAY}
-        resolvePerformer={resolverFor([fe, be, qa, mg])}
-        onOpenStage={vi.fn()}
       />,
     );
     expect(screen.queryByTestId('segmented-bar-summary')).not.toBeInTheDocument();
@@ -150,11 +113,9 @@ describe('GanttSegmentedBar', () => {
         feature={MINI_TEAM_FEATURE}
         stageBars={stageBars}
         today={FIXTURE_TODAY}
-        resolvePerformer={resolverFor([fe, be, qa, mg])}
-        onOpenStage={vi.fn()}
       />,
     );
-    const segs = screen.getAllByRole('button');
+    const segs = screen.getAllByRole('img');
     for (const s of segs) {
       const label = s.getAttribute('aria-label');
       expect(label).toBeTruthy();

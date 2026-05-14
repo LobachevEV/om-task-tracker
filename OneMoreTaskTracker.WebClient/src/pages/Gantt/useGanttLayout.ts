@@ -51,17 +51,8 @@ export interface UseGanttLayoutArgs {
 
 function featureHasAnyPlannedDate(feature: FeatureSummary): boolean {
   if (feature.plannedStart != null || feature.plannedEnd != null) return true;
-  return (
-    feature.csApprovingPlannedStart != null ||
-    feature.csApprovingPlannedEnd != null ||
-    feature.developmentPlannedStart != null ||
-    feature.developmentPlannedEnd != null ||
-    feature.testingPlannedStart != null ||
-    feature.testingPlannedEnd != null ||
-    feature.ethalonTestingPlannedStart != null ||
-    feature.ethalonTestingPlannedEnd != null ||
-    feature.liveReleasePlannedStart != null ||
-    feature.liveReleasePlannedEnd != null
+  return (feature.tracks ?? []).some((t) =>
+    t.stages.some((s) => s.plannedStart != null || s.plannedEnd != null),
   );
 }
 

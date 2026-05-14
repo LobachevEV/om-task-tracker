@@ -15,21 +15,6 @@ public record FeatureSummaryResponse(
     int TaskCount,
     IReadOnlyList<int> TaskIds,
     int Version,
-    string? CsApprovingPlannedStart,
-    string? CsApprovingPlannedEnd,
-    int? CsApprovingOwnerUserId,
-    string? DevelopmentPlannedStart,
-    string? DevelopmentPlannedEnd,
-    int? DevelopmentOwnerUserId,
-    string? TestingPlannedStart,
-    string? TestingPlannedEnd,
-    int? TestingOwnerUserId,
-    string? EthalonTestingPlannedStart,
-    string? EthalonTestingPlannedEnd,
-    int? EthalonTestingOwnerUserId,
-    string? LiveReleasePlannedStart,
-    string? LiveReleasePlannedEnd,
-    int? LiveReleaseOwnerUserId,
     IReadOnlyList<FeatureTrackSummaryResponse>? Tracks)
 {
     internal static FeatureSummaryResponse From<T>(
@@ -52,21 +37,6 @@ public record FeatureSummaryResponse(
             taskIds.Count,
             taskIds,
             f.Version,
-            string.IsNullOrEmpty(f.CsApprovingPlannedStart) ? null : f.CsApprovingPlannedStart,
-            string.IsNullOrEmpty(f.CsApprovingPlannedEnd) ? null : f.CsApprovingPlannedEnd,
-            f.CsApprovingOwnerUserId > 0 ? f.CsApprovingOwnerUserId : null,
-            string.IsNullOrEmpty(f.DevelopmentPlannedStart) ? null : f.DevelopmentPlannedStart,
-            string.IsNullOrEmpty(f.DevelopmentPlannedEnd) ? null : f.DevelopmentPlannedEnd,
-            f.DevelopmentOwnerUserId > 0 ? f.DevelopmentOwnerUserId : null,
-            string.IsNullOrEmpty(f.TestingPlannedStart) ? null : f.TestingPlannedStart,
-            string.IsNullOrEmpty(f.TestingPlannedEnd) ? null : f.TestingPlannedEnd,
-            f.TestingOwnerUserId > 0 ? f.TestingOwnerUserId : null,
-            string.IsNullOrEmpty(f.EthalonTestingPlannedStart) ? null : f.EthalonTestingPlannedStart,
-            string.IsNullOrEmpty(f.EthalonTestingPlannedEnd) ? null : f.EthalonTestingPlannedEnd,
-            f.EthalonTestingOwnerUserId > 0 ? f.EthalonTestingOwnerUserId : null,
-            string.IsNullOrEmpty(f.LiveReleasePlannedStart) ? null : f.LiveReleasePlannedStart,
-            string.IsNullOrEmpty(f.LiveReleasePlannedEnd) ? null : f.LiveReleasePlannedEnd,
-            f.LiveReleaseOwnerUserId > 0 ? f.LiveReleaseOwnerUserId : null,
             trackList);
     }
 }

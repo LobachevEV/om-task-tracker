@@ -8,9 +8,8 @@ import type {
 import type { TeamRosterMember } from '../../../../common/api/teamApi';
 import { daysBetween, formatShortDate, type BarGeometryPx, type DateWindow } from '../../ganttMath';
 import type { StageBarGeometry } from '../../ganttStageGeometry';
-import { featureIsOverdue, getStageWindow, plannedStageCount } from '../../ganttStageGeometry';
+import { computeLifecycleStageWindow, featureIsOverdue, plannedStageCount } from '../../ganttStageGeometry';
 import { GanttSegmentedBar } from '../GanttSegmentedBar';
-import { GanttStageSubRow } from '../GanttStageSubRow';
 import { GanttFeatureTrackBand } from '../GanttFeatureTrackBand';
 import type { GanttLaneVariant } from '../../useGanttLayout';
 import {
@@ -32,31 +31,20 @@ export interface GanttFeatureRowProps {
   lead: MiniTeamMember;
   /**
    * Why this lane renders the way it does. `planned` is the normal case;
-   * `noPlan` and `outOfWindow` render a ghost lane so the manager still sees
-   * the row and can triage from the info panel.
+   * `noPlan` renders a ghost lane so the manager still sees the row and can
+   * triage from the info panel.
    */
   variant?: GanttLaneVariant;
-  /** Inline expansion of the stage sub-rows (session-scoped). */
-  expanded: boolean;
-  /**
-   * Toggle handler. Receives the feature id so the page can pass a single
-   * stable callback for every row (enabling React.memo on the row).
-   */
-  onToggleExpand: (featureId: number) => void;
-  /** Click handler for per-stage cells (segmented bar + sub-row numeral). */
-  onOpenStage: (featureId: number, stage: FeatureState) => void;
-  /** Resolve a performer id against the cached roster for sub-row owner rendering. */
-  resolvePerformer: (userId: number | null | undefined) => MiniTeamMember | undefined;
   /**
    * True when the signed-in user may edit this feature (manager + owner).
    * Gates the inline editors; non-managers see the existing read-only row.
    */
   canEdit?: boolean;
-  /** Wired by GanttPage — the five per-field PATCH callers. */
+  /** Wired by GanttPage — the per-field PATCH callers. */
   mutations?: FeatureMutationCallbacks;
   /** Wired by GanttPage — track-stage PATCH callers. */
   trackMutations?: TrackMutationCallbacks;
-  /** Roster used by the stage-owner picker inside expanded sub-rows. */
+  /** Roster used by the lead picker. */
   roster?: readonly TeamRosterMember[];
   /** Date window used for track bar geometry. */
   loadedRange?: DateWindow;
@@ -70,7 +58,7 @@ function computeFeatureDtr(
   doneLabel: string,
 ): string {
   if (feature.state === 'LiveRelease') return doneLabel;
-  const active = getStageWindow(feature, feature.state);
+  const active = computeLifecycleStageWindow(feature, feature.state as FeatureState);
   const plannedEnd = active.plannedEnd ?? feature.plannedEnd;
   if (plannedEnd == null) return '—';
   const delta = daysBetween(today, plannedEnd);
@@ -85,10 +73,6 @@ function GanttFeatureRowInner({
   today,
   lead,
   variant = 'planned',
-  expanded,
-  onToggleExpand,
-  onOpenStage,
-  resolvePerformer,
   canEdit = false,
   mutations,
   trackMutations,
@@ -115,27 +99,14 @@ function GanttFeatureRowInner({
     variant,
   });
 
-  const handleToggleExpand = useCallback(
-    () => onToggleExpand(feature.id),
-    [onToggleExpand, feature.id],
-  );
-  const handleOpenStage = useCallback(
-    (stage: FeatureState) => onOpenStage(feature.id, stage),
-    [onOpenStage, feature.id],
-  );
-
   const handleTitleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      handleToggleExpand();
     }
   };
 
   const inlineEnabled = canEdit && mutations != null;
 
-  // Per-row aria-live region for inline-edit outcome announcements. Stored
-  // here (not at page level) so each row reads the same pattern and the
-  // screen reader hears feature-scoped context.
   const [announcement, setAnnouncement] = useState<string>('');
   const handleAnnounce = useCallback((message: string) => setAnnouncement(message), []);
   const buildTitleAnnouncement = useCallback(
@@ -172,20 +143,6 @@ function GanttFeatureRowInner({
       >
         <Gutter density="feature" columns={[]} className="gantt-row__gutter" data-testid="feature-info-panel">
           <div className="gantt-row__title-line">
-            <button
-              type="button"
-              className="gantt-row__caret"
-              data-testid="expand-caret"
-              aria-expanded={expanded}
-              aria-label={
-                expanded
-                  ? t('row.collapseAria', { title: feature.title })
-                  : t('row.expandAria', { title: feature.title })
-              }
-              onClick={handleToggleExpand}
-            >
-              {expanded ? '▾' : '▸'}
-            </button>
             {inlineEnabled && mutations != null ? (
               <InlineTextCell
                 value={feature.title}
@@ -220,7 +177,6 @@ function GanttFeatureRowInner({
                 type="button"
                 className="gantt-row__title"
                 aria-label={ariaLabel}
-                onClick={handleToggleExpand}
                 onKeyDown={handleTitleKeyDown}
               >
                 <span>{feature.title}</span>
@@ -285,8 +241,6 @@ function GanttFeatureRowInner({
             feature={feature}
             stageBars={stageBars}
             today={today}
-            resolvePerformer={resolvePerformer}
-            onOpenStage={handleOpenStage}
             laneVariant={variant}
             summaryBar={bar}
           />
@@ -303,31 +257,19 @@ function GanttFeatureRowInner({
               today={today}
               loadedRange={loadedRange}
               dayPx={dayPx}
-              resolveOwner={resolvePerformer}
+              resolveOwner={(userId) => {
+                const member = (feature.tracks ?? [])
+                  .flatMap((t) => [t.trackOwner, ...t.stages.map((s) => s.stageOwner)])
+                  .find((m) => m?.userId === userId);
+                return member ?? undefined;
+              }}
               canEdit={inlineEnabled}
               mutations={trackMutations}
               roster={roster}
               onAnnounce={handleAnnounce}
             />
           ))
-        : expanded
-          ? stageBars.map((seg, index) => (
-              <GanttStageSubRow
-                key={seg.stage}
-                feature={feature}
-                seg={seg}
-                today={today}
-                resolvePerformer={resolvePerformer}
-                removedPerformerName={null}
-                index={index}
-                onOpenStage={handleOpenStage}
-                canEdit={inlineEnabled}
-                mutations={mutations}
-                roster={roster}
-                onAnnounce={handleAnnounce}
-              />
-            ))
-          : null}
+        : null}
       {inlineEnabled ? <InlineLiveRegion message={announcement} /> : null}
     </>
   );

@@ -47,15 +47,11 @@ export interface GanttPageState {
   scope: FeatureScope;
   stateFilter: FeatureState | 'all';
   revealedFeatureId: number | null;
-  /** Session-scoped: ids of features whose stage timeline is expanded inline. */
-  expandedFeatureIds: ReadonlySet<number>;
   today: string;
   setZoom: (z: ZoomLevel) => void;
   setScope: (s: FeatureScope) => void;
   setStateFilter: (s: FeatureState | 'all') => void;
   revealTasks: (id: number | null) => void;
-  /** Flip the expansion state for one feature id. */
-  toggleFeatureExpanded: (id: number) => void;
 }
 
 export function useGanttPageState(role: UserRole): GanttPageState {
@@ -65,9 +61,6 @@ export function useGanttPageState(role: UserRole): GanttPageState {
   );
   const [stateFilter, setStateFilter] = useState<FeatureState | 'all'>('all');
   const [revealedFeatureId, setRevealedFeatureId] = useState<number | null>(null);
-  const [expandedFeatureIds, setExpandedFeatureIds] = useState<ReadonlySet<number>>(
-    () => new Set<number>(),
-  );
 
   // `today` is snapshotted on mount; reload to advance. useState with a
   // lazy initializer gives us a stable, render-safe value (refs can't be
@@ -80,14 +73,6 @@ export function useGanttPageState(role: UserRole): GanttPageState {
   }, []);
 
   const revealTasks = useCallback((id: number | null) => setRevealedFeatureId(id), []);
-  const toggleFeatureExpanded = useCallback((id: number) => {
-    setExpandedFeatureIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
 
   return useMemo(
     () => ({
@@ -95,24 +80,20 @@ export function useGanttPageState(role: UserRole): GanttPageState {
       scope,
       stateFilter,
       revealedFeatureId,
-      expandedFeatureIds,
       today,
       setZoom,
       setScope,
       setStateFilter,
       revealTasks,
-      toggleFeatureExpanded,
     }),
     [
       zoom,
       scope,
       stateFilter,
       revealedFeatureId,
-      expandedFeatureIds,
       today,
       setZoom,
       revealTasks,
-      toggleFeatureExpanded,
     ],
   );
 }

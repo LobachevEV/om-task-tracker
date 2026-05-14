@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '../../../src/common/i18n/config';
 import { GanttPageInternal } from '../../../src/pages/Gantt/GanttPage';
@@ -125,35 +125,6 @@ describe('GanttPageInternal', () => {
     const monthBtn = screen.getByRole('button', { name: 'Month' });
     fireEvent.click(monthBtn);
     expect(main.style.getPropertyValue('--day-px')).toBe('24px');
-  });
-
-  it('clicking the expand caret reveals five stage sub-rows for that feature', () => {
-    const { container } = renderHarness({ role: 'Manager' });
-    const firstCaret = container.querySelector<HTMLButtonElement>(
-      '[data-testid="expand-caret"]',
-    );
-    expect(firstCaret).not.toBeNull();
-    expect(firstCaret!.getAttribute('aria-expanded')).toBe('false');
-    act(() => {
-      firstCaret!.click();
-    });
-    expect(firstCaret!.getAttribute('aria-expanded')).toBe('true');
-    const subRows = container.querySelectorAll('[data-testid^="stage-subrow-"]');
-    expect(subRows).toHaveLength(5);
-  });
-
-  it('clicking a row title expands the row for non-manager viewers', () => {
-    const { container } = renderHarness({ role: 'Qa' });
-    const titleBtn = container.querySelector<HTMLButtonElement>('.gantt-row__title');
-    expect(titleBtn).not.toBeNull();
-    const caret = container.querySelector<HTMLButtonElement>('[data-testid="expand-caret"]');
-    expect(caret!.getAttribute('aria-expanded')).toBe('false');
-    act(() => {
-      titleBtn!.click();
-    });
-    expect(caret!.getAttribute('aria-expanded')).toBe('true');
-    const subRows = container.querySelectorAll('[data-testid^="stage-subrow-"]');
-    expect(subRows).toHaveLength(5);
   });
 
   it('renders an error state with a retry button when `error` is set', () => {

@@ -3,18 +3,13 @@ import { GanttSegmentedBar } from '../../../../../src/pages/Gantt/components/Gan
 import {
   FIXTURE_TODAY,
   MINI_TEAM_FEATURE,
-  MINI_TEAM_MEMBERS,
   OVERDUE_FEATURE,
   SHIPPED_FEATURE,
   UNSCHEDULED_FEATURE,
 } from '../../../../../src/pages/Gantt/__fixtures__/FeatureFixtures';
 import { windowForZoom } from '../../../../../src/pages/Gantt/ganttMath';
 import { computeStageBars } from '../../../../../src/pages/Gantt/ganttStageGeometry';
-import type { MiniTeamMember } from '../../../../../src/common/types/feature';
 
-const members = Object.values(MINI_TEAM_MEMBERS) as MiniTeamMember[];
-const resolve = (id: number | null | undefined): MiniTeamMember | undefined =>
-  id == null ? undefined : members.find((m) => m.userId === id);
 const win = windowForZoom(FIXTURE_TODAY, 'month');
 const DAY_PX = 32;
 
@@ -49,8 +44,6 @@ export const FullyPlannedActiveTesting: Story = {
     feature: MINI_TEAM_FEATURE,
     stageBars: computeStageBars(win, MINI_TEAM_FEATURE, FIXTURE_TODAY, DAY_PX),
     today: FIXTURE_TODAY,
-    resolvePerformer: resolve,
-    onOpenStage: () => undefined,
   },
 };
 
@@ -59,8 +52,6 @@ export const OverdueDevelopment: Story = {
     feature: OVERDUE_FEATURE,
     stageBars: computeStageBars(win, OVERDUE_FEATURE, FIXTURE_TODAY, DAY_PX),
     today: FIXTURE_TODAY,
-    resolvePerformer: resolve,
-    onOpenStage: () => undefined,
   },
 };
 
@@ -69,8 +60,6 @@ export const ShippedLiveRelease: Story = {
     feature: SHIPPED_FEATURE,
     stageBars: computeStageBars(win, SHIPPED_FEATURE, FIXTURE_TODAY, DAY_PX),
     today: FIXTURE_TODAY,
-    resolvePerformer: resolve,
-    onOpenStage: () => undefined,
   },
 };
 
@@ -79,7 +68,5 @@ export const UnplannedGhost: Story = {
     feature: UNSCHEDULED_FEATURE,
     stageBars: computeStageBars(win, UNSCHEDULED_FEATURE, FIXTURE_TODAY, DAY_PX),
     today: FIXTURE_TODAY,
-    resolvePerformer: resolve,
-    onOpenStage: () => undefined,
   },
 };

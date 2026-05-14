@@ -114,10 +114,9 @@ export interface GanttPageInternalProps {
 
 interface UnscheduledSectionProps {
   features: FeatureSummary[];
-  onOpen: (id: number) => void;
 }
 
-function UnscheduledSection({ features, onOpen }: UnscheduledSectionProps) {
+function UnscheduledSection({ features }: UnscheduledSectionProps) {
   const { t } = useTranslation('gantt');
   if (features.length === 0) return null;
   return (
@@ -126,14 +125,10 @@ function UnscheduledSection({ features, onOpen }: UnscheduledSectionProps) {
       <ul className="gantt-page__unscheduled-list">
         {features.map((feature) => (
           <li key={feature.id}>
-            <button
-              type="button"
-              className="gantt-page__unscheduled-item"
-              onClick={() => onOpen(feature.id)}
-            >
+            <div className="gantt-page__unscheduled-item">
               <span>{feature.title}</span>
               <span className="gantt-page__unscheduled-state">{t(`state.${feature.state}`)}</span>
-            </button>
+            </div>
           </li>
         ))}
       </ul>
@@ -208,24 +203,9 @@ export function GanttPageInternal({
     [rosterById],
   );
 
-  const resolvePerformer = useCallback(
-    (id: number | null | undefined): MiniTeamMember | undefined =>
-      id == null ? undefined : rosterById.get(id),
-    [rosterById],
-  );
-
-  const handleOpenStage = useCallback(
-    (featureId: number) => state.toggleFeatureExpanded(featureId),
-    [state],
-  );
-
-  const handleCreated = useCallback(
-    (feature: FeatureSummary) => {
-      state.toggleFeatureExpanded(feature.id);
-      onRetry();
-    },
-    [state, onRetry],
-  );
+  const handleCreated = useCallback(() => {
+    onRetry();
+  }, [onRetry]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -386,7 +366,6 @@ export function GanttPageInternal({
                 {isManager ? <AddFeatureRow onCreated={handleCreated} /> : null}
                 {layout.lanes.map((lane: GanttLane) => {
                   const lead = resolveMember(lane.feature.leadUserId);
-                  const expanded = state.expandedFeatureIds.has(lane.feature.id);
                   return (
                     <GanttFeatureRow
                       key={lane.feature.id}
@@ -396,10 +375,6 @@ export function GanttPageInternal({
                       today={state.today}
                       lead={lead}
                       variant={lane.variant}
-                      expanded={expanded}
-                      onToggleExpand={state.toggleFeatureExpanded}
-                      onOpenStage={handleOpenStage}
-                      resolvePerformer={resolvePerformer}
                       canEdit={isManager}
                       mutations={isManager ? mutations : undefined}
                       trackMutations={isManager ? trackMutations : undefined}
@@ -426,7 +401,6 @@ export function GanttPageInternal({
 
           <UnscheduledSection
             features={layout.unscheduled}
-            onOpen={state.toggleFeatureExpanded}
           />
         </section>
       )}

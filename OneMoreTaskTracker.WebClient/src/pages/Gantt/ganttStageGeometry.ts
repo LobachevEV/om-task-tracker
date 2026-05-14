@@ -1,6 +1,8 @@
 import type { FeatureState, FeatureSummary } from '../../common/types/feature';
 import { FEATURE_STATES } from '../../common/types/feature';
+import type { FeatureTrackStageKey } from '../../common/types/featureTrack';
 import { FEATURE_STATE_ORDER } from './stateConfig';
+import { selectStagesForKind } from './selectStagesForKind';
 import {
   addDays,
   barGeometryPx,
@@ -31,55 +33,55 @@ export interface StageBarGeometry {
 /** Fallback width for an unplanned (ghost) segment. */
 const GHOST_DEFAULT_SPAN_DAYS = 3;
 
-interface StageWindow {
+export interface StageWindow {
   stage: FeatureState;
   plannedStart: string | null;
   plannedEnd: string | null;
-  ownerUserId: number | null;
+  ownerUserId: null;
 }
 
 /**
- * Extract per-stage flat fields from FeatureSummary into a uniform shape.
- * Replaces the old `feature.stagePlans.find(p => p.stage === stage)` pattern.
+ * Track-stage keys that contribute to each lifecycle FeatureState.
+ * Both Frontend and Backend keys are listed; the rollup takes whichever
+ * tracks the feature actually has.
  */
-function getStageWindow(feature: FeatureSummary, stage: FeatureState): StageWindow {
-  switch (stage) {
-    case 'CsApproving':
-      return {
-        stage,
-        plannedStart: feature.csApprovingPlannedStart,
-        plannedEnd: feature.csApprovingPlannedEnd,
-        ownerUserId: feature.csApprovingOwnerUserId,
-      };
-    case 'Development':
-      return {
-        stage,
-        plannedStart: feature.developmentPlannedStart,
-        plannedEnd: feature.developmentPlannedEnd,
-        ownerUserId: feature.developmentOwnerUserId,
-      };
-    case 'Testing':
-      return {
-        stage,
-        plannedStart: feature.testingPlannedStart,
-        plannedEnd: feature.testingPlannedEnd,
-        ownerUserId: feature.testingOwnerUserId,
-      };
-    case 'EthalonTesting':
-      return {
-        stage,
-        plannedStart: feature.ethalonTestingPlannedStart,
-        plannedEnd: feature.ethalonTestingPlannedEnd,
-        ownerUserId: feature.ethalonTestingOwnerUserId,
-      };
-    case 'LiveRelease':
-      return {
-        stage,
-        plannedStart: feature.liveReleasePlannedStart,
-        plannedEnd: feature.liveReleasePlannedEnd,
-        ownerUserId: feature.liveReleaseOwnerUserId,
-      };
+const LIFECYCLE_TO_TRACK_STAGE_KEYS: Record<FeatureState, FeatureTrackStageKey[]> = {
+  CsApproving:    ['SrApproving', 'CsApproving'],
+  Development:    ['Development'],
+  Testing:        ['StandTesting'],
+  EthalonTesting: ['EthalonTesting'],
+  LiveRelease:    ['ReleaseToLive'],
+};
+
+/**
+ * Compute the planned window for a lifecycle stage by rolling up all matching
+ * track stages across all tracks on the feature.
+ * - plannedStart = min of all non-null starts
+ * - plannedEnd   = max of all non-null ends
+ * - ownerUserId  = null (no owner badge on Gantt rollup bar)
+ */
+export function computeLifecycleStageWindow(
+  feature: FeatureSummary,
+  stage: FeatureState,
+): StageWindow {
+  const trackStageKeys = LIFECYCLE_TO_TRACK_STAGE_KEYS[stage];
+  const tracks = feature.tracks ?? [];
+
+  const starts: string[] = [];
+  const ends: string[] = [];
+
+  for (const track of tracks) {
+    for (const ts of selectStagesForKind(track.stages, track.kind)) {
+      if (!trackStageKeys.includes(ts.stageKey)) continue;
+      if (ts.plannedStart != null) starts.push(ts.plannedStart);
+      if (ts.plannedEnd != null) ends.push(ts.plannedEnd);
+    }
   }
+
+  const plannedStart = starts.length > 0 ? starts.reduce((a, b) => (a < b ? a : b)) : null;
+  const plannedEnd = ends.length > 0 ? ends.reduce((a, b) => (a > b ? a : b)) : null;
+
+  return { stage, plannedStart, plannedEnd, ownerUserId: null };
 }
 
 function stageIsOverdue(
@@ -114,10 +116,9 @@ function statusOf(opts: {
 }
 
 /**
- * Compute a StageBarGeometry per stage in canonical order, reading flat
- * per-stage fields from FeatureSummary. Each entry carries either a real
- * `bar` (via `barGeometryPx`) OR a `ghost` placeholder anchored in the
- * loaded range.
+ * Compute a StageBarGeometry per lifecycle stage in canonical order, rolling
+ * up planned dates from track stages. Each entry carries either a real `bar`
+ * or a `ghost` placeholder anchored in the loaded range.
  *
  * Pure function — no side effects, no I/O.
  */
@@ -130,7 +131,7 @@ export function computeStageBars(
   let ghostAnchor: string = loadedRange.start;
   const out: StageBarGeometry[] = [];
   for (const stage of FEATURE_STATES) {
-    const plan = getStageWindow(feature, stage);
+    const plan = computeLifecycleStageWindow(feature, stage);
     const hasAnyDate = plan.plannedStart != null || plan.plannedEnd != null;
     const bar = barGeometryPx(
       loadedRange,
@@ -181,12 +182,12 @@ export function activeStageIndex(feature: FeatureSummary): number {
 }
 
 /**
- * Count of stages that have at least one date set. Used by the info
- * panel to render the `n/5 planned` counter.
+ * Count of lifecycle stages that have at least one date set (from track rollup).
+ * Used by the info panel to render the `n/5 planned` counter.
  */
 export function plannedStageCount(feature: FeatureSummary): number {
   return FEATURE_STATES.filter((stage) => {
-    const plan = getStageWindow(feature, stage);
+    const plan = computeLifecycleStageWindow(feature, stage);
     return plan.plannedStart != null || plan.plannedEnd != null;
   }).length;
 }
@@ -197,10 +198,7 @@ export function plannedStageCount(feature: FeatureSummary): number {
  */
 export function featureIsOverdue(feature: FeatureSummary, today: string): boolean {
   if (feature.state === 'LiveRelease') return false;
-  const active = getStageWindow(feature, feature.state);
+  const active = computeLifecycleStageWindow(feature, feature.state);
   if (active.plannedEnd == null) return false;
   return daysBetween(active.plannedEnd, today) > 0;
 }
-
-export { getStageWindow };
-export type { StageWindow };

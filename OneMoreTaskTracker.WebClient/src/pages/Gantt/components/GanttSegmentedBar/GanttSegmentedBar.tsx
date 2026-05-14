@@ -1,9 +1,9 @@
 import { useMemo, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { FeatureState, FeatureSummary, MiniTeamMember } from '../../../../common/types/feature';
+import type { FeatureSummary } from '../../../../common/types/feature';
 import { FEATURE_STATE_CSS } from '../../stateConfig';
 import type { BarGeometryPx } from '../../ganttMath';
-import { getStageWindow } from '../../ganttStageGeometry';
+import { computeLifecycleStageWindow } from '../../ganttStageGeometry';
 import type { StageBarGeometry } from '../../ganttStageGeometry';
 import './GanttSegmentedBar.css';
 
@@ -11,10 +11,6 @@ export interface GanttSegmentedBarProps {
   feature: FeatureSummary;
   stageBars: StageBarGeometry[];
   today: string;
-  /** Resolve performer id → mini member (or undefined if stale). */
-  resolvePerformer: (userId: number | null | undefined) => MiniTeamMember | undefined;
-  /** Click handler — opens the drawer at the given stage. */
-  onOpenStage: (stage: FeatureState) => void;
   /**
    * Lane-level context: `noPlan` renders a ghost lane with the 'Not planned
    * yet' label instead of dim segments. Defaults to `planned` when the lane
@@ -30,26 +26,22 @@ interface SegmentLabelParams {
   stageName: string;
   plannedStart: string | null;
   plannedEnd: string | null;
-  ownerName: string | null;
   statusPhrase: string;
 }
 
 function buildSegmentAriaLabel(p: SegmentLabelParams): string {
-  const { index, stageName, plannedStart, plannedEnd, ownerName, statusPhrase } = p;
+  const { index, stageName, plannedStart, plannedEnd, statusPhrase } = p;
   const dateFragment =
     plannedStart != null && plannedEnd != null
       ? `Planned ${plannedStart} to ${plannedEnd}.`
       : 'Not planned.';
-  const ownerFragment = ownerName != null ? `Owner ${ownerName}.` : 'Owner Unassigned.';
-  return `Stage ${index + 1} of 5: ${stageName}. ${dateFragment} ${ownerFragment} ${statusPhrase}.`;
+  return `Stage ${index + 1} of 5: ${stageName}. ${dateFragment} ${statusPhrase}.`;
 }
 
 export function GanttSegmentedBar({
   feature,
   stageBars,
   today,
-  resolvePerformer,
-  onOpenStage,
   laneVariant = 'planned',
   summaryBar,
 }: GanttSegmentedBarProps) {
@@ -92,8 +84,7 @@ export function GanttSegmentedBar({
         </span>
       ) : null}
       {stageBars.map((seg, index) => {
-        const plan = getStageWindow(feature, seg.stage);
-        const performer = resolvePerformer(plan.ownerUserId);
+        const plan = computeLifecycleStageWindow(feature, seg.stage);
         const geometry = seg.bar ?? seg.ghost;
         const cssVar = FEATURE_STATE_CSS[seg.stage];
         const stageName = t(`state.${seg.stage}`);
@@ -114,9 +105,9 @@ export function GanttSegmentedBar({
         } as CSSProperties;
 
         return (
-          <button
+          <div
             key={seg.stage}
-            type="button"
+            role="img"
             className="gantt-seg-bar__segment"
             style={style}
             data-testid={`segment-${seg.stage}`}
@@ -131,11 +122,9 @@ export function GanttSegmentedBar({
               stageName,
               plannedStart: plan.plannedStart,
               plannedEnd: plan.plannedEnd,
-              ownerName: performer?.displayName ?? null,
               statusPhrase,
             })}
             title={stageName}
-            onClick={() => onOpenStage(seg.stage)}
           >
             {seg.isCurrent ? (
               <span className="gantt-seg-bar__active-dot" aria-hidden="true" />
@@ -145,10 +134,10 @@ export function GanttSegmentedBar({
                 {'✓'}
               </span>
             ) : null}
-          </button>
+          </div>
         );
       })}
-      {/* reduce unused-var lint warning on `today` while keeping the prop for future DTR work */}
+      {/* today forwarded for potential future DTR annotation */}
       <span hidden data-today={today} />
     </div>
   );

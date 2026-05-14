@@ -221,8 +221,6 @@
     "unassigned": "Не назначен",
     "clearPerformer": "Очистить ответственного",
     "performerEmpty": "Никто из команды не совпадает с «{{query}}».",
-    "performerRemoved": "{{name}} · удалён",
-    "performerRemovedUnknown": "удалён",
     "reassign": "Переназначить",
     "rangeSummary_one": "{{start}} — {{end}} · {{count}} день",
     "rangeSummary_few": "{{start}} — {{end}} · {{count}} дня",

@@ -58,18 +58,6 @@ public sealed class PlanControllerStagePlansTests(TasksControllerWebApplicationF
             ManagerUserId = managerUserId,
             CreatedAt = DateTime.UtcNow.ToString("O"),
             UpdatedAt = DateTime.UtcNow.ToString("O"),
-            CsApprovingPlannedStart    = "2026-05-01",
-            CsApprovingPlannedEnd      = "2026-05-10",
-            CsApprovingOwnerUserId     = 4,
-            DevelopmentPlannedStart    = "2026-05-11",
-            DevelopmentPlannedEnd      = "2026-06-01",
-            DevelopmentOwnerUserId     = 2,
-            EthalonTestingPlannedStart = "2026-06-05",
-            EthalonTestingPlannedEnd   = "2026-06-10",
-            EthalonTestingOwnerUserId  = 6,
-            LiveReleasePlannedStart    = "2026-06-12",
-            LiveReleasePlannedEnd      = "2026-06-15",
-            LiveReleaseOwnerUserId     = 1,
         };
 
     [Fact]

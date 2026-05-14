@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { fn } from 'storybook/test';
 import { GanttFeatureRow } from '../../../../../src/pages/Gantt/components/GanttFeatureRow/GanttFeatureRow';
 import {
   FIXTURE_TODAY,
@@ -11,12 +10,17 @@ import {
 } from '../../../../../src/pages/Gantt/__fixtures__/FeatureFixtures';
 import { windowForZoom } from '../../../../../src/pages/Gantt/ganttMath';
 import { computeStageBars } from '../../../../../src/pages/Gantt/ganttStageGeometry';
-import type { MiniTeamMember } from '../../../../../src/common/types/feature';
+import type { TeamRosterMember } from '../../../../../src/common/api/teamApi';
 
 const { qa, fe, be, mg } = MINI_TEAM_MEMBERS;
-const roster = [fe, be, qa, mg];
-const resolve = (id: number | null | undefined): MiniTeamMember | undefined =>
-  id == null ? undefined : roster.find((m) => m.userId === id);
+const STUB_STATUS = { active: 0, lastActive: null, mix: { inDev: 0, mrToRelease: 0, inTest: 0, mrToMaster: 0, completed: 0 } };
+const roster: TeamRosterMember[] = [fe, be, qa, mg].map((m) => ({
+  ...m,
+  email: m.email ?? '',
+  managerId: null,
+  isSelf: false,
+  status: STUB_STATUS,
+}));
 
 const monthWindow = windowForZoom(FIXTURE_TODAY, 'month');
 const weekWindow = windowForZoom(FIXTURE_TODAY, 'week');
@@ -28,10 +32,8 @@ const meta: Meta<typeof GanttFeatureRow> = {
   parameters: { layout: 'padded' },
   tags: ['autodocs'],
   args: {
-    onOpenStage: fn(),
-    onToggleExpand: fn(),
     today: FIXTURE_TODAY,
-    resolvePerformer: resolve,
+    roster,
   },
   decorators: [
     (Story) => (
@@ -56,7 +58,6 @@ export const SoloOwner: Story = {
     feature: SOLO_FEATURE,
     stageBars: computeStageBars(monthWindow, SOLO_FEATURE, FIXTURE_TODAY, DAY_PX),
     lead: fe,
-    expanded: false,
   },
 };
 
@@ -65,16 +66,6 @@ export const MiniTeam: Story = {
     feature: MINI_TEAM_FEATURE,
     stageBars: computeStageBars(monthWindow, MINI_TEAM_FEATURE, FIXTURE_TODAY, DAY_PX),
     lead: be,
-    expanded: false,
-  },
-};
-
-export const Expanded: Story = {
-  args: {
-    feature: MINI_TEAM_FEATURE,
-    stageBars: computeStageBars(monthWindow, MINI_TEAM_FEATURE, FIXTURE_TODAY, DAY_PX),
-    lead: be,
-    expanded: true,
   },
 };
 
@@ -83,7 +74,6 @@ export const Overdue: Story = {
     feature: OVERDUE_FEATURE,
     stageBars: computeStageBars(monthWindow, OVERDUE_FEATURE, FIXTURE_TODAY, DAY_PX),
     lead: be,
-    expanded: false,
   },
 };
 
@@ -92,7 +82,6 @@ export const Unscheduled: Story = {
     feature: UNSCHEDULED_FEATURE,
     stageBars: computeStageBars(monthWindow, UNSCHEDULED_FEATURE, FIXTURE_TODAY, DAY_PX),
     lead: fe,
-    expanded: false,
   },
 };
 
@@ -116,6 +105,5 @@ export const ClampedBoth: Story = {
       DAY_PX,
     ),
     lead: be,
-    expanded: false,
   },
 };
