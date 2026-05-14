@@ -19,6 +19,10 @@ export const EXCLUDE_ATTRIBUTES: readonly string[] = [
   'autocomplete',
   'pressed',
   'level',
+  'hasPopup',
+  'live',
+  'atomic',
+  'relevant',
 ];
 
 function modelTag(): string {
