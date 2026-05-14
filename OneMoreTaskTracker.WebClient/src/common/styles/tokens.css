@@ -19,22 +19,37 @@
   --accent-ink:    oklch(0.18 0.02 85);
   --accent-dim:    oklch(0.75 0.14 85 / 0.15);
 
-  /* Spacing scale — owner: /layout. Numeric step name = 4px-multiple
-   * (--space-2 = 8px). Use these tokens; do not author new step values. */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-6: 24px;
-  --space-8: 32px;
+  /* Spacing scale — 8pt-linear + 4pt-half rule.
+   * Full steps (--space-1, -2, -3 …) are multiples of 8px.
+   * The single half-step (--space-0_5) is 4px for fine-grained insets.
+   * Do not introduce new step values; use the nearest token instead. */
+  --space-0:   0;
+  --space-0_5: 4px;
+  --space-1:   8px;
+  --space-2:   16px;
+  --space-3:   24px;
+  --space-4:   32px;
+  --space-5:   40px;
+  --space-6:   48px;
+  --space-7:   56px;
+  --space-8:   64px;
 
   /* Row densities — owner: /gan-refactor row-grid-primitive.
    * Single source of truth for vertical rhythm across the gantt and similar
    * row-based surfaces. Each component picks one. */
-  --row-h-compact: 28px;
-  --row-h-default: 36px;
+  --row-h-compact: 32px;
+  --row-h-default: 40px;
   --row-h-feature: 56px;
   --row-h-nav:     48px;
+
+  /* Typography baseline — 4pt line-height grid.
+   * Use these tokens for line-height; do not author raw px line-height values.
+   * These are absolute pixel baselines, not unitless ratios. */
+  --lh-tight:   16px;
+  --lh-default: 20px;
+  --lh-relaxed: 24px;
+  --lh-loose:   28px;
+  --lh-display: 32px;
 
   /* Breakpoint tokens — owner: /gan-refactor row-grid-primitive.
    * @custom-media is non-standard CSS, so consumers' @media queries keep
@@ -107,10 +122,6 @@
   --radius-sm:     4px;     /* small chips, tags, badges */
   --radius-xs:     2px;     /* thin bar/segment micro-rounding (Gantt) */
   --radius-micro:  3px;     /* icon inner rounding, combobox clear buttons */
-
-  /* Half-step spacing */
-  --space-2-5: 10px;
-  --space-3-5: 14px;
 
   /* Role-tone ink — dark overlay for role-tinted avatar text */
   --ink-role-mgr: oklch(0.14 0.02 300);

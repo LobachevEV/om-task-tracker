@@ -10,9 +10,28 @@
   background-color: color-mix(in oklch, var(--elevated) 50%, transparent);
 }
 
+.gantt-track-stage-row__gutter {
+  position: sticky;
+  inset-inline-start: 0;
+  background: var(--surface);
+  border-inline-end: 1px solid var(--border);
+  z-index: var(--z-sticky);
+  max-inline-size: var(--gantt-gutter-width, 280px);
+  min-inline-size: var(--gantt-gutter-width, 280px);
+  overflow: hidden;
+  min-block-size: var(--row-h-default, 36px);
+  align-items: center;
+  display: flex;
+}
+
+.gantt-row__grid {
+  align-items: center;
+  width: 100%;
+}
+
 /* Breakpoint cascade for the [dates] column children.
- * The inner grid-template-columns are now in Gutter.css keyed by
- * [data-density="default"]. Child visibility rules stay here. */
+ * Column widths are defined on .gantt-row__grid via --gantt-row-columns
+ * in GanttPage.css. Child visibility rules stay here. */
 @media (max-width: 1439px) /* --bp-xl */ {
   .gantt-track-stage-row__dates {
     flex-direction: column;
@@ -50,7 +69,6 @@
   letter-spacing: 0.04em;
   text-align: center;
   user-select: none;
-  grid-column: code;
 }
 
 .gantt-track-stage-row__name {
@@ -59,7 +77,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  grid-column: label;
 }
 
 .gantt-track-stage-row__owner {
@@ -67,7 +84,6 @@
   align-items: center;
   gap: var(--space-1);
   min-width: 0;
-  grid-column: owner;
   overflow: hidden;
 }
 
@@ -88,7 +104,6 @@
 .gantt-track-stage-row__empty-signal {
   font-size: var(--text-sm);
   color: var(--text-dim);
-  grid-column: owner;
 }
 
 .gantt-track-stage-row__inherited {
@@ -120,8 +135,6 @@
   flex-shrink: 0;
 }
 
-/* Inline-edit wrapper for the owner picker — normalises layout for both
-   assigned and inherited states when editing is enabled. */
 .gantt-track-stage-row__owner-inline {
   display: flex;
   align-items: center;
@@ -130,8 +143,6 @@
   overflow: hidden;
 }
 
-/* Inherited state: dim everything to 0.65 opacity so the three-signal
-   affordance reads "set by track, not this stage". */
 .gantt-track-stage-row__owner-inline--inherited {
   opacity: 0.65;
   color: var(--text-muted);
@@ -153,7 +164,6 @@
   font-size: var(--text-xs);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  grid-column: dates;
   overflow: hidden;
 }
 

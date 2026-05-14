@@ -19,7 +19,7 @@ import {
   type FeatureMutationCallbacks,
   type TrackMutationCallbacks,
 } from '../InlineEditors';
-import { Gutter } from '../GanttGutter';
+import { Box } from '../../../../common/ds/spatial';
 import './GanttFeatureRow.css';
 
 export interface GanttFeatureRowProps {
@@ -141,7 +141,7 @@ function GanttFeatureRowInner({
         data-testid={`feature-row-${feature.id}`}
         data-variant={variant}
       >
-        <Gutter density="feature" columns={[]} className="gantt-row__gutter" data-testid="feature-info-panel">
+        <Box className="gantt-row__gutter" data-testid="feature-info-panel">
           <div className="gantt-row__title-line">
             {inlineEnabled && mutations != null ? (
               <InlineTextCell
@@ -234,7 +234,7 @@ function GanttFeatureRowInner({
               {t('row.plannedCounter', { planned, total: totalStages })}
             </span>
           </div>
-        </Gutter>
+        </Box>
 
         <div className="gantt-row__lane" data-variant={variant}>
           <GanttSegmentedBar
