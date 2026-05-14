@@ -5,20 +5,20 @@ export const OLLAMA_URL =
 export const ALUMNIUM_MODEL = process.env.ALUMNIUM_MODEL ?? 'ollama/qwen3:14b';
 
 export const EXCLUDE_ATTRIBUTES: readonly string[] = [
-  'class',
-  'style',
-  'data-testid',
-  'data-feature-id',
-  'data-feature-row',
-  'data-day-cell',
-  'data-date',
-  'data-variant',
-  'data-stage',
-  'data-status',
-  'data-active',
-  'data-overdue',
-  'data-kind',
-  'data-inherited',
+  'name',
+  'focusable',
+  'focused',
+  'url',
+  'invalid',
+  'readonly',
+  'required',
+  'editable',
+  'settable',
+  'multiline',
+  'orientation',
+  'autocomplete',
+  'pressed',
+  'level',
 ];
 
 function modelTag(): string {
