@@ -204,7 +204,7 @@
  * Sets --gantt-row-columns consumed by Grid columns="var(--gantt-row-columns)".
  * Values mirror Gutter.css [data-density="default"] at each breakpoint. */
 .gantt-row__grid {
-  --gantt-row-columns: 28px 120px 1fr 180px;
+  --gantt-row-columns: 120px 1fr 180px;
 }
 
 @media (max-width: 1439px) {

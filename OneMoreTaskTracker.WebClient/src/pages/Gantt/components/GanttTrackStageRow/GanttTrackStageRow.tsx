@@ -171,11 +171,6 @@ export function GanttTrackStageRow({
           buildAnnouncement={announceOwner}
           allowInherit={isInherited || hasOwnerId}
         />
-        {isInherited ? (
-          <span className="gantt-track-stage-row__inherit-suffix" aria-hidden="true">
-            {t('tracks.row.inheritedOwnerSuffix', { defaultValue: '· по треку' })}
-          </span>
-        ) : null}
       </span>
     );
   } else if (isInherited) {
@@ -240,13 +235,12 @@ export function GanttTrackStageRow({
       <Box className="gantt-track-stage-row__gutter">
         <Grid columns="var(--gantt-row-columns)" className="gantt-row__grid">
         <span
-          className="gantt-track-stage-row__code"
+          className="gantt-track-stage-row__name"
           aria-hidden="true"
           style={{ color: `var(${meta.tokenVar})` }}
         >
-          {meta.code3}
+          {stageName}
         </span>
-        <span className="gantt-track-stage-row__name">{stageName}</span>
         <span className="gantt-track-stage-row__owner" data-testid="track-stage-owner">
           {ownerNode}
         </span>
