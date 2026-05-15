@@ -19,7 +19,7 @@ import {
   type FeatureMutationCallbacks,
   type TrackMutationCallbacks,
 } from '../InlineEditors';
-import { Box } from '../../../../common/ds/spatial';
+import { GanttRow } from '../GanttRow';
 import './GanttFeatureRow.css';
 
 export interface GanttFeatureRowProps {
@@ -134,109 +134,112 @@ function GanttFeatureRowInner({
 
   return (
     <>
-      <div
+      <GanttRow
         className="gantt-row"
-        data-feature-id={feature.id}
-        data-feature-row={feature.id}
+        gutterClassName="gantt-row__gutter"
+        laneClassName="gantt-row__lane"
+        borderVariant="strong"
+        data-feature-id={String(feature.id)}
+        data-feature-row={String(feature.id)}
         data-testid={`feature-row-${feature.id}`}
         data-variant={variant}
-      >
-        <Box className="gantt-row__gutter" data-testid="feature-info-panel">
-          <div className="gantt-row__title-line">
-            {inlineEnabled && mutations != null ? (
-              <InlineTextCell
-                value={feature.title}
-                ariaLabel={t('inlineEdit.titleAria', {
-                  defaultValue: 'Feature title: {{title}}',
-                  title: feature.title,
-                })}
-                className="gantt-row__title-editor"
-                testId={`feature-title-editor-${feature.id}`}
-                validate={(next) => {
-                  const trimmed = next.trim();
-                  if (trimmed.length === 0) {
-                    return t('inlineEdit.errors.titleEmpty', {
-                      defaultValue: "Title can't be empty",
-                    });
-                  }
-                  if (trimmed.length > 200) {
-                    return t('inlineEdit.errors.titleTooLong', {
-                      defaultValue: 'Title is too long (max 200 chars)',
-                    });
-                  }
-                  return null;
-                }}
-                onSave={async (next) => {
-                  await mutations.saveTitle(feature.id, next.trim(), feature.version ?? 0);
-                }}
-                onAnnounce={handleAnnounce}
-                buildAnnouncement={buildTitleAnnouncement}
-              />
-            ) : (
-              <button
-                type="button"
-                className="gantt-row__title"
-                aria-label={ariaLabel}
-                onKeyDown={handleTitleKeyDown}
+        gutter={
+          <>
+            <div className="gantt-row__title-line" data-testid="feature-info-panel">
+              {inlineEnabled && mutations != null ? (
+                <InlineTextCell
+                  value={feature.title}
+                  ariaLabel={t('inlineEdit.titleAria', {
+                    defaultValue: 'Feature title: {{title}}',
+                    title: feature.title,
+                  })}
+                  className="gantt-row__title-editor"
+                  testId={`feature-title-editor-${feature.id}`}
+                  validate={(next) => {
+                    const trimmed = next.trim();
+                    if (trimmed.length === 0) {
+                      return t('inlineEdit.errors.titleEmpty', {
+                        defaultValue: "Title can't be empty",
+                      });
+                    }
+                    if (trimmed.length > 200) {
+                      return t('inlineEdit.errors.titleTooLong', {
+                        defaultValue: 'Title is too long (max 200 chars)',
+                      });
+                    }
+                    return null;
+                  }}
+                  onSave={async (next) => {
+                    await mutations.saveTitle(feature.id, next.trim(), feature.version ?? 0);
+                  }}
+                  onAnnounce={handleAnnounce}
+                  buildAnnouncement={buildTitleAnnouncement}
+                />
+              ) : (
+                <button
+                  type="button"
+                  className="gantt-row__title"
+                  aria-label={ariaLabel}
+                  onKeyDown={handleTitleKeyDown}
+                >
+                  <span>{feature.title}</span>
+                </button>
+              )}
+            </div>
+            <div className="gantt-row__lead">
+              <span className="gantt-row__lead-label">{t('row.lead')}:</span>
+              {inlineEnabled && mutations != null && roster ? (
+                <InlineOwnerPicker
+                  value={feature.leadUserId}
+                  displayName={lead.displayName}
+                  roster={roster}
+                  clearable={false}
+                  ariaLabel={t('inlineEdit.leadAria', {
+                    defaultValue: 'Lead for "{{title}}"',
+                    title: feature.title,
+                  })}
+                  testId={`feature-lead-editor-${feature.id}`}
+                  onSave={async (next) => {
+                    if (next == null) return;
+                    await mutations.saveLead(feature.id, next, feature.version ?? 0);
+                  }}
+                  onAnnounce={handleAnnounce}
+                  buildAnnouncement={buildLeadAnnouncement}
+                />
+              ) : (
+                <span className="gantt-row__lead-value">{lead.displayName}</span>
+              )}
+            </div>
+            <div className="gantt-row__meta">
+              {variant === 'noPlan' ? (
+                <span className="gantt-row__no-plan-label">{t('row.notPlannedYet')}</span>
+              ) : (
+                <span className="gantt-row__dates">
+                  {formatShortDate(feature.plannedStart, locale)}
+                  <span className="gantt-row__meta-sep">{' · '}</span>
+                  {formatShortDate(feature.plannedEnd, locale)}
+                </span>
+              )}
+              <span className="gantt-row__meta-sep">{'·'}</span>
+              <span
+                className="gantt-row__dtr"
+                data-testid="feature-dtr"
+                data-overdue={isOverdue ? 'true' : 'false'}
               >
-                <span>{feature.title}</span>
-              </button>
-            )}
-          </div>
-          <div className="gantt-row__lead">
-            <span className="gantt-row__lead-label">{t('row.lead')}:</span>
-            {inlineEnabled && mutations != null && roster ? (
-              <InlineOwnerPicker
-                value={feature.leadUserId}
-                displayName={lead.displayName}
-                roster={roster}
-                clearable={false}
-                ariaLabel={t('inlineEdit.leadAria', {
-                  defaultValue: 'Lead for "{{title}}"',
-                  title: feature.title,
-                })}
-                testId={`feature-lead-editor-${feature.id}`}
-                onSave={async (next) => {
-                  if (next == null) return;
-                  await mutations.saveLead(feature.id, next, feature.version ?? 0);
-                }}
-                onAnnounce={handleAnnounce}
-                buildAnnouncement={buildLeadAnnouncement}
-              />
-            ) : (
-              <span className="gantt-row__lead-value">{lead.displayName}</span>
-            )}
-          </div>
-          <div className="gantt-row__meta">
-            {variant === 'noPlan' ? (
-              <span className="gantt-row__no-plan-label">{t('row.notPlannedYet')}</span>
-            ) : (
-              <span className="gantt-row__dates">
-                {formatShortDate(feature.plannedStart, locale)}
-                <span className="gantt-row__meta-sep">{' · '}</span>
-                {formatShortDate(feature.plannedEnd, locale)}
+                {dtr}
               </span>
-            )}
-            <span className="gantt-row__meta-sep">{'·'}</span>
-            <span
-              className="gantt-row__dtr"
-              data-testid="feature-dtr"
-              data-overdue={isOverdue ? 'true' : 'false'}
-            >
-              {dtr}
-            </span>
-            <span className="gantt-row__meta-sep">{'·'}</span>
-            <span
-              className="gantt-row__planned-counter"
-              data-testid="feature-planned-counter"
-              data-partial={planned < totalStages ? 'true' : 'false'}
-            >
-              {t('row.plannedCounter', { planned, total: totalStages })}
-            </span>
-          </div>
-        </Box>
-
-        <div className="gantt-row__lane" data-variant={variant}>
+              <span className="gantt-row__meta-sep">{'·'}</span>
+              <span
+                className="gantt-row__planned-counter"
+                data-testid="feature-planned-counter"
+                data-partial={planned < totalStages ? 'true' : 'false'}
+              >
+                {t('row.plannedCounter', { planned, total: totalStages })}
+              </span>
+            </div>
+          </>
+        }
+        lane={
           <GanttSegmentedBar
             feature={feature}
             stageBars={stageBars}
@@ -244,8 +247,8 @@ function GanttFeatureRowInner({
             laneVariant={variant}
             summaryBar={bar}
           />
-        </div>
-      </div>
+        }
+      />
 
       {feature.tracks && feature.tracks.length > 0 && loadedRange != null
         ? feature.tracks.map((track) => (

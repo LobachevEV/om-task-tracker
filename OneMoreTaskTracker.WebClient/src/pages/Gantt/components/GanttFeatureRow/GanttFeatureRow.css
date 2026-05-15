@@ -1,31 +1,13 @@
-/* Single Gantt row: sticky gutter + absolutely-positioned bar. */
-
 .gantt-row {
-  display: grid;
-  grid-template-columns: var(--gantt-gutter-width, 280px) 1fr;
   align-items: stretch;
-  border-bottom: 1px solid var(--border);
 }
 
 .gantt-row__gutter {
   display: flex;
   flex-direction: column;
-  position: sticky;
-  inset-inline-start: 0;
-  background: var(--surface);
-  border-inline-end: 1px solid var(--border);
-  z-index: var(--z-sticky);
-  max-inline-size: var(--gantt-gutter-width, 280px);
-  min-inline-size: var(--gantt-gutter-width, 280px);
-  overflow: hidden;
   align-items: stretch;
   padding: 8px 12px;
   gap: 4px;
-}
-
-.gantt-row__gutter:has(.inline-cell[data-open='true']),
-.gantt-row__gutter:has(.inline-cell[data-status='editing']) {
-  z-index: var(--z-popover);
 }
 
 .gantt-row__title-line {
@@ -130,9 +112,7 @@
 }
 
 .gantt-row__lane {
-  position: relative;
   height: 100%;
-  overflow: hidden;
 }
 
 .gantt-row__no-plan-label {
