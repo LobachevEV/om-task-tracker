@@ -18,7 +18,6 @@ export interface StageDateRangeProps {
   canEdit?: boolean;
   mutations?: TrackMutationCallbacks;
   onAnnounce?: (message: string) => void;
-  cssPrefix?: string;
 }
 
 export function StageDateRange({
@@ -35,7 +34,6 @@ export function StageDateRange({
   canEdit = false,
   mutations,
   onAnnounce,
-  cssPrefix = 'gantt-track-stage-row',
 }: StageDateRangeProps) {
   const { t } = useTranslation('gantt');
 
@@ -78,7 +76,7 @@ export function StageDateRange({
 
   if (inlineEnabled) {
     return (
-      <span className={`${cssPrefix}__dates`}>
+      <span className="gantt-track-stage-row__dates">
         <InlineDateCell
           value={plannedStart ?? null}
           ariaLabel={t('inlineEdit.plannedStartAria', {
@@ -99,7 +97,7 @@ export function StageDateRange({
           onAnnounce={onAnnounce}
           buildAnnouncement={announceStart}
         />
-        <span className={`${cssPrefix}__sep ${cssPrefix}__sep--range`} aria-hidden="true">
+        <span className="gantt-track-stage-row__sep gantt-track-stage-row__sep--range" aria-hidden="true">
           {' – '}
         </span>
         <InlineDateCell
@@ -122,11 +120,11 @@ export function StageDateRange({
           onAnnounce={onAnnounce}
           buildAnnouncement={announceEnd}
         />
-        <span className={`${cssPrefix}__sep`} aria-hidden="true">
+        <span className="gantt-track-stage-row__sep" aria-hidden="true">
           {' · '}
         </span>
         <span
-          className={`${cssPrefix}__dtr`}
+          className="gantt-track-stage-row__dtr"
           data-overdue={overdueAttr}
         >
           {dtr}
@@ -136,17 +134,17 @@ export function StageDateRange({
   }
 
   return (
-    <span className={`${cssPrefix}__dates`}>
-      <span className={`${cssPrefix}__date`}>{shortStart}</span>
-      <span className={`${cssPrefix}__sep ${cssPrefix}__sep--range`} aria-hidden="true">
+    <span className="gantt-track-stage-row__dates">
+      <span className="gantt-track-stage-row__date">{shortStart}</span>
+      <span className="gantt-track-stage-row__sep gantt-track-stage-row__sep--range" aria-hidden="true">
         {' – '}
       </span>
-      <span className={`${cssPrefix}__date`}>{shortEnd}</span>
-      <span className={`${cssPrefix}__sep`} aria-hidden="true">
+      <span className="gantt-track-stage-row__date">{shortEnd}</span>
+      <span className="gantt-track-stage-row__sep" aria-hidden="true">
         {' · '}
       </span>
       <span
-        className={`${cssPrefix}__dtr`}
+        className="gantt-track-stage-row__dtr"
         data-overdue={overdueAttr}
       >
         {dtr}

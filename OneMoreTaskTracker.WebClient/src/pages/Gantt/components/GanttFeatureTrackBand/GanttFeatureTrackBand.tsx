@@ -95,7 +95,6 @@ export function GanttFeatureTrackBand({
                     : t('inlineEdit.announce.leadError', { defaultValue: 'Feature lead change was rejected.' })}
                   ariaLabel={t('tracks.ownerAria', { defaultValue: 'Owner for {{kind}} track of "{{title}}"', kind: trackLabel, title: featureTitle })}
                   testId={`track-owner-editor-${track.featureId}-${kind}`}
-                  unassignedLabel={t('row.unassigned')}
                   removedLabel={t('row.removed', { defaultValue: 'Removed' })}
                   inheritedSuffixLabel=""
                   allowInherit={false}

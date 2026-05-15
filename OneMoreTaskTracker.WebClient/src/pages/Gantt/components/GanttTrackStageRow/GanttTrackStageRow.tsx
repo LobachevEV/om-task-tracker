@@ -54,16 +54,15 @@ export function GanttTrackStageRow({
 
   const stageName = t(meta.ariaKey, { defaultValue: stage.stageKey });
 
-  const hasOwnerId = stage.stageOwnerUserId != null;
-  const inheritedOwner = !hasOwnerId ? resolveOwner(track.trackOwnerUserId) : undefined;
-
   const bars = computeTrackStageBars(loadedRange, track, today, dayPx);
   const barEntry = bars[index] ?? null;
 
   const shortStart = stage.plannedStart ? formatShortDate(stage.plannedStart, locale) : '—';
   const shortEnd = stage.plannedEnd ? formatShortDate(stage.plannedEnd, locale) : '—';
 
-  const noSignal =
+  const hasOwnerId = stage.stageOwnerUserId != null;
+  const inheritedOwner = !hasOwnerId ? resolveOwner(track.trackOwnerUserId) : undefined;
+  const hideDates =
     !hasOwnerId &&
     inheritedOwner == null &&
     !stage.plannedStart &&
@@ -100,7 +99,8 @@ export function GanttTrackStageRow({
                 stageOwnerUserId={stage.stageOwnerUserId}
                 inheritedOwnerUserId={track.trackOwnerUserId}
                 resolveOwner={resolveOwner}
-                noSignal={noSignal}
+                plannedStart={stage.plannedStart}
+                plannedEnd={stage.plannedEnd}
                 canEdit={canEdit}
                 mutations={
                   mutations
@@ -135,12 +135,11 @@ export function GanttTrackStageRow({
                   title: featureTitle,
                 })}
                 testId={`track-stage-owner-${track.featureId}-${kind}-${stage.stageKey}`}
-                unassignedLabel={t('row.unassigned')}
                 removedLabel={t('row.removed')}
                 inheritedSuffixLabel={t('tracks.row.inheritedOwnerSuffix', { defaultValue: '· по треку' })}
               />
             </span>
-            {!noSignal && (
+            {!hideDates && (
               <StageDateRange
                 featureId={track.featureId}
                 kind={kind}

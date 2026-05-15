@@ -20,13 +20,14 @@ describe('OwnerCell', () => {
     await i18n.changeLanguage('en');
   });
 
-  it('renders em-dash signal when noSignal=true', () => {
+  it('renders em-dash signal when no owner, no inherited owner, and no dates', () => {
     render(
       <OwnerCell
         stageOwnerUserId={null}
+        inheritedOwnerUserId={null}
         resolveOwner={resolverFor([])}
-        noSignal
-        unassignedLabel="Unassigned"
+        plannedStart={null}
+        plannedEnd={null}
         removedLabel="Removed"
         inheritedSuffixLabel="· via track"
         buildAnnouncement={noop}
@@ -36,13 +37,29 @@ describe('OwnerCell', () => {
     expect(screen.getByText('—')).toBeInTheDocument();
   });
 
-  it('renders unassigned label when stageOwnerUserId is null and no inherited owner', () => {
+  it('renders unassigned label when stageOwnerUserId is null and no inherited owner but dates exist', () => {
     render(
       <OwnerCell
         stageOwnerUserId={null}
         inheritedOwnerUserId={null}
         resolveOwner={resolverFor([])}
-        unassignedLabel="Unassigned"
+        plannedStart="2024-01-01"
+        plannedEnd={null}
+        removedLabel="Removed"
+        inheritedSuffixLabel="· via track"
+        buildAnnouncement={noop}
+      />,
+    );
+
+    expect(screen.getByText('Unassigned')).toBeInTheDocument();
+  });
+
+  it('renders unassigned label when stageOwnerUserId is null, no inherited owner, and no dates provided', () => {
+    render(
+      <OwnerCell
+        stageOwnerUserId={null}
+        inheritedOwnerUserId={null}
+        resolveOwner={resolverFor([])}
         removedLabel="Removed"
         inheritedSuffixLabel="· via track"
         buildAnnouncement={noop}
@@ -57,7 +74,6 @@ describe('OwnerCell', () => {
       <OwnerCell
         stageOwnerUserId={9999}
         resolveOwner={resolverFor([fe, be, qa])}
-        unassignedLabel="Unassigned"
         removedLabel="Removed"
         inheritedSuffixLabel="· via track"
         buildAnnouncement={noop}
@@ -72,7 +88,6 @@ describe('OwnerCell', () => {
       <OwnerCell
         stageOwnerUserId={fe.userId}
         resolveOwner={resolverFor([fe])}
-        unassignedLabel="Unassigned"
         removedLabel="Removed"
         inheritedSuffixLabel="· via track"
         buildAnnouncement={noop}
@@ -88,7 +103,6 @@ describe('OwnerCell', () => {
         stageOwnerUserId={null}
         inheritedOwnerUserId={fe.userId}
         resolveOwner={resolverFor([fe])}
-        unassignedLabel="Unassigned"
         removedLabel="Removed"
         inheritedSuffixLabel="· via track"
         buildAnnouncement={noop}
@@ -121,7 +135,6 @@ describe('OwnerCell', () => {
         mutations={{ saveOwner: vi.fn().mockResolvedValue(undefined) }}
         roster={roster}
         testId="owner-picker-test"
-        unassignedLabel="Unassigned"
         removedLabel="Removed"
         inheritedSuffixLabel="· via track"
         buildAnnouncement={noop}
@@ -139,7 +152,6 @@ describe('OwnerCell', () => {
         resolveOwner={resolverFor([fe])}
         canEdit
         mutations={{ saveOwner: vi.fn().mockResolvedValue(undefined) }}
-        unassignedLabel="Unassigned"
         removedLabel="Removed"
         inheritedSuffixLabel="· via track"
         buildAnnouncement={noop}
@@ -154,9 +166,10 @@ describe('OwnerCell', () => {
     const { container } = render(
       <OwnerCell
         stageOwnerUserId={null}
+        inheritedOwnerUserId={null}
         resolveOwner={resolverFor([])}
         cssPrefix="my-prefix"
-        unassignedLabel="Unassigned"
+        plannedStart="2024-01-01"
         removedLabel="Removed"
         inheritedSuffixLabel=""
         buildAnnouncement={noop}

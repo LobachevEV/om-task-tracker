@@ -8,7 +8,8 @@ export interface OwnerCellProps {
   stageOwnerUserId?: number | null;
   inheritedOwnerUserId?: number | null;
   resolveOwner: (userId: number | null | undefined) => MiniTeamMember | undefined;
-  noSignal?: boolean;
+  plannedStart?: string | null;
+  plannedEnd?: string | null;
   canEdit?: boolean;
   mutations?: {
     saveOwner: (next: number | null) => Promise<void>;
@@ -18,10 +19,8 @@ export interface OwnerCellProps {
   buildAnnouncement: (outcome: 'saved' | 'error') => string;
   ariaLabel?: string;
   testId?: string;
-  unassignedLabel: string;
   removedLabel: string;
   inheritedSuffixLabel: string;
-  inheritedFromTrackAriaLabel?: string;
   allowInherit?: boolean;
   cssPrefix?: string;
 }
@@ -30,7 +29,8 @@ export function OwnerCell({
   stageOwnerUserId,
   inheritedOwnerUserId,
   resolveOwner,
-  noSignal = false,
+  plannedStart,
+  plannedEnd,
   canEdit = false,
   mutations,
   roster,
@@ -38,10 +38,8 @@ export function OwnerCell({
   buildAnnouncement,
   ariaLabel,
   testId,
-  unassignedLabel,
   removedLabel,
   inheritedSuffixLabel,
-  inheritedFromTrackAriaLabel,
   allowInherit,
   cssPrefix = 'gantt-track-stage-row',
 }: OwnerCellProps) {
@@ -52,6 +50,14 @@ export function OwnerCell({
   const isStale = hasOwnerId && owner == null;
   const inheritedOwner = !hasOwnerId ? resolveOwner(inheritedOwnerUserId) : undefined;
   const isInherited = !hasOwnerId && inheritedOwner != null;
+
+  const datesProvided = plannedStart !== undefined || plannedEnd !== undefined;
+  const noSignal =
+    datesProvided &&
+    !hasOwnerId &&
+    inheritedOwner == null &&
+    !plannedStart &&
+    !plannedEnd;
 
   const inlineEnabled = canEdit && mutations != null;
 
@@ -77,10 +83,10 @@ export function OwnerCell({
         data-inherited={isInherited ? 'true' : undefined}
         aria-label={
           isInherited
-            ? (inheritedFromTrackAriaLabel ?? t('tracks.row.ariaInheritedOwner', {
+            ? t('tracks.row.ariaInheritedOwner', {
                 defaultValue: 'Owner inherited from track: {{name}}',
                 name: inheritedOwner!.displayName,
-              }))
+              })
             : undefined
         }
       >
@@ -108,13 +114,10 @@ export function OwnerCell({
     return (
       <span
         className={`${cssPrefix}__inherited`}
-        aria-label={
-          inheritedFromTrackAriaLabel ??
-          t('tracks.row.ariaInheritedOwner', {
-            defaultValue: 'Owner inherited from track: {{name}}',
-            name: inheritedOwner!.displayName,
-          })
-        }
+        aria-label={t('tracks.row.ariaInheritedOwner', {
+          defaultValue: 'Owner inherited from track: {{name}}',
+          name: inheritedOwner!.displayName,
+        })}
       >
         <Avatar
           name={inheritedOwner!.displayName}
@@ -135,7 +138,7 @@ export function OwnerCell({
 
   if (!hasOwnerId) {
     return (
-      <span className={`${cssPrefix}__unassigned`}>{unassignedLabel}</span>
+      <span className={`${cssPrefix}__unassigned`}>{t('row.unassigned')}</span>
     );
   }
 
