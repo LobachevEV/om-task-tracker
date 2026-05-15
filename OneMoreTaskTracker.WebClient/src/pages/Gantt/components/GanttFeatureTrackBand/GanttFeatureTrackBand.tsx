@@ -7,7 +7,7 @@ import type { DateWindow } from '../../ganttMath';
 import type { TrackMutationCallbacks } from '../InlineEditors/useTrackMutationCallbacks';
 import { GanttTrackStageRow } from '../GanttTrackStageRow';
 import { selectStagesForKind } from '../../selectStagesForKind';
-import { Box, Grid } from '../../../../common/ds/spatial';
+import { Grid } from '../../../../common/ds/spatial';
 import { GanttRow } from '../GanttRow';
 import { OwnerCell } from '../RowParts/OwnerCell';
 import './GanttFeatureTrackBand.css';
@@ -68,41 +68,37 @@ export function GanttFeatureTrackBand({
         gutterClassName="gantt-track-band__gutter"
         borderVariant="none"
         gutter={
-          <Box className="gantt-track-band__gutter-inner">
-            <Grid columns="28px 120px 1fr" className="gantt-track-band__grid">
-              <button
-                type="button"
-                className="gantt-track-band__toggle"
-                aria-label={toggleLabel}
-                aria-expanded={expanded}
-                onClick={() => setExpanded((v) => !v)}
-              >
-                <span className="gantt-track-band__chevron" aria-hidden="true" data-expanded={expanded}>
-                  {expanded ? '▾' : '▸'}
-                </span>
-              </button>
-              <span className="gantt-track-band__tag">{trackLabel}</span>
-              <span className="gantt-track-band__owner">
-                <OwnerCell
-                  stageOwnerUserId={resolvedTrackOwnerId}
-                  resolveOwner={resolveOwner}
-                  canEdit={inlineEnabled}
-                  mutations={ownerMutations}
-                  roster={roster}
-                  onAnnounce={onAnnounce}
-                  buildAnnouncement={(outcome) => outcome === 'saved'
-                    ? t('inlineEdit.announce.leadSaved', { defaultValue: 'Feature lead saved.' })
-                    : t('inlineEdit.announce.leadError', { defaultValue: 'Feature lead change was rejected.' })}
-                  ariaLabel={t('tracks.ownerAria', { defaultValue: 'Owner for {{kind}} track of "{{title}}"', kind: trackLabel, title: featureTitle })}
-                  testId={`track-owner-editor-${track.featureId}-${kind}`}
-                  removedLabel={t('row.removed', { defaultValue: 'Removed' })}
-                  inheritedSuffixLabel=""
-                  allowInherit={false}
-                  cssPrefix="gantt-track-band"
-                />
+          <Grid columns="28px 120px 1fr" className="gantt-track-band__grid">
+            <button
+              type="button"
+              className="gantt-track-band__toggle"
+              aria-label={toggleLabel}
+              aria-expanded={expanded}
+              onClick={() => setExpanded((v) => !v)}
+            >
+              <span className="gantt-track-band__chevron" aria-hidden="true" data-expanded={expanded}>
+                {expanded ? '▾' : '▸'}
               </span>
-            </Grid>
-          </Box>
+            </button>
+            <span className="gantt-track-band__tag">{trackLabel}</span>
+            <span className="gantt-track-band__owner">
+              <OwnerCell
+                stageOwnerUserId={resolvedTrackOwnerId}
+                resolveOwner={resolveOwner}
+                canEdit={inlineEnabled}
+                mutations={ownerMutations}
+                roster={roster}
+                onAnnounce={onAnnounce}
+                buildAnnouncement={(outcome) => outcome === 'saved'
+                  ? t('inlineEdit.announce.leadSaved', { defaultValue: 'Feature lead saved.' })
+                  : t('inlineEdit.announce.leadError', { defaultValue: 'Feature lead change was rejected.' })}
+                ariaLabel={t('tracks.ownerAria', { defaultValue: 'Owner for {{kind}} track of "{{title}}"', kind: trackLabel, title: featureTitle })}
+                testId={`track-owner-editor-${track.featureId}-${kind}`}
+                allowInherit={false}
+                cssPrefix="gantt-track-band"
+              />
+            </span>
+          </Grid>
         }
         lane={<div className="gantt-track-band__lane-placeholder" aria-hidden="true" />}
       />

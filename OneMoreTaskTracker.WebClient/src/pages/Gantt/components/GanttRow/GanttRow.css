@@ -18,15 +18,12 @@
   background: var(--surface);
   border-inline-end: 1px solid var(--border);
   z-index: var(--z-sticky);
-  max-inline-size: var(--gantt-gutter-width, 280px);
-  min-inline-size: var(--gantt-gutter-width, 280px);
   overflow: hidden;
   display: flex;
   align-items: center;
 }
 
-.gantt-row-frame__gutter:has(.inline-cell[data-open='true']),
-.gantt-row-frame__gutter:has(.inline-cell[data-status='editing']) {
+.gantt-row-frame__gutter:has(.inline-cell[data-open='true'],.inline-cell[data-status='editing']) {
   z-index: var(--z-popover);
 }
 

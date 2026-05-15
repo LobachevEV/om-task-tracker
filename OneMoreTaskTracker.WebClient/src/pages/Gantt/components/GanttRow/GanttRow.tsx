@@ -30,13 +30,13 @@ export function GanttRow({
 
   return (
     <div
-      className={['gantt-row-frame', borderClass, className].filter(Boolean).join(' ')}
+      className={'gantt-row-frame' + (borderClass ? ' ' + borderClass : '') + (className ? ' ' + className : '')}
       {...dataProps}
     >
-      <div className={['gantt-row-frame__gutter', gutterClassName].filter(Boolean).join(' ')}>
+      <div className={'gantt-row-frame__gutter' + (gutterClassName ? ' ' + gutterClassName : '')}>
         {gutter}
       </div>
-      <div className={['gantt-row-frame__lane', laneClassName].filter(Boolean).join(' ')}>
+      <div className={'gantt-row-frame__lane' + (laneClassName ? ' ' + laneClassName : '')}>
         {lane}
       </div>
     </div>

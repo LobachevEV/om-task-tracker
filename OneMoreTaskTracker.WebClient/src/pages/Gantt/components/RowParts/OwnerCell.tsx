@@ -19,8 +19,8 @@ export interface OwnerCellProps {
   buildAnnouncement: (outcome: 'saved' | 'error') => string;
   ariaLabel?: string;
   testId?: string;
-  removedLabel: string;
-  inheritedSuffixLabel: string;
+  removedLabel?: string;
+  inheritedSuffixLabel?: string;
   allowInherit?: boolean;
   cssPrefix?: string;
 }
@@ -38,8 +38,8 @@ export function OwnerCell({
   buildAnnouncement,
   ariaLabel,
   testId,
-  removedLabel,
-  inheritedSuffixLabel,
+  removedLabel = '',
+  inheritedSuffixLabel = '',
   allowInherit,
   cssPrefix = 'gantt-track-stage-row',
 }: OwnerCellProps) {
@@ -60,6 +60,7 @@ export function OwnerCell({
     !plannedEnd;
 
   const inlineEnabled = canEdit && mutations != null;
+  const inheritGlyphCls = `${cssPrefix}__inherit-glyph`;
 
   if (noSignal) {
     return (
@@ -91,7 +92,7 @@ export function OwnerCell({
         }
       >
         {isInherited ? (
-          <span className={`${cssPrefix}__inherit-glyph`} aria-hidden="true">&#x2198;</span>
+          <span className={inheritGlyphCls} aria-hidden="true">&#x2198;</span>
         ) : null}
         <InlineOwnerPicker
           value={stageOwnerUserId ?? null}
@@ -131,7 +132,7 @@ export function OwnerCell({
             {inheritedSuffixLabel}
           </span>
         </span>
-        <span className={`${cssPrefix}__inherit-glyph`} aria-hidden="true">&#x2198;</span>
+        <span className={inheritGlyphCls} aria-hidden="true">&#x2198;</span>
       </span>
     );
   }

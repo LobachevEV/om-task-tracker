@@ -1,7 +1,3 @@
-.gantt-row {
-  align-items: stretch;
-}
-
 .gantt-row__gutter {
   display: flex;
   flex-direction: column;

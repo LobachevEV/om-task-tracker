@@ -4,6 +4,11 @@ import { InlineDateCell } from '../InlineEditors';
 import type { TrackMutationCallbacks } from '../InlineEditors/useTrackMutationCallbacks';
 import type { FeatureTrackKind, FeatureTrackStageKey } from '../../../../common/types/featureTrack';
 
+const CLS_DATES = 'gantt-track-stage-row__dates';
+const CLS_SEP_RANGE = 'gantt-track-stage-row__sep gantt-track-stage-row__sep--range';
+const CLS_SEP = 'gantt-track-stage-row__sep';
+const CLS_DTR = 'gantt-track-stage-row__dtr';
+
 export interface StageDateRangeProps {
   featureId: number;
   kind: FeatureTrackKind;
@@ -76,7 +81,7 @@ export function StageDateRange({
 
   if (inlineEnabled) {
     return (
-      <span className="gantt-track-stage-row__dates">
+      <span className={CLS_DATES}>
         <InlineDateCell
           value={plannedStart ?? null}
           ariaLabel={t('inlineEdit.plannedStartAria', {
@@ -97,7 +102,7 @@ export function StageDateRange({
           onAnnounce={onAnnounce}
           buildAnnouncement={announceStart}
         />
-        <span className="gantt-track-stage-row__sep gantt-track-stage-row__sep--range" aria-hidden="true">
+        <span className={CLS_SEP_RANGE} aria-hidden="true">
           {' – '}
         </span>
         <InlineDateCell
@@ -120,11 +125,11 @@ export function StageDateRange({
           onAnnounce={onAnnounce}
           buildAnnouncement={announceEnd}
         />
-        <span className="gantt-track-stage-row__sep" aria-hidden="true">
+        <span className={CLS_SEP} aria-hidden="true">
           {' · '}
         </span>
         <span
-          className="gantt-track-stage-row__dtr"
+          className={CLS_DTR}
           data-overdue={overdueAttr}
         >
           {dtr}
@@ -134,17 +139,17 @@ export function StageDateRange({
   }
 
   return (
-    <span className="gantt-track-stage-row__dates">
+    <span className={CLS_DATES}>
       <span className="gantt-track-stage-row__date">{shortStart}</span>
-      <span className="gantt-track-stage-row__sep gantt-track-stage-row__sep--range" aria-hidden="true">
+      <span className={CLS_SEP_RANGE} aria-hidden="true">
         {' – '}
       </span>
       <span className="gantt-track-stage-row__date">{shortEnd}</span>
-      <span className="gantt-track-stage-row__sep" aria-hidden="true">
+      <span className={CLS_SEP} aria-hidden="true">
         {' · '}
       </span>
       <span
-        className="gantt-track-stage-row__dtr"
+        className={CLS_DTR}
         data-overdue={overdueAttr}
       >
         {dtr}

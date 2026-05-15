@@ -1,17 +1,13 @@
 .gantt-track-band {
   border-left: 1px solid var(--border-strong);
-  margin-left: 0;
 }
 
 .gantt-track-band__header {
   align-items: center;
 }
 
-.gantt-track-band__gutter-inner {
+.gantt-track-band__gutter {
   min-block-size: var(--row-h-compact, 28px);
-  display: flex;
-  align-items: center;
-  width: 100%;
 }
 
 .gantt-track-band__grid {

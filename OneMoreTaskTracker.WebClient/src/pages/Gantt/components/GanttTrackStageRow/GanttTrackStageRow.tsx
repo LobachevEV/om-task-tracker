@@ -10,7 +10,7 @@ import { formatShortDate, type DateWindow } from '../../ganttMath';
 import { getTrackStageMeta } from '../../trackStageMeta';
 import { computeTrackStageBars } from '../../trackStageGeometry';
 import { GanttStageBar } from '../GanttStageBar';
-import { Box, Grid } from '../../../../common/ds/spatial';
+import { Grid } from '../../../../common/ds/spatial';
 import type { TrackMutationCallbacks } from '../InlineEditors/useTrackMutationCallbacks';
 import { GanttRow } from '../GanttRow';
 import { OwnerCell } from '../RowParts/OwnerCell';
@@ -82,82 +82,81 @@ export function GanttTrackStageRow({
   return (
     <GanttRow
       className="gantt-track-stage-row"
+      gutterClassName="gantt-track-stage-row__gutter"
       data-testid={`track-stage-row-${track.featureId}-${kind}-${stage.stageKey}`}
       data-kind={kind.toLowerCase()}
       gutter={
-        <Box className="gantt-track-stage-row__gutter-inner">
-          <Grid columns="var(--gantt-row-columns)" className="gantt-row__grid">
-            <span
-              className="gantt-track-stage-row__name"
-              aria-hidden="true"
-              style={{ color: `var(${meta.tokenVar})` }}
-            >
-              {stageName}
-            </span>
-            <span className="gantt-track-stage-row__owner" data-testid="track-stage-owner">
-              <OwnerCell
-                stageOwnerUserId={stage.stageOwnerUserId}
-                inheritedOwnerUserId={track.trackOwnerUserId}
-                resolveOwner={resolveOwner}
-                plannedStart={stage.plannedStart}
-                plannedEnd={stage.plannedEnd}
-                canEdit={canEdit}
-                mutations={
-                  mutations
-                    ? {
-                        saveOwner: (next) =>
-                          mutations.saveTrackStageOwner(
-                            track.featureId,
-                            kind,
-                            stage.stageKey,
-                            next,
-                            stage.stageVersion,
-                          ),
-                      }
-                    : undefined
-                }
-                roster={roster}
-                onAnnounce={onAnnounce}
-                buildAnnouncement={(outcome) =>
-                  outcome === 'saved'
-                    ? t('inlineEdit.announce.ownerSaved', {
-                        defaultValue: '{{stage}} stage owner saved.',
-                        stage: stageName,
-                      })
-                    : t('inlineEdit.announce.ownerError', {
-                        defaultValue: '{{stage}} stage owner change was rejected.',
-                        stage: stageName,
-                      })
-                }
-                ariaLabel={t('inlineEdit.ownerAria', {
-                  defaultValue: 'Owner for {{stage}} stage of "{{title}}"',
-                  stage: stageName,
-                  title: featureTitle,
-                })}
-                testId={`track-stage-owner-${track.featureId}-${kind}-${stage.stageKey}`}
-                removedLabel={t('row.removed')}
-                inheritedSuffixLabel={t('tracks.row.inheritedOwnerSuffix', { defaultValue: '· по треку' })}
-              />
-            </span>
-            {!hideDates && (
-              <StageDateRange
-                featureId={track.featureId}
-                kind={kind}
-                stageKey={stage.stageKey}
-                stageVersion={stage.stageVersion}
-                plannedStart={stage.plannedStart}
-                plannedEnd={stage.plannedEnd}
-                today={today}
-                locale={locale}
-                featureTitle={featureTitle}
-                stageName={stageName}
-                canEdit={canEdit}
-                mutations={mutations}
-                onAnnounce={onAnnounce}
-              />
-            )}
-          </Grid>
-        </Box>
+        <Grid columns="var(--gantt-row-columns)" className="gantt-row__grid">
+          <span
+            className="gantt-track-stage-row__name"
+            aria-hidden="true"
+            style={{ color: `var(${meta.tokenVar})` }}
+          >
+            {stageName}
+          </span>
+          <span className="gantt-track-stage-row__owner" data-testid="track-stage-owner">
+            <OwnerCell
+              stageOwnerUserId={stage.stageOwnerUserId}
+              inheritedOwnerUserId={track.trackOwnerUserId}
+              resolveOwner={resolveOwner}
+              plannedStart={stage.plannedStart}
+              plannedEnd={stage.plannedEnd}
+              canEdit={canEdit}
+              mutations={
+                mutations
+                  ? {
+                      saveOwner: (next) =>
+                        mutations.saveTrackStageOwner(
+                          track.featureId,
+                          kind,
+                          stage.stageKey,
+                          next,
+                          stage.stageVersion,
+                        ),
+                    }
+                  : undefined
+              }
+              roster={roster}
+              onAnnounce={onAnnounce}
+              buildAnnouncement={(outcome) =>
+                outcome === 'saved'
+                  ? t('inlineEdit.announce.ownerSaved', {
+                      defaultValue: '{{stage}} stage owner saved.',
+                      stage: stageName,
+                    })
+                  : t('inlineEdit.announce.ownerError', {
+                      defaultValue: '{{stage}} stage owner change was rejected.',
+                      stage: stageName,
+                    })
+              }
+              ariaLabel={t('inlineEdit.ownerAria', {
+                defaultValue: 'Owner for {{stage}} stage of "{{title}}"',
+                stage: stageName,
+                title: featureTitle,
+              })}
+              testId={`track-stage-owner-${track.featureId}-${kind}-${stage.stageKey}`}
+              removedLabel={t('row.removed')}
+              inheritedSuffixLabel={t('tracks.row.inheritedOwnerSuffix', { defaultValue: '· по треку' })}
+            />
+          </span>
+          {!hideDates && (
+            <StageDateRange
+              featureId={track.featureId}
+              kind={kind}
+              stageKey={stage.stageKey}
+              stageVersion={stage.stageVersion}
+              plannedStart={stage.plannedStart}
+              plannedEnd={stage.plannedEnd}
+              today={today}
+              locale={locale}
+              featureTitle={featureTitle}
+              stageName={stageName}
+              canEdit={canEdit}
+              mutations={mutations}
+              onAnnounce={onAnnounce}
+            />
+          )}
+        </Grid>
       }
       lane={<div aria-hidden="true">{barNode}</div>}
       laneClassName="gantt-track-stage-row__lane"
