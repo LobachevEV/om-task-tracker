@@ -1,6 +1,7 @@
 .gantt-row-frame {
   display: grid;
-  grid-template-columns: var(--gantt-gutter-width, 280px) 1fr;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
   align-items: stretch;
 }
 
@@ -13,8 +14,6 @@
 }
 
 .gantt-row-frame__gutter {
-  position: sticky;
-  inset-inline-start: 0;
   background: var(--surface);
   border-inline-end: 1px solid var(--border);
   z-index: var(--z-sticky);

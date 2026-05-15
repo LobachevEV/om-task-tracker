@@ -68,13 +68,15 @@
 }
 
 /* Sticky 3-band date header sits at the top of the scrollable inner content.
- * Combines the leading flank, the day-band header, and the trailing flank. */
+ * Combines the leading flank, the day-band header, and the trailing flank.
+ * Uses a 3-column grid so the leading flank width is driven by the same
+ * --gantt-gutter-width token as the lane grid below — no inline-size needed. */
 .gantt-page__header-row {
   position: sticky;
   inset-block-start: 0;
   z-index: var(--z-overlay);
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: var(--gantt-gutter-width) 1fr auto;
   background: var(--surface);
   border-block-end: 1px solid var(--border);
   inline-size: var(--gantt-content-width);
@@ -86,13 +88,14 @@
 }
 
 /* Mirrors the sticky row-gutter so the date axis starts at the same scroller-x
- * as each row's lane (and segment bars line up under their date columns). */
+ * as each row's lane (and segment bars line up under their date columns).
+ * Width comes from grid-template-columns on the parent header-row; no
+ * inline-size override needed here. */
 .gantt-page__header-flank--leading {
   position: sticky;
   inset-inline-start: 0;
   z-index: var(--z-base);
   border-inline-end: 1px solid var(--border);
-  inline-size: var(--gantt-gutter-width);
 }
 
 .gantt-page__header-flank--trailing {
@@ -131,12 +134,29 @@
   padding-block-end: var(--space-2);
 }
 
+/* Two-column grid: column 1 = gutter (--gantt-gutter-width), column 2 = lane.
+ * All .gantt-row-frame children participate via `grid-column: 1 / -1` +
+ * `grid-template-columns: subgrid` so their gutter/lane cells align to these
+ * tracks. Sticky is applied to .gantt-row-frame__gutter at page scope below. */
 .gantt-page__lanes {
   position: relative;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: var(--gantt-gutter-width) 1fr;
   flex: 0 0 auto;
   inline-size: var(--gantt-lanes-width);
+}
+
+/* Sticky ownership for the shared gutter element, lifted from GanttRow.css so
+ * a single declaration covers every row variant (feature, track-band, stage). */
+.gantt-page__lanes .gantt-row-frame__gutter {
+  position: sticky;
+  inset-inline-start: 0;
+}
+
+/* AddFeatureRow is a direct child of .gantt-page__lanes but is not a
+ * .gantt-row-frame; span both columns so it occupies the full row width. */
+.gantt-page__lanes > .add-feature-row {
+  grid-column: 1 / -1;
 }
 
 /* Unscheduled section: clean hairline separator, generous block padding so
