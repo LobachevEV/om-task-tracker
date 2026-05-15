@@ -18,8 +18,6 @@ export interface OwnerCellProps {
   buildAnnouncement: (outcome: 'saved' | 'error') => string;
   ariaLabel?: string;
   testId?: string;
-  featureTitle?: string;
-  stageName?: string;
   unassignedLabel: string;
   removedLabel: string;
   inheritedSuffixLabel: string;

@@ -18,29 +18,6 @@
   overflow: hidden;
 }
 
-.gantt-row__caret {
-  all: unset;
-  cursor: pointer;
-  font-size: 11px;
-  color: var(--text-muted);
-  width: 16px;
-  height: 16px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-xs);
-  font-variant-numeric: tabular-nums;
-}
-
-.gantt-row__caret:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.gantt-row__caret[aria-expanded='true'] {
-  color: var(--text);
-}
-
 .gantt-row__title {
   all: unset;
   cursor: pointer;
@@ -118,16 +95,4 @@
 .gantt-row__no-plan-label {
   color: var(--text-muted);
   font-style: italic;
-}
-
-.gantt-row__sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
 }

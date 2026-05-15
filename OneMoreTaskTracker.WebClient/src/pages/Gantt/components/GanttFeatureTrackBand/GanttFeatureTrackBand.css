@@ -71,7 +71,7 @@
   min-width: 0;
 }
 
-.gantt-track-band__owner-name {
+.gantt-track-band__owner-text {
   font-size: var(--text-xs);
   color: var(--text);
   white-space: nowrap;
@@ -79,7 +79,7 @@
   text-overflow: ellipsis;
 }
 
-.gantt-track-band__owner--unassigned {
+.gantt-track-band__unassigned {
   font-size: var(--text-xs);
   color: var(--text-dim);
   font-style: italic;

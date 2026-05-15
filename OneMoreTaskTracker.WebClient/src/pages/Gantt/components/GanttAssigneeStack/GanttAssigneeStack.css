@@ -25,14 +25,6 @@
   font-size: 11px;
 }
 
-.gantt-assignee-stack__solo-label {
-  font-size: 11px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
 .gantt-assignee-stack__placeholder {
   width: 24px;
   height: 24px;

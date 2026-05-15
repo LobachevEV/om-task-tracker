@@ -38,27 +38,11 @@
   }
 }
 
-/* 1100px: hide the stage-code chip (internal-id); dates stay stacked. */
-@media (max-width: 1100px) /* --bp-lg-narrow */ {
-  .gantt-track-stage-row__code {
-    display: none;
-  }
-}
-
 /* 1024px: compact — hide dates too; keep label + owner only. */
 @media (max-width: 1023px) /* --bp-md */ {
   .gantt-track-stage-row__dates {
     display: none;
   }
-}
-
-.gantt-track-stage-row__code {
-  font-size: var(--text-xs);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.04em;
-  text-align: center;
-  user-select: none;
 }
 
 .gantt-track-stage-row__name {
