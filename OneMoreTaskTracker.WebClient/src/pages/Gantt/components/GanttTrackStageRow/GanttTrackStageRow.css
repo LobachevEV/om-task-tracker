@@ -12,13 +12,9 @@
 
 .gantt-row__grid {
   align-items: center;
-  width: 100%;
 }
 
-/* Breakpoint cascade for the [dates] column children.
- * Column widths are defined on .gantt-row__grid via --gantt-row-columns
- * in GanttPage.css. Child visibility rules stay here. */
-@media (max-width: 1439px) /* --bp-xl */ {
+@media (max-width: 1439px) {
   .gantt-track-stage-row__dates {
     flex-direction: column;
     gap: 0;
@@ -34,8 +30,7 @@
   }
 }
 
-/* 1024px: compact — hide dates too; keep label + owner only. */
-@media (max-width: 1023px) /* --bp-md */ {
+@media (max-width: 1023px) {
   .gantt-track-stage-row__dates {
     display: none;
   }
@@ -129,8 +124,4 @@
 .gantt-track-stage-row__dtr[data-overdue='true'] {
   color: var(--danger);
   font-weight: 500;
-}
-
-.gantt-track-stage-row__lane {
-  height: 36px;
 }

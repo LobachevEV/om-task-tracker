@@ -84,10 +84,6 @@
   min-inline-size: 0;
 }
 
-.gantt-row__lane {
-  height: 100%;
-}
-
 .gantt-row__no-plan-label {
   color: var(--text-muted);
   font-style: italic;

@@ -51,13 +51,11 @@ test.describe('@harness column-alignment — gutter/date-header x-alignment', ()
 
         return {
           // x-coord 1: left edge of the first feature-row gutter
-          featureGutterLeft: leftOf('.gantt-row-frame__gutter'),
-          // x-coord 2: left edge of the first track-band gutter
-          trackBandGutterLeft: leftOf('.gantt-track-band__gutter'),
+          featureGutterLeft: leftOf('.gantt-row__gutter'),
+          // x-coord 2: left edge of the first track-band row gutter
+          trackBandGutterLeft: leftOf('.gantt-track-band__header .gantt-row-frame__gutter'),
           // x-coord 3: left edge of the first stage-row gutter
-          stageGutterLeft:
-            leftOf('.gantt-track-stage-row__gutter') ??
-            leftOf('.gantt-row__gutter'),
+          stageGutterLeft: leftOf('.gantt-track-stage-row .gantt-row-frame__gutter'),
           // x-coord 4: right edge of the leading date-header flank
           //             (the point where day columns begin)
           headerFlankRight,
