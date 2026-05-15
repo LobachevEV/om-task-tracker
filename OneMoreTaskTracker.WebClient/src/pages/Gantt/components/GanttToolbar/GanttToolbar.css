@@ -30,13 +30,13 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2, 8px);
+  gap: var(--space-2);
 }
 
 .gantt-toolbar__group {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2, 8px);
+  gap: var(--space-2);
 }
 
 .gantt-toolbar__group-label {
@@ -49,7 +49,8 @@
 
 .gantt-toolbar__zoom-button--active,
 .gantt-toolbar__scope-button--active,
-.gantt-toolbar__state-button--active {
+.gantt-toolbar__state-button--active,
+.gantt-state-popover__trigger--active {
   background: var(--surface-2, color-mix(in oklch, var(--surface) 80%, var(--text)));
   color: var(--text-strong, var(--text));
   border-color: var(--border-strong);
@@ -59,12 +60,6 @@
 .gantt-state-popover {
   position: relative;
   display: inline-flex;
-}
-
-.gantt-state-popover__trigger--active {
-  background: var(--surface-2, color-mix(in oklch, var(--surface) 80%, var(--text)));
-  color: var(--text-strong, var(--text));
-  border-color: var(--border-strong);
 }
 
 .gantt-state-popover__badge {
@@ -90,8 +85,8 @@
   z-index: var(--z-dropdown);
   display: flex;
   flex-direction: column;
-  gap: var(--space-2, 8px);
-  padding: var(--space-2, 8px);
+  gap: var(--space-2);
+  padding: var(--space-2);
   background: var(--surface);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-base);
@@ -102,5 +97,5 @@
 .gantt-state-popover__chips {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1, 4px);
+  gap: var(--space-1);
 }

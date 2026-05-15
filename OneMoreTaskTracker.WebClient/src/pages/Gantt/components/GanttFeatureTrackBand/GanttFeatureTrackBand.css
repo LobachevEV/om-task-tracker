@@ -11,7 +11,8 @@
   grid-template-columns: subgrid;
 }
 
-.gantt-track-band__header {
+
+.gantt-track-band__grid {
   align-items: center;
 }
 
@@ -19,9 +20,6 @@
   min-block-size: var(--row-h-compact, 28px);
 }
 
-.gantt-track-band__grid {
-  align-items: center;
-}
 
 .gantt-track-band__toggle {
   display: inline-flex;
@@ -89,6 +87,3 @@
   font-style: italic;
 }
 
-.gantt-track-band__lane-placeholder {
-  height: 24px;
-}

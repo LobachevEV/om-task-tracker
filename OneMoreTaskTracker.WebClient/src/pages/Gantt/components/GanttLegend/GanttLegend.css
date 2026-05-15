@@ -10,8 +10,8 @@
   z-index: var(--z-dropdown);
   display: grid;
   grid-template-columns: repeat(2, minmax(140px, 1fr));
-  gap: var(--space-3, 12px) var(--space-4, 16px);
-  padding: var(--space-3, 12px) var(--space-4, 16px);
+  gap: var(--space-3) var(--space-4);
+  padding: var(--space-3) var(--space-4);
   background: var(--surface);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-base);

@@ -177,7 +177,7 @@
   color: var(--text);
   border: 1px solid transparent;
   border-radius: 8px; /* literal: hand-tuned input rounding, no token equiv */
-  padding: var(--space-2) var(--space-2);
+  padding: var(--space-2);
   font: inherit;
   cursor: pointer;
   text-align: start;

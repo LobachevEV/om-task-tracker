@@ -1,27 +1,15 @@
 import { test, expect } from '../../fixtures/authed';
 import { isBackendReachable } from '../../helpers/backend';
+import { fileURLToPath } from 'node:url';
 import * as fs from 'fs';
 import * as path from 'path';
-
-/**
- * Harness spec: column-alignment
- *
- * Asserts that the leading edge of every gutter-column participant aligns with
- * the leading edge of the date-header at three representative viewport widths.
- * Uses boundingBox() rather than getComputedStyle() so the check works even
- * when the value is inherited via subgrid.
- *
- * Tolerance: ±0.5px (sub-pixel layout rounding).
- *
- * On first green run: writes captured x-coords back to behavior-contract.json
- * → frozen_x_coords.coords[*] so the evaluator can pin future iterations.
- */
 
 const VIEWPORTS = [1024, 1280, 1440] as const;
 const TOLERANCE_PX = 0.5;
 
+const HERE = path.dirname(fileURLToPath(import.meta.url));
 const CONTRACT_PATH = path.resolve(
-  __dirname,
+  HERE,
   '../../../../gan-harness-refactor/gantt-2col-grid/behavior-contract.json',
 );
 
