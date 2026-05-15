@@ -10,6 +10,7 @@ import { InlineOwnerPicker } from '../InlineEditors';
 import { GanttTrackStageRow } from '../GanttTrackStageRow';
 import { selectStagesForKind } from '../../selectStagesForKind';
 import { Box, Grid } from '../../../../common/ds/spatial';
+import { GanttRow } from '../GanttRow';
 import './GanttFeatureTrackBand.css';
 
 export interface GanttFeatureTrackBandProps {
@@ -73,62 +74,67 @@ export function GanttFeatureTrackBand({
       data-kind={kind.toLowerCase()}
       data-testid={`track-band-${track.featureId}-${kind}`}
     >
-      <div className="gantt-track-band__header">
-        <Box className="gantt-track-band__gutter">
-          <Grid columns="28px 120px 1fr" className="gantt-track-band__grid">
-          <button
-            type="button"
-            className="gantt-track-band__toggle"
-            aria-label={toggleLabel}
-            aria-expanded={expanded}
-            onClick={() => setExpanded((v) => !v)}
-          >
-            <span
-              className="gantt-track-band__chevron"
-              aria-hidden="true"
-              data-expanded={expanded}
-            >
-              {expanded ? '▾' : '▸'}
-            </span>
-          </button>
-          <span className="gantt-track-band__tag">{trackLabel}</span>
-          {inlineEnabled && mutations != null && roster != null ? (
-            <InlineOwnerPicker
-              value={track.trackOwnerUserId}
-              displayName={trackOwner?.displayName ?? null}
-              roster={roster}
-              clearable={false}
-              ariaLabel={t('tracks.ownerAria', {
-                defaultValue: 'Owner for {{kind}} track of "{{title}}"',
-                kind: trackLabel,
-                title: featureTitle,
-              })}
-              testId={`track-owner-editor-${track.featureId}-${kind}`}
-              onSave={async (next) => {
-                if (next == null) return;
-                await mutations.saveTrackOwner(track.featureId, kind, next, track.version);
-              }}
-              onAnnounce={onAnnounce}
-              buildAnnouncement={buildOwnerAnnouncement}
-            />
-          ) : trackOwner ? (
-            <span className="gantt-track-band__owner">
-              <Avatar
-                name={trackOwner.displayName}
-                size="sm"
-                tone={roleToAvatarTone(trackOwner.role)}
-              />
-              <span className="gantt-track-band__owner-name">{trackOwner.displayName}</span>
-            </span>
-          ) : (
-            <span className="gantt-track-band__owner gantt-track-band__owner--unassigned">
-              {t('row.unassigned')}
-            </span>
-          )}
-          </Grid>
-        </Box>
-        <div className="gantt-track-band__lane-placeholder" aria-hidden="true" />
-      </div>
+      <GanttRow
+        className="gantt-track-band__header"
+        gutterClassName="gantt-track-band__gutter"
+        borderVariant="none"
+        gutter={
+          <Box className="gantt-track-band__gutter-inner">
+            <Grid columns="28px 120px 1fr" className="gantt-track-band__grid">
+              <button
+                type="button"
+                className="gantt-track-band__toggle"
+                aria-label={toggleLabel}
+                aria-expanded={expanded}
+                onClick={() => setExpanded((v) => !v)}
+              >
+                <span
+                  className="gantt-track-band__chevron"
+                  aria-hidden="true"
+                  data-expanded={expanded}
+                >
+                  {expanded ? '▾' : '▸'}
+                </span>
+              </button>
+              <span className="gantt-track-band__tag">{trackLabel}</span>
+              {inlineEnabled && mutations != null && roster != null ? (
+                <InlineOwnerPicker
+                  value={track.trackOwnerUserId ?? null}
+                  displayName={trackOwner?.displayName ?? null}
+                  roster={roster}
+                  clearable={false}
+                  ariaLabel={t('tracks.ownerAria', {
+                    defaultValue: 'Owner for {{kind}} track of "{{title}}"',
+                    kind: trackLabel,
+                    title: featureTitle,
+                  })}
+                  testId={`track-owner-editor-${track.featureId}-${kind}`}
+                  onSave={async (next) => {
+                    if (next == null) return;
+                    await mutations.saveTrackOwner(track.featureId, kind, next, track.version);
+                  }}
+                  onAnnounce={onAnnounce}
+                  buildAnnouncement={buildOwnerAnnouncement}
+                />
+              ) : trackOwner ? (
+                <span className="gantt-track-band__owner">
+                  <Avatar
+                    name={trackOwner.displayName}
+                    size="sm"
+                    tone={roleToAvatarTone(trackOwner.role)}
+                  />
+                  <span className="gantt-track-band__owner-name">{trackOwner.displayName}</span>
+                </span>
+              ) : (
+                <span className="gantt-track-band__owner gantt-track-band__owner--unassigned">
+                  {t('row.unassigned')}
+                </span>
+              )}
+            </Grid>
+          </Box>
+        }
+        lane={<div className="gantt-track-band__lane-placeholder" aria-hidden="true" />}
+      />
 
       {expanded && (
         <div className="gantt-track-band__stages">

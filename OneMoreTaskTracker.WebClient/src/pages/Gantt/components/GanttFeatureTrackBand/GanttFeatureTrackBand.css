@@ -4,23 +4,14 @@
 }
 
 .gantt-track-band__header {
-  display: grid;
-  grid-template-columns: var(--gantt-gutter-width, 280px) 1fr;
   align-items: center;
 }
 
-.gantt-track-band__gutter {
-  position: sticky;
-  inset-inline-start: 0;
-  background: var(--surface);
-  border-inline-end: 1px solid var(--border);
-  z-index: var(--z-sticky);
-  max-inline-size: var(--gantt-gutter-width, 280px);
-  min-inline-size: var(--gantt-gutter-width, 280px);
-  overflow: hidden;
+.gantt-track-band__gutter-inner {
   min-block-size: var(--row-h-compact, 28px);
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
 .gantt-track-band__grid {
