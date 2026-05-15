@@ -68,7 +68,7 @@ export function GanttFeatureTrackBand({
         gutterClassName="gantt-track-band__gutter"
         borderVariant="none"
         gutter={
-          <Grid columns="28px 120px 1fr" className="gantt-track-band__grid">
+          <Grid columns="var(--gantt-track-band-inner-columns, 28px 120px 1fr)" className="gantt-track-band__grid">
             <button
               type="button"
               className="gantt-track-band__toggle"

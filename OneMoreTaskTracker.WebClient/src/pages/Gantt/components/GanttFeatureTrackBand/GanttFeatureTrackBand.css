@@ -1,5 +1,14 @@
 .gantt-track-band {
   border-left: 1px solid var(--border-strong);
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+}
+
+.gantt-track-band__stages {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
 }
 
 .gantt-track-band__header {

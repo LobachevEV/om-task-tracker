@@ -1,5 +1,7 @@
 import { test, expect } from '../../fixtures/authed';
 import { isBackendReachable } from '../../helpers/backend';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * Harness spec: column-alignment
@@ -10,10 +12,27 @@ import { isBackendReachable } from '../../helpers/backend';
  * when the value is inherited via subgrid.
  *
  * Tolerance: ±0.5px (sub-pixel layout rounding).
+ *
+ * On first green run: writes captured x-coords back to behavior-contract.json
+ * → frozen_x_coords.coords[*] so the evaluator can pin future iterations.
  */
 
 const VIEWPORTS = [1024, 1280, 1440] as const;
 const TOLERANCE_PX = 0.5;
+
+const CONTRACT_PATH = path.resolve(
+  __dirname,
+  '../../../../gan-harness-refactor/gantt-2col-grid/behavior-contract.json',
+);
+
+type CapturedCoords = {
+  featureGutterLeft: number | null;
+  trackBandGutterLeft: number | null;
+  stageGutterLeft: number | null;
+  headerFlankRight: number | null;
+};
+
+const capturedByViewport: Record<number, CapturedCoords> = {};
 
 test.describe('@harness column-alignment — gutter/date-header x-alignment', () => {
   test.beforeAll(async () => {
@@ -21,6 +40,35 @@ test.describe('@harness column-alignment — gutter/date-header x-alignment', ()
       !(await isBackendReachable()),
       'gateway at :5000 unreachable — skipping column-alignment harness spec',
     );
+  });
+
+  test.afterAll(() => {
+    if (!fs.existsSync(CONTRACT_PATH)) return;
+
+    const contract = JSON.parse(fs.readFileSync(CONTRACT_PATH, 'utf8'));
+    const coords = contract?.frozen_x_coords?.coords;
+    if (!coords) return;
+
+    const allNull = (slot: Record<string, number | null>) =>
+      Object.values(slot).every((v) => v === null);
+
+    if (
+      allNull(coords.feature_title_column_start) ||
+      allNull(coords.track_owner_column_start) ||
+      allNull(coords.stage_owner_column_start) ||
+      allNull(coords.day_header_column0_left)
+    ) {
+      for (const vw of VIEWPORTS) {
+        const c = capturedByViewport[vw];
+        if (!c) continue;
+        coords.feature_title_column_start[String(vw)] = c.featureGutterLeft;
+        coords.track_owner_column_start[String(vw)] = c.trackBandGutterLeft;
+        coords.stage_owner_column_start[String(vw)] = c.stageGutterLeft;
+        coords.day_header_column0_left[String(vw)] = c.headerFlankRight;
+      }
+      contract.frozen_x_coords.spec_status_at_iter0 = 'captured_iter3';
+      fs.writeFileSync(CONTRACT_PATH, JSON.stringify(contract, null, 2) + '\n', 'utf8');
+    }
   });
 
   for (const vw of VIEWPORTS) {
@@ -64,6 +112,8 @@ test.describe('@harness column-alignment — gutter/date-header x-alignment', ()
 
       const { featureGutterLeft, trackBandGutterLeft, stageGutterLeft, headerFlankRight } =
         coords;
+
+      capturedByViewport[vw] = coords;
 
       // All four coordinates must be non-null (elements exist in the DOM)
       expect(featureGutterLeft, 'feature gutter must be visible').not.toBeNull();
