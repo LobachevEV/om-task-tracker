@@ -1,27 +1,17 @@
 .gantt-track-stage-row {
-  display: grid;
-  grid-template-columns: var(--gantt-gutter-width, 280px) 1fr;
   min-height: 36px;
   align-items: center;
-  border-bottom: 1px solid var(--border-soft);
 }
 
 .gantt-track-stage-row:nth-child(even) {
   background-color: color-mix(in oklch, var(--elevated) 50%, transparent);
 }
 
-.gantt-track-stage-row__gutter {
-  position: sticky;
-  inset-inline-start: 0;
-  background: var(--surface);
-  border-inline-end: 1px solid var(--border);
-  z-index: var(--z-sticky);
-  max-inline-size: var(--gantt-gutter-width, 280px);
-  min-inline-size: var(--gantt-gutter-width, 280px);
-  overflow: hidden;
+.gantt-track-stage-row__gutter-inner {
   min-block-size: var(--row-h-default, 36px);
   align-items: center;
   display: flex;
+  width: 100%;
 }
 
 .gantt-row__grid {
@@ -185,7 +175,5 @@
 }
 
 .gantt-track-stage-row__lane {
-  position: relative;
   height: 36px;
-  overflow: hidden;
 }
