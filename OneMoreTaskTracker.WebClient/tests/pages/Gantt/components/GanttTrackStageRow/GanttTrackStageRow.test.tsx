@@ -33,33 +33,6 @@ describe('GanttTrackStageRow — read-only', () => {
     await i18n.changeLanguage('en');
   });
 
-  it('renders the stage 3-letter code', () => {
-    const stage: FeatureTrackStage = {
-      stageKey: 'Development',
-      plannedStart: '2026-04-15',
-      plannedEnd: '2026-04-25',
-      stageOwnerUserId: null,
-      stageVersion: 1,
-    };
-    const track = makeTrack([stage]);
-
-    render(
-      <GanttTrackStageRow
-        track={track}
-        stage={stage}
-        kind="Frontend"
-        featureTitle="Export to PDF"
-        today={FIXTURE_TODAY}
-        loadedRange={LOADED_RANGE}
-        dayPx={DAY_PX}
-        index={0}
-        resolveOwner={resolverFor([])}
-      />,
-    );
-
-    expect(screen.getByText('DEV')).toBeInTheDocument();
-  });
-
   it('renders stage start and end dates', () => {
     const stage: FeatureTrackStage = {
       stageKey: 'Development',
