@@ -150,6 +150,43 @@ describe('usePlanFeatures', () => {
     expect(updatedTrack!.version, 'scalar version must take next value').toBe(2);
   });
 
+  it('applyTrackUpdate preserves nested trackOwner + stageOwner when PATCH response sends explicit null (MB-001-01 iter-2 regression)', async () => {
+    const owner: MiniTeamMember = { userId: 7, email: 'a@b.com', displayName: 'Alice', role: 'FrontendDeveloper' };
+    const initialTrack: FeatureTrack = {
+      id: 10, featureId: 1, kind: 'Frontend', trackOwnerUserId: 7, version: 1,
+      trackOwner: owner,
+      stages: [
+        { stageKey: 'Development', plannedStart: '2026-04-08', plannedEnd: '2026-04-21', stageOwnerUserId: 7, stageVersion: 1, stageOwner: owner },
+        { stageKey: 'StandTesting', plannedStart: null, plannedEnd: null, stageOwnerUserId: 7, stageVersion: 1, stageOwner: owner },
+      ],
+    };
+    const featureWithTrack: FeatureSummary = { ...makeFeature(1, '2026-04-01', '2026-04-30'), tracks: [initialTrack] };
+    const fetcher = vi.fn<Fetcher>(async () => [featureWithTrack]);
+    const { result } = renderHook(() => usePlanFeatures({ scope: 'mine', fetcher }));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    // BE sends explicit null (not omitted) for trackOwner and stageOwner
+    const patchResponse: FeatureTrack = {
+      id: 10, featureId: 1, kind: 'Frontend', trackOwnerUserId: 7, version: 2,
+      trackOwner: null,
+      stages: [
+        { stageKey: 'Development', plannedStart: '2026-04-15', plannedEnd: '2026-04-21', stageOwnerUserId: 7, stageVersion: 2, stageOwner: null },
+        { stageKey: 'StandTesting', plannedStart: null, plannedEnd: null, stageOwnerUserId: 7, stageVersion: 1, stageOwner: null },
+      ],
+    };
+    act(() => { result.current.applyTrackUpdate(1, patchResponse); });
+
+    const updatedTrack = result.current.data?.[0].tracks?.find((t) => t.kind === 'Frontend');
+    expect(updatedTrack, 'Frontend track must survive the update').toBeDefined();
+    expect(updatedTrack!.trackOwner, 'trackOwner must be preserved when PATCH sends explicit null').toEqual(owner);
+    const devStage = updatedTrack!.stages.find((s) => s.stageKey === 'Development');
+    const standStage = updatedTrack!.stages.find((s) => s.stageKey === 'StandTesting');
+    expect(devStage!.stageOwner, 'Development stageOwner must be preserved').toEqual(owner);
+    expect(standStage!.stageOwner, 'StandTesting stageOwner must be preserved').toEqual(owner);
+    expect(devStage!.plannedStart, 'scalar plannedStart must take next value').toBe('2026-04-15');
+    expect(updatedTrack!.version, 'scalar version must take next value').toBe(2);
+  });
+
   it('applyFeatureUpdate replaces a row in place without re-fetch', async () => {
     const original = makeFeature(1, '2026-04-01', '2026-04-10');
     const updated = { ...original, title: 'Renamed' };

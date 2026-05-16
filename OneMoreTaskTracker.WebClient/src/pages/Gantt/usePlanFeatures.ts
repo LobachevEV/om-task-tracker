@@ -93,11 +93,11 @@ function mergeTrack(existing: FeatureTrack, next: FeatureTrack): FeatureTrack {
   if (existing.kind !== next.kind) return existing;
   const mergedStages = next.stages.map((ns) => {
     const prev = existing.stages.find((ps) => ps.stageKey === ns.stageKey);
-    return ns.stageOwner === undefined && prev?.stageOwner !== undefined
+    return ns.stageOwner == null && prev?.stageOwner != null
       ? { ...ns, stageOwner: prev.stageOwner }
       : ns;
   });
-  const trackOwner = next.trackOwner === undefined && existing.trackOwner !== undefined
+  const trackOwner = next.trackOwner == null && existing.trackOwner != null
     ? existing.trackOwner
     : next.trackOwner;
   return { ...next, stages: mergedStages, trackOwner };
