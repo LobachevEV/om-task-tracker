@@ -23,18 +23,20 @@ public class FeaturesController(
     GetFeatureQuery.FeatureGetter.FeatureGetterClient featureGetter,
     ITeamRosterProvider rosterProvider,
     IValidator<UpdateFeaturePayload> updateValidator,
+    IValidator<ListFeaturesQueryModel> listQueryValidator,
     ILogger<FeaturesController> logger) : ControllerBase
 {
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<FeatureSummaryResponse>>> List(
-        [FromQuery] string? scope,
-        [FromQuery] string? state,
-        [FromQuery] string? windowStart,
-        [FromQuery] string? windowEnd,
+        [FromQuery] ListFeaturesQueryModel query,
         CancellationToken ct)
     {
-        if (!PlanRequestHelpers.TryValidateDateWindow(windowStart, windowEnd, out var windowError))
+        var scopeValidation = await listQueryValidator.ValidateAsync(query, ct);
+        if (!scopeValidation.IsValid)
+            return BadRequest(new { error = scopeValidation.Errors[0].ErrorMessage });
+
+        if (!PlanRequestHelpers.TryValidateDateWindow(query.WindowStart, query.WindowEnd, out var windowError))
             return BadRequest(new { error = windowError });
 
         var userId = User.GetUserId();
@@ -43,19 +45,20 @@ public class FeaturesController(
             new ListFeaturesRequest
             {
                 ManagerUserId = userId,
-                CallerUserId = userId,
-                WindowStart = windowStart ?? string.Empty,
-                WindowEnd = windowEnd ?? string.Empty,
-                State = state ?? string.Empty,
-                Scope = scope ?? string.Empty,
+                WindowStart = query.WindowStart ?? string.Empty,
+                WindowEnd = query.WindowEnd ?? string.Empty,
+                State = query.State ?? string.Empty,
             },
             cancellationToken: ct);
 
-        // Load roster once for the caller — used to resolve track/stage owners.
-        // All features in the list share the same manager (userId = caller).
         var roster = await rosterProvider.LoadRosterAsync(userId, ct);
 
-        var summaries = listResponse.Features
+        ListScopeParser.TryParse(query.Scope, out var scope);
+        var features = scope == ListScopeKind.Mine
+            ? listResponse.Features.Where(f => f.LeadUserId == userId)
+            : listResponse.Features;
+
+        var summaries = features
             .Select(f => FeatureSummaryResponse.From(f, PlanRequestHelpers.EmptyTasks, roster))
             .ToList();
 
