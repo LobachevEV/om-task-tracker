@@ -1,5 +1,6 @@
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import i18n from '../../../../../src/common/i18n/config';
 import { AddFeatureRow } from '../../../../../src/pages/Gantt/components/AddFeatureRow';
 import type { FeatureSummary } from '../../../../../src/common/types/feature';
@@ -66,12 +67,12 @@ describe('AddFeatureRow', () => {
   });
 
   it('shows an error message for empty-title submission (AC #3 — folds CR4)', async () => {
+    const user = userEvent.setup();
     const createFeature = vi.fn();
     render(<AddFeatureRow onCreated={vi.fn()} api={{ createFeature }} />);
 
-    fireEvent.click(screen.getByRole('button', { name: /new feature/i }));
-    const input = screen.getByLabelText(/title/i) as HTMLInputElement;
-    fireEvent.submit(input.closest('form')!);
+    await user.click(screen.getByRole('button', { name: /new feature/i }));
+    await user.keyboard('{Enter}');
     await act(flush);
 
     expect(createFeature).not.toHaveBeenCalled();
@@ -160,19 +161,19 @@ describe('AddFeatureRow', () => {
   });
 
   it('header variant: empty-title submit shows inline error (AC #3 in header context)', async () => {
+    const user = userEvent.setup();
     const createFeature = vi.fn();
     render(
       <AddFeatureRow onCreated={vi.fn()} api={{ createFeature }} variant="header" />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /new feature/i }));
-    const input = screen.getByLabelText(/title/i) as HTMLInputElement;
-    fireEvent.submit(input.closest('form')!);
+    await user.click(screen.getByRole('button', { name: /new feature/i }));
+    await user.keyboard('{Enter}');
     await act(flush);
 
     expect(createFeature).not.toHaveBeenCalled();
     const alert = screen.getByRole('alert');
     expect(alert.textContent).toMatch(/title required/i);
-    expect(document.activeElement).toBe(input);
+    expect(document.activeElement).toBe(screen.getByLabelText(/title/i));
   });
 });

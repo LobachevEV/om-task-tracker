@@ -186,7 +186,6 @@ export function AddFeatureRow({
           tabIndex={-1}
           aria-hidden="true"
           className="add-feature-row__submit-sr"
-          disabled={!submittable}
         >
           {t('drawer.save')}
         </button>
