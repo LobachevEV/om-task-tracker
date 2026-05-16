@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { __resetPlanFeaturesCache, usePlanFeatures } from '../../../src/pages/Gantt/usePlanFeatures';
-import type { FeatureSummary } from '../../../src/common/types/feature';
+import type { FeatureSummary, MiniTeamMember } from '../../../src/common/types/feature';
+import type { FeatureTrack } from '../../../src/common/types/featureTrack';
 import type { ListFeaturesParams } from '../../../src/common/api/planApi';
 
 type Fetcher = (params: ListFeaturesParams) => Promise<FeatureSummary[]>;
@@ -110,6 +111,43 @@ describe('usePlanFeatures', () => {
     });
     const lastCall = fetcher.mock.calls[fetcher.mock.calls.length - 1][0];
     expect(lastCall.signal).toBe(ac.signal);
+  });
+
+  it('applyTrackUpdate preserves nested trackOwner + stageOwner when PATCH response omits them (MB-001-01)', async () => {
+    const owner: MiniTeamMember = { userId: 7, email: 'a@b.com', displayName: 'Alice', role: 'FrontendDeveloper' };
+    const initialTrack: FeatureTrack = {
+      id: 10, featureId: 1, kind: 'Frontend', trackOwnerUserId: 7, version: 1,
+      trackOwner: owner,
+      stages: [
+        { stageKey: 'Development', plannedStart: '2026-04-08', plannedEnd: '2026-04-21', stageOwnerUserId: 7, stageVersion: 1, stageOwner: owner },
+        { stageKey: 'StandTesting', plannedStart: null, plannedEnd: null, stageOwnerUserId: 7, stageVersion: 1, stageOwner: owner },
+      ],
+    };
+    const featureWithTrack = makeFeature(1, '2026-04-01', '2026-04-30');
+    const featureWithTrackAndTrackData: FeatureSummary = { ...featureWithTrack, tracks: [initialTrack] };
+    const fetcher = vi.fn<Fetcher>(async () => [featureWithTrackAndTrackData]);
+    const { result } = renderHook(() => usePlanFeatures({ scope: 'mine', fetcher }));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    const patchResponse: FeatureTrack = {
+      id: 10, featureId: 1, kind: 'Frontend', trackOwnerUserId: 7, version: 2,
+      stages: [
+        { stageKey: 'Development', plannedStart: '2026-04-15', plannedEnd: '2026-04-21', stageOwnerUserId: 7, stageVersion: 2 },
+        { stageKey: 'StandTesting', plannedStart: null, plannedEnd: null, stageOwnerUserId: 7, stageVersion: 1 },
+      ],
+    };
+    act(() => { result.current.applyTrackUpdate(1, patchResponse); });
+
+    const updatedTracks = result.current.data?.[0].tracks ?? [];
+    const updatedTrack = updatedTracks.find((t) => t.kind === 'Frontend');
+    expect(updatedTrack, 'Frontend track must survive the update').toBeDefined();
+    expect(updatedTrack!.trackOwner, 'trackOwner must be preserved when PATCH omits it').toEqual(owner);
+    const devStage = updatedTrack!.stages.find((s) => s.stageKey === 'Development');
+    const standStage = updatedTrack!.stages.find((s) => s.stageKey === 'StandTesting');
+    expect(devStage!.stageOwner, 'Development stageOwner must be preserved').toEqual(owner);
+    expect(standStage!.stageOwner, 'StandTesting stageOwner must be preserved').toEqual(owner);
+    expect(devStage!.plannedStart, 'scalar plannedStart must take next value').toBe('2026-04-15');
+    expect(updatedTrack!.version, 'scalar version must take next value').toBe(2);
   });
 
   it('applyFeatureUpdate replaces a row in place without re-fetch', async () => {

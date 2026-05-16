@@ -89,6 +89,20 @@ export function __resetPlanFeaturesCache(): void {
   inFlight.clear();
 }
 
+function mergeTrack(existing: FeatureTrack, next: FeatureTrack): FeatureTrack {
+  if (existing.kind !== next.kind) return existing;
+  const mergedStages = next.stages.map((ns) => {
+    const prev = existing.stages.find((ps) => ps.stageKey === ns.stageKey);
+    return ns.stageOwner === undefined && prev?.stageOwner !== undefined
+      ? { ...ns, stageOwner: prev.stageOwner }
+      : ns;
+  });
+  const trackOwner = next.trackOwner === undefined && existing.trackOwner !== undefined
+    ? existing.trackOwner
+    : next.trackOwner;
+  return { ...next, stages: mergedStages, trackOwner };
+}
+
 export function usePlanFeatures(params: UsePlanFeaturesParams): UsePlanFeaturesResult {
   const {
     scope,
@@ -222,7 +236,7 @@ export function usePlanFeatures(params: UsePlanFeaturesParams): UsePlanFeaturesR
           const existingTracks = row.tracks ?? [];
           const hasMatch = existingTracks.some((t) => t.kind === next.kind);
           const updatedTracks = hasMatch
-            ? existingTracks.map((t) => (t.kind === next.kind ? next : t))
+            ? existingTracks.map((t) => mergeTrack(t, next))
             : [...existingTracks, next];
           changed = true;
           return { ...row, tracks: updatedTracks };
@@ -234,7 +248,7 @@ export function usePlanFeatures(params: UsePlanFeaturesParams): UsePlanFeaturesR
           const existingTracks = cachedRow.tracks ?? [];
           const hasMatch = existingTracks.some((t) => t.kind === next.kind);
           const updatedTracks = hasMatch
-            ? existingTracks.map((t) => (t.kind === next.kind ? next : t))
+            ? existingTracks.map((t) => mergeTrack(t, next))
             : [...existingTracks, next];
           cached.set(featureId, { ...cachedRow, tracks: updatedTracks });
         }
