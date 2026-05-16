@@ -98,7 +98,7 @@ export const GanttTimelineScroller = forwardRef<
           <button
             type="button"
             className="gantt-timeline-scroller__today-chip"
-            onClick={onJumpToToday}
+            onClick={() => onJumpToToday()}
             aria-label={t('chip.todayAria', {
               defaultValue: 'Jump to today',
             })}

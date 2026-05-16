@@ -58,6 +58,19 @@ export interface ScrollState {
 const EDGE_PREFETCH_DAYS = 14;
 const TODAY_LEAD_FRACTION = 1 / 3;
 
+const VALID_SCROLL_BEHAVIORS: ReadonlySet<string> = new Set(['auto', 'smooth', 'instant']);
+
+export function respectMotionPref(behavior?: unknown): ScrollBehavior {
+  const safe = typeof behavior === 'string' && VALID_SCROLL_BEHAVIORS.has(behavior)
+    ? (behavior as ScrollBehavior)
+    : undefined;
+  if (safe !== undefined) return safe;
+  if (typeof window === 'undefined') return 'auto';
+  const reduced =
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+  return reduced ? 'auto' : 'smooth';
+}
+
 function isWithinRange(iso: string, range: DateWindow): boolean {
   return daysBetween(range.start, iso) >= 0 && daysBetween(iso, range.end) > 0;
 }
@@ -222,14 +235,6 @@ export function useGanttTimelineScroll(
     isFetchingLeading,
     isFetchingTrailing,
   ]);
-
-  const respectMotionPref = (behavior?: ScrollBehavior): ScrollBehavior => {
-    if (behavior) return behavior;
-    if (typeof window === 'undefined') return 'auto';
-    const reduced =
-      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
-    return reduced ? 'auto' : 'smooth';
-  };
 
   const scrollToToday = useCallback(
     (behavior?: ScrollBehavior) => {
