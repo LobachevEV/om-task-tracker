@@ -62,7 +62,7 @@ function Harness({
       onRetry={onRetry}
       state={state}
       onFeatureUpdated={() => {}}
-      onTrackUpdated={() => {}}
+      onTrackStageApplied={() => {}}
       loadChunk={async () => {}}
     />
   );

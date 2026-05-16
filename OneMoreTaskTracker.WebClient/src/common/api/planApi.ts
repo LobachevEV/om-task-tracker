@@ -2,7 +2,6 @@ import { API_BASE_URL, authHeaders, handleResponse } from './httpClient';
 import {
   featureDetailSchema,
   featureSummarySchema,
-  featureTrackSchema,
 } from './schemas';
 import type {
   CreateFeaturePayload,
@@ -13,7 +12,6 @@ import type {
   PatchFeaturePayload,
 } from '../types/feature';
 import type {
-  FeatureTrack,
   FeatureTrackKind,
   FeatureTrackStageKey,
   PatchFeatureTrackPayload,
@@ -129,7 +127,7 @@ export async function patchFeatureTrack(
   featureId: number,
   kind: FeatureTrackKind,
   body: PatchFeatureTrackPayload,
-): Promise<FeatureTrack> {
+): Promise<void> {
   const response = await fetch(
     `${API_BASE_URL}/api/plan/features/${featureId}/tracks/${kind}`,
     {
@@ -138,8 +136,7 @@ export async function patchFeatureTrack(
       body: JSON.stringify(body),
     },
   );
-  const data = await handleResponse<unknown>(response);
-  return featureTrackSchema.parse(data);
+  await handleResponse<void>(response);
 }
 
 export async function patchFeatureTrackStage(
@@ -147,7 +144,7 @@ export async function patchFeatureTrackStage(
   kind: FeatureTrackKind,
   stageKey: FeatureTrackStageKey,
   body: PatchFeatureTrackStagePayload,
-): Promise<FeatureTrack> {
+): Promise<void> {
   const response = await fetch(
     `${API_BASE_URL}/api/plan/features/${featureId}/tracks/${kind}/stages/${stageKey}`,
     {
@@ -156,8 +153,7 @@ export async function patchFeatureTrackStage(
       body: JSON.stringify(body),
     },
   );
-  const data = await handleResponse<unknown>(response);
-  return featureTrackSchema.parse(data);
+  await handleResponse<void>(response);
 }
 
 export type {
@@ -169,4 +165,4 @@ export type {
   PatchFeaturePayload,
 } from '../types/feature';
 
-export type { FeatureTrack, FeatureTrackKind, FeatureTrackStageKey } from '../types/featureTrack';
+export type { FeatureTrackKind, FeatureTrackStageKey } from '../types/featureTrack';

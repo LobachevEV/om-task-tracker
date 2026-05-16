@@ -8,11 +8,9 @@ using NSubstitute;
 using OneMoreTaskTracker.Api.Auth;
 using OneMoreTaskTracker.Api.Tests.Infra;
 using OneMoreTaskTracker.Proto.Features;
-using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureTrackCommand;
 using OneMoreTaskTracker.Proto.Users;
 using Xunit;
-using GetFeatureDto = OneMoreTaskTracker.Proto.Features.GetFeatureQuery.FeatureDto;
 using TrackDto = OneMoreTaskTracker.Proto.Features.FeatureTrackDto;
 
 namespace OneMoreTaskTracker.Api.Tests.Controllers;
@@ -81,65 +79,39 @@ public sealed class PatchFeatureTrackControllerTests(TasksControllerWebApplicati
             .Returns(GrpcTestHelpers.UnaryCall(new IsTeamMemberResponse { IsMember = false }));
     }
 
-    private static GetFeatureDto MinimalFeatureDto(int id = 1, int managerUserId = 1)
-    {
-        var dto = new GetFeatureDto
-        {
-            Id            = id,
-            Title         = "Feature",
-            Description   = string.Empty,
-            State         = FeatureState.Development,
-            PlannedStart  = string.Empty,
-            PlannedEnd    = string.Empty,
-            LeadUserId    = managerUserId,
-            ManagerUserId = managerUserId,
-            CreatedAt     = DateTime.UtcNow.ToString("O"),
-            UpdatedAt     = DateTime.UtcNow.ToString("O"),
-            Version       = 1,
-        };
-        dto.Tracks.Add(new TrackDto { Id = 1, FeatureId = id, Kind = FeatureTrackKind.Frontend, TrackOwnerUserId = managerUserId, Version = 1 });
-        dto.Tracks.Add(new TrackDto { Id = 2, FeatureId = id, Kind = FeatureTrackKind.Backend,  TrackOwnerUserId = managerUserId, Version = 1 });
-        return dto;
-    }
-
-    private void StubPatchAndGet(GetFeatureDto featureDto)
+    private void StubPatch()
     {
         _factory.MockFeatureTrackPatcher
             .PatchAsync(Arg.Any<PatchFeatureTrackRequest>(),
                 Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
             .Returns(GrpcTestHelpers.UnaryCall(new TrackDto { Id = 1 }));
-
-        _factory.MockFeatureGetter
-            .GetAsync(Arg.Any<GetFeatureRequest>(),
-                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
-            .Returns(GrpcTestHelpers.UnaryCall(featureDto));
     }
 
     [Fact]
-    public async Task PatchTrack_HappyPath_Returns200()
+    public async Task PatchTrack_HappyPath_Returns204()
     {
         var client = ClientWithToken(ManagerToken(userId: 1));
         StubRoster(managerUserId: 1, teammateUserIds: 7);
-        StubPatchAndGet(MinimalFeatureDto(managerUserId: 1));
+        StubPatch();
 
         var response = await client.PatchAsync(
             "/api/plan/features/1/tracks/Frontend",
             JsonBody(new { trackOwnerUserId = 7 }));
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
     [Fact]
-    public async Task PatchTrack_NoFields_NoOp_Returns200()
+    public async Task PatchTrack_NoFields_NoOp_Returns204()
     {
         var client = ClientWithToken(ManagerToken());
-        StubPatchAndGet(MinimalFeatureDto());
+        StubPatch();
 
         var response = await client.PatchAsync(
             "/api/plan/features/1/tracks/Backend",
             JsonBody(new { }));
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
     [Fact]
@@ -153,16 +125,12 @@ public sealed class PatchFeatureTrackControllerTests(TasksControllerWebApplicati
             .PatchAsync(Arg.Do<PatchFeatureTrackRequest>(r => captured = r),
                 Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
             .Returns(GrpcTestHelpers.UnaryCall(new TrackDto { Id = 1 }));
-        _factory.MockFeatureGetter
-            .GetAsync(Arg.Any<GetFeatureRequest>(),
-                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
-            .Returns(GrpcTestHelpers.UnaryCall(MinimalFeatureDto(managerUserId: 42)));
 
         var response = await client.PatchAsync(
             "/api/plan/features/1/tracks/Frontend",
             JsonBody(new { trackOwnerUserId = 7 }));
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         captured.Should().NotBeNull();
         captured!.CallerUserId.Should().Be(42);
         captured.Kind.Should().Be(FeatureTrackKind.Frontend);
@@ -180,10 +148,6 @@ public sealed class PatchFeatureTrackControllerTests(TasksControllerWebApplicati
             .PatchAsync(Arg.Do<PatchFeatureTrackRequest>(r => captured = r),
                 Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
             .Returns(GrpcTestHelpers.UnaryCall(new TrackDto { Id = 1 }));
-        _factory.MockFeatureGetter
-            .GetAsync(Arg.Any<GetFeatureRequest>(),
-                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
-            .Returns(GrpcTestHelpers.UnaryCall(MinimalFeatureDto()));
 
         var request = new HttpRequestMessage(HttpMethod.Patch, "/api/plan/features/1/tracks/Frontend")
         {
@@ -193,7 +157,7 @@ public sealed class PatchFeatureTrackControllerTests(TasksControllerWebApplicati
 
         var response = await client.SendAsync(request);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         captured!.HasExpectedVersion.Should().BeTrue();
         captured.ExpectedVersion.Should().Be(3);
     }
@@ -208,10 +172,6 @@ public sealed class PatchFeatureTrackControllerTests(TasksControllerWebApplicati
             .PatchAsync(Arg.Do<PatchFeatureTrackRequest>(r => captured = r),
                 Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
             .Returns(GrpcTestHelpers.UnaryCall(new TrackDto { Id = 1 }));
-        _factory.MockFeatureGetter
-            .GetAsync(Arg.Any<GetFeatureRequest>(),
-                Arg.Any<Metadata>(), Arg.Any<DateTime?>(), Arg.Any<CancellationToken>())
-            .Returns(GrpcTestHelpers.UnaryCall(MinimalFeatureDto()));
 
         var request = new HttpRequestMessage(HttpMethod.Patch, "/api/plan/features/1/tracks/Backend")
         {
@@ -221,7 +181,7 @@ public sealed class PatchFeatureTrackControllerTests(TasksControllerWebApplicati
 
         var response = await client.SendAsync(request);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         captured!.HasExpectedVersion.Should().BeTrue();
         captured.ExpectedVersion.Should().Be(9);
     }
@@ -338,34 +298,17 @@ public sealed class PatchFeatureTrackControllerTests(TasksControllerWebApplicati
     }
 
     [Fact]
-    public async Task PatchTrack_ResponseBody_IsFeatureTrackShape_NotFeatureSummary()
+    public async Task PatchTrack_ResponseBody_IsEmpty()
     {
         var client = ClientWithToken(ManagerToken());
-
-        var featureDto = MinimalFeatureDto();
-        featureDto.Tracks.Add(new TrackDto
-        {
-            Id                = 10,
-            FeatureId         = 1,
-            Kind              = FeatureTrackKind.Backend,
-            TrackOwnerUserId  = 1,
-            Version           = 2,
-        });
-        StubPatchAndGet(featureDto);
+        StubPatch();
 
         var response = await client.PatchAsync(
             "/api/plan/features/1/tracks/Backend",
             JsonBody(new { }));
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         var body = await response.Content.ReadAsStringAsync();
-        using var doc = System.Text.Json.JsonDocument.Parse(body);
-        var root = doc.RootElement;
-
-        root.TryGetProperty("kind", out _).Should().BeTrue("response must expose 'kind'");
-        root.TryGetProperty("stages", out _).Should().BeTrue("response must expose 'stages'");
-        root.TryGetProperty("featureId", out _).Should().BeTrue("response must expose 'featureId'");
-        root.TryGetProperty("tracks", out _).Should().BeFalse("response must NOT be FeatureSummary (no 'tracks' envelope)");
+        body.Should().BeEmpty();
     }
 }

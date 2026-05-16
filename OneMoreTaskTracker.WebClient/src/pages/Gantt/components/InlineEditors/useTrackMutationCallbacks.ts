@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import * as planApi from '../../../../common/api/planApi';
-import type { FeatureTrack } from '../../../../common/types/featureTrack';
-import type { FeatureTrackKind, FeatureTrackStageKey } from '../../../../common/types/featureTrack';
+import type { FeatureTrackKind, FeatureTrackStage, FeatureTrackStageKey } from '../../../../common/types/featureTrack';
 
 export interface TrackMutationCallbacks {
   saveTrackOwner: (
@@ -34,60 +33,69 @@ export interface TrackMutationCallbacks {
 }
 
 export interface UseTrackMutationCallbacksOptions {
-  onTrackApplied: (featureId: number, next: FeatureTrack) => void;
+  /**
+   * Called after each successful track-stage PATCH (204 ack) with the
+   * locally-known values so the store reflects the committed state without
+   * waiting for a refetch.
+   */
+  onStageApplied: (
+    featureId: number,
+    kind: FeatureTrackKind,
+    stageKey: FeatureTrackStageKey,
+    patch: Partial<Pick<FeatureTrackStage, 'plannedStart' | 'plannedEnd' | 'stageOwnerUserId'>>,
+  ) => void;
 }
 
 export function useTrackMutationCallbacks(
-  options: UseTrackMutationCallbacksOptions,
+  opts: UseTrackMutationCallbacksOptions,
 ): TrackMutationCallbacks {
-  const { onTrackApplied } = options;
+  const { onStageApplied } = opts;
 
   const saveTrackOwner = useCallback<TrackMutationCallbacks['saveTrackOwner']>(
     async (featureId, kind, next, version) => {
-      const updated = await planApi.patchFeatureTrack(featureId, kind, {
+      await planApi.patchFeatureTrack(featureId, kind, {
         trackOwnerUserId: next,
         expectedVersion: version,
       });
-      onTrackApplied(featureId, updated);
     },
-    [onTrackApplied],
+    [],
   );
 
   const saveTrackStageOwner = useCallback<TrackMutationCallbacks['saveTrackStageOwner']>(
     async (featureId, kind, stageKey, next, stageVersion) => {
-      const updated = await planApi.patchFeatureTrackStage(featureId, kind, stageKey, {
+      await planApi.patchFeatureTrackStage(featureId, kind, stageKey, {
         stageOwnerUserId: next,
         expectedStageVersion: stageVersion,
       });
-      onTrackApplied(featureId, updated);
+      onStageApplied(featureId, kind, stageKey, { stageOwnerUserId: next });
     },
-    [onTrackApplied],
+    [onStageApplied],
   );
 
   const saveTrackStagePlannedStart = useCallback<
     TrackMutationCallbacks['saveTrackStagePlannedStart']
   >(
     async (featureId, kind, stageKey, next, stageVersion) => {
-      const updated = await planApi.patchFeatureTrackStage(featureId, kind, stageKey, {
+      await planApi.patchFeatureTrackStage(featureId, kind, stageKey, {
         plannedStart: next,
         expectedStageVersion: stageVersion,
       });
-      onTrackApplied(featureId, updated);
+      onStageApplied(featureId, kind, stageKey, { plannedStart: next });
     },
-    [onTrackApplied],
+    [onStageApplied],
   );
 
   const saveTrackStagePlannedEnd = useCallback<
     TrackMutationCallbacks['saveTrackStagePlannedEnd']
   >(
     async (featureId, kind, stageKey, next, stageVersion) => {
-      const updated = await planApi.patchFeatureTrackStage(featureId, kind, stageKey, {
+      await planApi.patchFeatureTrackStage(featureId, kind, stageKey, {
         plannedEnd: next,
         expectedStageVersion: stageVersion,
       });
-      onTrackApplied(featureId, updated);
+      onStageApplied(featureId, kind, stageKey, { plannedEnd: next });
     },
-    [onTrackApplied],
+    [onStageApplied],
   );
 
   return useMemo(

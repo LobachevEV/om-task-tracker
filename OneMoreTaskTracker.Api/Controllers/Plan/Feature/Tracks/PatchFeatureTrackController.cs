@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using OneMoreTaskTracker.Api.Auth;
 using OneMoreTaskTracker.Api.Controllers.Plan.Feature;
 using OneMoreTaskTracker.Api.Roster;
-using OneMoreTaskTracker.Proto.Features.GetFeatureQuery;
 using OneMoreTaskTracker.Proto.Features.PatchFeatureTrackCommand;
 
 namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.Tracks;
@@ -14,12 +13,12 @@ namespace OneMoreTaskTracker.Api.Controllers.Plan.Feature.Tracks;
 [Route("api/plan/features/{featureId:int}/tracks/{kind}")]
 public class PatchFeatureTrackController(
     FeatureTrackPatcher.FeatureTrackPatcherClient featureTrackPatcher,
-    FeatureGetter.FeatureGetterClient featureGetter,
     IValidator<PatchFeatureTrackPayload> validator,
     ILogger<PatchFeatureTrackController> logger) : ControllerBase
 {
     [HttpPatch("")]
-    public async Task<ActionResult<FeatureTrackSummaryResponse>> Patch(
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> Patch(
         int featureId,
         string kind,
         [FromBody] PatchFeatureTrackPayload body,
@@ -54,12 +53,6 @@ public class PatchFeatureTrackController(
             request.ExpectedVersion = expectedVersion.Value;
 
         await featureTrackPatcher.PatchAsync(request, cancellationToken: ct);
-
-        var dto = await featureGetter.GetAsync(
-            new GetFeatureRequest { Id = featureId },
-            cancellationToken: ct);
-
-        var track = dto.Tracks.First(t => t.Kind == parsedKind);
-        return Ok(FeatureTrackSummaryResponse.From(track));
+        return NoContent();
     }
 }

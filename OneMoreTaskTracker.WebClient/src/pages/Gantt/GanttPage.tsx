@@ -15,7 +15,6 @@ import type {
   FeatureSummary,
   MiniTeamMember,
 } from '../../common/types/feature';
-import type { FeatureTrack } from '../../common/types/featureTrack';
 import type { TeamRosterMember } from '../../common/api/teamApi';
 import { AddFeatureRow } from './components/AddFeatureRow';
 import { GanttChunkStripe } from './components/GanttChunkStripe';
@@ -25,7 +24,7 @@ import { GanttFeatureRow } from './components/GanttFeatureRow';
 import { GanttGoToDate } from './components/GanttGoToDate';
 import { GanttTimelineScroller } from './components/GanttTimelineScroller';
 import { GanttToolbar } from './components/GanttToolbar';
-import { usePlanFeatures } from './usePlanFeatures';
+import { usePlanFeatures, type UsePlanFeaturesResult } from './usePlanFeatures';
 import { useTeamRoster } from './useTeamRoster';
 import { useGanttLayout, type GanttLane } from './useGanttLayout';
 import { useGanttPageState, type GanttPageState } from './useGanttPageState';
@@ -104,10 +103,10 @@ export interface GanttPageInternalProps {
    */
   onFeatureUpdated: (next: FeatureSummary) => void;
   /**
-   * Merge an updated track back into the feature row.
-   * Supplied by `usePlanFeatures.applyTrackUpdate`.
+   * Surgically update a track stage with locally-known values after a 204
+   * PATCH ack. Supplied by `usePlanFeatures.applyTrackStageUpdate`.
    */
-  onTrackUpdated: (featureId: number, next: FeatureTrack) => void;
+  onTrackStageApplied: UsePlanFeaturesResult['applyTrackStageUpdate'];
   /** Chunk-fetch callback wired into the scrollable timeline. */
   loadChunk: (req: ScrollChunkRequest) => Promise<unknown>;
 }
@@ -151,7 +150,7 @@ export function GanttPageInternal({
   onRetry,
   state,
   onFeatureUpdated,
-  onTrackUpdated,
+  onTrackStageApplied,
   loadChunk,
 }: GanttPageInternalProps) {
   const { t } = useTranslation('gantt');
@@ -160,7 +159,7 @@ export function GanttPageInternal({
   const dayPx = DAY_PX_BY_ZOOM[state.zoom];
   const isManager = role === 'Manager';
   const mutations = useFeatureMutationCallbacks({ onApplied: onFeatureUpdated });
-  const trackMutations = useTrackMutationCallbacks({ onTrackApplied: onTrackUpdated });
+  const trackMutations = useTrackMutationCallbacks({ onStageApplied: onTrackStageApplied });
 
   const trailingStripeWidthPx = CHUNK_DAYS * dayPx;
 
@@ -474,7 +473,7 @@ export function GanttPage() {
       onRetry={features.refetch}
       state={state}
       onFeatureUpdated={features.applyFeatureUpdate}
-      onTrackUpdated={features.applyTrackUpdate}
+      onTrackStageApplied={features.applyTrackStageUpdate}
       loadChunk={loadChunk}
     />
   );

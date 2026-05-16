@@ -62,7 +62,7 @@ function PageHarness({
       onRetry={() => {}}
       state={state}
       onFeatureUpdated={() => {}}
-      onTrackUpdated={() => {}}
+      onTrackStageApplied={() => {}}
       loadChunk={async () => {}}
     />
   );

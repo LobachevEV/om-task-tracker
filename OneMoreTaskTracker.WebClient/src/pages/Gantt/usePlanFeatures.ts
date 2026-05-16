@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import * as planApi from '../../common/api/planApi';
 import type { ListFeaturesParams } from '../../common/api/planApi';
 import type { FeatureScope, FeatureState, FeatureSummary } from '../../common/types/feature';
-import type { FeatureTrack } from '../../common/types/featureTrack';
+import type { FeatureTrackKind, FeatureTrackStage, FeatureTrackStageKey } from '../../common/types/featureTrack';
 import { useRefetchOnFocus } from '../../common/hooks/useRefetchOnFocus';
 
 export interface UsePlanFeaturesParams {
@@ -47,11 +47,18 @@ export interface UsePlanFeaturesResult {
    */
   applyFeatureUpdate: (next: FeatureSummary) => void;
   /**
-   * Merge an updated `FeatureTrack` into the existing feature's `tracks`
-   * array. Replaces the matching track by `kind`; no-op when the feature
-   * or track is not present.
+   * Surgically update specific fields of a single track stage using
+   * locally-known values (optimistic-ack after a 204 PATCH). The BE never
+   * returns a body, so callers supply the values they already typed.
+   *
+   * No-op when the feature, track, or stage is not found in the cache.
    */
-  applyTrackUpdate: (featureId: number, next: FeatureTrack) => void;
+  applyTrackStageUpdate: (
+    featureId: number,
+    kind: FeatureTrackKind,
+    stageKey: FeatureTrackStageKey,
+    patch: Partial<Pick<FeatureTrackStage, 'plannedStart' | 'plannedEnd' | 'stageOwnerUserId'>>,
+  ) => void;
 }
 
 function cacheKey(params: { scope?: FeatureScope; state?: FeatureState }): string {
@@ -212,37 +219,40 @@ export function usePlanFeatures(params: UsePlanFeaturesParams): UsePlanFeaturesR
     [key],
   );
 
-  const applyTrackUpdate = useCallback(
-    (featureId: number, next: FeatureTrack) => {
+  const applyTrackStageUpdate = useCallback(
+    (
+      featureId: number,
+      kind: FeatureTrackKind,
+      stageKey: FeatureTrackStageKey,
+      patch: Partial<Pick<FeatureTrackStage, 'plannedStart' | 'plannedEnd' | 'stageOwnerUserId'>>,
+    ) => {
       setData((prev) => {
         if (!prev) return prev;
         let changed = false;
         const replaced = prev.map((row) => {
           if (row.id !== featureId) return row;
-          const existingTracks = row.tracks ?? [];
-          const hasMatch = existingTracks.some((t) => t.kind === next.kind);
-          const updatedTracks = hasMatch
-            ? existingTracks.map((t) => (t.kind === next.kind ? next : t))
-            : [...existingTracks, next];
+          const track = row.tracks?.find((t) => t.kind === kind);
+          if (!track) return row;
+          const stageIdx = track.stages.findIndex((s) => s.stageKey === stageKey);
+          if (stageIdx === -1) return row;
+          const oldStage = track.stages[stageIdx];
+          const newStage = { ...oldStage, ...patch };
+          const newStages = track.stages.map((s, i) => (i === stageIdx ? newStage : s));
+          const newTrack = { ...track, stages: newStages };
+          const newTracks = row.tracks!.map((t) => (t.kind === kind ? newTrack : t));
+          const newRow = { ...row, tracks: newTracks };
           changed = true;
-          return { ...row, tracks: updatedTracks };
+          const cached = featuresCache.get(key);
+          if (cached?.has(featureId)) {
+            cached.set(featureId, newRow);
+          }
+          return newRow;
         });
-        if (!changed) return prev;
-        const cached = featuresCache.get(key);
-        if (cached && cached.has(featureId)) {
-          const cachedRow = cached.get(featureId)!;
-          const existingTracks = cachedRow.tracks ?? [];
-          const hasMatch = existingTracks.some((t) => t.kind === next.kind);
-          const updatedTracks = hasMatch
-            ? existingTracks.map((t) => (t.kind === next.kind ? next : t))
-            : [...existingTracks, next];
-          cached.set(featureId, { ...cachedRow, tracks: updatedTracks });
-        }
-        return replaced;
+        return changed ? replaced : prev;
       });
     },
     [key],
   );
 
-  return { data, loading, error, refetch, loadChunk, applyFeatureUpdate, applyTrackUpdate };
+  return { data, loading, error, refetch, loadChunk, applyFeatureUpdate, applyTrackStageUpdate };
 }
