@@ -60,9 +60,11 @@
      suppresses `overflow: auto` on the child. Force shrink-to-fit so the
      internal scroll container works inside a flex column parent. */
   min-block-size: 0;
-  /* The scroller owns horizontal overflow; the wrap owns vertical. */
+  /* Clip both axes on the wrap — the scroller viewport owns vertical scroll;
+     overflow-y:hidden here prevents layout bleed without adding a second
+     scroll container that would steal sticky context from the viewport. */
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: hidden;
   display: flex;
   flex-direction: column;
 }

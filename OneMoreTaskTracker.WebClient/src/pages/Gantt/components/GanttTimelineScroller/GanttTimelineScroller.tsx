@@ -28,14 +28,13 @@ export interface GanttTimelineScrollerProps {
 }
 
 /**
- * Single horizontally-scrolling container for the Gantt date axis. Owns:
+ * Two-axis scrolling container for the Gantt date axis. Owns:
  *  - the native horizontal scrollbar,
+ *  - the native vertical scrollbar (the viewport is the single scroll container
+ *    for both axes; `.gantt-page__header-row` sticky resolves against it),
  *  - the off-screen `Today` chip (top-right) that appears once today scrolls
  *    out of the viewport,
  *  - the a11y `role="region"` + label.
- *
- * Vertical scroll is the page's existing vertical scroll (this scroller's
- * `overflow-y` is `hidden`).
  *
  * Forwards its scrollable element through `ref` so the page's
  * `useGanttTimelineScroll` hook can attach to it.
