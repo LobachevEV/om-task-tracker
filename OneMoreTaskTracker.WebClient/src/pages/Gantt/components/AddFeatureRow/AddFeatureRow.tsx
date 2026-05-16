@@ -14,7 +14,7 @@ import './AddFeatureRow.css';
 const TITLE_MAX = 200;
 const PULSE_MS = 280;
 
-export type AddFeatureRowVariant = 'row' | 'standalone';
+export type AddFeatureRowVariant = 'row' | 'standalone' | 'header';
 
 export interface AddFeatureRowProps {
   onCreated: (feature: FeatureSummary) => void;
@@ -48,7 +48,9 @@ export function AddFeatureRow({
   const tooLong = trimmed.length > TITLE_MAX;
   const isEmpty = trimmed.length === 0;
 
-  const validationMsg = tooLong ? t('inlineEdit.errors.titleTooLong') : null;
+  const validationMsg = tooLong
+    ? t('inlineEdit.errors.titleTooLong')
+    : null;
   const message = errorMsg ?? validationMsg;
 
   const submittable = !isEmpty && !tooLong && status !== 'submitting';
@@ -62,6 +64,11 @@ export function AddFeatureRow({
   const handleSubmit = useCallback(
     async (e?: FormEvent<HTMLFormElement>) => {
       e?.preventDefault();
+      if (isEmpty) {
+        setErrorMsg(t('toolbar.newFeatureEmpty'));
+        inputRef.current?.focus();
+        return;
+      }
       if (!submittable) return;
       setStatus('submitting');
       setErrorMsg(null);
@@ -81,7 +88,7 @@ export function AddFeatureRow({
         inputRef.current?.focus();
       }
     },
-    [api, onCreated, submittable, trimmed, t],
+    [api, isEmpty, onCreated, submittable, trimmed, t],
   );
 
   const handleKeyDown = useCallback(
@@ -120,7 +127,7 @@ export function AddFeatureRow({
         <button
           type="button"
           className="add-feature-row__ghost"
-          onClick={() => setStatus('editing')}
+          onClick={() => { setStatus('editing'); setErrorMsg(null); }}
           aria-label={t('toolbar.newFeature')}
         >
           <span className="add-feature-row__plus" aria-hidden="true">

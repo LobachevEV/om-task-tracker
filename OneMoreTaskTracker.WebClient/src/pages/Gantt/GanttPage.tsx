@@ -335,10 +335,9 @@ export function GanttPageInternal({
             onJumpToToday={scrollToToday}
           >
             <div className="gantt-page__header-row">
-              <div
-                className="gantt-page__header-flank gantt-page__header-flank--leading"
-                aria-hidden="true"
-              />
+              <div className="gantt-page__header-flank gantt-page__header-flank--leading">
+                {isManager ? <AddFeatureRow onCreated={handleCreated} variant="header" /> : null}
+              </div>
               <GanttDateHeader
                 loadedRange={loadedRange}
                 today={state.today}
@@ -363,7 +362,6 @@ export function GanttPageInternal({
                 className="gantt-page__lanes"
                 role="list"
               >
-                {isManager ? <AddFeatureRow onCreated={handleCreated} /> : null}
                 {layout.lanes.map((lane: GanttLane) => {
                   const lead = resolveMember(lane.feature.leadUserId);
                   return (

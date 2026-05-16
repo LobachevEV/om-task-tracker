@@ -20,6 +20,7 @@
       "popoverLabel": "Filter by state"
     },
     "newFeature": "New feature",
+    "newFeatureEmpty": "Title required",
     "revealTasks": "Reveal task sub-bars",
     "hideTasks": "Collapse to features"
   },

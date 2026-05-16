@@ -7,6 +7,10 @@
  *
  * `--standalone` variant: mounts inside `.gantt-empty`. No grid, no sticky;
  * a centered, max-width affordance.
+ *
+ * `--header` variant: mounts inside `.gantt-page__header-flank--leading`
+ * (the sticky gutter column of the header row). Fits within
+ * `var(--gantt-gutter-width)` and never overlaps the date axis.
  */
 
 .add-feature-row {
@@ -180,6 +184,40 @@
   100% {
     background: var(--surface);
   }
+}
+
+/* ---------- header variant ---------- */
+
+/*
+ * Fills the sticky leading-flank column of the header row. Block-size matches
+ * the header row's natural height so the ghost covers the whole cell without
+ * overflowing the date axis to the right (width is clamped to 100%).
+ */
+.add-feature-row--header {
+  display: flex;
+  align-items: stretch;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.add-feature-row--header .add-feature-row__ghost {
+  inline-size: 100%;
+  block-size: auto;
+  padding-block: var(--space-1);
+  padding-inline: var(--space-2);
+}
+
+.add-feature-row--header .add-feature-row__form {
+  inline-size: 100%;
+  block-size: auto;
+  padding-block: 2px;
+  padding-inline: var(--space-2);
+}
+
+.add-feature-row--header .add-feature-row__message {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -20,6 +20,7 @@
       "popoverLabel": "Фильтр по статусу"
     },
     "newFeature": "Новая фича",
+    "newFeatureEmpty": "Введите название",
     "revealTasks": "Показать задачи",
     "hideTasks": "Скрыть задачи"
   },
