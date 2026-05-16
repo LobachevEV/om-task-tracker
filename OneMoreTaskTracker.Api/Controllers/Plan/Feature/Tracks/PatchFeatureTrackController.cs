@@ -19,7 +19,7 @@ public class PatchFeatureTrackController(
     ILogger<PatchFeatureTrackController> logger) : ControllerBase
 {
     [HttpPatch("")]
-    public async Task<ActionResult<FeatureSummaryResponse>> Patch(
+    public async Task<ActionResult<FeatureTrackSummaryResponse>> Patch(
         int featureId,
         string kind,
         [FromBody] PatchFeatureTrackPayload body,
@@ -59,6 +59,7 @@ public class PatchFeatureTrackController(
             new GetFeatureRequest { Id = featureId },
             cancellationToken: ct);
 
-        return Ok(FeatureSummaryResponse.From(dto, PlanRequestHelpers.EmptyTasks));
+        var track = dto.Tracks.First(t => t.Kind == parsedKind);
+        return Ok(FeatureTrackSummaryResponse.From(track));
     }
 }

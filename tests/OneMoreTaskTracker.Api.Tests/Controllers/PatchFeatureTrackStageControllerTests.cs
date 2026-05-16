@@ -81,8 +81,9 @@ public sealed class PatchFeatureTrackStageControllerTests(TasksControllerWebAppl
             .Returns(GrpcTestHelpers.UnaryCall(new IsTeamMemberResponse { IsMember = false }));
     }
 
-    private static GetFeatureDto MinimalFeatureDto(int id = 1, int managerUserId = 1) =>
-        new()
+    private static GetFeatureDto MinimalFeatureDto(int id = 1, int managerUserId = 1)
+    {
+        var dto = new GetFeatureDto
         {
             Id            = id,
             Title         = "Feature",
@@ -96,6 +97,10 @@ public sealed class PatchFeatureTrackStageControllerTests(TasksControllerWebAppl
             UpdatedAt     = DateTime.UtcNow.ToString("O"),
             Version       = 1,
         };
+        dto.Tracks.Add(new TrackDto { Id = 1, FeatureId = id, Kind = FeatureTrackKind.Frontend, TrackOwnerUserId = managerUserId, Version = 1 });
+        dto.Tracks.Add(new TrackDto { Id = 2, FeatureId = id, Kind = FeatureTrackKind.Backend,  TrackOwnerUserId = managerUserId, Version = 1 });
+        return dto;
+    }
 
     private void StubPatchAndGet(GetFeatureDto featureDto)
     {
@@ -416,5 +421,46 @@ public sealed class PatchFeatureTrackStageControllerTests(TasksControllerWebAppl
             JsonBody(new { }));
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task PatchTrackStage_ResponseBody_IsFeatureTrackShape_NotFeatureSummary()
+    {
+        var client = ClientWithToken(ManagerToken());
+
+        var featureDto = MinimalFeatureDto();
+        featureDto.Tracks.Add(new TrackDto
+        {
+            Id                = 20,
+            FeatureId         = 1,
+            Kind              = FeatureTrackKind.Frontend,
+            TrackOwnerUserId  = 1,
+            Version           = 1,
+            Stages            =
+            {
+                new FeatureTrackStageDto
+                {
+                    StageKey     = FeatureTrackStageKey.TrackStageDevelopment,
+                    PlannedStart = "2026-06-01",
+                    PlannedEnd   = "2026-06-30",
+                }
+            },
+        });
+        StubPatchAndGet(featureDto);
+
+        var response = await client.PatchAsync(
+            "/api/plan/features/1/tracks/Frontend/stages/Development",
+            JsonBody(new { plannedStart = "2026-06-01" }));
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var body = await response.Content.ReadAsStringAsync();
+        using var doc = System.Text.Json.JsonDocument.Parse(body);
+        var root = doc.RootElement;
+
+        root.TryGetProperty("kind", out _).Should().BeTrue("response must expose 'kind'");
+        root.TryGetProperty("stages", out _).Should().BeTrue("response must expose 'stages'");
+        root.TryGetProperty("featureId", out _).Should().BeTrue("response must expose 'featureId'");
+        root.TryGetProperty("tracks", out _).Should().BeFalse("response must NOT be FeatureSummary (no 'tracks' envelope)");
     }
 }
