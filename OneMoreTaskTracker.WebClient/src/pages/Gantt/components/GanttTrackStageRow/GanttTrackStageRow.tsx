@@ -101,7 +101,7 @@ export function GanttTrackStageRow({
         title: featureTitle,
       })}
       onAnnounce={onAnnounce}
-      dataTestId={`stage-bar-editor-${track.featureId}-${kind}-${stage.stageKey}`}
+      dataTestId={`track-stage-bar-${track.featureId}-${kind}-${stage.stageKey}`}
     >
       {barVisual}
     </StageBarDateEditor>

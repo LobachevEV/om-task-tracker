@@ -61,23 +61,25 @@ describe('StageBarDateEditor — static rendering', () => {
     expect(screen.getByTestId('stage-bar-editor-test')).toBeInTheDocument();
   });
 
-  it('starts in idle state (data-state="idle")', () => {
+  it('starts in empty state (data-state="empty") when no dates', () => {
     render(<StageBarDateEditor {...makeProps()} />);
-    expect(screen.getByRole('button')).toHaveAttribute('data-state', 'idle');
+    expect(screen.getByRole('button')).toHaveAttribute('data-state', 'empty');
   });
 
-  it('has data-has-dates="false" when plannedStart/End are null', () => {
+  it('has data-state="empty" when plannedStart/End are null', () => {
     render(<StageBarDateEditor {...makeProps()} />);
-    expect(screen.getByRole('button')).toHaveAttribute('data-has-dates', 'false');
+    expect(screen.getByRole('button')).toHaveAttribute('data-state', 'empty');
+    expect(screen.getByRole('button')).not.toHaveAttribute('data-has-dates');
   });
 
-  it('has data-has-dates="true" when both dates are set', () => {
+  it('has data-state="set" when both dates are set', () => {
     render(
       <StageBarDateEditor
         {...makeProps({ plannedStart: '2026-05-05', plannedEnd: '2026-05-15' })}
       />,
     );
-    expect(screen.getByRole('button')).toHaveAttribute('data-has-dates', 'true');
+    expect(screen.getByRole('button')).toHaveAttribute('data-state', 'set');
+    expect(screen.getByRole('button')).not.toHaveAttribute('data-has-dates');
   });
 
   it('exposes data-planned-start when set', () => {
@@ -161,13 +163,13 @@ describe('StageBarDateEditor — keyboard mode activation', () => {
     expect(btn).toHaveAttribute('data-state', 'kb-rewrite');
   });
 
-  it('returns to idle on Escape from selectStart', () => {
+  it('returns to empty state on Escape from selectStart (no dates)', () => {
     render(<StageBarDateEditor {...makeProps()} />);
     const btn = screen.getByRole('button');
     fireEvent.keyDown(btn, { key: 'Enter' });
     expect(btn).toHaveAttribute('data-state', 'kb-selectStart');
     fireEvent.keyDown(btn, { key: 'Escape' });
-    expect(btn).toHaveAttribute('data-state', 'idle');
+    expect(btn).toHaveAttribute('data-state', 'empty');
   });
 
   it('renders keyboard caret after entering keyboard mode', () => {

@@ -12,7 +12,7 @@
 }
 
 /* Set-bar cursor zones */
-.stage-bar-date-editor[data-state="idle"][data-has-dates="true"] {
+.stage-bar-date-editor[data-state="set"] {
   cursor: col-resize;
 }
 

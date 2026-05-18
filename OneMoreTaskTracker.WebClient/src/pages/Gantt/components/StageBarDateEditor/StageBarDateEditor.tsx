@@ -105,7 +105,16 @@ export function StageBarDateEditor({
   const isDragging = dragState.status === 'dragging';
   const isCommitting = dragState.status === 'committing' || kbState.phase === 'committing';
 
-  let dataState: string = kbState.phase !== 'idle' ? `kb-${kbState.phase}` : dragState.status;
+  // At-rest states: data-state="empty" (no dates) | data-state="set" (has dates)
+  const atRest = dragState.status === 'idle' && kbState.phase === 'idle';
+  let dataState: string;
+  if (atRest) {
+    dataState = hasDates ? 'set' : 'empty';
+  } else if (kbState.phase !== 'idle') {
+    dataState = `kb-${kbState.phase}`;
+  } else {
+    dataState = dragState.status;
+  }
   if (isCommitting) dataState = 'committing';
 
   const showPreview =
@@ -168,7 +177,6 @@ export function StageBarDateEditor({
       data-testid={dataTestId}
       data-state={dataState}
       data-armed-clear={kbState.phase === 'awaitDeleteConfirm' ? 'true' : 'false'}
-      data-has-dates={hasDates ? 'true' : 'false'}
       data-planned-start={plannedStart ?? undefined}
       data-planned-end={plannedEnd ?? undefined}
       onPointerDown={onPointerDown}
