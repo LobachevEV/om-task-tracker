@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DateWindow } from '../../ganttMath';
-import { dateToPixel, daysBetween } from '../../ganttMath';
+import { dateToPixel } from '../../ganttMath';
 import type { FeatureTrackKind, FeatureTrackStageKey } from '../../../../common/types/featureTrack';
 import type { TrackMutationCallbacks } from '../InlineEditors/useTrackMutationCallbacks';
 import { useStageBarDrag } from './useStageBarDrag';
@@ -49,7 +49,15 @@ export function StageBarDateEditor({
   const locale = i18n.language || 'en';
 
   const onSave = async (range: { plannedStart: string | null; plannedEnd: string | null }) => {
-    await mutations.saveTrackStageRange(featureId, kind, stageKey, range, stageVersion);
+    const startChanged = range.plannedStart !== (plannedStart ?? null);
+    const endChanged = range.plannedEnd !== (plannedEnd ?? null);
+    if (startChanged && !endChanged) {
+      await mutations.saveTrackStagePlannedStart(featureId, kind, stageKey, range.plannedStart, stageVersion);
+    } else if (!startChanged && endChanged) {
+      await mutations.saveTrackStagePlannedEnd(featureId, kind, stageKey, range.plannedEnd, stageVersion);
+    } else {
+      await mutations.saveTrackStageRange(featureId, kind, stageKey, range, stageVersion);
+    }
   };
 
   const announceCommitted = (start: string, end: string) => {
@@ -66,7 +74,7 @@ export function StageBarDateEditor({
   const announceCancelled = () =>
     t('stageBarEditor.announce.cancelled', { defaultValue: 'Date selection cancelled.' });
 
-  const { dragState, onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
+  const { dragState, onPointerDown, onPointerMove, onPointerUp, onPointerCancel, onDragKeyDown } =
     useStageBarDrag({
       plannedStart,
       plannedEnd,
@@ -82,6 +90,7 @@ export function StageBarDateEditor({
     plannedStart,
     plannedEnd,
     today,
+    loadedRangeEnd: loadedRange.end,
     onSave,
     onAnnounce,
     announceCommitted: (start, end) => {
@@ -97,7 +106,6 @@ export function StageBarDateEditor({
   const hasDates = plannedStart != null && plannedEnd != null;
   const isDragging = dragState.status === 'dragging';
   const isCommitting = dragState.status === 'committing' || kbState.phase === 'committing';
-  const isError = dragState.status === 'error';
 
   let dataState: string = kbState.phase !== 'idle' ? `kb-${kbState.phase}` : dragState.status;
   if (isCommitting) dataState = 'committing';
@@ -168,7 +176,10 @@ export function StageBarDateEditor({
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerCancel}
-      onKeyDown={onKeyDown}
+      onKeyDown={(e) => {
+        onDragKeyDown(e);
+        if (!e.defaultPrevented) onKeyDown(e);
+      }}
     >
       {children}
       {showPreview && (

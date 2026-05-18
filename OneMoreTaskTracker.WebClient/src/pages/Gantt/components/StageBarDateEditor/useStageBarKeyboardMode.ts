@@ -22,6 +22,7 @@ type KeyboardAction =
   | { type: 'OPEN_EMPTY'; today: string }
   | { type: 'OPEN_SET'; start: string; end: string }
   | { type: 'MOVE_CARET'; delta: number; start: string | null; end: string | null }
+  | { type: 'SNAP_CARET'; day: string }
   | { type: 'CONFIRM_START'; day: string }
   | { type: 'CONFIRM_END'; day: string }
   | { type: 'COMMIT' }
@@ -79,6 +80,10 @@ function reducer(state: KeyboardState, action: KeyboardAction): KeyboardState {
 
       return { ...state, caretDay: next };
     }
+    case 'SNAP_CARET': {
+      if (state.phase === 'idle') return state;
+      return { ...state, caretDay: action.day };
+    }
     case 'CONFIRM_START': {
       if (state.phase !== 'selectStart') return state;
       return {
@@ -125,6 +130,7 @@ export interface UseStageBarKeyboardModeOptions {
   plannedStart: string | null | undefined;
   plannedEnd: string | null | undefined;
   today: string;
+  loadedRangeEnd?: string;
   disabled?: boolean;
   onSave: (range: { plannedStart: string | null; plannedEnd: string | null }) => Promise<void>;
   onAnnounce?: (message: string) => void;
@@ -143,6 +149,7 @@ export function useStageBarKeyboardMode(
     plannedStart,
     plannedEnd,
     today,
+    loadedRangeEnd,
     disabled = false,
     onSave,
     onAnnounce,
@@ -196,13 +203,29 @@ export function useStageBarKeyboardMode(
 
       if (key === 'ArrowLeft') {
         e.preventDefault();
-        dispatch({ type: 'MOVE_CARET', delta: -1, start: plannedStart ?? null, end: plannedEnd ?? null });
+        const delta = e.shiftKey ? -7 : -1;
+        dispatch({ type: 'MOVE_CARET', delta, start: plannedStart ?? null, end: plannedEnd ?? null });
         return;
       }
 
       if (key === 'ArrowRight') {
         e.preventDefault();
-        dispatch({ type: 'MOVE_CARET', delta: 1, start: plannedStart ?? null, end: plannedEnd ?? null });
+        const delta = e.shiftKey ? 7 : 1;
+        dispatch({ type: 'MOVE_CARET', delta, start: plannedStart ?? null, end: plannedEnd ?? null });
+        return;
+      }
+
+      if (key === 'Home') {
+        e.preventDefault();
+        dispatch({ type: 'SNAP_CARET', day: today });
+        return;
+      }
+
+      if (key === 'End') {
+        e.preventDefault();
+        if (loadedRangeEnd != null) {
+          dispatch({ type: 'SNAP_CARET', day: loadedRangeEnd });
+        }
         return;
       }
 
@@ -276,7 +299,7 @@ export function useStageBarKeyboardMode(
         }
       }
     },
-    [disabled, kbState, plannedStart, plannedEnd, today, commitDraft],
+    [disabled, kbState, plannedStart, plannedEnd, today, commitDraft, loadedRangeEnd],
   );
 
   return { kbState, onKeyDown };

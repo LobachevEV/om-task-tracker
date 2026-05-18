@@ -21,7 +21,7 @@ function makeProps(overrides?: Partial<StageBarDateEditorProps>): StageBarDateEd
   return {
     featureId: 1,
     kind: 'Frontend',
-    stageKey: 'development',
+    stageKey: 'Development',
     stageVersion: 0,
     plannedStart: null,
     plannedEnd: null,

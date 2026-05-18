@@ -31,7 +31,7 @@ export function GanttLegend() {
   }, [open]);
 
   return (
-    <div className="gantt-legend" ref={containerRef}>
+    <div className="gantt-legend" ref={containerRef} data-testid="gantt-legend">
       <Button
         type="button"
         variant="ghost"

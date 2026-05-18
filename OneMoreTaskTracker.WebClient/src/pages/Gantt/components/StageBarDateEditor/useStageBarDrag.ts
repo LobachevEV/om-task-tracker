@@ -86,6 +86,7 @@ export interface UseStageBarDragResult {
   onPointerMove: (e: React.PointerEvent<HTMLElement>) => void;
   onPointerUp: (e: React.PointerEvent<HTMLElement>) => void;
   onPointerCancel: (e: React.PointerEvent<HTMLElement>) => void;
+  onDragKeyDown: (e: React.KeyboardEvent<HTMLElement>) => void;
 }
 
 export function useStageBarDrag(opts: UseStageBarDragOptions): UseStageBarDragResult {
@@ -148,6 +149,7 @@ export function useStageBarDrag(opts: UseStageBarDragOptions): UseStageBarDragRe
 
   const onPointerUp = useCallback(
     (e: React.PointerEvent<HTMLElement>) => {
+      if (dragState.status === 'committing') return;
       if (dragState.status !== 'dragging') return;
       e.currentTarget.releasePointerCapture(e.pointerId);
       const day = getDay(e);
@@ -161,15 +163,11 @@ export function useStageBarDrag(opts: UseStageBarDragOptions): UseStageBarDragRe
         return;
       }
 
-      const isDragGesture = anchor !== day;
-
-      if (isDragGesture) {
-        const { plannedStart: ps, plannedEnd: pe } = computePreviewRange(anchor, day);
-        rangeToCommit = { plannedStart: ps, plannedEnd: pe };
-      } else if (plannedStart != null && plannedEnd != null) {
+      if (plannedStart != null && plannedEnd != null) {
         rangeToCommit = coerceClickToCommit(plannedStart, plannedEnd, day);
       } else {
-        rangeToCommit = { plannedStart: day, plannedEnd: day };
+        const { plannedStart: ps, plannedEnd: pe } = computePreviewRange(anchor, day);
+        rangeToCommit = { plannedStart: ps, plannedEnd: pe };
       }
 
       dispatch({ type: 'COMMIT' });
@@ -213,5 +211,16 @@ export function useStageBarDrag(opts: UseStageBarDragOptions): UseStageBarDragRe
     [dragState.status, onAnnounce, announceCancelled],
   );
 
-  return { dragState, onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
+  const onDragKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLElement>) => {
+      if (dragState.status !== 'dragging') return;
+      if (e.key !== 'Escape') return;
+      e.preventDefault();
+      dispatch({ type: 'CANCEL' });
+      if (onAnnounce) onAnnounce(announceCancelled());
+    },
+    [dragState.status, onAnnounce, announceCancelled],
+  );
+
+  return { dragState, onPointerDown, onPointerMove, onPointerUp, onPointerCancel, onDragKeyDown };
 }

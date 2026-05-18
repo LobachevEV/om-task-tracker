@@ -1,7 +1,6 @@
 import type { CSSProperties } from 'react';
-import { dateToPixel, daysBetween } from '../../ganttMath';
+import { daysBetween } from '../../ganttMath';
 import type { DateWindow } from '../../ganttMath';
-import { spanDays } from './stageBarDragMath';
 
 interface StageBarDragPreviewProps {
   previewStart: string;
@@ -47,7 +46,7 @@ export function StageBarDragPreview({
       data-testid="stage-bar-drag-preview"
     >
       {chip ? (
-        <span className="stage-bar-drag-preview__chip" aria-hidden="true">
+        <span className="stage-bar-drag-preview__chip" aria-hidden="true" data-testid="stage-bar-range-chip">
           {chip}
         </span>
       ) : null}
