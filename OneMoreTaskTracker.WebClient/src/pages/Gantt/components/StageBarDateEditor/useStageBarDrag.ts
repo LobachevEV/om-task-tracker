@@ -76,7 +76,7 @@ export interface UseStageBarDragOptions {
   disabled?: boolean;
   onSave: (range: { plannedStart: string | null; plannedEnd: string | null }) => Promise<void>;
   onAnnounce?: (message: string) => void;
-  announceCommitted: (start: string, end: string) => string;
+  announceCommitted: (start: string | null, end: string | null) => string;
   announceCancelled: () => string;
 }
 
@@ -175,13 +175,7 @@ export function useStageBarDrag(opts: UseStageBarDragOptions): UseStageBarDragRe
       onSave(rangeToCommit).then(
         () => {
           dispatch({ type: 'COMMITTED' });
-          if (
-            onAnnounce &&
-            rangeToCommit.plannedStart != null &&
-            rangeToCommit.plannedEnd != null
-          ) {
-            onAnnounce(announceCommitted(rangeToCommit.plannedStart, rangeToCommit.plannedEnd));
-          }
+          if (onAnnounce) onAnnounce(announceCommitted(rangeToCommit.plannedStart, rangeToCommit.plannedEnd));
         },
         (err: unknown) => {
           const msg = err instanceof Error ? err.message : 'Save failed';

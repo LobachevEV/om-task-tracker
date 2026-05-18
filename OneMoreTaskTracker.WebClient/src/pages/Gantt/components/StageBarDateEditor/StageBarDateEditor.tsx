@@ -60,7 +60,12 @@ export function StageBarDateEditor({
     }
   };
 
-  const announceCommitted = (start: string, end: string) => {
+  const announceCommitted = (start: string | null, end: string | null) => {
+    if (start == null || end == null) {
+      return t('stageBarEditor.announce.rangeCleared', {
+        defaultValue: 'Date range cleared.',
+      });
+    }
     const days = spanDays(start, end);
     return t('stageBarEditor.announce.rangeSet', {
       defaultValue: 'Date range set: {{start}} to {{end}}, {{count}} day.',
@@ -93,14 +98,7 @@ export function StageBarDateEditor({
     loadedRangeEnd: loadedRange.end,
     onSave,
     onAnnounce,
-    announceCommitted: (start, end) => {
-      if (start == null || end == null) {
-        return t('stageBarEditor.announce.rangeCleared', {
-          defaultValue: 'Date range cleared.',
-        });
-      }
-      return announceCommitted(start, end);
-    },
+    announceCommitted,
   });
 
   const hasDates = plannedStart != null && plannedEnd != null;
