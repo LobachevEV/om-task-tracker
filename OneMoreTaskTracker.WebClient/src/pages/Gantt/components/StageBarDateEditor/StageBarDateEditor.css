@@ -1,0 +1,116 @@
+.stage-bar-date-editor {
+  position: absolute;
+  inset: 0;
+  cursor: crosshair;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.stage-bar-date-editor:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* Set-bar cursor zones */
+.stage-bar-date-editor[data-state="idle"][data-has-dates="true"] {
+  cursor: col-resize;
+}
+
+.stage-bar-date-editor[data-state="dragging"] {
+  cursor: grabbing;
+}
+
+.stage-bar-date-editor[data-state="committing"] {
+  cursor: wait;
+}
+
+.stage-bar-date-editor[data-state="error"] {
+  cursor: not-allowed;
+}
+
+/* Preview overlay */
+.stage-bar-drag-preview {
+  position: absolute;
+  height: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: var(--radius-xs);
+  background: color-mix(in oklch, var(--preview-color, var(--accent)) 40%, transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .stage-bar-drag-preview {
+    transition: left 60ms linear, width 60ms linear;
+  }
+}
+
+/* Range chip inside preview */
+.stage-bar-drag-preview__chip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--surface-overlay, oklch(0.18 0 0 / 0.85));
+  color: var(--text-primary, oklch(1 0 0));
+  font-size: var(--text-xs, 10px);
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm, 4px);
+  pointer-events: none;
+}
+
+/* Keyboard caret */
+.stage-bar-kb-caret {
+  position: absolute;
+  width: var(--gantt-day-px, 20px);
+  height: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-xs);
+  background: transparent;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .stage-bar-kb-caret {
+    transition: left 100ms var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1));
+  }
+}
+
+/* Keyboard mode hint */
+.stage-bar-date-editor__kb-hint {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  background: var(--surface-overlay, oklch(0.18 0 0 / 0.85));
+  color: var(--text-primary, oklch(1 0 0));
+  font-size: var(--text-xs, 10px);
+  padding: 3px 7px;
+  border-radius: var(--radius-sm, 4px);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Delete confirm overlay */
+.stage-bar-date-editor__delete-confirm {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in oklch, var(--color-error, oklch(0.65 0.2 20)) 20%, transparent);
+  border: 1px solid var(--color-error, oklch(0.65 0.2 20));
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-xs, 10px);
+  color: var(--color-error, oklch(0.65 0.2 20));
+  font-weight: 600;
+  pointer-events: none;
+  z-index: 3;
+}

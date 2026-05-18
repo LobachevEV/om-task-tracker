@@ -38,7 +38,8 @@
     "states": "Lifecycle",
     "today": "Today",
     "todayAt": "Today {{date}}",
-    "hint": "Hover a lane to reveal task-level bars."
+    "hint": "Hover a lane to reveal task-level bars.",
+    "dragHint": "Drag on a stage bar to set dates. Click to adjust start or end."
   },
   "row": {
     "progress": "{{done}} of {{total}} tasks shipped",
@@ -232,6 +233,22 @@
       "overlap_one": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}}. {{days}}-day overlap.",
       "overlap_other": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}}. {{days}}-day overlap.",
       "overlap": "{{fromStage}} ends {{fromDate}} · {{toStage}} starts {{toDate}}. {{days}}-day overlap."
+    }
+  },
+  "stageBarEditor": {
+    "ariaLabel": "Set date range for {{stage}} stage of \"{{title}}\"",
+    "announce": {
+      "rangeSet_one": "Date range set: {{start}} to {{end}}, {{count}} day.",
+      "rangeSet_other": "Date range set: {{start}} to {{end}}, {{count}} days.",
+      "rangeCleared": "Date range cleared.",
+      "cancelled": "Date selection cancelled."
+    },
+    "kb": {
+      "pickStart": "Arrow keys to move · Enter to set start",
+      "pickEnd": "Arrow keys to move · Enter to set end",
+      "rewrite": "Arrow keys to adjust · Enter to confirm · Del to clear",
+      "confirmDelete": "Enter to clear dates · Esc to cancel",
+      "confirmDeleteLabel": "Enter to clear"
     }
   }
 }

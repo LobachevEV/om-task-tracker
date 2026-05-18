@@ -1,6 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { GanttStageBar } from '../../../../../src/pages/Gantt/components/GanttStageBar/GanttStageBar';
 import type { BarGeometryPx } from '../../../../../src/pages/Gantt/ganttMath';
 
@@ -78,51 +77,49 @@ describe('GanttStageBar — read-only', () => {
   });
 });
 
-describe('GanttStageBar — editable', () => {
-  it('renders as a button when canEdit=true and onClick is provided', () => {
+describe('GanttStageBar — children and dataTestId', () => {
+  it('renders children inside the bar', () => {
     render(
       <GanttStageBar
         bar={BAR}
         status="current"
         tokenVar="--state-development"
         stripeAxis="btt"
-        ariaLabel="edit me"
-        canEdit
-        onClick={vi.fn()}
-      />,
+        ariaLabel="bar with child"
+      >
+        <span data-testid="child-node">child</span>
+      </GanttStageBar>,
     );
-    expect(screen.getByRole('button', { name: 'edit me' })).toBeInTheDocument();
+    expect(screen.getByTestId('child-node')).toBeInTheDocument();
   });
 
-  it('calls onClick when clicked', async () => {
-    const handler = vi.fn();
+  it('exposes data-testid when provided', () => {
     render(
       <GanttStageBar
         bar={BAR}
         status="current"
         tokenVar="--state-development"
         stripeAxis="btt"
-        ariaLabel="clickable bar"
-        canEdit
-        onClick={handler}
+        ariaLabel="test-id bar"
+        dataTestId="my-bar"
       />,
     );
-    await userEvent.click(screen.getByRole('button', { name: 'clickable bar' }));
-    expect(handler).toHaveBeenCalledOnce();
+    expect(screen.getByTestId('my-bar')).toBeInTheDocument();
   });
 
-  it('renders as div (not button) when canEdit=true but no onClick', () => {
+  it('always renders as role=img regardless of children', () => {
     render(
       <GanttStageBar
         bar={BAR}
-        status="upcoming"
+        status="current"
         tokenVar="--state-development"
         stripeAxis="btt"
-        ariaLabel="no click"
-        canEdit
-      />,
+        ariaLabel="always img"
+      >
+        <span>inner</span>
+      </GanttStageBar>,
     );
     expect(screen.queryByRole('button')).toBeNull();
-    expect(screen.getByRole('img', { name: 'no click' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'always img' })).toBeInTheDocument();
   });
 });

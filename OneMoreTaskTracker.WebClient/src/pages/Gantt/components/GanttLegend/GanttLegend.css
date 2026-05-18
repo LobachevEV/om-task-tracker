@@ -100,3 +100,13 @@
 .gantt-legend__label {
   white-space: nowrap;
 }
+
+.gantt-legend__drag-hint {
+  grid-column: 1 / -1;
+  margin: var(--space-2) 0 0;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}

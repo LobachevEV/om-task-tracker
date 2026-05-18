@@ -10,6 +10,7 @@ import { formatShortDate, type DateWindow } from '../../ganttMath';
 import { getTrackStageMeta } from '../../trackStageMeta';
 import { computeTrackStageBars } from '../../trackStageGeometry';
 import { GanttStageBar } from '../GanttStageBar';
+import { StageBarDateEditor } from '../StageBarDateEditor';
 import { Grid } from '../../../../common/ds/spatial';
 import type { TrackMutationCallbacks } from '../InlineEditors/useTrackMutationCallbacks';
 import { GanttRow } from '../GanttRow';
@@ -68,16 +69,43 @@ export function GanttTrackStageRow({
     !stage.plannedStart &&
     !stage.plannedEnd;
 
-  const barNode =
-    barEntry && (barEntry.bar || barEntry.ghost) ? (
-      <GanttStageBar
-        bar={(barEntry.bar ?? barEntry.ghost)!}
-        status={barEntry.status}
-        tokenVar={meta.tokenVar}
-        stripeAxis={meta.stripeAxis}
-        ariaLabel={`${stageName}: ${shortStart} – ${shortEnd}`}
-      />
-    ) : null;
+  const barGeometry = barEntry && (barEntry.bar ?? barEntry.ghost) ? (barEntry.bar ?? barEntry.ghost)! : null;
+
+  const barVisual = barGeometry ? (
+    <GanttStageBar
+      bar={barGeometry}
+      status={barEntry!.status}
+      tokenVar={meta.tokenVar}
+      stripeAxis={meta.stripeAxis}
+      ariaLabel={`${stageName}: ${shortStart} – ${shortEnd}`}
+      dataTestId={`stage-bar-${track.featureId}-${kind}-${stage.stageKey}`}
+    />
+  ) : null;
+
+  const barNode = canEdit && mutations && barGeometry ? (
+    <StageBarDateEditor
+      featureId={track.featureId}
+      kind={kind}
+      stageKey={stage.stageKey}
+      stageVersion={stage.stageVersion}
+      plannedStart={stage.plannedStart}
+      plannedEnd={stage.plannedEnd}
+      today={today}
+      loadedRange={loadedRange}
+      dayPx={dayPx}
+      tokenVar={meta.tokenVar}
+      mutations={mutations}
+      ariaLabel={t('stageBarEditor.ariaLabel', {
+        defaultValue: 'Set date range for {{stage}} stage of "{{title}}"',
+        stage: stageName,
+        title: featureTitle,
+      })}
+      onAnnounce={onAnnounce}
+      dataTestId={`stage-bar-editor-${track.featureId}-${kind}-${stage.stageKey}`}
+    >
+      {barVisual}
+    </StageBarDateEditor>
+  ) : barVisual;
 
   return (
     <GanttRow
@@ -151,8 +179,7 @@ export function GanttTrackStageRow({
               locale={locale}
               featureTitle={featureTitle}
               stageName={stageName}
-              canEdit={canEdit}
-              mutations={mutations}
+              canEdit={false}
               onAnnounce={onAnnounce}
             />
           )}

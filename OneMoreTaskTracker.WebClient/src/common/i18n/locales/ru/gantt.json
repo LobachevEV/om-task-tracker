@@ -42,7 +42,8 @@
     "states": "Жизненный цикл",
     "today": "Сегодня",
     "todayAt": "Сегодня {{date}}",
-    "hint": "Наведите на строку, чтобы увидеть задачи."
+    "hint": "Наведите на строку, чтобы увидеть задачи.",
+    "dragHint": "Перетащите по бару для задания дат. Клик — изменить начало или конец."
   },
   "row": {
     "progress": "Сделано {{done}} из {{total}} задач",
@@ -243,6 +244,24 @@
       "overlap_many": "{{fromStage}} заканчивается {{fromDate}} · {{toStage}} начинается {{toDate}} — перекрытие {{days}} дней.",
       "overlap_other": "{{fromStage}} заканчивается {{fromDate}} · {{toStage}} начинается {{toDate}} — перекрытие {{days}} дней.",
       "overlap": "{{fromStage}} заканчивается {{fromDate}} · {{toStage}} начинается {{toDate}} — перекрытие {{days}} дн."
+    }
+  },
+  "stageBarEditor": {
+    "ariaLabel": "Задать диапазон дат для этапа {{stage}} функции «{{title}}»",
+    "announce": {
+      "rangeSet_one": "Диапазон задан: {{start}} — {{end}}, {{count}} день.",
+      "rangeSet_few": "Диапазон задан: {{start}} — {{end}}, {{count}} дня.",
+      "rangeSet_many": "Диапазон задан: {{start}} — {{end}}, {{count}} дней.",
+      "rangeSet_other": "Диапазон задан: {{start}} — {{end}}, {{count}} дней.",
+      "rangeCleared": "Даты очищены.",
+      "cancelled": "Выбор дат отменён."
+    },
+    "kb": {
+      "pickStart": "Стрелки для перемещения · Enter для выбора начала",
+      "pickEnd": "Стрелки для перемещения · Enter для выбора конца",
+      "rewrite": "Стрелки для изменения · Enter для подтверждения · Del для очистки",
+      "confirmDelete": "Enter для очистки дат · Esc для отмены",
+      "confirmDeleteLabel": "Подтвердить очистку"
     }
   }
 }

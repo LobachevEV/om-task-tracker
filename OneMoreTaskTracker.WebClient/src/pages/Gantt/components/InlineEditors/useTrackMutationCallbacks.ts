@@ -30,6 +30,13 @@ export interface TrackMutationCallbacks {
     next: string | null,
     stageVersion: number,
   ) => Promise<void>;
+  saveTrackStageRange: (
+    featureId: number,
+    kind: FeatureTrackKind,
+    stageKey: FeatureTrackStageKey,
+    range: { plannedStart: string | null; plannedEnd: string | null },
+    stageVersion: number,
+  ) => Promise<void>;
 }
 
 export interface UseTrackMutationCallbacksOptions {
@@ -98,13 +105,35 @@ export function useTrackMutationCallbacks(
     [onStageApplied],
   );
 
+  const saveTrackStageRange = useCallback<TrackMutationCallbacks['saveTrackStageRange']>(
+    async (featureId, kind, stageKey, range, stageVersion) => {
+      await planApi.patchFeatureTrackStage(featureId, kind, stageKey, {
+        plannedStart: range.plannedStart,
+        plannedEnd: range.plannedEnd,
+        expectedStageVersion: stageVersion,
+      });
+      onStageApplied(featureId, kind, stageKey, {
+        plannedStart: range.plannedStart,
+        plannedEnd: range.plannedEnd,
+      });
+    },
+    [onStageApplied],
+  );
+
   return useMemo(
     () => ({
       saveTrackOwner,
       saveTrackStageOwner,
       saveTrackStagePlannedStart,
       saveTrackStagePlannedEnd,
+      saveTrackStageRange,
     }),
-    [saveTrackOwner, saveTrackStageOwner, saveTrackStagePlannedStart, saveTrackStagePlannedEnd],
+    [
+      saveTrackOwner,
+      saveTrackStageOwner,
+      saveTrackStagePlannedStart,
+      saveTrackStagePlannedEnd,
+      saveTrackStageRange,
+    ],
   );
 }
