@@ -66,6 +66,22 @@ export function StageBarDateEditor({
         defaultValue: 'Date range cleared.',
       });
     }
+    const priorStart = plannedStart ?? null;
+    const priorEnd = plannedEnd ?? null;
+    const startChanged = start !== priorStart;
+    const endChanged = end !== priorEnd;
+    if (startChanged && !endChanged && priorEnd != null) {
+      return t('stageBarEditor.announce.startDateMoved', {
+        defaultValue: 'Start date moved to {{start}}.',
+        start,
+      });
+    }
+    if (!startChanged && endChanged && priorStart != null) {
+      return t('stageBarEditor.announce.endDateMoved', {
+        defaultValue: 'End date moved to {{end}}.',
+        end,
+      });
+    }
     const days = spanDays(start, end);
     return t('stageBarEditor.announce.rangeSet', {
       defaultValue: 'Date range set: {{start}} to {{end}}, {{count}} day.',

@@ -13,6 +13,8 @@ function makeMutations(overrides?: Partial<TrackMutationCallbacks>): TrackMutati
     saveTrackOwner: vi.fn(),
     saveTrackStageOwner: vi.fn(),
     saveTrackStageRange: vi.fn().mockResolvedValue(undefined),
+    saveTrackStagePlannedStart: vi.fn().mockResolvedValue(undefined),
+    saveTrackStagePlannedEnd: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   } as unknown as TrackMutationCallbacks;
 }
@@ -197,5 +199,59 @@ describe('StageBarDateEditor — keyboard mode activation', () => {
     const caret = screen.getByTestId('stage-bar-kb-caret');
     const iso = caret.getAttribute('data-day-iso');
     expect(iso).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+});
+
+describe('StageBarDateEditor — announceCommitted endpoint-specific copy', () => {
+  function setupClickableBar(props: Partial<StageBarDateEditorProps>) {
+    const result = render(<StageBarDateEditor {...makeProps(props)} />);
+    const btn = screen.getByRole('button');
+    Object.defineProperty(btn, 'setPointerCapture', { value: vi.fn(), writable: true });
+    Object.defineProperty(btn, 'releasePointerCapture', { value: vi.fn(), writable: true });
+    // Bar spans 2026-05-01 → 2026-05-31 at DAY_PX=20; day 0 = left edge = May 1
+    // May 10 is day 9 → x = 9 * 20 = 180; May 20 is day 19 → x = 380
+    // Click at x=20 (May 2) is before plannedStart (May 10) → start moved
+    // Click at x=500 (May 26) is after plannedEnd (May 20) → end moved
+    Object.defineProperty(btn, 'getBoundingClientRect', {
+      value: () => ({ left: 0, top: 0, width: 620, height: 24, right: 620, bottom: 24 } as DOMRect),
+      writable: true,
+    });
+    return { btn, result };
+  }
+
+  it('announces startDateMoved when click is before current start', async () => {
+    const announced: string[] = [];
+    const saveTrackStagePlannedStart = vi.fn().mockResolvedValue(undefined);
+    const { btn } = setupClickableBar({
+      plannedStart: '2026-05-10',
+      plannedEnd: '2026-05-20',
+      onAnnounce: (msg) => announced.push(msg),
+      mutations: makeMutations({ saveTrackStagePlannedStart }),
+    });
+    // x=20 → day offset 1 → May 2, which is before May 10 (start) → startDateMoved
+    fireEvent.pointerDown(btn, { button: 0, clientX: 20, pointerId: 1 });
+    fireEvent.pointerUp(btn, { button: 0, clientX: 20, pointerId: 1 });
+    await vi.waitFor(() => {
+      // RU locale active in tests; match the RU translation for startDateMoved
+      expect(announced.some((m) => m.includes('начала'))).toBe(true);
+    });
+  });
+
+  it('announces endDateMoved when click is after current end', async () => {
+    const announced: string[] = [];
+    const saveTrackStagePlannedEnd = vi.fn().mockResolvedValue(undefined);
+    const { btn } = setupClickableBar({
+      plannedStart: '2026-05-10',
+      plannedEnd: '2026-05-20',
+      onAnnounce: (msg) => announced.push(msg),
+      mutations: makeMutations({ saveTrackStagePlannedEnd }),
+    });
+    // x=500 → day offset 25 → May 26, which is after May 20 (end) → endDateMoved
+    fireEvent.pointerDown(btn, { button: 0, clientX: 500, pointerId: 1 });
+    fireEvent.pointerUp(btn, { button: 0, clientX: 500, pointerId: 1 });
+    await vi.waitFor(() => {
+      // RU locale active in tests; match the RU translation for endDateMoved
+      expect(announced.some((m) => m.includes('окончания'))).toBe(true);
+    });
   });
 });

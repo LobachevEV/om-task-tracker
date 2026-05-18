@@ -254,6 +254,8 @@
       "rangeSet_many": "Диапазон задан: {{start}} — {{end}}, {{count}} дней.",
       "rangeSet_other": "Диапазон задан: {{start}} — {{end}}, {{count}} дней.",
       "rangeCleared": "Даты очищены.",
+      "startDateMoved": "Дата начала перенесена на {{start}}.",
+      "endDateMoved": "Дата окончания перенесена на {{end}}.",
       "cancelled": "Выбор дат отменён."
     },
     "kb": {
