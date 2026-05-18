@@ -66,7 +66,7 @@ describe('useTrackMutationCallbacks — optimistic stageVersion bump', () => {
     });
   });
 
-  it('saveTrackStageRange passes stageVersion + 1 to onStageApplied', async () => {
+  it('saveTrackStageRange passes stageVersion + 2 to onStageApplied when both fields are non-null', async () => {
     const onStageApplied = vi.fn();
     const { result } = renderHook(() =>
       useTrackMutationCallbacks({ onStageApplied }),
@@ -80,7 +80,59 @@ describe('useTrackMutationCallbacks — optimistic stageVersion bump', () => {
     expect(onStageApplied).toHaveBeenCalledWith(4, 'Backend', 'Development', {
       plannedStart: '2026-04-01',
       plannedEnd: '2026-04-30',
+      stageVersion: 9,
+    });
+  });
+
+  it('saveTrackStageRange passes stageVersion + 1 when only plannedStart is non-null', async () => {
+    const onStageApplied = vi.fn();
+    const { result } = renderHook(() =>
+      useTrackMutationCallbacks({ onStageApplied }),
+    );
+
+    const range = { plannedStart: '2026-04-01', plannedEnd: null };
+    await act(async () => {
+      await result.current.saveTrackStageRange(4, 'Backend', 'Development', range, 7);
+    });
+
+    expect(onStageApplied).toHaveBeenCalledWith(4, 'Backend', 'Development', {
+      plannedStart: '2026-04-01',
+      plannedEnd: null,
       stageVersion: 8,
+    });
+  });
+
+  it('saveTrackStageRange passes stageVersion + 1 when only plannedEnd is non-null', async () => {
+    const onStageApplied = vi.fn();
+    const { result } = renderHook(() =>
+      useTrackMutationCallbacks({ onStageApplied }),
+    );
+
+    const range = { plannedStart: null, plannedEnd: '2026-04-30' };
+    await act(async () => {
+      await result.current.saveTrackStageRange(4, 'Backend', 'Development', range, 3);
+    });
+
+    expect(onStageApplied).toHaveBeenCalledWith(4, 'Backend', 'Development', {
+      plannedStart: null,
+      plannedEnd: '2026-04-30',
+      stageVersion: 4,
+    });
+  });
+
+  it('saveTrackStageOwner passes stageVersion + 1 even when next is null (clear-owner counts as a mutation)', async () => {
+    const onStageApplied = vi.fn();
+    const { result } = renderHook(() =>
+      useTrackMutationCallbacks({ onStageApplied }),
+    );
+
+    await act(async () => {
+      await result.current.saveTrackStageOwner(1, 'Frontend', 'Development', null, 4);
+    });
+
+    expect(onStageApplied).toHaveBeenCalledWith(1, 'Frontend', 'Development', {
+      stageOwnerUserId: null,
+      stageVersion: 5,
     });
   });
 
