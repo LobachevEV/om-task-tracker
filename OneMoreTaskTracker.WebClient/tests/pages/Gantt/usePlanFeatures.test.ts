@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { __resetPlanFeaturesCache, usePlanFeatures } from '../../../src/pages/Gantt/usePlanFeatures';
 import type { FeatureSummary } from '../../../src/common/types/feature';
+import type { FeatureTrack, FeatureTrackStage } from '../../../src/common/types/featureTrack';
 import type { ListFeaturesParams } from '../../../src/common/api/planApi';
 
 type Fetcher = (params: ListFeaturesParams) => Promise<FeatureSummary[]>;
@@ -19,6 +20,38 @@ function makeFeature(id: number, plannedStart: string, plannedEnd: string): Feat
     taskCount: 0,
     taskIds: [],
     version: 0,
+  };
+}
+
+function makeFeatureWithTrack(id: number, stageVersion: number): FeatureSummary {
+  const stage: FeatureTrackStage = {
+    stageKey: 'Development',
+    plannedStart: '2026-04-01',
+    plannedEnd: '2026-04-30',
+    stageOwnerUserId: null,
+    stageVersion,
+  };
+  const track: FeatureTrack = {
+    id: 10,
+    featureId: id,
+    kind: 'Frontend',
+    trackOwnerUserId: 1,
+    version: 1,
+    stages: [stage],
+  };
+  return {
+    id,
+    title: `Feature ${id}`,
+    description: null,
+    state: 'Development',
+    plannedStart: '2026-04-01',
+    plannedEnd: '2026-04-30',
+    leadUserId: 1,
+    managerUserId: 1,
+    taskCount: 0,
+    taskIds: [],
+    version: 0,
+    tracks: [track],
   };
 }
 
@@ -125,5 +158,26 @@ describe('usePlanFeatures', () => {
     });
     expect(result.current.data?.[0].title).toBe('Renamed');
     expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
+  it('applyTrackStageUpdate merges stageVersion into the cached FeatureTrackStage', async () => {
+    const featureWithTrack = makeFeatureWithTrack(1, 3);
+    const fetcher = vi.fn<Fetcher>(async () => [featureWithTrack]);
+    const { result } = renderHook(() =>
+      usePlanFeatures({ scope: 'mine', fetcher }),
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    act(() => {
+      result.current.applyTrackStageUpdate(1, 'Frontend', 'Development', {
+        plannedStart: '2026-05-01',
+        stageVersion: 4,
+      });
+    });
+
+    const updatedStage = result.current.data?.[0].tracks?.[0].stages[0];
+    expect(updatedStage?.stageVersion).toBe(4);
+    expect(updatedStage?.plannedStart).toBe('2026-05-01');
+    expect(updatedStage?.plannedEnd).toBe('2026-04-30');
   });
 });

@@ -49,7 +49,7 @@ export interface UseTrackMutationCallbacksOptions {
     featureId: number,
     kind: FeatureTrackKind,
     stageKey: FeatureTrackStageKey,
-    patch: Partial<Pick<FeatureTrackStage, 'plannedStart' | 'plannedEnd' | 'stageOwnerUserId'>>,
+    patch: Partial<Pick<FeatureTrackStage, 'plannedStart' | 'plannedEnd' | 'stageOwnerUserId' | 'stageVersion'>>,
   ) => void;
 }
 
@@ -74,7 +74,7 @@ export function useTrackMutationCallbacks(
         stageOwnerUserId: next,
         expectedStageVersion: stageVersion,
       });
-      onStageApplied(featureId, kind, stageKey, { stageOwnerUserId: next });
+      onStageApplied(featureId, kind, stageKey, { stageOwnerUserId: next, stageVersion: stageVersion + 1 });
     },
     [onStageApplied],
   );
@@ -87,7 +87,7 @@ export function useTrackMutationCallbacks(
         plannedStart: next,
         expectedStageVersion: stageVersion,
       });
-      onStageApplied(featureId, kind, stageKey, { plannedStart: next });
+      onStageApplied(featureId, kind, stageKey, { plannedStart: next, stageVersion: stageVersion + 1 });
     },
     [onStageApplied],
   );
@@ -100,7 +100,7 @@ export function useTrackMutationCallbacks(
         plannedEnd: next,
         expectedStageVersion: stageVersion,
       });
-      onStageApplied(featureId, kind, stageKey, { plannedEnd: next });
+      onStageApplied(featureId, kind, stageKey, { plannedEnd: next, stageVersion: stageVersion + 1 });
     },
     [onStageApplied],
   );
@@ -115,6 +115,7 @@ export function useTrackMutationCallbacks(
       onStageApplied(featureId, kind, stageKey, {
         plannedStart: range.plannedStart,
         plannedEnd: range.plannedEnd,
+        stageVersion: stageVersion + 1,
       });
     },
     [onStageApplied],
