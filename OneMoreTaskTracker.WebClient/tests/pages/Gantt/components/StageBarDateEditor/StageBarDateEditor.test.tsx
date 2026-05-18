@@ -189,4 +189,13 @@ describe('StageBarDateEditor — keyboard mode activation', () => {
     const leftAfter = (screen.getByTestId('stage-bar-kb-caret') as HTMLElement).style.left;
     expect(leftAfter).not.toBe(leftBefore);
   });
+
+  it('renders data-day-iso on keyboard caret matching kbState.caretDay', () => {
+    render(<StageBarDateEditor {...makeProps()} />);
+    const btn = screen.getByRole('button');
+    fireEvent.keyDown(btn, { key: 'Enter' });
+    const caret = screen.getByTestId('stage-bar-kb-caret');
+    const iso = caret.getAttribute('data-day-iso');
+    expect(iso).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
 });

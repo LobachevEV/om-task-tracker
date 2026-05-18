@@ -205,6 +205,7 @@ export function StageBarDateEditor({
           style={kbCaretStyle}
           aria-hidden="true"
           data-testid="stage-bar-kb-caret"
+          data-day-iso={kbState.caretDay ?? undefined}
         />
       )}
       {kbHint != null && kbState.phase !== 'idle' && (
