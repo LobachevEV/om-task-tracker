@@ -191,6 +191,9 @@ export function useStageBarKeyboardMode(
           } else {
             dispatch({ type: 'OPEN_EMPTY', today });
           }
+        } else if ((key === 'Delete' || key === 'Backspace') && plannedStart != null && plannedEnd != null) {
+          e.preventDefault();
+          dispatch({ type: 'REQUEST_DELETE' });
         }
         return;
       }
@@ -286,13 +289,13 @@ export function useStageBarKeyboardMode(
       }
 
       if (phase === 'awaitDeleteConfirm') {
-        if (key === 'Enter' || key === ' ') {
+        if (key === 'Enter' || key === ' ' || key === 'Delete' || key === 'Backspace') {
           e.preventDefault();
           dispatch({ type: 'CONFIRM_DELETE' });
           commitDraft(null, null);
           return;
         }
-        if (key === 'Escape' || key === 'Delete' || key === 'Backspace') {
+        if (key === 'Escape') {
           e.preventDefault();
           dispatch({ type: 'CANCEL' });
           return;

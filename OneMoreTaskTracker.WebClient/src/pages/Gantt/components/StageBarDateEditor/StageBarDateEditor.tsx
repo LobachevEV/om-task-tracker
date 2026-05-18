@@ -156,7 +156,7 @@ export function StageBarDateEditor({
       return t('stageBarEditor.kb.rewrite', { defaultValue: 'Arrow keys to adjust · Enter to confirm · Del to clear' });
     }
     if (kbState.phase === 'awaitDeleteConfirm') {
-      return t('stageBarEditor.kb.confirmDelete', { defaultValue: 'Enter to clear dates · Esc to cancel' });
+      return t('stageBarEditor.kb.confirmDelete', { defaultValue: 'Del or Enter to clear dates · Esc to cancel' });
     }
     return null;
   })();
@@ -169,6 +169,7 @@ export function StageBarDateEditor({
       aria-label={ariaLabel}
       data-testid={dataTestId}
       data-state={dataState}
+      data-armed-clear={kbState.phase === 'awaitDeleteConfirm' ? 'true' : 'false'}
       data-has-dates={hasDates ? 'true' : 'false'}
       data-planned-start={plannedStart ?? undefined}
       data-planned-end={plannedEnd ?? undefined}
