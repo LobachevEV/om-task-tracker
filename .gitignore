@@ -47,4 +47,5 @@ graphify-out/
 # GAN harness scratch dirs produced by the gan-feature-* agents.
 # Use a specific prefix — `gan*/` is too broad and matches `gantt/` in the
 # web client's feature tree.
-gan-harness-*/
+gan-harness-*/*
+tests/*/TestResults/*
