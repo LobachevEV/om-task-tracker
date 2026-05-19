@@ -405,6 +405,77 @@ describe('GanttTrackStageRow — pointerdown clears chip synchronously', () => {
   });
 });
 
+describe('GanttTrackStageRow — Dismiss button restores focus to bar', () => {
+  function makeMutations(): TrackMutationCallbacks {
+    return {
+      saveTrackTitle: vi.fn(),
+      saveTrackOwner: vi.fn(),
+      saveTrackStageOwner: vi.fn(),
+      saveTrackStageRange: vi.fn().mockResolvedValue(undefined),
+      saveTrackStagePlannedStart: vi.fn().mockResolvedValue(undefined),
+      saveTrackStagePlannedEnd: vi.fn().mockResolvedValue(undefined),
+    } as unknown as TrackMutationCallbacks;
+  }
+
+  beforeEach(async () => {
+    await i18n.changeLanguage('en');
+  });
+
+  it('Dismiss click with focus inside chip moves focus to the bar wrapper', async () => {
+    const stage: FeatureTrackStage = {
+      stageKey: 'Development',
+      plannedStart: '2026-04-17',
+      plannedEnd: '2026-04-24',
+      stageOwnerUserId: fe.userId,
+      stageVersion: 1,
+    };
+    const track = makeTrack([stage]);
+    const barTestId = `track-stage-bar-${track.featureId}-Frontend-Development`;
+
+    render(
+      <GanttTrackStageRow
+        track={track}
+        stage={stage}
+        kind="Frontend"
+        featureTitle="Export to PDF"
+        today={FIXTURE_TODAY}
+        loadedRange={LOADED_RANGE}
+        dayPx={DAY_PX}
+        index={0}
+        resolveOwner={resolverFor([fe])}
+        canEdit={true}
+        mutations={makeMutations()}
+      />,
+    );
+
+    // Trigger the error state.
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('mock-trigger-fail'));
+    });
+
+    // Chip must be visible.
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+
+    const bar = screen.getByTestId(barTestId) as HTMLElement;
+    expect(bar).toBeInTheDocument();
+
+    const dismissBtn = screen.getByTestId(
+      `stage-bar-save-error-${track.featureId}-frontend-development-revert`,
+    ) as HTMLElement;
+
+    // Place focus inside the chip so the guard condition is met.
+    act(() => { dismissBtn.focus(); });
+    expect(document.activeElement).toBe(dismissBtn);
+
+    // Click Dismiss.
+    act(() => { fireEvent.click(dismissBtn); });
+
+    // Chip must be gone and focus must have returned to the bar.
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(document.activeElement).toBe(bar);
+  });
+});
+
 describe('GanttTrackStageRow — Esc inside save-error chip', () => {
   function makeMutations(): TrackMutationCallbacks {
     return {

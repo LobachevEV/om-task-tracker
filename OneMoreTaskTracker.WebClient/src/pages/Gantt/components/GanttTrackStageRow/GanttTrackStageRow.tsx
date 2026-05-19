@@ -66,6 +66,8 @@ export function GanttTrackStageRow({
   const meta = getTrackStageMeta(kind, stage.stageKey);
   const locale = i18n.language || 'en';
 
+  const barTestId = `track-stage-bar-${track.featureId}-${kind}-${stage.stageKey}`;
+
   const [saveErrorState, setSaveErrorState] = useState<SaveErrorState | null>(null);
   const pausedRef = useRef(false);
   const dismissTimerRef = useRef<number | null>(null);
@@ -77,14 +79,24 @@ export function GanttTrackStageRow({
     }
   }, []);
 
+  const restoreFocusToBarIfChipFocused = useCallback(() => {
+    const ae = document.activeElement;
+    const chip = document.querySelector('.inline-cell__error');
+    if (chip && ae && chip.contains(ae)) {
+      const bar = document.querySelector<HTMLElement>(`[data-testid="${barTestId}"]`);
+      bar?.focus();
+    }
+  }, [barTestId]);
+
   const scheduleDismiss = useCallback(() => {
     clearDismissTimer();
     dismissTimerRef.current = window.setTimeout(() => {
       if (!pausedRef.current) {
         setSaveErrorState(null);
+        restoreFocusToBarIfChipFocused();
       }
     }, 4000);
-  }, [clearDismissTimer]);
+  }, [clearDismissTimer, restoreFocusToBarIfChipFocused]);
 
   const clearError = useCallback(() => {
     clearDismissTimer();
@@ -99,14 +111,14 @@ export function GanttTrackStageRow({
   }, [clearDismissTimer]);
 
   const handleAnchorKeyDown = useCallback(
-    (e: React.KeyboardEvent, barTestId: string) => {
+    (e: React.KeyboardEvent) => {
       if (e.key !== 'Escape') return;
       e.preventDefault();
       clearError();
       const bar = document.querySelector<HTMLElement>(`[data-testid="${barTestId}"]`);
       bar?.focus();
     },
-    [clearError],
+    [clearError, barTestId],
   );
 
   // Clean up timer on unmount.
@@ -267,7 +279,7 @@ export function GanttTrackStageRow({
               onFocus={() => { pausedRef.current = true; clearDismissTimer(); }}
               onMouseLeave={() => { pausedRef.current = false; scheduleDismiss(); }}
               onBlur={() => { pausedRef.current = false; scheduleDismiss(); }}
-              onKeyDown={(e) => handleAnchorKeyDown(e, `track-stage-bar-${track.featureId}-${kind}-${stage.stageKey}`)}
+              onKeyDown={handleAnchorKeyDown}
             >
               <InlineCellError
                 error={saveErrorState.error}
@@ -285,7 +297,7 @@ export function GanttTrackStageRow({
                     void mutations.saveTrackStageRange(track.featureId, kind, stage.stageKey, range, stage.stageVersion).catch(() => { /* retry failure silent */ });
                   }
                 } : undefined}
-                onRevert={clearError}
+                onRevert={() => { clearError(); restoreFocusToBarIfChipFocused(); }}
                 testId={stageBarErrorTestId(track.featureId, kind, stage.stageKey)}
               />
             </div>
