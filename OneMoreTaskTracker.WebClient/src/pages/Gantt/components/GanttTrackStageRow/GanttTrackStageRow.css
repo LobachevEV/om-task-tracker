@@ -125,3 +125,13 @@
   color: var(--danger);
   font-weight: 500;
 }
+
+.gantt-track-stage-row__lane--has-chip {
+  overflow: visible;
+}
+
+.gantt-track-stage-row__error-chip-anchor {
+  position: absolute;
+  top: calc(50% + 9px);
+  z-index: 2;
+}

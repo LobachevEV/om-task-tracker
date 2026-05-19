@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MiniTeamMember } from '../../../../common/types/feature';
 import type {
@@ -13,10 +14,20 @@ import { GanttStageBar } from '../GanttStageBar';
 import { StageBarDateEditor } from '../StageBarDateEditor';
 import { Grid } from '../../../../common/ds/spatial';
 import type { TrackMutationCallbacks } from '../InlineEditors/useTrackMutationCallbacks';
+import { InlineCellError } from '../InlineEditors/InlineCellError';
+import type { InlineEditorError } from '../InlineEditors/InlineEditorError';
 import { GanttRow } from '../GanttRow';
 import { OwnerCell } from '../RowParts/OwnerCell';
 import { StageDateRange } from '../RowParts/StageDateRange';
+import { resolveStageSaveErrorMessage } from '../StageBarDateEditor/resolveStageSaveErrorMessage';
+import { resolveStageSaveAnnounceMessage } from '../StageBarDateEditor/resolveStageSaveAnnounceMessage';
 import './GanttTrackStageRow.css';
+
+type SaveErrorState = {
+  error: InlineEditorError;
+  range: { plannedStart: string | null; plannedEnd: string | null };
+  barLeftPx: number;
+};
 
 export interface GanttTrackStageRowProps {
   track: FeatureTrack;
@@ -53,6 +64,34 @@ export function GanttTrackStageRow({
   const meta = getTrackStageMeta(kind, stage.stageKey);
   const locale = i18n.language || 'en';
 
+  const [saveErrorState, setSaveErrorState] = useState<SaveErrorState | null>(null);
+  const pausedRef = useRef(false);
+  const dismissTimerRef = useRef<number | null>(null);
+
+  const clearDismissTimer = useCallback(() => {
+    if (dismissTimerRef.current != null) {
+      window.clearTimeout(dismissTimerRef.current);
+      dismissTimerRef.current = null;
+    }
+  }, []);
+
+  const scheduleDismiss = useCallback(() => {
+    clearDismissTimer();
+    dismissTimerRef.current = window.setTimeout(() => {
+      if (!pausedRef.current) {
+        setSaveErrorState(null);
+      }
+    }, 4000);
+  }, [clearDismissTimer]);
+
+  const clearError = useCallback(() => {
+    clearDismissTimer();
+    setSaveErrorState(null);
+  }, [clearDismissTimer]);
+
+  // Clean up timer on unmount.
+  useEffect(() => clearDismissTimer, [clearDismissTimer]);
+
   const stageName = t(meta.ariaKey, { defaultValue: stage.stageKey });
 
   const bars = computeTrackStageBars(loadedRange, track, today, dayPx);
@@ -70,6 +109,16 @@ export function GanttTrackStageRow({
     !stage.plannedEnd;
 
   const barGeometry = barEntry && (barEntry.bar ?? barEntry.ghost) ? (barEntry.bar ?? barEntry.ghost)! : null;
+  const barLeftPx = barGeometry?.leftPx ?? 0;
+
+  const handleFail = useCallback(
+    (error: InlineEditorError, range: { plannedStart: string | null; plannedEnd: string | null }) => {
+      setSaveErrorState({ error, range, barLeftPx });
+      scheduleDismiss();
+      if (onAnnounce) onAnnounce(resolveStageSaveAnnounceMessage(error, t));
+    },
+    [barLeftPx, scheduleDismiss, onAnnounce, t],
+  );
 
   const barVisual = barGeometry ? (
     <GanttStageBar
@@ -101,6 +150,8 @@ export function GanttTrackStageRow({
         title: featureTitle,
       })}
       onAnnounce={onAnnounce}
+      onFail={handleFail}
+      onClearError={clearError}
       dataTestId={`track-stage-bar-${track.featureId}-${kind}-${stage.stageKey}`}
     >
       {barVisual}
@@ -185,8 +236,42 @@ export function GanttTrackStageRow({
           )}
         </Grid>
       }
-      lane={<div aria-hidden="true">{barNode}</div>}
-      laneClassName="gantt-track-stage-row__lane"
+      lane={
+        <>
+          <div aria-hidden="true">{barNode}</div>
+          {saveErrorState != null && (
+            <div
+              className="gantt-track-stage-row__error-chip-anchor"
+              style={{ left: saveErrorState.barLeftPx }}
+              onMouseEnter={() => { pausedRef.current = true; clearDismissTimer(); }}
+              onFocus={() => { pausedRef.current = true; clearDismissTimer(); }}
+              onMouseLeave={() => { pausedRef.current = false; scheduleDismiss(); }}
+              onBlur={() => { pausedRef.current = false; scheduleDismiss(); }}
+            >
+              <InlineCellError
+                error={saveErrorState.error}
+                resolveMessage={(err) => resolveStageSaveErrorMessage(err, t)}
+                onRetry={saveErrorState.error.kind !== 'validation' && mutations ? () => {
+                  const range = saveErrorState.range;
+                  clearError();
+                  const startChanged = range.plannedStart !== (stage.plannedStart ?? null);
+                  const endChanged = range.plannedEnd !== (stage.plannedEnd ?? null);
+                  if (startChanged && !endChanged) {
+                    void mutations.saveTrackStagePlannedStart(track.featureId, kind, stage.stageKey, range.plannedStart, stage.stageVersion).catch(() => { /* retry failure silent */ });
+                  } else if (!startChanged && endChanged) {
+                    void mutations.saveTrackStagePlannedEnd(track.featureId, kind, stage.stageKey, range.plannedEnd, stage.stageVersion).catch(() => { /* retry failure silent */ });
+                  } else {
+                    void mutations.saveTrackStageRange(track.featureId, kind, stage.stageKey, range, stage.stageVersion).catch(() => { /* retry failure silent */ });
+                  }
+                } : undefined}
+                onRevert={clearError}
+                testId={`track-stage-bar-${track.featureId}-${kind}-${stage.stageKey}-save-error`}
+              />
+            </div>
+          )}
+        </>
+      }
+      laneClassName={`gantt-track-stage-row__lane${saveErrorState != null ? ' gantt-track-stage-row__lane--has-chip' : ''}`}
     />
   );
 }
