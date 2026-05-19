@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import type { MiniTeamMember } from '../../../../common/types/feature';
 import type {
@@ -90,6 +91,13 @@ export function GanttTrackStageRow({
     setSaveErrorState(null);
   }, [clearDismissTimer]);
 
+  const clearErrorSync = useCallback(() => {
+    flushSync(() => {
+      clearDismissTimer();
+      setSaveErrorState(null);
+    });
+  }, [clearDismissTimer]);
+
   const handleAnchorKeyDown = useCallback(
     (e: React.KeyboardEvent, barTestId: string) => {
       if (e.key !== 'Escape') return;
@@ -163,7 +171,7 @@ export function GanttTrackStageRow({
       })}
       onAnnounce={onAnnounce}
       onFail={handleFail}
-      onClearError={clearError}
+      onClearError={clearErrorSync}
       dataTestId={`track-stage-bar-${track.featureId}-${kind}-${stage.stageKey}`}
     >
       {barVisual}

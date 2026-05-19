@@ -11,8 +11,9 @@ import type { TrackMutationCallbacks } from '../../../../../src/pages/Gantt/comp
 
 vi.mock('../../../../../src/pages/Gantt/components/StageBarDateEditor/StageBarDateEditor', () => ({
   StageBarDateEditor: vi.fn(
-    ({ onFail, dataTestId, children }: {
+    ({ onFail, onClearError, dataTestId, children }: {
       onFail: (err: { kind: string; message: string; conflict: null }, range: { plannedStart: string | null; plannedEnd: string | null }) => void;
+      onClearError?: () => void;
       dataTestId: string;
       children?: ReactNode;
     }) => (
@@ -27,6 +28,12 @@ vi.mock('../../../../../src/pages/Gantt/components/StageBarDateEditor/StageBarDa
           }
         >
           Trigger fail
+        </button>
+        <button
+          data-testid="mock-trigger-pointerdown-clear"
+          onPointerDown={() => onClearError?.()}
+        >
+          Pointerdown clear
         </button>
         {children}
       </div>
@@ -335,6 +342,66 @@ describe('GanttTrackStageRow — read-only', () => {
 
     const dtr = screen.getByText(/\d+d/);
     expect(dtr).toHaveAttribute('data-overdue', 'false');
+  });
+});
+
+describe('GanttTrackStageRow — pointerdown clears chip synchronously', () => {
+  function makeMutations(): TrackMutationCallbacks {
+    return {
+      saveTrackTitle: vi.fn(),
+      saveTrackOwner: vi.fn(),
+      saveTrackStageOwner: vi.fn(),
+      saveTrackStageRange: vi.fn().mockResolvedValue(undefined),
+      saveTrackStagePlannedStart: vi.fn().mockResolvedValue(undefined),
+      saveTrackStagePlannedEnd: vi.fn().mockResolvedValue(undefined),
+    } as unknown as TrackMutationCallbacks;
+  }
+
+  beforeEach(async () => {
+    await i18n.changeLanguage('en');
+  });
+
+  it('chip is gone synchronously after onClearError fires on pointerdown — no additional act needed', async () => {
+    const stage: FeatureTrackStage = {
+      stageKey: 'Development',
+      plannedStart: '2026-04-17',
+      plannedEnd: '2026-04-24',
+      stageOwnerUserId: fe.userId,
+      stageVersion: 1,
+    };
+    const track = makeTrack([stage]);
+
+    render(
+      <GanttTrackStageRow
+        track={track}
+        stage={stage}
+        kind="Frontend"
+        featureTitle="Export to PDF"
+        today={FIXTURE_TODAY}
+        loadedRange={LOADED_RANGE}
+        dayPx={DAY_PX}
+        index={0}
+        resolveOwner={resolverFor([fe])}
+        canEdit={true}
+        mutations={makeMutations()}
+      />,
+    );
+
+    // Trigger the error state.
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('mock-trigger-fail'));
+    });
+
+    // Chip must be present before pointerdown.
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+
+    // Fire pointerdown on the mock bar — this calls onClearError which uses flushSync.
+    // No additional act() wrapper should be needed for the chip to disappear because
+    // flushSync commits the state update synchronously before the event handler returns.
+    fireEvent.pointerDown(screen.getByTestId('mock-trigger-pointerdown-clear'));
+
+    // Chip must be gone immediately — same synchronous tick.
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 });
 
