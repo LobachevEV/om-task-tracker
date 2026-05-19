@@ -8,7 +8,7 @@ import type {
   FeatureTrackStage,
 } from '../../../../common/types/featureTrack';
 import type { TeamRosterMember } from '../../../../common/api/teamApi';
-import { formatShortDate, type DateWindow } from '../../ganttMath';
+import { dateToPixel, formatShortDate, type DateWindow } from '../../ganttMath';
 import { getTrackStageMeta } from '../../trackStageMeta';
 import { computeTrackStageBars } from '../../trackStageGeometry';
 import { GanttStageBar } from '../GanttStageBar';
@@ -141,15 +141,21 @@ export function GanttTrackStageRow({
     !stage.plannedEnd;
 
   const barGeometry = barEntry && (barEntry.bar ?? barEntry.ghost) ? (barEntry.bar ?? barEntry.ghost)! : null;
-  const barLeftPx = barGeometry?.leftPx ?? 0;
 
   const handleFail = useCallback(
     (error: InlineEditorError, range: { plannedStart: string | null; plannedEnd: string | null }) => {
+      const anchor = range.plannedStart ?? range.plannedEnd;
+      const barLeftPx = Math.max(
+        0,
+        anchor != null
+          ? dateToPixel(loadedRange.start, anchor, dayPx)
+          : barGeometry?.leftPx ?? dateToPixel(loadedRange.start, today, dayPx),
+      );
       setSaveErrorState({ error, range, barLeftPx });
       scheduleDismiss();
       if (onAnnounce) onAnnounce(resolveStageSaveAnnounceMessage(error, t));
     },
-    [barLeftPx, scheduleDismiss, onAnnounce, t],
+    [barGeometry, loadedRange.start, today, dayPx, scheduleDismiss, onAnnounce, t],
   );
 
   const barVisual = barGeometry ? (

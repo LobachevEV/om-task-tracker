@@ -127,7 +127,8 @@
 }
 
 .gantt-track-stage-row__lane--has-chip {
-  overflow: visible;
+  overflow-x: clip;
+  overflow-y: visible;
 }
 
 .gantt-track-stage-row__error-chip-anchor {
