@@ -98,10 +98,10 @@
   z-index: 3;
 }
 
-/* Error chip wrapper — outer position root */
+/* Error chip wrapper — replaces the editor as the absolute-position root in the lane */
 .stage-bar-date-editor-with-error {
-  position: relative;
-  display: block;
+  position: absolute;
+  inset: 0;
 }
 
 /* Error anchor — positions the chip below the bar */

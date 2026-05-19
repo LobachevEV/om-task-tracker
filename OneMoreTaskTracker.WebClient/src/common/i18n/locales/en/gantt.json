@@ -243,7 +243,16 @@
       "rangeCleared": "Date range cleared.",
       "startDateMoved": "Start date moved to {{start}}.",
       "endDateMoved": "End date moved to {{end}}.",
-      "cancelled": "Date selection cancelled."
+      "cancelled": "Date selection cancelled.",
+      "error": {
+        "prefix": "Stage date change rejected: ",
+        "overlap": "stage order violation — pick a non-overlapping date.",
+        "overlapWithNeighbour": "conflicts with the {{neighbour}} stage — pick a non-overlapping date.",
+        "version": "stage was updated elsewhere — refresh to see the latest.",
+        "order": "stage order violation.",
+        "rangeInvalid": "invalid date range.",
+        "generic": "could not save — try again."
+      }
     },
     "kb": {
       "pickStart": "Arrow keys to move · Enter to set start",

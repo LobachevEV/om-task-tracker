@@ -13,6 +13,7 @@ import { useStageBarKeyboardMode } from './useStageBarKeyboardMode';
 import { StageBarDragPreview } from './StageBarDragPreview';
 import { spanDays } from './stageBarDragMath';
 import { resolveStageSaveErrorMessage } from './resolveStageSaveErrorMessage';
+import { resolveStageSaveAnnounceMessage } from './resolveStageSaveAnnounceMessage';
 import './StageBarDateEditor.css';
 
 export interface StageBarDateEditorProps {
@@ -33,6 +34,11 @@ export interface StageBarDateEditorProps {
   dataTestId: string;
 }
 
+type SaveErrorState = {
+  error: InlineEditorError;
+  range: { plannedStart: string | null; plannedEnd: string | null };
+};
+
 export function StageBarDateEditor({
   featureId,
   kind,
@@ -52,11 +58,6 @@ export function StageBarDateEditor({
 }: StageBarDateEditorProps) {
   const { t, i18n } = useTranslation('gantt');
   const locale = i18n.language || 'en';
-
-  type SaveErrorState = {
-    error: InlineEditorError;
-    range: { plannedStart: string | null; plannedEnd: string | null };
-  };
 
   const [saveErrorState, setSaveErrorState] = useState<SaveErrorState | null>(null);
   const lastAttemptedRangeRef = useRef<{ plannedStart: string | null; plannedEnd: string | null } | null>(null);
@@ -84,7 +85,7 @@ export function StageBarDateEditor({
       const error = toInlineEditorError(err);
       setSaveErrorState({ error, range: lastAttemptedRangeRef.current ?? { plannedStart: null, plannedEnd: null } });
       scheduleDismiss();
-      if (onAnnounce) onAnnounce(resolveStageSaveErrorMessage(error, t));
+      if (onAnnounce) onAnnounce(resolveStageSaveAnnounceMessage(error, t));
     },
     [onAnnounce, scheduleDismiss, t],
   );
@@ -138,7 +139,12 @@ export function StageBarDateEditor({
   const announceCancelled = () =>
     t('stageBarEditor.announce.cancelled', { defaultValue: 'Date selection cancelled.' });
 
-  const { dragState, onPointerDown, onPointerMove, onPointerUp, onPointerCancel, onDragKeyDown } =
+  const clearError = useCallback(() => {
+    clearDismissTimer();
+    setSaveErrorState(null);
+  }, [clearDismissTimer]);
+
+  const { dragState, onPointerDown: rawOnPointerDown, onPointerMove, onPointerUp, onPointerCancel, onDragKeyDown } =
     useStageBarDrag({
       plannedStart,
       plannedEnd,
@@ -151,7 +157,7 @@ export function StageBarDateEditor({
       announceCancelled,
     });
 
-  const { kbState, onKeyDown } = useStageBarKeyboardMode({
+  const { kbState, onKeyDown: rawOnKeyDown } = useStageBarKeyboardMode({
     plannedStart,
     plannedEnd,
     today,
@@ -162,17 +168,24 @@ export function StageBarDateEditor({
     announceCommitted,
   });
 
-  // Clear the error when the user starts a new interaction.
-  useEffect(() => {
-    const isActive = dragState.status === 'dragging' || kbState.phase !== 'idle';
-    if (isActive && saveErrorState != null) {
-      clearDismissTimer();
-      setSaveErrorState(null);
-    }
-  }, [dragState.status, kbState.phase, saveErrorState, clearDismissTimer]);
+  const onPointerDown = useCallback(
+    (e: React.PointerEvent<HTMLElement>) => {
+      if (saveErrorState != null) clearError();
+      rawOnPointerDown(e);
+    },
+    [saveErrorState, clearError, rawOnPointerDown],
+  );
+
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLElement>) => {
+      if (saveErrorState != null && kbState.phase === 'idle') clearError();
+      rawOnKeyDown(e);
+    },
+    [saveErrorState, kbState.phase, clearError, rawOnKeyDown],
+  );
 
   // Clean up timer on unmount.
-  useEffect(() => () => clearDismissTimer(), [clearDismissTimer]);
+  useEffect(() => clearDismissTimer, [clearDismissTimer]);
 
   const hasDates = plannedStart != null && plannedEnd != null;
   const isDragging = dragState.status === 'dragging';
