@@ -419,4 +419,77 @@ public sealed class PatchFeatureTrackStageHandlerTests
         var ex = await act.Should().ThrowAsync<RpcException>();
         ex.Which.StatusCode.Should().Be(StatusCode.InvalidArgument);
     }
+
+    [Fact]
+    public async Task Patch_WhenInsertingFilledLaterStageAcrossNullMiddle_RejectsWithStandTestingNeighbour()
+    {
+        var db = NewDb();
+        var feature = await CreateFeatureAsync(db);
+        var handler = Handler(db);
+        var ctx = TestServerCallContext.Create();
+
+        await handler.Patch(
+            new PatchFeatureTrackStageRequest
+            {
+                FeatureId = feature.Id,
+                Kind = FeatureTrackKind.Backend,
+                StageKey = FeatureTrackStageKey.TrackStageCsApproving,
+                CallerUserId = 1,
+                PlannedStart = "2026-05-12",
+                PlannedEnd = "2026-05-17",
+            },
+            ctx);
+
+        await handler.Patch(
+            new PatchFeatureTrackStageRequest
+            {
+                FeatureId = feature.Id,
+                Kind = FeatureTrackKind.Backend,
+                StageKey = FeatureTrackStageKey.TrackStageDevelopment,
+                CallerUserId = 1,
+                PlannedStart = "2026-05-17",
+                PlannedEnd = "2026-05-23",
+            },
+            ctx);
+
+        await handler.Patch(
+            new PatchFeatureTrackStageRequest
+            {
+                FeatureId = feature.Id,
+                Kind = FeatureTrackKind.Backend,
+                StageKey = FeatureTrackStageKey.TrackStageStandTesting,
+                CallerUserId = 1,
+                PlannedStart = "2026-06-04",
+                PlannedEnd = "2026-06-11",
+            },
+            ctx);
+
+        await handler.Patch(
+            new PatchFeatureTrackStageRequest
+            {
+                FeatureId = feature.Id,
+                Kind = FeatureTrackKind.Backend,
+                StageKey = FeatureTrackStageKey.TrackStageReleaseToLive,
+                CallerUserId = 1,
+                PlannedStart = "2026-06-12",
+                PlannedEnd = "2026-06-13",
+            },
+            ctx);
+
+        var act = () => handler.Patch(
+            new PatchFeatureTrackStageRequest
+            {
+                FeatureId = feature.Id,
+                Kind = FeatureTrackKind.Backend,
+                StageKey = FeatureTrackStageKey.TrackStageReleaseToLive,
+                CallerUserId = 1,
+                PlannedStart = "2026-06-06",
+            },
+            ctx);
+
+        var ex = await act.Should().ThrowAsync<RpcException>();
+        ex.Which.StatusCode.Should().Be(StatusCode.FailedPrecondition);
+        ex.Which.Status.Detail.Should().Contain("\"kind\":\"overlap\"");
+        ex.Which.Status.Detail.Should().Contain("\"neighbour\":\"StandTesting\"");
+    }
 }

@@ -116,21 +116,51 @@ public sealed class PatchFeatureTrackStageHandler(
     {
         var ordered = stages.OrderBy(s => s.StageKey).ToArray();
 
-        for (int i = 0; i < ordered.Length - 1; i++)
+        TrackStageSnapshot? lastFilled = null;
+
+        foreach (var current in ordered)
         {
-            var earlier = ordered[i];
-            var later = ordered[i + 1];
-
-            if (earlier.PlannedEnd is not { } earlierEnd) continue;
-            if (later.PlannedStart is not { } laterStart) continue;
-
-            if (laterStart < earlierEnd)
+            if (current.PlannedStart is { } currentStart && lastFilled is { } lf)
             {
-                var neighbourKeyOrdinal = mutatedKey == earlier.StageKey ? later.StageKey : earlier.StageKey;
+                if (currentStart < lf.PlannedEnd!.Value)
+                {
+                    var neighbourKeyOrdinal = mutatedKey == current.StageKey ? lf.StageKey : current.StageKey;
+                    throw new RpcException(new Status(
+                        StatusCode.FailedPrecondition,
+                        ConflictDetail.StageOrderOverlap(StageKeyName(neighbourKeyOrdinal))));
+                }
+            }
+
+            if (current.PlannedEnd is not null)
+                lastFilled = current;
+        }
+
+        var mutatedProspective = ordered.First(s => s.StageKey == mutatedKey);
+        TrackStageSnapshot? predecessor = ordered
+            .Where(s => s.StageKey < mutatedKey && s.PlannedEnd is not null)
+            .OrderByDescending(s => s.StageKey)
+            .Cast<TrackStageSnapshot?>()
+            .FirstOrDefault();
+        TrackStageSnapshot? successor = ordered
+            .Where(s => s.StageKey > mutatedKey && s.PlannedStart is not null)
+            .OrderBy(s => s.StageKey)
+            .Cast<TrackStageSnapshot?>()
+            .FirstOrDefault();
+
+        if (predecessor is { } pred && mutatedProspective.PlannedStart is { } prospectiveStart)
+        {
+            if (prospectiveStart < pred.PlannedEnd!.Value)
                 throw new RpcException(new Status(
                     StatusCode.FailedPrecondition,
-                    ConflictDetail.StageOrderOverlap(StageKeyName(neighbourKeyOrdinal))));
-            }
+                    ConflictDetail.StageOrderOverlap(StageKeyName(pred.StageKey))));
+        }
+
+        if (successor is { } succ && mutatedProspective.PlannedEnd is { } prospectiveEnd)
+        {
+            if (succ.PlannedStart!.Value < prospectiveEnd)
+                throw new RpcException(new Status(
+                    StatusCode.FailedPrecondition,
+                    ConflictDetail.StageOrderOverlap(StageKeyName(succ.StageKey))));
         }
     }
 
