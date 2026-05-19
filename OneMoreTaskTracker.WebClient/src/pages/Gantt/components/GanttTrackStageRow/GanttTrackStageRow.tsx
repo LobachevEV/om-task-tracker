@@ -21,6 +21,7 @@ import { OwnerCell } from '../RowParts/OwnerCell';
 import { StageDateRange } from '../RowParts/StageDateRange';
 import { resolveStageSaveErrorMessage } from '../StageBarDateEditor/resolveStageSaveErrorMessage';
 import { resolveStageSaveAnnounceMessage } from '../StageBarDateEditor/resolveStageSaveAnnounceMessage';
+import { stageBarErrorTestId } from '../StageBarDateEditor/stageBarErrorTestId';
 import './GanttTrackStageRow.css';
 
 type SaveErrorState = {
@@ -265,7 +266,7 @@ export function GanttTrackStageRow({
                   }
                 } : undefined}
                 onRevert={clearError}
-                testId={`track-stage-bar-${track.featureId}-${kind}-${stage.stageKey}-save-error`}
+                testId={stageBarErrorTestId(track.featureId, kind, stage.stageKey)}
               />
             </div>
           )}
