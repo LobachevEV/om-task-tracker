@@ -26,7 +26,7 @@ function parseConflict(raw: unknown): InlineEditConflict | null {
   }
   return {
     kind,
-    with: typeof obj.with === 'string' ? obj.with : undefined,
+    neighbour: typeof obj.neighbour === 'string' ? obj.neighbour : undefined,
     currentVersion: typeof obj.currentVersion === 'number' ? obj.currentVersion : undefined,
   };
 }

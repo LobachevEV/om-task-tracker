@@ -75,6 +75,7 @@ export interface UseStageBarDragOptions {
   dayPx: number;
   disabled?: boolean;
   onSave: (range: { plannedStart: string | null; plannedEnd: string | null }) => Promise<void>;
+  onFail?: (err: unknown) => void;
   onAnnounce?: (message: string) => void;
   announceCommitted: (start: string | null, end: string | null) => string;
   announceCancelled: () => string;
@@ -97,6 +98,7 @@ export function useStageBarDrag(opts: UseStageBarDragOptions): UseStageBarDragRe
     dayPx,
     disabled = false,
     onSave,
+    onFail,
     onAnnounce,
     announceCommitted,
     announceCancelled,
@@ -180,6 +182,7 @@ export function useStageBarDrag(opts: UseStageBarDragOptions): UseStageBarDragRe
         (err: unknown) => {
           const msg = err instanceof Error ? err.message : 'Save failed';
           dispatch({ type: 'FAIL', message: msg });
+          if (onFail) onFail(err);
         },
       );
     },
@@ -190,6 +193,7 @@ export function useStageBarDrag(opts: UseStageBarDragOptions): UseStageBarDragRe
       plannedStart,
       plannedEnd,
       onSave,
+      onFail,
       onAnnounce,
       announceCommitted,
     ],

@@ -1,13 +1,18 @@
 import type { CSSProperties, ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DateWindow } from '../../ganttMath';
 import { dateToPixel } from '../../ganttMath';
 import type { FeatureTrackKind, FeatureTrackStageKey } from '../../../../common/types/featureTrack';
 import type { TrackMutationCallbacks } from '../InlineEditors/useTrackMutationCallbacks';
+import { InlineCellError } from '../InlineEditors/InlineCellError';
+import type { InlineEditorError } from '../InlineEditors/InlineEditorError';
+import { toInlineEditorError } from '../InlineEditors/InlineEditorError';
 import { useStageBarDrag } from './useStageBarDrag';
 import { useStageBarKeyboardMode } from './useStageBarKeyboardMode';
 import { StageBarDragPreview } from './StageBarDragPreview';
 import { spanDays } from './stageBarDragMath';
+import { resolveStageSaveErrorMessage } from './resolveStageSaveErrorMessage';
 import './StageBarDateEditor.css';
 
 export interface StageBarDateEditorProps {
@@ -48,7 +53,45 @@ export function StageBarDateEditor({
   const { t, i18n } = useTranslation('gantt');
   const locale = i18n.language || 'en';
 
+  type SaveErrorState = {
+    error: InlineEditorError;
+    range: { plannedStart: string | null; plannedEnd: string | null };
+  };
+
+  const [saveErrorState, setSaveErrorState] = useState<SaveErrorState | null>(null);
+  const lastAttemptedRangeRef = useRef<{ plannedStart: string | null; plannedEnd: string | null } | null>(null);
+  const pausedRef = useRef(false);
+  const dismissTimerRef = useRef<number | null>(null);
+
+  const clearDismissTimer = useCallback(() => {
+    if (dismissTimerRef.current != null) {
+      window.clearTimeout(dismissTimerRef.current);
+      dismissTimerRef.current = null;
+    }
+  }, []);
+
+  const scheduleDismiss = useCallback(() => {
+    clearDismissTimer();
+    dismissTimerRef.current = window.setTimeout(() => {
+      if (!pausedRef.current) {
+        setSaveErrorState(null);
+      }
+    }, 4000);
+  }, [clearDismissTimer]);
+
+  const handleFail = useCallback(
+    (err: unknown) => {
+      const error = toInlineEditorError(err);
+      setSaveErrorState({ error, range: lastAttemptedRangeRef.current ?? { plannedStart: null, plannedEnd: null } });
+      scheduleDismiss();
+      if (onAnnounce) onAnnounce(resolveStageSaveErrorMessage(error, t));
+    },
+    [onAnnounce, scheduleDismiss, t],
+  );
+
   const onSave = async (range: { plannedStart: string | null; plannedEnd: string | null }) => {
+    lastAttemptedRangeRef.current = range;
+    setSaveErrorState(null);
     const startChanged = range.plannedStart !== (plannedStart ?? null);
     const endChanged = range.plannedEnd !== (plannedEnd ?? null);
     if (startChanged && !endChanged) {
@@ -102,6 +145,7 @@ export function StageBarDateEditor({
       loadedRange,
       dayPx,
       onSave,
+      onFail: handleFail,
       onAnnounce,
       announceCommitted,
       announceCancelled,
@@ -113,9 +157,22 @@ export function StageBarDateEditor({
     today,
     loadedRangeEnd: loadedRange.end,
     onSave,
+    onFail: handleFail,
     onAnnounce,
     announceCommitted,
   });
+
+  // Clear the error when the user starts a new interaction.
+  useEffect(() => {
+    const isActive = dragState.status === 'dragging' || kbState.phase !== 'idle';
+    if (isActive && saveErrorState != null) {
+      clearDismissTimer();
+      setSaveErrorState(null);
+    }
+  }, [dragState.status, kbState.phase, saveErrorState, clearDismissTimer]);
+
+  // Clean up timer on unmount.
+  useEffect(() => () => clearDismissTimer(), [clearDismissTimer]);
 
   const hasDates = plannedStart != null && plannedEnd != null;
   const isDragging = dragState.status === 'dragging';
@@ -184,57 +241,104 @@ export function StageBarDateEditor({
     return null;
   })();
 
+  const canRetry =
+    saveErrorState != null &&
+    saveErrorState.error.conflict?.kind !== 'version' &&
+    saveErrorState.error.conflict?.kind !== 'rangeInvalid';
+
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      className="stage-bar-date-editor"
-      aria-label={ariaLabel}
-      data-testid={dataTestId}
-      data-state={dataState}
-      data-armed-clear={kbState.phase === 'awaitDeleteConfirm' ? 'true' : 'false'}
-      data-planned-start={plannedStart ?? undefined}
-      data-planned-end={plannedEnd ?? undefined}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      onPointerCancel={onPointerCancel}
-      onKeyDown={(e) => {
-        onDragKeyDown(e);
-        if (!e.defaultPrevented) onKeyDown(e);
-      }}
-    >
-      {children}
-      {showPreview && (
-        <StageBarDragPreview
-          previewStart={dragState.previewStart!}
-          previewEnd={dragState.previewEnd!}
-          loadedRange={loadedRange}
-          dayPx={dayPx}
-          tokenVar={tokenVar}
-          chip={previewChip}
-        />
-      )}
-      {showKbCaret && (
+    <div className="stage-bar-date-editor-with-error">
+      <div
+        role="button"
+        tabIndex={0}
+        className="stage-bar-date-editor"
+        aria-label={ariaLabel}
+        data-testid={dataTestId}
+        data-state={dataState}
+        data-armed-clear={kbState.phase === 'awaitDeleteConfirm' ? 'true' : 'false'}
+        data-planned-start={plannedStart ?? undefined}
+        data-planned-end={plannedEnd ?? undefined}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerCancel}
+        onKeyDown={(e) => {
+          onDragKeyDown(e);
+          if (!e.defaultPrevented) onKeyDown(e);
+        }}
+      >
+        {children}
+        {showPreview && (
+          <StageBarDragPreview
+            previewStart={dragState.previewStart!}
+            previewEnd={dragState.previewEnd!}
+            loadedRange={loadedRange}
+            dayPx={dayPx}
+            tokenVar={tokenVar}
+            chip={previewChip}
+          />
+        )}
+        {showKbCaret && (
+          <div
+            className="stage-bar-kb-caret"
+            style={kbCaretStyle}
+            aria-hidden="true"
+            data-testid="stage-bar-kb-caret"
+            data-day-iso={kbState.caretDay ?? undefined}
+          />
+        )}
+        {kbHint != null && kbState.phase !== 'idle' && (
+          <span className="stage-bar-date-editor__kb-hint" aria-live="polite">
+            {kbHint}
+          </span>
+        )}
+        {showDeleteConfirm && (
+          <div
+            className="stage-bar-date-editor__delete-confirm"
+            aria-live="assertive"
+          >
+            {t('stageBarEditor.kb.confirmDeleteLabel', { defaultValue: 'Enter to clear' })}
+          </div>
+        )}
+      </div>
+      {saveErrorState != null && (
         <div
-          className="stage-bar-kb-caret"
-          style={kbCaretStyle}
-          aria-hidden="true"
-          data-testid="stage-bar-kb-caret"
-          data-day-iso={kbState.caretDay ?? undefined}
-        />
-      )}
-      {kbHint != null && kbState.phase !== 'idle' && (
-        <span className="stage-bar-date-editor__kb-hint" aria-live="polite">
-          {kbHint}
-        </span>
-      )}
-      {showDeleteConfirm && (
-        <div
-          className="stage-bar-date-editor__delete-confirm"
-          aria-live="assertive"
+          className="stage-bar-date-editor__error-anchor"
+          onMouseEnter={() => {
+            pausedRef.current = true;
+            clearDismissTimer();
+          }}
+          onFocus={() => {
+            pausedRef.current = true;
+            clearDismissTimer();
+          }}
+          onMouseLeave={() => {
+            pausedRef.current = false;
+            scheduleDismiss();
+          }}
+          onBlur={() => {
+            pausedRef.current = false;
+            scheduleDismiss();
+          }}
         >
-          {t('stageBarEditor.kb.confirmDeleteLabel', { defaultValue: 'Enter to clear' })}
+          <InlineCellError
+            error={saveErrorState.error}
+            resolveMessage={(err) => resolveStageSaveErrorMessage(err, t)}
+            onRetry={
+              canRetry
+                ? () => {
+                    clearDismissTimer();
+                    setSaveErrorState(null);
+                    void onSave(saveErrorState.range);
+                  }
+                : undefined
+            }
+            onRevert={() => {
+              clearDismissTimer();
+              setSaveErrorState(null);
+            }}
+            testId={`${dataTestId}-save-error`}
+          />
         </div>
       )}
     </div>

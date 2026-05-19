@@ -98,6 +98,20 @@
   z-index: 3;
 }
 
+/* Error chip wrapper — outer position root */
+.stage-bar-date-editor-with-error {
+  position: relative;
+  display: block;
+}
+
+/* Error anchor — positions the chip below the bar */
+.stage-bar-date-editor__error-anchor {
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-start: 0;
+  z-index: 2;
+}
+
 /* Delete confirm overlay */
 .stage-bar-date-editor__delete-confirm {
   position: absolute;

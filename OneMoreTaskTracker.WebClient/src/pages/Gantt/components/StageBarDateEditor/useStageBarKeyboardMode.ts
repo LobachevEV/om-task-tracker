@@ -133,6 +133,7 @@ export interface UseStageBarKeyboardModeOptions {
   loadedRangeEnd?: string;
   disabled?: boolean;
   onSave: (range: { plannedStart: string | null; plannedEnd: string | null }) => Promise<void>;
+  onFail?: (err: unknown) => void;
   onAnnounce?: (message: string) => void;
   announceCommitted: (start: string | null, end: string | null) => string;
 }
@@ -152,6 +153,7 @@ export function useStageBarKeyboardMode(
     loadedRangeEnd,
     disabled = false,
     onSave,
+    onFail,
     onAnnounce,
     announceCommitted,
   } = opts;
@@ -166,12 +168,13 @@ export function useStageBarKeyboardMode(
           dispatch({ type: 'COMMITTED' });
           if (onAnnounce) onAnnounce(announceCommitted(start, end));
         },
-        () => {
+        (err: unknown) => {
           dispatch({ type: 'CANCEL' });
+          if (onFail) onFail(err);
         },
       );
     },
-    [onSave, onAnnounce, announceCommitted],
+    [onSave, onFail, onAnnounce, announceCommitted],
   );
 
   const onKeyDown = useCallback(

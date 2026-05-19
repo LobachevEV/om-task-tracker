@@ -251,6 +251,14 @@
       "rewrite": "Arrow keys to adjust · Enter to confirm · Del to clear",
       "confirmDelete": "Enter to clear dates · Esc to cancel",
       "confirmDeleteLabel": "Enter to clear"
+    },
+    "errors": {
+      "overlap": "Stage order violation — pick a non-overlapping date.",
+      "overlapWithNeighbour": "Conflicts with the {{neighbour}} stage — pick a non-overlapping date.",
+      "version": "Stage was updated elsewhere — refresh to see the latest.",
+      "order": "Stage order violation.",
+      "rangeInvalid": "Invalid date range.",
+      "generic": "Could not save — try again."
     }
   }
 }
