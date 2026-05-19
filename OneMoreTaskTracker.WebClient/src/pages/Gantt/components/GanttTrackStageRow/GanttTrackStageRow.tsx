@@ -90,6 +90,17 @@ export function GanttTrackStageRow({
     setSaveErrorState(null);
   }, [clearDismissTimer]);
 
+  const handleAnchorKeyDown = useCallback(
+    (e: React.KeyboardEvent, barTestId: string) => {
+      if (e.key !== 'Escape') return;
+      e.preventDefault();
+      clearError();
+      const bar = document.querySelector<HTMLElement>(`[data-testid="${barTestId}"]`);
+      bar?.focus();
+    },
+    [clearError],
+  );
+
   // Clean up timer on unmount.
   useEffect(() => clearDismissTimer, [clearDismissTimer]);
 
@@ -248,6 +259,7 @@ export function GanttTrackStageRow({
               onFocus={() => { pausedRef.current = true; clearDismissTimer(); }}
               onMouseLeave={() => { pausedRef.current = false; scheduleDismiss(); }}
               onBlur={() => { pausedRef.current = false; scheduleDismiss(); }}
+              onKeyDown={(e) => handleAnchorKeyDown(e, `track-stage-bar-${track.featureId}-${kind}-${stage.stageKey}`)}
             >
               <InlineCellError
                 error={saveErrorState.error}
