@@ -280,7 +280,7 @@ export function GanttTrackStageRow({
           {saveErrorState != null && (
             <div
               className="gantt-track-stage-row__error-chip-anchor"
-              style={{ left: saveErrorState.barLeftPx }}
+              style={{ left: saveErrorState.barLeftPx, ['--chip-anchor-left' as string]: `${saveErrorState.barLeftPx}px` }}
               onMouseEnter={() => { pausedRef.current = true; clearDismissTimer(); }}
               onFocus={() => { pausedRef.current = true; clearDismissTimer(); }}
               onMouseLeave={() => { pausedRef.current = false; scheduleDismiss(); }}
