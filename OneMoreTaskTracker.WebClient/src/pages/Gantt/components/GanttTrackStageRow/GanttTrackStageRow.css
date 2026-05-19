@@ -133,5 +133,12 @@
 .gantt-track-stage-row__error-chip-anchor {
   position: absolute;
   top: calc(50% + 9px);
+  width: max-content;
+  min-inline-size: 240px;
+  max-inline-size: min(420px, calc(100vw - 32px));
   z-index: 2;
+}
+
+.gantt-track-stage-row__error-chip-anchor .inline-cell__error {
+  max-inline-size: 100%;
 }
