@@ -15,7 +15,7 @@ export function resolveStageSaveAnnounceMessage(error: InlineEditorError, t: TFu
   if (kind === 'overlap') {
     const neighbour = error.conflict?.neighbour;
     if (neighbour) {
-      const localisedNeighbour = t(`tracks.stage.${pascalToSnake(neighbour)}`, {
+      const localisedNeighbour = t(`stageBarEditor.stageName.${pascalToSnake(neighbour)}`, {
         defaultValue: neighbour,
       });
       return (

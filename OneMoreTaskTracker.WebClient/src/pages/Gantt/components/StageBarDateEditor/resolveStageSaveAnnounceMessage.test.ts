@@ -43,11 +43,11 @@ describe('resolveStageSaveAnnounceMessage', () => {
     expect(result).toContain('neighbour');
   });
 
-  it('localises neighbour via tracks.stage.<snake_case>', () => {
+  it('localises neighbour via stageBarEditor.stageName.<snake_case>', () => {
     const error = makeError({ conflict: { kind: 'overlap', neighbour: 'StandTesting' } });
     const result = resolveStageSaveAnnounceMessage(error, t);
     expect(result).toContain('stageBarEditor.announce.error.overlapWithNeighbour');
-    expect(result).toContain('tracks.stage.stand_testing');
+    expect(result).toContain('stageBarEditor.stageName.stand_testing');
   });
 
   it('returns version announce key when kind=version', () => {

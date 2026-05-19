@@ -237,6 +237,13 @@
   },
   "stageBarEditor": {
     "ariaLabel": "Set date range for {{stage}} stage of \"{{title}}\"",
+    "stageName": {
+      "cs_approving": "CS approving",
+      "development": "Development",
+      "stand_testing": "Stand testing",
+      "ethalon_testing": "Ethalon testing",
+      "release_to_live": "Release to live"
+    },
     "announce": {
       "rangeSet_one": "Date range set: {{start}} to {{end}}, {{count}} day.",
       "rangeSet_other": "Date range set: {{start}} to {{end}}, {{count}} days.",
