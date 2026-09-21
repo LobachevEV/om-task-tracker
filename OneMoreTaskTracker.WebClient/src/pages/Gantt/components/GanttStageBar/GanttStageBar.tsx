@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import type { BarGeometryPx } from '../../ganttMath';
 import type { TrackStageBarStatus } from '../../trackStageGeometry';
 import type { StripeAxis } from '../../trackStageMeta';
@@ -10,8 +10,8 @@ interface GanttStageBarProps {
   tokenVar: string;
   stripeAxis: StripeAxis;
   ariaLabel: string;
-  onClick?: () => void;
-  canEdit?: boolean;
+  children?: ReactNode;
+  dataTestId?: string;
 }
 
 export function GanttStageBar({
@@ -20,8 +20,8 @@ export function GanttStageBar({
   tokenVar,
   stripeAxis,
   ariaLabel,
-  onClick,
-  canEdit = false,
+  children,
+  dataTestId,
 }: GanttStageBarProps) {
   const style: CSSProperties & Record<string, string | number> = {
     left: bar.leftPx,
@@ -35,28 +35,16 @@ export function GanttStageBar({
     `gantt-stage-bar--stripe-${stripeAxis}`,
   ].join(' ');
 
-  if (canEdit && onClick) {
-    return (
-      <button
-        type="button"
-        className={classNames}
-        style={style}
-        aria-label={ariaLabel}
-        onClick={onClick}
-      >
-        <span className="gantt-stage-bar__stripe" aria-hidden="true" />
-      </button>
-    );
-  }
-
   return (
     <div
       className={classNames}
       style={style}
       aria-label={ariaLabel}
       role="img"
+      data-testid={dataTestId}
     >
       <span className="gantt-stage-bar__stripe" aria-hidden="true" />
+      {children}
     </div>
   );
 }

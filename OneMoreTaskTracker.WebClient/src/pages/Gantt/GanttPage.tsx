@@ -247,6 +247,7 @@ export function GanttPageInternal({
   const pageStyle = useMemo<CSSProperties>(
     () => ({
       ['--day-px']: `${dayPx}px`,
+      ['--gantt-day-px']: `${dayPx}px`,
       ['--gantt-cushion-width']: `${effectiveTrailingPx}px`,
       ['--gantt-loaded-width']: `${totalWidthPx}px`,
       ['--gantt-lanes-width']: `${lanesInlinePx}px`,

@@ -8,7 +8,7 @@
  *     "conflict": { "kind": "version", "currentVersion": 7 } }
  *
  *   { "error": "Stage order violation",
- *     "conflict": { "kind": "overlap", "with": "Development" } }
+ *     "conflict": { "kind": "overlap", "neighbour": "StandTesting" } }
  *
  * Inline editors pattern-match on `status` + `conflict.kind` to decide
  * whether to show a version-conflict affordance ("Updated by … Refresh"),
@@ -18,7 +18,7 @@ export type InlineEditConflictKind = 'version' | 'overlap' | 'order' | 'rangeInv
 
 export interface InlineEditConflict {
   kind: InlineEditConflictKind;
-  with?: string;
+  neighbour?: string;
   currentVersion?: number;
 }
 

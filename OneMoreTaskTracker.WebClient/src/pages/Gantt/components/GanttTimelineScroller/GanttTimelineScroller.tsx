@@ -66,6 +66,7 @@ export const GanttTimelineScroller = forwardRef<
       const cw = el.clientWidth;
       const visible = todayPx >= sl && todayPx <= sl + cw;
       setTodayInView(visible);
+      el.style.setProperty('--gantt-scroll-x', sl + 'px');
     };
     onScroll();
     el.addEventListener('scroll', onScroll, { passive: true });

@@ -1,11 +1,47 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ReactNode } from 'react';
+import { act, render, screen, fireEvent } from '@testing-library/react';
 import i18n from '../../../../../src/common/i18n/config';
 import { GanttTrackStageRow } from '../../../../../src/pages/Gantt/components/GanttTrackStageRow/GanttTrackStageRow';
 import type { MiniTeamMember } from '../../../../../src/common/types/feature';
 import type { FeatureTrack, FeatureTrackStage } from '../../../../../src/common/types/featureTrack';
-import { windowForZoom } from '../../../../../src/pages/Gantt/ganttMath';
+import { daysBetween, windowForZoom } from '../../../../../src/pages/Gantt/ganttMath';
 import { FIXTURE_TODAY, MINI_TEAM_MEMBERS } from '../../../../../src/pages/Gantt/__fixtures__/FeatureFixtures';
+import type { TrackMutationCallbacks } from '../../../../../src/pages/Gantt/components/InlineEditors/useTrackMutationCallbacks';
+import { StageBarDateEditor } from '../../../../../src/pages/Gantt/components/StageBarDateEditor/StageBarDateEditor';
+import type { StageBarDateEditorProps } from '../../../../../src/pages/Gantt/components/StageBarDateEditor/StageBarDateEditor';
+
+vi.mock('../../../../../src/pages/Gantt/components/StageBarDateEditor/StageBarDateEditor', () => ({
+  StageBarDateEditor: vi.fn(
+    ({ onFail, onClearError, dataTestId, children }: {
+      onFail: (err: { kind: string; message: string; conflict: null }, range: { plannedStart: string | null; plannedEnd: string | null }) => void;
+      onClearError?: () => void;
+      dataTestId: string;
+      children?: ReactNode;
+    }) => (
+      <div data-testid={dataTestId} role="button" tabIndex={0}>
+        <button
+          data-testid="mock-trigger-fail"
+          onClick={() =>
+            onFail(
+              { kind: 'network', message: 'Save failed', conflict: null },
+              { plannedStart: '2026-04-17', plannedEnd: '2026-04-24' },
+            )
+          }
+        >
+          Trigger fail
+        </button>
+        <button
+          data-testid="mock-trigger-pointerdown-clear"
+          onPointerDown={() => onClearError?.()}
+        >
+          Pointerdown clear
+        </button>
+        {children}
+      </div>
+    ),
+  ),
+}));
 
 const { fe, be, qa } = MINI_TEAM_MEMBERS;
 const LOADED_RANGE = windowForZoom(FIXTURE_TODAY, 'month');
@@ -308,5 +344,284 @@ describe('GanttTrackStageRow — read-only', () => {
 
     const dtr = screen.getByText(/\d+d/);
     expect(dtr).toHaveAttribute('data-overdue', 'false');
+  });
+});
+
+describe('GanttTrackStageRow — pointerdown clears chip synchronously', () => {
+  function makeMutations(): TrackMutationCallbacks {
+    return {
+      saveTrackTitle: vi.fn(),
+      saveTrackOwner: vi.fn(),
+      saveTrackStageOwner: vi.fn(),
+      saveTrackStageRange: vi.fn().mockResolvedValue(undefined),
+      saveTrackStagePlannedStart: vi.fn().mockResolvedValue(undefined),
+      saveTrackStagePlannedEnd: vi.fn().mockResolvedValue(undefined),
+    } as unknown as TrackMutationCallbacks;
+  }
+
+  beforeEach(async () => {
+    await i18n.changeLanguage('en');
+  });
+
+  it('chip is gone synchronously after onClearError fires on pointerdown — no additional act needed', async () => {
+    const stage: FeatureTrackStage = {
+      stageKey: 'Development',
+      plannedStart: '2026-04-17',
+      plannedEnd: '2026-04-24',
+      stageOwnerUserId: fe.userId,
+      stageVersion: 1,
+    };
+    const track = makeTrack([stage]);
+
+    render(
+      <GanttTrackStageRow
+        track={track}
+        stage={stage}
+        kind="Frontend"
+        featureTitle="Export to PDF"
+        today={FIXTURE_TODAY}
+        loadedRange={LOADED_RANGE}
+        dayPx={DAY_PX}
+        index={0}
+        resolveOwner={resolverFor([fe])}
+        canEdit={true}
+        mutations={makeMutations()}
+      />,
+    );
+
+    // Trigger the error state.
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('mock-trigger-fail'));
+    });
+
+    // Chip must be present before pointerdown.
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+
+    // Fire pointerdown on the mock bar — this calls onClearError which uses flushSync.
+    // No additional act() wrapper should be needed for the chip to disappear because
+    // flushSync commits the state update synchronously before the event handler returns.
+    fireEvent.pointerDown(screen.getByTestId('mock-trigger-pointerdown-clear'));
+
+    // Chip must be gone immediately — same synchronous tick.
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+});
+
+describe('GanttTrackStageRow — Dismiss button restores focus to bar', () => {
+  function makeMutations(): TrackMutationCallbacks {
+    return {
+      saveTrackTitle: vi.fn(),
+      saveTrackOwner: vi.fn(),
+      saveTrackStageOwner: vi.fn(),
+      saveTrackStageRange: vi.fn().mockResolvedValue(undefined),
+      saveTrackStagePlannedStart: vi.fn().mockResolvedValue(undefined),
+      saveTrackStagePlannedEnd: vi.fn().mockResolvedValue(undefined),
+    } as unknown as TrackMutationCallbacks;
+  }
+
+  beforeEach(async () => {
+    await i18n.changeLanguage('en');
+  });
+
+  it('Dismiss click with focus inside chip moves focus to the bar wrapper', async () => {
+    const stage: FeatureTrackStage = {
+      stageKey: 'Development',
+      plannedStart: '2026-04-17',
+      plannedEnd: '2026-04-24',
+      stageOwnerUserId: fe.userId,
+      stageVersion: 1,
+    };
+    const track = makeTrack([stage]);
+    const barTestId = `track-stage-bar-${track.featureId}-Frontend-Development`;
+
+    render(
+      <GanttTrackStageRow
+        track={track}
+        stage={stage}
+        kind="Frontend"
+        featureTitle="Export to PDF"
+        today={FIXTURE_TODAY}
+        loadedRange={LOADED_RANGE}
+        dayPx={DAY_PX}
+        index={0}
+        resolveOwner={resolverFor([fe])}
+        canEdit={true}
+        mutations={makeMutations()}
+      />,
+    );
+
+    // Trigger the error state.
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('mock-trigger-fail'));
+    });
+
+    // Chip must be visible.
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+
+    const bar = screen.getByTestId(barTestId) as HTMLElement;
+    expect(bar).toBeInTheDocument();
+
+    const dismissBtn = screen.getByTestId(
+      `stage-bar-save-error-${track.featureId}-frontend-development-revert`,
+    ) as HTMLElement;
+
+    // Place focus inside the chip so the guard condition is met.
+    act(() => { dismissBtn.focus(); });
+    expect(document.activeElement).toBe(dismissBtn);
+
+    // Click Dismiss.
+    act(() => { fireEvent.click(dismissBtn); });
+
+    // Chip must be gone and focus must have returned to the bar.
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(document.activeElement).toBe(bar);
+  });
+});
+
+describe('GanttTrackStageRow — Esc inside save-error chip', () => {
+  function makeMutations(): TrackMutationCallbacks {
+    return {
+      saveTrackTitle: vi.fn(),
+      saveTrackOwner: vi.fn(),
+      saveTrackStageOwner: vi.fn(),
+      saveTrackStageRange: vi.fn().mockResolvedValue(undefined),
+      saveTrackStagePlannedStart: vi.fn().mockResolvedValue(undefined),
+      saveTrackStagePlannedEnd: vi.fn().mockResolvedValue(undefined),
+    } as unknown as TrackMutationCallbacks;
+  }
+
+  beforeEach(async () => {
+    await i18n.changeLanguage('en');
+  });
+
+  it('Esc on the chip anchor dismisses the chip and moves focus to the bar wrapper', async () => {
+    const stage: FeatureTrackStage = {
+      stageKey: 'Development',
+      plannedStart: '2026-04-17',
+      plannedEnd: '2026-04-24',
+      stageOwnerUserId: fe.userId,
+      stageVersion: 1,
+    };
+    const track = makeTrack([stage]);
+    const barTestId = `track-stage-bar-${track.featureId}-Frontend-Development`;
+
+    render(
+      <GanttTrackStageRow
+        track={track}
+        stage={stage}
+        kind="Frontend"
+        featureTitle="Export to PDF"
+        today={FIXTURE_TODAY}
+        loadedRange={LOADED_RANGE}
+        dayPx={DAY_PX}
+        index={0}
+        resolveOwner={resolverFor([fe])}
+        canEdit={true}
+        mutations={makeMutations()}
+      />,
+    );
+
+    // Trigger the error state via the mocked StageBarDateEditor's onFail button.
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('mock-trigger-fail'));
+    });
+
+    // Chip should now be visible.
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+
+    const anchor = document.querySelector('.gantt-track-stage-row__error-chip-anchor') as HTMLElement;
+    expect(anchor).not.toBeNull();
+
+    const bar = screen.getByTestId(barTestId) as HTMLElement;
+    expect(bar).toBeInTheDocument();
+
+    // Fire Esc keydown on the anchor (simulates Esc while focus is inside chip).
+    act(() => {
+      fireEvent.keyDown(anchor, { key: 'Escape', code: 'Escape' });
+    });
+
+    // Chip must be gone.
+    expect(screen.queryByRole('alert')).toBeNull();
+
+    // Focus must have moved to the bar wrapper.
+    expect(document.activeElement).toBe(bar);
+  });
+});
+
+describe('GanttTrackStageRow — chip anchor position for empty-bar drag failures', () => {
+  function makeMutations(): TrackMutationCallbacks {
+    return {
+      saveTrackTitle: vi.fn(),
+      saveTrackOwner: vi.fn(),
+      saveTrackStageOwner: vi.fn(),
+      saveTrackStageRange: vi.fn().mockResolvedValue(undefined),
+      saveTrackStagePlannedStart: vi.fn().mockResolvedValue(undefined),
+      saveTrackStagePlannedEnd: vi.fn().mockResolvedValue(undefined),
+    } as unknown as TrackMutationCallbacks;
+  }
+
+  beforeEach(async () => {
+    await i18n.changeLanguage('en');
+  });
+
+  it('chip anchor left reflects range.plannedStart even when it is outside loaded range', async () => {
+    const FUTURE_START = '2026-06-15';
+    const stage: FeatureTrackStage = {
+      stageKey: 'Development',
+      plannedStart: '2026-04-17',
+      plannedEnd: '2026-04-24',
+      stageOwnerUserId: fe.userId,
+      stageVersion: 1,
+    };
+    const track = makeTrack([stage]);
+
+    vi.mocked(StageBarDateEditor).mockImplementationOnce(
+      ({ onFail, dataTestId, children }: StageBarDateEditorProps) => (
+        <div data-testid={dataTestId} role="button" tabIndex={0}>
+          <button
+            data-testid="mock-trigger-fail-future"
+            onClick={() =>
+              onFail?.(
+                { kind: 'network', message: 'Save failed', conflict: null },
+                { plannedStart: FUTURE_START, plannedEnd: null },
+              )
+            }
+          >
+            Trigger fail future
+          </button>
+          {children}
+        </div>
+      ),
+    );
+
+    render(
+      <GanttTrackStageRow
+        track={track}
+        stage={stage}
+        kind="Frontend"
+        featureTitle="Export to PDF"
+        today={FIXTURE_TODAY}
+        loadedRange={LOADED_RANGE}
+        dayPx={DAY_PX}
+        index={0}
+        resolveOwner={resolverFor([fe])}
+        canEdit={true}
+        mutations={makeMutations()}
+      />,
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('mock-trigger-fail-future'));
+    });
+
+    const anchor = document.querySelector<HTMLElement>('.gantt-track-stage-row__error-chip-anchor');
+    expect(anchor).not.toBeNull();
+
+    const leftStyle = anchor!.style.left;
+    const leftPx = parseFloat(leftStyle);
+    const expectedPx = daysBetween(LOADED_RANGE.start, FUTURE_START) * DAY_PX;
+
+    expect(leftPx).toBeGreaterThan(0);
+    expect(leftPx).toBe(expectedPx);
   });
 });

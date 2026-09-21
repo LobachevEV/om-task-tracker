@@ -57,7 +57,7 @@ export interface UsePlanFeaturesResult {
     featureId: number,
     kind: FeatureTrackKind,
     stageKey: FeatureTrackStageKey,
-    patch: Partial<Pick<FeatureTrackStage, 'plannedStart' | 'plannedEnd' | 'stageOwnerUserId'>>,
+    patch: Partial<Pick<FeatureTrackStage, 'plannedStart' | 'plannedEnd' | 'stageOwnerUserId' | 'stageVersion'>>,
   ) => void;
 }
 
@@ -224,7 +224,7 @@ export function usePlanFeatures(params: UsePlanFeaturesParams): UsePlanFeaturesR
       featureId: number,
       kind: FeatureTrackKind,
       stageKey: FeatureTrackStageKey,
-      patch: Partial<Pick<FeatureTrackStage, 'plannedStart' | 'plannedEnd' | 'stageOwnerUserId'>>,
+      patch: Partial<Pick<FeatureTrackStage, 'plannedStart' | 'plannedEnd' | 'stageOwnerUserId' | 'stageVersion'>>,
     ) => {
       setData((prev) => {
         if (!prev) return prev;

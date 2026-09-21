@@ -31,7 +31,7 @@ export function GanttLegend() {
   }, [open]);
 
   return (
-    <div className="gantt-legend" ref={containerRef}>
+    <div className="gantt-legend" ref={containerRef} data-testid="gantt-legend">
       <Button
         type="button"
         variant="ghost"
@@ -87,6 +87,11 @@ export function GanttLegend() {
               ))}
             </ul>
           </section>
+          <p className="gantt-legend__drag-hint">
+            {t('legend.dragHint', {
+              defaultValue: 'Drag on a stage bar to set dates. Click to adjust start or end.',
+            })}
+          </p>
         </div>
       ) : null}
     </div>
